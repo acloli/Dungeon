@@ -13,6 +13,8 @@
 4. 商店、奖励、事件、补给选择能正确回写 `RunState`。
 5. 竖屏 UI 信息层级清晰，单手可完成所有核心操作。
 6. 商业化入口不影响战斗数值。
+7. 首批实现同时落地 MasterData 的 settings / 注册 / 校验入口，且资源路径遵守 `DungeonUnity/Assets/` 约束。
+8. 任何涉及 prefab / GameObject / scene 的实现与验收，都必须附带 `unity-mcp` 操作证据，不接受纯代码侧假设通过。
 
 ---
 
@@ -21,12 +23,12 @@
 ### Gate A — Playable Gate
 - 内容范围：**10 张基础卡（其中 8 张具升级分支）**、3 个遗物（`破损晶核` / `回音容器` / `裂纹圣像`）、3 类遭遇（`晶蚀鼠` / `废墟守卒` / `晶蚀王座残影`灰盒版）
 - 页面范围：`HubPage` 最小入口、`MapExplorePage`、`BattlePage`、`RewardDialog`、`ResultPage`
-- 必跑测试：`B-01 ~ B-08`、`B-10`、`R-01`、`R-02`、`UI-01`、`UI-02`、`3.0A` intent-lock 断言集、边界专项检查、数据完整性基础校验
+- 必跑测试：`B-01 ~ B-08`、`B-10`、`R-01`、`R-02`、`UI-01`、`UI-02`、`3.0A` intent-lock 断言集、边界专项检查、数据完整性基础校验、`D-05`、`D-08`
 - Exit Criteria：主线可跑通；Intent 时序稳定；`RewardResolver` 唯一回写生效；Boss 可完成基础战斗但可暂不启用正式 Phase 2 演出；不要求 `DeckPage` 与 `ShopSupplyPage` 进入主线
 
 ### Gate B — Content Gate
 - 新增范围：补齐 20 张基础卡、其余升级派生卡、6 遗物、5 类遭遇、3 事件、`ShopSupplyPage`、完整 Boss Phase
-- 新增必跑测试：`B-09`、`R-03 ~ R-07`、`D-02`、BossPhase 行为用例、设备矩阵 UI 用例、整章 walkthrough
+- 新增必跑测试：`B-09`、`R-03 ~ R-07`、`D-02`、`D-06`、`D-07`、BossPhase 行为用例、设备矩阵 UI 用例、整章 walkthrough
 - Exit Criteria：完整首章可玩；MasterData 全表校验通过；无 P0/P1 阻断；商业化红线检查通过
 
 ## 2. 测试分层
@@ -52,6 +54,9 @@
 - Encounter 权重有效
 - Shop / Reward / Economy 配置区间合法
 - 敌人与意图表不缺项
+- `MasterDataManager` / `IMasterDataService` / `MasterDataValidationService` 入口同时可用
+- 首批 MasterData 资源位于 `DungeonUnity/Assets/ScriptableObjects/MasterData/`
+- 不引入 `_Project/` 路径下的 gameplay 资源、脚本、prefab 或 scene
 
 ### 2.4 手动体验测试
 - 新手首局
@@ -75,6 +80,9 @@
 - **固定 seed / fixture**：为地图模板、商店刷新、奖励三选一分别准备固定测试数据，以保证回归可复现
 - **设备矩阵**：至少验证 `720x1280`、`1080x1920`、`1290x2796` 三档竖屏比例
 - **观测点**：记录当前回合号、已展示 intent、EnemyTurn 实际执行 intent、RunState 金币/遗物/节点变化、Boss 当前 phase
+- **仓库基线补充**：当前仓库尚无项目自有测试程序集时，Gate A 首批实现必须先补齐 `DungeonUnity/Assets/Tests/Editor/` 与所需的最小自动化入口，再宣称自动化覆盖
+- **PlayMode 补充**：若验收包含 PlayMode 自动化或 BattleScene/UI smoke，用例执行前必须确认 `ProjectSettings.asset` 已开启 PlayMode runner
+- **场景编辑补充**：凡涉及 prefab / GameObject / scene 的变更，验收记录必须包含 `unity-mcp` 操作日志或等价证据
 
 ---
 
@@ -124,6 +132,10 @@
 | D-02 | 商业化边界 | 检查商品表 | 无数值付费商品 |
 | D-03 | 广告边界 | 检查广告入口配置 | 广告奖励仅产出局外货币，不影响 run 内战斗数值 |
 | D-04 | 初始 loadout 边界 | 检查角色/初始 relic 配置 | 不存在通过付费获得更强初始战斗 loadout 的路径 |
+| D-05 | MasterData 启动引导 | 启动数据加载/注册流程 | `MasterDataManager`、`IMasterDataService`、`MasterDataValidationService` 同时可用，且缺表时会阻断进入 run |
+| D-06 | 资源路径约束 | 检查首批实现资源/脚本/数据资产位置 | gameplay 资产位于 `DungeonUnity/Assets/` 约定路径，不引入 `_Project/` 镜像目录 |
+| D-07 | 场景编辑验收约束 | 检查 prefab / GameObject / scene 相关交付记录 | 相关变更附带 `unity-mcp` 操作证据，且落地资产与记录一致 |
+| D-08 | PlayMode Runner 就绪 | 检查测试运行配置后执行 BattleScene/UI smoke | 若声明 PlayMode 自动化覆盖，则 `playModeTestRunnerEnabled` 已开启且 smoke 用例可被 Test Runner 发现 |
 | UI-01 | 战斗页可读性 | 进入战斗 | 敌人意图/能量/手牌/End Turn 明显 |
 | UI-02 | 单手操作 | 完成一场战斗 | 核心操作均在下半区可达 |
 
@@ -162,6 +174,8 @@
 - `PageFlowController` 不直接承担业务结算
 - `SceneBridgeData` 只传摘要/引用，不复制完整战斗状态
 - Boss Phase 表与 Enemy/Boss schema 键关联完整
+- `MasterDataValidationService` 在进入主流程前执行，不允许缺表/断键带病进入 run
+- `DungeonUnity/Assets/ScriptableObjects/MasterData/` 为首批数据资产根目录；实现不得回退到 `_Project/`
 
 ## 7. 交付前回归清单
 - M1 的 8 条战斗用例全部通过
@@ -169,4 +183,6 @@
 - MasterData 全表静态校验通过
 - 无 P0/P1 级死锁、断页、崩溃、无法结算问题
 - 商业化表与 UI 入口通过红线检查
-
+- prefab / GameObject / scene 变更均附带 `unity-mcp` 验收证据
+- 未引入 `_Project/` 下的并行实现路径
+- 若提交中包含 PlayMode smoke 覆盖，`playModeTestRunnerEnabled` 已开启
