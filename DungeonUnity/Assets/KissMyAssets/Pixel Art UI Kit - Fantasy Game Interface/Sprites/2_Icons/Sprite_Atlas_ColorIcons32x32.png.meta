@@ -1,0 +1,735 @@
+fileFormatVersion: 2
+guid: 4d2d2ade396f13a4780ac791ae3aa98c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1866787976442738809
+    second: Sprite_Atlas_ColorIcons32x32_0
+  - first:
+      213: 6490713914448521802
+    second: Sprite_Atlas_ColorIcons32x32_1
+  - first:
+      213: -2567490738970509140
+    second: Sprite_Atlas_ColorIcons32x32_2
+  - first:
+      213: -3400573359910382733
+    second: Sprite_Atlas_ColorIcons32x32_3
+  - first:
+      213: -5737469120122685304
+    second: Sprite_Atlas_ColorIcons32x32_4
+  - first:
+      213: 505353875830293550
+    second: Sprite_Atlas_ColorIcons32x32_5
+  - first:
+      213: -5164871871266415583
+    second: Sprite_Atlas_ColorIcons32x32_6
+  - first:
+      213: 8814377583355983607
+    second: Sprite_Atlas_ColorIcons32x32_7
+  - first:
+      213: 2176318487129046175
+    second: Sprite_Atlas_ColorIcons32x32_8
+  - first:
+      213: -8776103962926661680
+    second: Sprite_Atlas_ColorIcons32x32_9
+  - first:
+      213: -1963936373116149228
+    second: Sprite_Atlas_ColorIcons32x32_10
+  - first:
+      213: -6168775929990512938
+    second: Sprite_Atlas_ColorIcons32x32_11
+  - first:
+      213: 4198654460606155792
+    second: Sprite_Atlas_ColorIcons32x32_12
+  - first:
+      213: 1735085164150473921
+    second: Sprite_Atlas_ColorIcons32x32_13
+  - first:
+      213: 4215997330218690443
+    second: Sprite_Atlas_ColorIcons32x32_14
+  - first:
+      213: 3375042583301063997
+    second: Sprite_Atlas_ColorIcons32x32_15
+  - first:
+      213: 2953758847644929716
+    second: Sprite_Atlas_ColorIcons32x32_16
+  - first:
+      213: 8926135378589837922
+    second: Sprite_Atlas_ColorIcons32x32_17
+  - first:
+      213: 1234259126173553078
+    second: Sprite_Atlas_ColorIcons32x32_18
+  - first:
+      213: 5570275384992388744
+    second: Sprite_Atlas_ColorIcons32x32_19
+  - first:
+      213: -8324555847986166225
+    second: Sprite_Atlas_ColorIcons32x32_20
+  - first:
+      213: -4658849762135702648
+    second: Sprite_Atlas_ColorIcons32x32_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 31
+        width: 33
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 978f6de16c928e910800000000000000
+      internalID: 1866787976442738809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 34
+        width: 32
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4aa3697ae5a31a50800000000000000
+      internalID: 6490713914448521802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_2
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 31
+        width: 32
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca0ce8ba6c07e5cd0800000000000000
+      internalID: -2567490738970509140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_3
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 36
+        width: 22
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37392e1db8cbec0d0800000000000000
+      internalID: -3400573359910382733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_4
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 32
+        width: 66
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8887051db3a6060b0800000000000000
+      internalID: -5737469120122685304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_5
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 36
+        width: 15
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e244bbe2ca0630700800000000000000
+      internalID: 505353875830293550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_6
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 36
+        width: 11
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12c12c2d560b258b0800000000000000
+      internalID: -5164871871266415583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_7
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 34
+        width: 24
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f6791426b5f25a70800000000000000
+      internalID: 8814377583355983607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_8
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 37
+        width: 18
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9c31772226d33e10800000000000000
+      internalID: 2176318487129046175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_9
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 33
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dfbbd981f3053680800000000000000
+      internalID: -8776103962926661680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_10
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 34
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41261f62642beb4e0800000000000000
+      internalID: -1963936373116149228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6de7fe9a9fa146aa0800000000000000
+      internalID: -6168775929990512938
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_12
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 3
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01c0a0b8cfd944a30800000000000000
+      internalID: 4198654460606155792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_13
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 24
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c44d3093c2441810800000000000000
+      internalID: 1735085164150473921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_14
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 0
+        width: 24
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b872ea90c3b328a30800000000000000
+      internalID: 4215997330218690443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_15
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 0
+        width: 18
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d350a77095f86de20800000000000000
+      internalID: 3375042583301063997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_16
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 1
+        width: 31
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4be0b02b50cddf820800000000000000
+      internalID: 2953758847644929716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_17
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26ae4e985d000eb70800000000000000
+      internalID: 8926135378589837922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_18
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 2
+        width: 24
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b1db58c228f02110800000000000000
+      internalID: 1234259126173553078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_19
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 1
+        width: 30
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 886d29733f79d4d40800000000000000
+      internalID: 5570275384992388744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_20
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 0
+        width: 30
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2642e7cf8c397c80800000000000000
+      internalID: -8324555847986166225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sprite_Atlas_ColorIcons32x32_21
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 5
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8830df133d0785fb0800000000000000
+      internalID: -4658849762135702648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Sprite_Atlas_ColorIcons32x32_0: 1866787976442738809
+      Sprite_Atlas_ColorIcons32x32_1: 6490713914448521802
+      Sprite_Atlas_ColorIcons32x32_10: -1963936373116149228
+      Sprite_Atlas_ColorIcons32x32_11: -6168775929990512938
+      Sprite_Atlas_ColorIcons32x32_12: 4198654460606155792
+      Sprite_Atlas_ColorIcons32x32_13: 1735085164150473921
+      Sprite_Atlas_ColorIcons32x32_14: 4215997330218690443
+      Sprite_Atlas_ColorIcons32x32_15: 3375042583301063997
+      Sprite_Atlas_ColorIcons32x32_16: 2953758847644929716
+      Sprite_Atlas_ColorIcons32x32_17: 8926135378589837922
+      Sprite_Atlas_ColorIcons32x32_18: 1234259126173553078
+      Sprite_Atlas_ColorIcons32x32_19: 5570275384992388744
+      Sprite_Atlas_ColorIcons32x32_2: -2567490738970509140
+      Sprite_Atlas_ColorIcons32x32_20: -8324555847986166225
+      Sprite_Atlas_ColorIcons32x32_21: -4658849762135702648
+      Sprite_Atlas_ColorIcons32x32_3: -3400573359910382733
+      Sprite_Atlas_ColorIcons32x32_4: -5737469120122685304
+      Sprite_Atlas_ColorIcons32x32_5: 505353875830293550
+      Sprite_Atlas_ColorIcons32x32_6: -5164871871266415583
+      Sprite_Atlas_ColorIcons32x32_7: 8814377583355983607
+      Sprite_Atlas_ColorIcons32x32_8: 2176318487129046175
+      Sprite_Atlas_ColorIcons32x32_9: -8776103962926661680
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355392
+  packageName: Pixel Art UI Kit - Fantasy Game Interface
+  packageVersion: 1.0.0
+  assetPath: Assets/KissMyAssets/Pixel Art UI Kit - Fantasy Game Interface/Sprites/2_Icons/Sprite_Atlas_ColorIcons32x32.png
+  uploadId: 848338

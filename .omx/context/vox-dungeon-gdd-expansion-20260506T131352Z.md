@@ -1,0 +1,30 @@
+# Context Snapshot — vox-dungeon-gdd-expansion
+
+- Task statement: 基于当前已定下来的 GDD，完善成更具体、完整的策划方案。
+- Desired outcome: 产出可直接进入后续 ralplan / PRD 细化的执行级策划规格，而不是停留在高层概念。
+- Stated solution: 通过 deep-interview 先澄清目标、边界、优先级、非目标、决策边界。
+- Probable intent hypothesis: 用户希望把已冻结的 GDD 从“方向正确但大量待设计项未落地”推进成“可拆任务、可验收、可交付”的完整策划方案。
+- Known facts/evidence:
+  - GDD 文件存在：Docs/vox_dungeon_gdd.md（v0.1，状态：正式冻结）
+  - 技术方案存在：Docs/vox_dungeon_m1_technical_plan.md
+  - 项目为 Unity brownfield：DungeonUnity/...
+  - GDD 当前已定义：核心循环、能量、地图框架、商业化边界、技术架构
+  - GDD 当前未完成：卡池明细、遗物池、掉率、金币数值、IAP 数值、效果枚举等多处“待设计”
+- Constraints:
+  - 当前模式为 deep-interview，只做需求澄清与规格收敛，不直接实施
+  - 每轮只问一个问题
+  - 需要尽早明确 Non-goals 与 Decision Boundaries
+- Unknowns/open questions:
+  - 本次要补全到什么粒度（MVP可开发级 / 可测试平衡级 / 可商业化上线级）
+  - 先补全哪些章节优先级最高
+  - 哪些内容允许我自主定案，哪些必须保留给你拍板
+  - 数值设计偏向体验优先还是商业化优先
+- Decision-boundary unknowns:
+  - 我是否可以自主补完数值、掉率、卡牌与遗物方案
+  - 我是否可以改写/扩展现有 GDD 结构
+- Likely codebase touchpoints:
+  - Docs/vox_dungeon_gdd.md
+  - Docs/vox_dungeon_m1_technical_plan.md
+  - DungeonUnity/Packages/manifest.json
+  - DungeonUnity/Assets/Scenes/
+- Prompt-safe initial-context summary status: not_needed

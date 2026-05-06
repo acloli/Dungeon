@@ -1,0 +1,23 @@
+# Vox Dungeon 规划上下文快照
+
+- 任务：基于当前仓库上下文，为《Vox Dungeon》产出“完整策划案 + 开发计划”初稿，供 Architect 和 Critic 后续审查。
+- 目标结果：形成可执行、可审查、可继续细化为实现任务的中文计划文档，覆盖 RALPLAN-DR、完整 PRD 初稿、开发计划、验证草案。
+- 已知事实：
+  - GDD：`Docs/vox_dungeon_gdd.md`
+  - 技术方案：`Docs/vox_dungeon_m1_technical_plan.md`
+  - Unity 版本：`6000.3.10f1`
+  - 依赖：R3 / UniTask / VContainer / TFramework / URP
+  - 项目实现状态：`DungeonUnity` 工程存在，但几乎无业务代码；仅 SampleScene、URP 设置、第三方包/示例资源
+  - GDD 已锁定部分核心参数：1 张地图、5 节点 + Boss、20 张卡、6 个遗物、手牌上限 5、每回合 3 能量
+  - 技术方案已提出 BattleCanvas / CardView / FSM / EffectChain / EnemyAIService / 验收用例骨架
+  - TFramework 文档确认有 `MasterDataManager` / `IMasterDataService` / `IMasterDataObject`，但项目内暂无 card/relic/economy 专用 masterdata 资产
+  - UI 资源基础：Pixel Art UI Kit - Fantasy Game Interface，仅可作为美术/版式资源，不假设脚本能力
+  - 商业化红线：付费不影响战斗数值
+- 约束：
+  - 首交付必须以“首章/首地图 MVP 可落地”为主
+  - 输出尽量具体，尤其卡牌、遗物、遭遇、masterdata、UI 信息架构、阶段计划
+- 未知与后续审查点：
+  - 是否保留“战斗后获得卡牌但仅当局生效”的设计，还是改为更经典的 run 内永久牌组成长
+  - 局外经济是否仅承担解锁/外观，还是也承担进度便利功能
+  - Pixel UI 套件与自制像素 UI 的混合比例
+- 可能触达资源：`Docs/vox_dungeon_gdd.md`、`Docs/vox_dungeon_m1_technical_plan.md`、`Docs/TFramework/TFramework_Documentation.md`、`DungeonUnity/Packages/manifest.json`
