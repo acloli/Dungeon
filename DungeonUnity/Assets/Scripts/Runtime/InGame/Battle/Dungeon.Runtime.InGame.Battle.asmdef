@@ -1,0 +1,22 @@
+{
+  "name": "Dungeon.Runtime.InGame.Battle",
+  "rootNamespace": "Dungeon.Runtime.InGame.Battle",
+  "references": [
+    "TFramework.Core",
+    "TFramework.Scene",
+    "TFramework.UI",
+    "Unity.TextMeshPro",
+    "Dungeon.Runtime.InGame.Domain",
+    "UniTask",
+    "VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
