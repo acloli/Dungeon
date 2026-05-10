@@ -1,0 +1,14 @@
+{
+  "name": "Dungeon.Runtime.InGame.Domain",
+  "rootNamespace": "Dungeon.Runtime.InGame.Domain",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
