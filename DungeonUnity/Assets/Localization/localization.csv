@@ -1,0 +1,7 @@
+key,ja,en,zh-CN,zh-TW,ko
+ui.title.main,メイン,Main,Main,Main,Main
+ui.message.welcome,ようこそ、{0}!,"Welcome, {0}!",欢迎，{0}!,歡迎，{0}!,"환영합니다, {0}!"
+ui.title.settings,設定,Settings,设置,設定,설정
+ui.message.complete,完了,Complete,完成,完成,완료
+ui.button.confirm,確認,Confirm,确认,確認,확인
+ui.button.cancel,キャンセル,Cancel,取消,取消,취소
