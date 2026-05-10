@@ -1,0 +1,19 @@
+{
+  "name": "Dungeon.Runtime.OutGame.Main",
+  "rootNamespace": "Dungeon.Runtime.OutGame.Main",
+  "references": [
+    "TFramework.Core",
+    "TFramework.Scene",
+    "UniTask",
+    "VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
