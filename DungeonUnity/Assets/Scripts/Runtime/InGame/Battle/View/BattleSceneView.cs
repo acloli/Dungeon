@@ -8,7 +8,10 @@ using UnityEngine.UI;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
-    public sealed class BattleSceneView : MonoBehaviour
+    /// <summary>
+    /// BattleSceneのviewクラス
+    /// </summary>
+    public sealed class BattleSceneView : MonoBehaviour, IBattleSceneView
     {
         [Header("Panels")]
         [SerializeField] private GameObject _mapPanel;
@@ -50,112 +53,107 @@ namespace Dungeon.Runtime.InGame.Battle.View
         private readonly List<BattleOptionButtonView> _handButtons = new List<BattleOptionButtonView>();
         private readonly List<BattleOptionButtonView> _rewardButtons = new List<BattleOptionButtonView>();
 
+        /// <summary>
+        /// 固定ボタンのイベント購読
+        /// </summary>
         public void WireStaticButtons(Action onEnemyTargetClicked, Action onEndTurnClicked, Action onRestClicked, Action onUpgradeClicked, Action onShopClicked, Action onRestShopContinueClicked, Action onResultBackClicked)
         {
             UnwireStaticButtons();
-
             if (_enemyTargetButton != null)
             {
                 _enemyTargetButton.onClick.AddListener(() => onEnemyTargetClicked());
             }
-
             if (_endTurnButton != null)
             {
                 _endTurnButton.onClick.AddListener(() => onEndTurnClicked());
             }
-
             if (_restButton != null)
             {
                 _restButton.onClick.AddListener(() => onRestClicked());
             }
-
             if (_upgradeButton != null)
             {
                 _upgradeButton.onClick.AddListener(() => onUpgradeClicked());
             }
-
             if (_shopButton != null)
             {
                 _shopButton.onClick.AddListener(() => onShopClicked());
             }
-
             if (_restShopContinueButton != null)
             {
                 _restShopContinueButton.onClick.AddListener(() => onRestShopContinueClicked());
             }
-
             if (_resultBackButton != null)
             {
                 _resultBackButton.onClick.AddListener(() => onResultBackClicked());
             }
         }
 
+        /// <summary>
+        /// 固定ボタンのイベント解除
+        /// </summary>
         public void UnwireStaticButtons()
         {
             if (_enemyTargetButton != null)
             {
                 _enemyTargetButton.onClick.RemoveAllListeners();
             }
-
             if (_endTurnButton != null)
             {
                 _endTurnButton.onClick.RemoveAllListeners();
             }
-
             if (_restButton != null)
             {
                 _restButton.onClick.RemoveAllListeners();
             }
-
             if (_upgradeButton != null)
             {
                 _upgradeButton.onClick.RemoveAllListeners();
             }
-
             if (_shopButton != null)
             {
                 _shopButton.onClick.RemoveAllListeners();
             }
-
             if (_restShopContinueButton != null)
             {
                 _restShopContinueButton.onClick.RemoveAllListeners();
             }
-
             if (_resultBackButton != null)
             {
                 _resultBackButton.onClick.RemoveAllListeners();
             }
         }
 
+        /// <summary>
+        /// 画面表示切り替え
+        /// </summary>
         public void SetPanels(bool map, bool battle, bool reward, bool restShop, bool result)
         {
             if (_mapPanel != null)
             {
                 _mapPanel.SetActive(map);
             }
-
             if (_battlePanel != null)
             {
                 _battlePanel.SetActive(battle);
             }
-
             if (_rewardPanel != null)
             {
                 _rewardPanel.SetActive(reward);
             }
-
             if (_restShopPanel != null)
             {
                 _restShopPanel.SetActive(restShop);
             }
-
             if (_resultPanel != null)
             {
                 _resultPanel.SetActive(result);
             }
         }
 
+        /// <summary>
+        /// マップ文言反映
+        /// </summary>
         public void SetMapStateText(string message)
         {
             if (_mapStateText != null)
@@ -164,32 +162,28 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 戦闘文言反映
+        /// </summary>
         public void SetBattleStateText(string playerText, string enemyText, string hintText)
         {
             if (_playerStatText != null)
             {
                 _playerStatText.text = playerText;
             }
-
             if (_enemyStatText != null)
             {
                 _enemyStatText.text = enemyText;
             }
-
             if (_battleHintText != null)
             {
                 _battleHintText.text = hintText;
             }
         }
 
-        public void SetBattleHintText(string message)
-        {
-            if (_battleHintText != null)
-            {
-                _battleHintText.text = message;
-            }
-        }
-
+        /// <summary>
+        /// 補給文言反映
+        /// </summary>
         public void SetRestShopText(string message)
         {
             if (_restShopText != null)
@@ -198,6 +192,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 補給継続の操作切り替え
+        /// </summary>
         public void SetRestShopContinueInteractable(bool interactable)
         {
             if (_restShopContinueButton != null)
@@ -206,6 +203,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 結果文言反映
+        /// </summary>
         public void SetResultText(string message)
         {
             if (_resultText != null)
@@ -214,10 +214,12 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// マップボタン構築
+        /// </summary>
         public void BuildMapButtons(IReadOnlyList<MapTemplate.Node> nodes, Action<int> onClicked)
         {
             ClearButtons(_mapButtons);
-
             if (_mapNodeRoot == null || _mapNodeButtonTemplate == null || nodes == null)
             {
                 return;
@@ -242,6 +244,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// マップボタン活性切り替え
+        /// </summary>
         public void SetMapButtonInteractable(int allowedIndex)
         {
             for (int i = 0; i < _mapButtons.Count; i++)
@@ -250,6 +255,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 手札ボタン構築
+        /// </summary>
         public void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked)
         {
             ClearButtons(_handButtons);
@@ -278,6 +286,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 報酬ボタン構築
+        /// </summary>
         public void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked)
         {
             ClearButtons(_rewardButtons);
@@ -305,6 +316,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// 動的ボタン消去
+        /// </summary>
         public void ClearDynamicButtons()
         {
             ClearButtons(_mapButtons);
@@ -312,6 +326,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             ClearButtons(_rewardButtons);
         }
 
+        /// <summary>
+        /// ボタン一覧消去
+        /// </summary>
         private static void ClearButtons(List<BattleOptionButtonView> buttons)
         {
             for (int i = 0; i < buttons.Count; i++)
