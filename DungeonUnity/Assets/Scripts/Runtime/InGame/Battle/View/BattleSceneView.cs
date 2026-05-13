@@ -53,165 +53,63 @@ namespace Dungeon.Runtime.InGame.Battle.View
         private readonly List<BattleOptionButtonView> _handButtons = new List<BattleOptionButtonView>();
         private readonly List<BattleOptionButtonView> _rewardButtons = new List<BattleOptionButtonView>();
 
+        private IMapPageView _mapPageView;
+        private IBattlePageView _battlePageView;
+        private IRewardPageView _rewardPageView;
+        private IRestShopPageView _restShopPageView;
+        private IResultPageView _resultPageView;
+
         /// <summary>
-        /// 固定ボタンのイベント購読
+        /// マップ画面View取得
         /// </summary>
-        public void WireStaticButtons(Action onEnemyTargetClicked, Action onEndTurnClicked, Action onRestClicked, Action onUpgradeClicked, Action onShopClicked, Action onRestShopContinueClicked, Action onResultBackClicked)
+        public IMapPageView MapPageView
         {
-            UnwireStaticButtons();
-            if (_enemyTargetButton != null)
-            {
-                _enemyTargetButton.onClick.AddListener(() => onEnemyTargetClicked());
-            }
-            if (_endTurnButton != null)
-            {
-                _endTurnButton.onClick.AddListener(() => onEndTurnClicked());
-            }
-            if (_restButton != null)
-            {
-                _restButton.onClick.AddListener(() => onRestClicked());
-            }
-            if (_upgradeButton != null)
-            {
-                _upgradeButton.onClick.AddListener(() => onUpgradeClicked());
-            }
-            if (_shopButton != null)
-            {
-                _shopButton.onClick.AddListener(() => onShopClicked());
-            }
-            if (_restShopContinueButton != null)
-            {
-                _restShopContinueButton.onClick.AddListener(() => onRestShopContinueClicked());
-            }
-            if (_resultBackButton != null)
-            {
-                _resultBackButton.onClick.AddListener(() => onResultBackClicked());
-            }
+            get { return _mapPageView ??= new MapPageViewAdapter(this); }
         }
 
         /// <summary>
-        /// 固定ボタンのイベント解除
+        /// 戦闘画面View取得
         /// </summary>
-        public void UnwireStaticButtons()
+        public IBattlePageView BattlePageView
         {
-            if (_enemyTargetButton != null)
-            {
-                _enemyTargetButton.onClick.RemoveAllListeners();
-            }
-            if (_endTurnButton != null)
-            {
-                _endTurnButton.onClick.RemoveAllListeners();
-            }
-            if (_restButton != null)
-            {
-                _restButton.onClick.RemoveAllListeners();
-            }
-            if (_upgradeButton != null)
-            {
-                _upgradeButton.onClick.RemoveAllListeners();
-            }
-            if (_shopButton != null)
-            {
-                _shopButton.onClick.RemoveAllListeners();
-            }
-            if (_restShopContinueButton != null)
-            {
-                _restShopContinueButton.onClick.RemoveAllListeners();
-            }
-            if (_resultBackButton != null)
-            {
-                _resultBackButton.onClick.RemoveAllListeners();
-            }
+            get { return _battlePageView ??= new BattlePageViewAdapter(this); }
         }
 
         /// <summary>
-        /// 画面表示切り替え
+        /// 報酬画面View取得
         /// </summary>
-        public void SetPanels(bool map, bool battle, bool reward, bool restShop, bool result)
+        public IRewardPageView RewardPageView
         {
-            if (_mapPanel != null)
-            {
-                _mapPanel.SetActive(map);
-            }
-            if (_battlePanel != null)
-            {
-                _battlePanel.SetActive(battle);
-            }
-            if (_rewardPanel != null)
-            {
-                _rewardPanel.SetActive(reward);
-            }
-            if (_restShopPanel != null)
-            {
-                _restShopPanel.SetActive(restShop);
-            }
-            if (_resultPanel != null)
-            {
-                _resultPanel.SetActive(result);
-            }
+            get { return _rewardPageView ??= new RewardPageViewAdapter(this); }
         }
 
         /// <summary>
-        /// マップ文言反映
+        /// 補給画面View取得
         /// </summary>
-        public void SetMapStateText(string message)
+        public IRestShopPageView RestShopPageView
         {
-            if (_mapStateText != null)
-            {
-                _mapStateText.text = message;
-            }
+            get { return _restShopPageView ??= new RestShopPageViewAdapter(this); }
         }
 
         /// <summary>
-        /// 戦闘文言反映
+        /// 結果画面View取得
         /// </summary>
-        public void SetBattleStateText(string playerText, string enemyText, string hintText)
+        public IResultPageView ResultPageView
         {
-            if (_playerStatText != null)
-            {
-                _playerStatText.text = playerText;
-            }
-            if (_enemyStatText != null)
-            {
-                _enemyStatText.text = enemyText;
-            }
-            if (_battleHintText != null)
-            {
-                _battleHintText.text = hintText;
-            }
+            get { return _resultPageView ??= new ResultPageViewAdapter(this); }
         }
 
         /// <summary>
-        /// 補給文言反映
+        /// 表示ページ切り替え
         /// </summary>
-        public void SetRestShopText(string message)
+        public void ShowPage(BattleScenePage page)
         {
-            if (_restShopText != null)
-            {
-                _restShopText.text = message;
-            }
-        }
-
-        /// <summary>
-        /// 補給継続の操作切り替え
-        /// </summary>
-        public void SetRestShopContinueInteractable(bool interactable)
-        {
-            if (_restShopContinueButton != null)
-            {
-                _restShopContinueButton.interactable = interactable;
-            }
-        }
-
-        /// <summary>
-        /// 結果文言反映
-        /// </summary>
-        public void SetResultText(string message)
-        {
-            if (_resultText != null)
-            {
-                _resultText.text = message;
-            }
+            SetPanels(
+                page == BattleScenePage.Map,
+                page == BattleScenePage.Battle,
+                page == BattleScenePage.Reward,
+                page == BattleScenePage.RestShop,
+                page == BattleScenePage.Result);
         }
 
         /// <summary>
@@ -245,7 +143,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
-        /// マップボタン活性切り替え
+        /// マップボタンのアクティブ切り替え
         /// </summary>
         public void SetMapButtonInteractable(int allowedIndex)
         {
@@ -317,16 +215,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
-        /// 動的ボタン消去
-        /// </summary>
-        public void ClearDynamicButtons()
-        {
-            ClearButtons(_mapButtons);
-            ClearButtons(_handButtons);
-            ClearButtons(_rewardButtons);
-        }
-
-        /// <summary>
         /// ボタン一覧消去
         /// </summary>
         private static void ClearButtons(List<BattleOptionButtonView> buttons)
@@ -344,6 +232,267 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
+        }
+
+        /// <summary>
+        /// 画面表示切り替え
+        /// </summary>
+        private void SetPanels(bool map, bool battle, bool reward, bool restShop, bool result)
+        {
+            if (_mapPanel != null)
+            {
+                _mapPanel.SetActive(map);
+            }
+            if (_battlePanel != null)
+            {
+                _battlePanel.SetActive(battle);
+            }
+            if (_rewardPanel != null)
+            {
+                _rewardPanel.SetActive(reward);
+            }
+            if (_restShopPanel != null)
+            {
+                _restShopPanel.SetActive(restShop);
+            }
+            if (_resultPanel != null)
+            {
+                _resultPanel.SetActive(result);
+            }
+        }
+
+        /// <summary>
+        /// マップ画面表示実装クラス
+        /// </summary>
+        private sealed class MapPageViewAdapter : IMapPageView
+        {
+            private readonly BattleSceneView _owner;
+
+            public MapPageViewAdapter(BattleSceneView owner)
+            {
+                _owner = owner;
+            }
+
+            public void SetMapStateText(string message)
+            {
+                if (_owner._mapStateText != null)
+                {
+                    _owner._mapStateText.text = message;
+                }
+            }
+
+            public void BuildMapButtons(IReadOnlyList<MapTemplate.Node> nodes, Action<int> onClicked)
+            {
+                _owner.BuildMapButtons(nodes, onClicked);
+            }
+
+            public void SetMapButtonInteractable(int allowedIndex)
+            {
+                for (int i = 0; i < _owner._mapButtons.Count; i++)
+                {
+                    _owner._mapButtons[i].SetInteractable(i == allowedIndex);
+                }
+            }
+
+            public void ClearDynamicButtons()
+            {
+                ClearButtons(_owner._mapButtons);
+            }
+        }
+
+        /// <summary>
+        /// 戦闘画面表示実装クラス
+        /// </summary>
+        private sealed class BattlePageViewAdapter : IBattlePageView
+        {
+            private readonly BattleSceneView _owner;
+
+            public BattlePageViewAdapter(BattleSceneView owner)
+            {
+                _owner = owner;
+            }
+
+            public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
+            {
+                UnwireButtons();
+                if (_owner._enemyTargetButton != null)
+                {
+                    _owner._enemyTargetButton.onClick.AddListener(() => onEnemyTargetClicked());
+                }
+                if (_owner._endTurnButton != null)
+                {
+                    _owner._endTurnButton.onClick.AddListener(() => onEndTurnClicked());
+                }
+            }
+
+            public void UnwireButtons()
+            {
+                if (_owner._enemyTargetButton != null)
+                {
+                    _owner._enemyTargetButton.onClick.RemoveAllListeners();
+                }
+                if (_owner._endTurnButton != null)
+                {
+                    _owner._endTurnButton.onClick.RemoveAllListeners();
+                }
+            }
+
+            public void SetBattleStateText(string playerText, string enemyText, string hintText)
+            {
+                if (_owner._playerStatText != null)
+                {
+                    _owner._playerStatText.text = playerText;
+                }
+                if (_owner._enemyStatText != null)
+                {
+                    _owner._enemyStatText.text = enemyText;
+                }
+                if (_owner._battleHintText != null)
+                {
+                    _owner._battleHintText.text = hintText;
+                }
+            }
+
+            public void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked)
+            {
+                _owner.BuildHandButtons(hand, onClicked);
+            }
+
+            public void ClearDynamicButtons()
+            {
+                ClearButtons(_owner._handButtons);
+            }
+        }
+
+        /// <summary>
+        /// 報酬画面表示実装クラス
+        /// </summary>
+        private sealed class RewardPageViewAdapter : IRewardPageView
+        {
+            private readonly BattleSceneView _owner;
+
+            public RewardPageViewAdapter(BattleSceneView owner)
+            {
+                _owner = owner;
+            }
+
+            public void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked)
+            {
+                _owner.BuildRewardButtons(cards, onClicked);
+            }
+
+            public void ClearDynamicButtons()
+            {
+                ClearButtons(_owner._rewardButtons);
+            }
+        }
+
+        /// <summary>
+        /// 補給画面表示実装クラス
+        /// </summary>
+        private sealed class RestShopPageViewAdapter : IRestShopPageView
+        {
+            private readonly BattleSceneView _owner;
+
+            public RestShopPageViewAdapter(BattleSceneView owner)
+            {
+                _owner = owner;
+            }
+
+            public void WireButtons(Action onRestClicked, Action onUpgradeClicked, Action onShopClicked, Action onContinueClicked)
+            {
+                UnwireButtons();
+                if (_owner._restButton != null)
+                {
+                    _owner._restButton.onClick.AddListener(() => onRestClicked());
+                }
+                if (_owner._upgradeButton != null)
+                {
+                    _owner._upgradeButton.onClick.AddListener(() => onUpgradeClicked());
+                }
+                if (_owner._shopButton != null)
+                {
+                    _owner._shopButton.onClick.AddListener(() => onShopClicked());
+                }
+                if (_owner._restShopContinueButton != null)
+                {
+                    _owner._restShopContinueButton.onClick.AddListener(() => onContinueClicked());
+                }
+            }
+
+            public void UnwireButtons()
+            {
+                if (_owner._restButton != null)
+                {
+                    _owner._restButton.onClick.RemoveAllListeners();
+                }
+                if (_owner._upgradeButton != null)
+                {
+                    _owner._upgradeButton.onClick.RemoveAllListeners();
+                }
+                if (_owner._shopButton != null)
+                {
+                    _owner._shopButton.onClick.RemoveAllListeners();
+                }
+                if (_owner._restShopContinueButton != null)
+                {
+                    _owner._restShopContinueButton.onClick.RemoveAllListeners();
+                }
+            }
+
+            public void SetRestShopText(string message)
+            {
+                if (_owner._restShopText != null)
+                {
+                    _owner._restShopText.text = message;
+                }
+            }
+
+            public void SetRestShopContinueInteractable(bool interactable)
+            {
+                if (_owner._restShopContinueButton != null)
+                {
+                    _owner._restShopContinueButton.interactable = interactable;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 結果画面表示実装クラス
+        /// </summary>
+        private sealed class ResultPageViewAdapter : IResultPageView
+        {
+            private readonly BattleSceneView _owner;
+
+            public ResultPageViewAdapter(BattleSceneView owner)
+            {
+                _owner = owner;
+            }
+
+            public void WireButtons(Action onBackClicked)
+            {
+                UnwireButtons();
+                if (_owner._resultBackButton != null)
+                {
+                    _owner._resultBackButton.onClick.AddListener(() => onBackClicked());
+                }
+            }
+
+            public void UnwireButtons()
+            {
+                if (_owner._resultBackButton != null)
+                {
+                    _owner._resultBackButton.onClick.RemoveAllListeners();
+                }
+            }
+
+            public void SetResultText(string message)
+            {
+                if (_owner._resultText != null)
+                {
+                    _owner._resultText.text = message;
+                }
+            }
         }
     }
 }

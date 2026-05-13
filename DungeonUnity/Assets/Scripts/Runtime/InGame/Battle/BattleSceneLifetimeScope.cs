@@ -16,6 +16,11 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.BattleRandomProvider>(Lifetime.Singleton).As<Services.IBattleRandomProvider>();
             builder.Register<Services.BattleSceneRules>(Lifetime.Singleton).As<Services.IBattleSceneRules>();
             builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService>();
+            builder.Register<MapPagePresenter>(Lifetime.Scoped);
+            builder.Register<BattlePagePresenter>(Lifetime.Scoped);
+            builder.Register<RewardPagePresenter>(Lifetime.Scoped);
+            builder.Register<RestShopPagePresenter>(Lifetime.Scoped);
+            builder.Register<ResultPagePresenter>(Lifetime.Scoped);
             builder.Register<BattleScenePresenter>(Lifetime.Scoped);
             builder.RegisterComponentInHierarchy<BattleSceneController>().AsImplementedInterfaces();
         }

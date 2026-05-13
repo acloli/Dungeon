@@ -1,3 +1,4 @@
+using System;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
@@ -11,19 +12,39 @@ namespace Dungeon.Runtime.InGame.Battle
     public sealed class BattleScenePresenter
     {
         private readonly IBattleSceneFlowService _flowService;
+        private readonly MapPagePresenter _mapPagePresenter;
+        private readonly BattlePagePresenter _battlePagePresenter;
+        private readonly RewardPagePresenter _rewardPagePresenter;
+        private readonly RestShopPagePresenter _restShopPagePresenter;
+        private readonly ResultPagePresenter _resultPagePresenter;
         private IBattleSceneView _view;
 
-        public BattleScenePresenter(IBattleSceneFlowService flowService)
+        public BattleScenePresenter(IBattleSceneFlowService flowService,
+            MapPagePresenter mapPagePresenter,
+            BattlePagePresenter battlePagePresenter,
+            RewardPagePresenter rewardPagePresenter,
+            RestShopPagePresenter restShopPagePresenter,
+            ResultPagePresenter resultPagePresenter)
         {
             _flowService = flowService;
+            _mapPagePresenter = mapPagePresenter;
+            _battlePagePresenter = battlePagePresenter;
+            _rewardPagePresenter = rewardPagePresenter;
+            _restShopPagePresenter = restShopPagePresenter;
+            _resultPagePresenter = resultPagePresenter;
         }
 
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public void Initialize(IBattleSceneView view, RunStartConfig runStartConfig)
+        public void Initialize(IBattleSceneView view, RunStartConfig runStartConfig, Action onResultBackClicked)
         {
             _view = view;
+            _mapPagePresenter.Initialize(_view.MapPageView, OnMapNodeClicked);
+            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
+            _rewardPagePresenter.Initialize(_view.RewardPageView, OnRewardSelected);
+            _restShopPagePresenter.Initialize(_view.RestShopPageView, OnRestClicked, OnUpgradeClicked, OnShopClicked, OnRestShopContinueClicked);
+            _resultPagePresenter.Initialize(_view.ResultPageView, onResultBackClicked);
             _flowService.Initialize(runStartConfig);
             Render();
         }
@@ -33,6 +54,9 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         public void Dispose()
         {
+            _battlePagePresenter.Dispose();
+            _restShopPagePresenter.Dispose();
+            _resultPagePresenter.Dispose();
             _view = null;
         }
 
@@ -128,44 +152,27 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
-            _view.ClearDynamicButtons();
+            _mapPagePresenter.Clear();
+            _battlePagePresenter.Clear();
+            _rewardPagePresenter.Clear();
+            _view.ShowPage(snapshot.CurrentPage);
 
             switch (snapshot.CurrentPage)
             {
                 case BattleScenePage.Map:
-                    _view.SetPanels(true, false, false, false, false);
-                    _view.BuildMapButtons(snapshot.Nodes, OnMapNodeClicked);
-                    _view.SetMapButtonInteractable(snapshot.CurrentNodeIndex + 1);
-                    _view.SetMapStateText(snapshot.MapMessage);
+                    _mapPagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Battle:
-                    _view.SetPanels(false, true, false, false, false);
-                    _view.BuildHandButtons(snapshot.Hand, OnHandCardClicked);
-                    _view.SetBattleStateText(
-                        string.Format(
-                            BattleSceneConstants.PlayerStateFormat,
-                            snapshot.PlayerHp,
-                            snapshot.PlayerMaxHp,
-                            snapshot.PlayerEnergy,
-                            snapshot.Gold),
-                        string.Format(
-                            BattleSceneConstants.EnemyStateFormat,
-                            snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : "Enemy",
-                            snapshot.EnemyHp),
-                        snapshot.BattleHintMessage);
+                    _battlePagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Reward:
-                    _view.SetPanels(false, false, true, false, false);
-                    _view.BuildRewardButtons(snapshot.RewardChoices, OnRewardSelected);
+                    _rewardPagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.RestShop:
-                    _view.SetPanels(false, false, false, true, false);
-                    _view.SetRestShopText(snapshot.RestShopMessage);
-                    _view.SetRestShopContinueInteractable(snapshot.IsRestShopContinueEnabled);
+                    _restShopPagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Result:
-                    _view.SetPanels(false, false, false, false, true);
-                    _view.SetResultText(snapshot.ResultMessage);
+                    _resultPagePresenter.Render(snapshot);
                     break;
             }
         }

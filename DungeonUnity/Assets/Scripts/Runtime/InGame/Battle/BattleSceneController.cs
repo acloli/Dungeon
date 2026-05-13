@@ -43,15 +43,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 return UniTask.CompletedTask;
             }
 
-            _view.WireStaticButtons(
-                _presenter.OnEnemyTargetClicked,
-                _presenter.OnEndTurnClicked,
-                _presenter.OnRestClicked,
-                _presenter.OnUpgradeClicked,
-                _presenter.OnShopClicked,
-                _presenter.OnRestShopContinueClicked,
-                OnResultBackClicked);
-            _presenter.Initialize(_view, _runStartConfig);
+            _presenter.Initialize(_view, _runStartConfig, OnResultBackClicked);
             return UniTask.CompletedTask;
         }
 
@@ -65,8 +57,6 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            _view.UnwireStaticButtons();
-            _view.ClearDynamicButtons();
             if (_presenter != null)
             {
                 _presenter.Dispose();
