@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
@@ -10,50 +12,40 @@ using NUnit.Framework;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleScenePresenterのEditモードのテストクラス
+    /// BattleScenePresenterのEditモード試験クラス
     /// </summary>
     [TestFixture]
     public sealed class BattleScenePresenterTests
     {
         [Test]
-        public void Initialize_MapPageOnlyShown()
+        public void InitializeAsync_MapState_ShowsMapThroughCoordinator()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
-            FakeBattleSceneView view = new FakeBattleSceneView();
-            BattleScenePresenter presenter = CreatePresenter(flowService);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.Initialize(view, null, () => { });
+            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
-            Assert.That(view.LastShownPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(view.MapPageView.BuildCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.InitializeCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.ShowMapCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
             Assert.That(view.BattlePageView.BuildCallCount, Is.EqualTo(0));
-            Assert.That(view.RewardPageView.BuildCallCount, Is.EqualTo(0));
         }
 
         [Test]
-        public void OnEndTurnClicked_BattlePageRerendered()
+        public void OnEndTurnClicked_BattleState_RendersBattleBase()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
-            FakeBattleSceneView view = new FakeBattleSceneView();
-            BattleScenePresenter presenter = CreatePresenter(flowService);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.Initialize(view, null, () => { });
+            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnEndTurnClicked();
 
             Assert.That(flowService.EndTurnCallCount, Is.EqualTo(1));
-            Assert.That(view.LastShownPage, Is.EqualTo(BattleScenePage.Battle));
-            Assert.That(view.BattlePageView.BuildCallCount, Is.EqualTo(2));
-        }
-
-        private static BattleScenePresenter CreatePresenter(IBattleSceneFlowService flowService)
-        {
-            return new BattleScenePresenter(
-                flowService,
-                new MapPagePresenter(),
-                new BattlePagePresenter(),
-                new RewardPagePresenter(),
-                new RestShopPagePresenter(),
-                new ResultPagePresenter());
+            Assert.That(uiCoordinator.ShowBattleCallCount, Is.GreaterThanOrEqualTo(1));
         }
 
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
@@ -137,59 +129,16 @@ namespace Dungeon.Tests.EditMode
             }
         }
 
-        private sealed class FakeBattleSceneView : IBattleSceneView
+        private sealed class FakeBattleSceneHostView : IBattleSceneHostView
         {
-            public FakeBattleSceneView()
+            public FakeBattlePageView BattlePageView { get; } = new FakeBattlePageView();
+            IBattlePageView IBattleSceneHostView.BattlePageView => BattlePageView;
+
+            public bool IsBattleVisible { get; private set; }
+
+            public void SetBattleVisible(bool visible)
             {
-                MapPageView = new FakeMapPageView();
-                BattlePageView = new FakeBattlePageView();
-                RewardPageView = new FakeRewardPageView();
-                RestShopPageView = new FakeRestShopPageView();
-                ResultPageView = new FakeResultPageView();
-            }
-
-            public FakeMapPageView MapPageView { get; }
-            IMapPageView IBattleSceneView.MapPageView => MapPageView;
-
-            public FakeBattlePageView BattlePageView { get; }
-            IBattlePageView IBattleSceneView.BattlePageView => BattlePageView;
-
-            public FakeRewardPageView RewardPageView { get; }
-            IRewardPageView IBattleSceneView.RewardPageView => RewardPageView;
-
-            public FakeRestShopPageView RestShopPageView { get; }
-            IRestShopPageView IBattleSceneView.RestShopPageView => RestShopPageView;
-
-            public FakeResultPageView ResultPageView { get; }
-            IResultPageView IBattleSceneView.ResultPageView => ResultPageView;
-
-            public BattleScenePage LastShownPage { get; private set; }
-
-            public void ShowPage(BattleScenePage page)
-            {
-                LastShownPage = page;
-            }
-        }
-
-        private sealed class FakeMapPageView : IMapPageView
-        {
-            public int BuildCallCount { get; private set; }
-
-            public void SetMapStateText(string message)
-            {
-            }
-
-            public void BuildMapButtons(IReadOnlyList<MapTemplate.Node> nodes, Action<int> onClicked)
-            {
-                BuildCallCount++;
-            }
-
-            public void SetMapButtonInteractable(int allowedIndex)
-            {
-            }
-
-            public void ClearDynamicButtons()
-            {
+                IsBattleVisible = visible;
             }
         }
 
@@ -219,50 +168,51 @@ namespace Dungeon.Tests.EditMode
             }
         }
 
-        private sealed class FakeRewardPageView : IRewardPageView
+        private sealed class FakeBattleSceneUiCoordinator : IBattleSceneUiCoordinator
         {
-            public int BuildCallCount { get; private set; }
+            public int InitializeCallCount { get; private set; }
+            public int ShowMapCallCount { get; private set; }
+            public int ShowBattleCallCount { get; private set; }
+            public BattleSceneSnapshot LastSnapshot { get; private set; }
 
-            public void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked)
+            public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
             {
-                BuildCallCount++;
+                InitializeCallCount++;
+                return UniTask.CompletedTask;
             }
 
-            public void ClearDynamicButtons()
+            public UniTask ShowMapAsync(BattleSceneSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct)
             {
-            }
-        }
-
-        private sealed class FakeRestShopPageView : IRestShopPageView
-        {
-            public void WireButtons(Action onRestClicked, Action onUpgradeClicked, Action onShopClicked, Action onContinueClicked)
-            {
+                ShowMapCallCount++;
+                LastSnapshot = snapshot;
+                return UniTask.CompletedTask;
             }
 
-            public void UnwireButtons()
+            public UniTask ShowBattleAsync(CancellationToken ct)
             {
+                ShowBattleCallCount++;
+                return UniTask.CompletedTask;
             }
 
-            public void SetRestShopText(string message)
+            public UniTask<CardDefinition> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
+                LastSnapshot = snapshot;
+                return UniTask.FromResult<CardDefinition>(null);
             }
 
-            public void SetRestShopContinueInteractable(bool interactable)
+            public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
-            }
-        }
-
-        private sealed class FakeResultPageView : IResultPageView
-        {
-            public void WireButtons(Action onBackClicked)
-            {
+                LastSnapshot = snapshot;
+                return UniTask.FromResult(RestShopDialogAction.None);
             }
 
-            public void UnwireButtons()
+            public UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
+                LastSnapshot = snapshot;
+                return UniTask.CompletedTask;
             }
 
-            public void SetResultText(string message)
+            public void Dispose()
             {
             }
         }

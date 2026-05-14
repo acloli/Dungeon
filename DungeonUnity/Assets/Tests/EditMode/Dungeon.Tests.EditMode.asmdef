@@ -3,7 +3,8 @@
   "rootNamespace": "Dungeon.Tests.EditMode",
   "references": [
     "Dungeon.Runtime.InGame.Battle",
-    "Dungeon.Runtime.InGame.Domain"
+    "Dungeon.Runtime.InGame.Domain",
+    "UniTask"
   ],
   "includePlatforms": [
     "Editor"
