@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
@@ -12,41 +14,36 @@ namespace Dungeon.Runtime.InGame.Battle
     public sealed class BattleScenePresenter
     {
         private readonly IBattleSceneFlowService _flowService;
-        private readonly MapPagePresenter _mapPagePresenter;
         private readonly BattlePagePresenter _battlePagePresenter;
-        private readonly RewardPagePresenter _rewardPagePresenter;
-        private readonly RestShopPagePresenter _restShopPagePresenter;
-        private readonly ResultPagePresenter _resultPagePresenter;
-        private IBattleSceneView _view;
+        private readonly IBattleSceneUiCoordinator _uiCoordinator;
+        private readonly CancellationTokenSource _presenterCts = new CancellationTokenSource();
 
-        public BattleScenePresenter(IBattleSceneFlowService flowService,
-            MapPagePresenter mapPagePresenter,
+        private IBattleSceneHostView _view;
+        private Action _onResultBackClicked;
+
+        public BattleScenePresenter(
+            IBattleSceneFlowService flowService,
             BattlePagePresenter battlePagePresenter,
-            RewardPagePresenter rewardPagePresenter,
-            RestShopPagePresenter restShopPagePresenter,
-            ResultPagePresenter resultPagePresenter)
+            IBattleSceneUiCoordinator uiCoordinator)
         {
             _flowService = flowService;
-            _mapPagePresenter = mapPagePresenter;
             _battlePagePresenter = battlePagePresenter;
-            _rewardPagePresenter = rewardPagePresenter;
-            _restShopPagePresenter = restShopPagePresenter;
-            _resultPagePresenter = resultPagePresenter;
+            _uiCoordinator = uiCoordinator;
         }
 
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public void Initialize(IBattleSceneView view, RunStartConfig runStartConfig, Action onResultBackClicked)
+        public async UniTask InitializeAsync(IBattleSceneHostView view, RunStartConfig runStartConfig, Action onResultBackClicked, CancellationToken ct)
         {
             _view = view;
-            _mapPagePresenter.Initialize(_view.MapPageView, OnMapNodeClicked);
+            _onResultBackClicked = onResultBackClicked;
+
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
-            _rewardPagePresenter.Initialize(_view.RewardPageView, OnRewardSelected);
-            _restShopPagePresenter.Initialize(_view.RestShopPageView, OnRestClicked, OnUpgradeClicked, OnShopClicked, OnRestShopContinueClicked);
-            _resultPagePresenter.Initialize(_view.ResultPageView, onResultBackClicked);
+            await _uiCoordinator.InitializeAsync(view, ct);
+
             _flowService.Initialize(runStartConfig);
-            Render();
+            await RenderAsync(ct);
         }
 
         /// <summary>
@@ -55,9 +52,10 @@ namespace Dungeon.Runtime.InGame.Battle
         public void Dispose()
         {
             _battlePagePresenter.Dispose();
-            _restShopPagePresenter.Dispose();
-            _resultPagePresenter.Dispose();
+            _presenterCts.Cancel();
+            _uiCoordinator.Dispose();
             _view = null;
+            _onResultBackClicked = null;
         }
 
         /// <summary>
@@ -66,7 +64,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnMapNodeClicked(int index)
         {
             _flowService.SelectMapNode(index);
-            Render();
+            RenderAsync(_presenterCts.Token).Forget();
         }
 
         /// <summary>
@@ -75,7 +73,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnHandCardClicked(int index)
         {
             _flowService.SelectHandCard(index);
-            Render();
+            RenderAsync(_presenterCts.Token).Forget();
         }
 
         /// <summary>
@@ -84,7 +82,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEnemyTargetClicked()
         {
             _flowService.TryPlaySelectedCard();
-            Render();
+            RenderAsync(_presenterCts.Token).Forget();
         }
 
         /// <summary>
@@ -93,58 +91,13 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEndTurnClicked()
         {
             _flowService.EndTurn();
-            Render();
-        }
-
-        /// <summary>
-        /// 報酬選択通知
-        /// </summary>
-        public void OnRewardSelected(CardDefinition card)
-        {
-            _flowService.SelectReward(card);
-            Render();
-        }
-
-        /// <summary>
-        /// 休憩選択通知
-        /// </summary>
-        public void OnRestClicked()
-        {
-            _flowService.ApplyRest();
-            Render();
-        }
-
-        /// <summary>
-        /// 強化選択通知
-        /// </summary>
-        public void OnUpgradeClicked()
-        {
-            _flowService.ApplyUpgrade();
-            Render();
-        }
-
-        /// <summary>
-        /// 購入選択通知
-        /// </summary>
-        public void OnShopClicked()
-        {
-            _flowService.ApplyShopPurchase();
-            Render();
-        }
-
-        /// <summary>
-        /// 補給継続通知
-        /// </summary>
-        public void OnRestShopContinueClicked()
-        {
-            _flowService.ContinueFromRestShop();
-            Render();
+            RenderAsync(_presenterCts.Token).Forget();
         }
 
         /// <summary>
         /// スナップショット反映処理
         /// </summary>
-        private void Render()
+        private async UniTask RenderAsync(CancellationToken ct)
         {
             if (_view == null)
             {
@@ -152,27 +105,55 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
-            _mapPagePresenter.Clear();
             _battlePagePresenter.Clear();
-            _rewardPagePresenter.Clear();
-            _view.ShowPage(snapshot.CurrentPage);
 
             switch (snapshot.CurrentPage)
             {
                 case BattleScenePage.Map:
-                    _mapPagePresenter.Render(snapshot);
+                    await _uiCoordinator.ShowMapAsync(snapshot, OnMapNodeClicked, ct);
                     break;
                 case BattleScenePage.Battle:
+                    await _uiCoordinator.ShowBattleAsync(ct);
                     _battlePagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Reward:
-                    _rewardPagePresenter.Render(snapshot);
+                    CardDefinition reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                    if (reward != null)
+                    {
+                        _flowService.SelectReward(reward);
+                        await RenderAsync(ct);
+                    }
                     break;
                 case BattleScenePage.RestShop:
-                    _restShopPagePresenter.Render(snapshot);
+                    RestShopDialogAction action = await _uiCoordinator.ShowRestShopAsync(snapshot, ct);
+                    ApplyRestShopAction(action);
+                    await RenderAsync(ct);
                     break;
                 case BattleScenePage.Result:
-                    _resultPagePresenter.Render(snapshot);
+                    await _uiCoordinator.ShowResultAsync(snapshot, ct);
+                    _onResultBackClicked?.Invoke();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 補給ダイアログ結果適用
+        /// </summary>
+        private void ApplyRestShopAction(RestShopDialogAction action)
+        {
+            switch (action)
+            {
+                case RestShopDialogAction.Rest:
+                    _flowService.ApplyRest();
+                    break;
+                case RestShopDialogAction.Upgrade:
+                    _flowService.ApplyUpgrade();
+                    break;
+                case RestShopDialogAction.Shop:
+                    _flowService.ApplyShopPurchase();
+                    break;
+                case RestShopDialogAction.Continue:
+                    _flowService.ContinueFromRestShop();
                     break;
             }
         }

@@ -33,18 +33,17 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// シーン初期化処理
         /// </summary>
-        protected override UniTask OnInitializeInternalAsync(ISceneBridgeData bridgeData, CancellationToken ct)
+        protected override async UniTask OnInitializeInternalAsync(ISceneBridgeData bridgeData, CancellationToken ct)
         {
             ValidateConfiguration();
 
             if (_view == null)
             {
                 Debug.LogError("BattleSceneView is missing.");
-                return UniTask.CompletedTask;
+                return;
             }
 
-            _presenter.Initialize(_view, _runStartConfig, OnResultBackClicked);
-            return UniTask.CompletedTask;
+            await _presenter.InitializeAsync(_view, _runStartConfig, OnResultBackClicked, ct);
         }
 
         /// <summary>

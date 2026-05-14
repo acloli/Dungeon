@@ -1,4 +1,7 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,39 +9,22 @@ using UnityEngine.UI;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 結果画面Viewクラス
+    /// 結果ダイアログViewクラス
     /// </summary>
-    public sealed class ResultPageView : MonoBehaviour, IResultPageView
+    public sealed class ResultPageView : UIDialogBase, IResultPageView
     {
         [SerializeField] private TFTextUGUI _resultText;
         [SerializeField] private Button _backButton;
 
-        /// <summary>
-        /// 実行時参照補完
-        /// </summary>
-        private void Awake()
-        {
-            ResolveBindings();
-        }
-
-        /// <summary>
-        /// エディタ参照補完
-        /// </summary>
-        private void OnValidate()
-        {
-            ResolveBindings();
-        }
+        private Action _onBackClicked;
+        private BattleResultDialogParam _param;
 
         /// <summary>
         /// 戻りボタン登録
         /// </summary>
         public void WireButtons(Action onBackClicked)
         {
-            UnwireButtons();
-            if (_backButton != null)
-            {
-                _backButton.onClick.AddListener(() => onBackClicked?.Invoke());
-            }
+            _onBackClicked = onBackClicked;
         }
 
         /// <summary>
@@ -50,6 +36,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _backButton.onClick.RemoveAllListeners();
             }
+
+            _onBackClicked = null;
         }
 
         /// <summary>
@@ -63,13 +51,36 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
-        /// <summary>
-        /// 参照補完
-        /// </summary>
-        private void ResolveBindings()
+        protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
-            _resultText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("ResultText");
-            _backButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("ResultBackButton");
+            _param = param as BattleResultDialogParam;
+            return UniTask.CompletedTask;
+        }
+
+        protected override void OnOpened()
+        {
+            UnwireButtons();
+
+            if (_param != null)
+            {
+                SetResultText(_param.Snapshot.ResultMessage);
+            }
+
+            if (_backButton != null)
+            {
+                _backButton.onClick.AddListener(OnBackPressedInternal);
+            }
+        }
+
+        protected override void OnClosed()
+        {
+            UnwireButtons();
+        }
+
+        private void OnBackPressedInternal()
+        {
+            _onBackClicked?.Invoke();
+            Close();
         }
     }
 }

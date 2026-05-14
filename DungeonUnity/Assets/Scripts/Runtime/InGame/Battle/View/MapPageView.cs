@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
@@ -10,28 +12,31 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// マップ画面Viewクラス
     /// </summary>
-    public sealed class MapPageView : MonoBehaviour, IMapPageView
+    public sealed class MapPageView : UIPageBase, IMapPageView
     {
         [SerializeField] private Transform _nodeRoot;
         [SerializeField] private BattleOptionButtonView _nodeButtonTemplate;
         [SerializeField] private TFTextUGUI _stateText;
 
         private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
+        private BattleMapPageParam _param;
 
         /// <summary>
-        /// 実行時参照補完
+        /// ページ表示内容適用
         /// </summary>
-        private void Awake()
+        public void Apply(BattleMapPageParam param)
         {
-            ResolveBindings();
-        }
+            _param = param;
+            if (_param == null)
+            {
+                ClearDynamicButtons();
+                SetMapStateText(string.Empty);
+                return;
+            }
 
-        /// <summary>
-        /// エディタ参照補完
-        /// </summary>
-        private void OnValidate()
-        {
-            ResolveBindings();
+            BuildMapButtons(_param.Snapshot.Nodes, _param.OnMapNodeClicked);
+            SetMapButtonInteractable(_param.Snapshot.CurrentNodeIndex + 1);
+            SetMapStateText(_param.Snapshot.MapMessage);
         }
 
         /// <summary>
@@ -93,6 +98,22 @@ namespace Dungeon.Runtime.InGame.Battle.View
             ClearButtons(_buttons);
         }
 
+        protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
+        {
+            Apply(param as BattleMapPageParam);
+            return UniTask.CompletedTask;
+        }
+
+        protected override void OnClosed()
+        {
+            ClearDynamicButtons();
+        }
+
+        protected override void OnTerminate()
+        {
+            ClearDynamicButtons();
+        }
+
         /// <summary>
         /// 動的ボタン一覧消去
         /// </summary>
@@ -111,16 +132,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
-        }
-
-        /// <summary>
-        /// 参照補完
-        /// </summary>
-        private void ResolveBindings()
-        {
-            _nodeRoot ??= BattleSceneViewBindingUtility.FindTransform("MapNodeRoot");
-            _nodeButtonTemplate ??= BattleSceneViewBindingUtility.FindComponent<BattleOptionButtonView>("MapNodeTemplate");
-            _stateText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("MapStateText");
         }
     }
 }

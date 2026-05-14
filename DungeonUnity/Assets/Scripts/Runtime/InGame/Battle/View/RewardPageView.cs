@@ -1,36 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using TFramework.UI;
 using UnityEngine;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 報酬画面Viewクラス
+    /// 報酬ダイアログViewクラス
     /// </summary>
-    public sealed class RewardPageView : MonoBehaviour, IRewardPageView
+    public sealed class RewardPageView : UIDialogBase<CardDefinition>, IRewardPageView
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;
 
         private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
-
-        /// <summary>
-        /// 実行時参照補完
-        /// </summary>
-        private void Awake()
-        {
-            ResolveBindings();
-        }
-
-        /// <summary>
-        /// エディタ参照補完
-        /// </summary>
-        private void OnValidate()
-        {
-            ResolveBindings();
-        }
+        private BattleRewardDialogParam _param;
 
         /// <summary>
         /// 報酬ボタン構築
@@ -69,6 +57,28 @@ namespace Dungeon.Runtime.InGame.Battle.View
             ClearButtons(_buttons);
         }
 
+        protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
+        {
+            _param = param as BattleRewardDialogParam;
+            return UniTask.CompletedTask;
+        }
+
+        protected override void OnOpened()
+        {
+            if (_param == null)
+            {
+                ClearDynamicButtons();
+                return;
+            }
+
+            BuildRewardButtons(_param.Snapshot.RewardChoices, card => CloseWithResult(card));
+        }
+
+        protected override void OnClosed()
+        {
+            ClearDynamicButtons();
+        }
+
         /// <summary>
         /// 動的ボタン一覧消去
         /// </summary>
@@ -87,15 +97,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
-        }
-
-        /// <summary>
-        /// 参照補完
-        /// </summary>
-        private void ResolveBindings()
-        {
-            _rewardRoot ??= BattleSceneViewBindingUtility.FindTransform("RewardRoot");
-            _rewardButtonTemplate ??= BattleSceneViewBindingUtility.FindComponent<BattleOptionButtonView>("RewardButtonTemplate");
         }
     }
 }

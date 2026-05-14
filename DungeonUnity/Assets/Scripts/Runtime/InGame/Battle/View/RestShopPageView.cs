@@ -1,4 +1,7 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,9 +9,9 @@ using UnityEngine.UI;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 補給画面Viewクラス
+    /// 補給ダイアログViewクラス
     /// </summary>
-    public sealed class RestShopPageView : MonoBehaviour, IRestShopPageView
+    public sealed class RestShopPageView : UIDialogBase<RestShopDialogAction>, IRestShopPageView
     {
         [SerializeField] private TFTextUGUI _restShopText;
         [SerializeField] private Button _restButton;
@@ -16,21 +19,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Button _shopButton;
         [SerializeField] private Button _continueButton;
 
-        /// <summary>
-        /// 実行時参照補完
-        /// </summary>
-        private void Awake()
-        {
-            ResolveBindings();
-        }
-
-        /// <summary>
-        /// エディタ参照補完
-        /// </summary>
-        private void OnValidate()
-        {
-            ResolveBindings();
-        }
+        private BattleRestShopDialogParam _param;
 
         /// <summary>
         /// 固定ボタン登録
@@ -101,16 +90,47 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
-        /// <summary>
-        /// 参照補完
-        /// </summary>
-        private void ResolveBindings()
+        protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
-            _restShopText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("RestShopText");
-            _restButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("RestButton");
-            _upgradeButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("UpgradeButton");
-            _shopButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("ShopButton");
-            _continueButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("RestShopContinueButton");
+            _param = param as BattleRestShopDialogParam;
+            return UniTask.CompletedTask;
+        }
+
+        protected override void OnOpened()
+        {
+            UnwireButtons();
+
+            if (_param == null)
+            {
+                SetRestShopText(string.Empty);
+                SetRestShopContinueInteractable(false);
+                return;
+            }
+
+            SetRestShopText(_param.Snapshot.RestShopMessage);
+            SetRestShopContinueInteractable(_param.Snapshot.IsRestShopContinueEnabled);
+
+            if (_restButton != null)
+            {
+                _restButton.onClick.AddListener(() => CloseWithResult(RestShopDialogAction.Rest));
+            }
+            if (_upgradeButton != null)
+            {
+                _upgradeButton.onClick.AddListener(() => CloseWithResult(RestShopDialogAction.Upgrade));
+            }
+            if (_shopButton != null)
+            {
+                _shopButton.onClick.AddListener(() => CloseWithResult(RestShopDialogAction.Shop));
+            }
+            if (_continueButton != null)
+            {
+                _continueButton.onClick.AddListener(() => CloseWithResult(RestShopDialogAction.Continue));
+            }
+        }
+
+        protected override void OnClosed()
+        {
+            UnwireButtons();
         }
     }
 }

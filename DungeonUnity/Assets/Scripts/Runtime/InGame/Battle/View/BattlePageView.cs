@@ -24,22 +24,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
         private readonly List<BattleOptionButtonView> _handButtons = new List<BattleOptionButtonView>();
 
         /// <summary>
-        /// 実行時参照補完
-        /// </summary>
-        private void Awake()
-        {
-            ResolveBindings();
-        }
-
-        /// <summary>
-        /// エディタ参照補完
-        /// </summary>
-        private void OnValidate()
-        {
-            ResolveBindings();
-        }
-
-        /// <summary>
         /// 固定ボタン登録
         /// </summary>
         public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
@@ -145,20 +129,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
-        }
-
-        /// <summary>
-        /// 参照補完
-        /// </summary>
-        private void ResolveBindings()
-        {
-            _playerStatText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("PlayerStatText");
-            _enemyStatText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("EnemyStatText");
-            _battleHintText ??= BattleSceneViewBindingUtility.FindComponent<TFTextUGUI>("BattleHintText");
-            _handCardRoot ??= BattleSceneViewBindingUtility.FindTransform("HandCardRoot");
-            _handCardButtonTemplate ??= BattleSceneViewBindingUtility.FindComponent<BattleOptionButtonView>("HandCardTemplate");
-            _enemyTargetButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("EnemyTargetButton");
-            _endTurnButton ??= BattleSceneViewBindingUtility.FindComponent<Button>("EndTurnButton");
         }
     }
 }
