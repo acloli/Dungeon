@@ -1,4 +1,5 @@
 using System;
+using TFramework.UI;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
@@ -54,5 +55,21 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
+    /// ダイアログ表示要求生成クラス
+    /// </summary>
+    public static class BattleDialogOpenParams
+    {
+        public static UIDialogOpenParam Cached(object payload)
+        {
+            return new UIDialogOpenParam(payload, true);
+        }
+
+        public static UIDialogOpenParam SingleUse(object payload)
+        {
+            return new UIDialogOpenParam(payload, false);
+        }
     }
 }

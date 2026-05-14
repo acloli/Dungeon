@@ -78,8 +78,8 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RewardPageView, CardDefinition>(
-                new BattleRewardDialogParam(snapshot),
+            return await _uiService.ShowDialogAsync<RewardDialogView, CardDefinition>(
+                BattleDialogOpenParams.Cached(new BattleRewardDialogParam(snapshot)),
                 ct);
         }
 
@@ -94,8 +94,8 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RestShopPageView, RestShopDialogAction>(
-                new BattleRestShopDialogParam(snapshot),
+            return await _uiService.ShowDialogAsync<RestShopDialogView, RestShopDialogAction>(
+                BattleDialogOpenParams.Cached(new BattleRestShopDialogParam(snapshot)),
                 ct);
         }
 
@@ -110,8 +110,8 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            await _uiService.ShowDialogAsync<ResultPageView>(
-                new BattleResultDialogParam(snapshot),
+            await _uiService.ShowDialogAsync<ResultDialogView>(
+                BattleDialogOpenParams.SingleUse(new BattleResultDialogParam(snapshot)),
                 ct);
         }
 

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7508704762363843694}
   - component: {fileID: 6579127674352979082}
   m_Layer: 0
-  m_Name: RewardPageView
+  m_Name: RewardDialogView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f50de63c6fd4a2b969a9eb0fca0ed2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RewardPageView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RewardDialogView
   _canvasGroup: {fileID: 6579127674352979082}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1

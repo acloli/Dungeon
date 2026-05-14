@@ -11,7 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 結果ダイアログViewクラス
     /// </summary>
-    public sealed class ResultPageView : UIDialogBase, IResultPageView
+    public sealed class ResultDialogView : UIDialogBase, IResultDialogView
     {
         [SerializeField] private TFTextUGUI _resultText;
         [SerializeField] private Button _backButton;

@@ -7,7 +7,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 報酬画面表示インターフェース
     /// </summary>
-    public interface IRewardPageView
+    public interface IRewardDialogView
     {
         void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked);
         void ClearDynamicButtons();

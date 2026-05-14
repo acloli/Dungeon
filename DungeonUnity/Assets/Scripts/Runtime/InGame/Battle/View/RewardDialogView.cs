@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 報酬ダイアログViewクラス
     /// </summary>
-    public sealed class RewardPageView : UIDialogBase<CardDefinition>, IRewardPageView
+    public sealed class RewardDialogView : UIDialogBase<CardDefinition>, IRewardDialogView
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;

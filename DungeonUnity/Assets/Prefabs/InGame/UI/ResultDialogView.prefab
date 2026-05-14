@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 1813358825239211913}
   - component: {fileID: 2524310341106215937}
   m_Layer: 0
-  m_Name: ResultPageView
+  m_Name: ResultDialogView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -352,7 +352,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55490cf9396ea4b2987c1a930e3831b5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.ResultPageView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.ResultDialogView
   _canvasGroup: {fileID: 2524310341106215937}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1

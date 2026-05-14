@@ -1203,7 +1203,7 @@ GameObject:
   - component: {fileID: 6876050228995188779}
   - component: {fileID: 4435882452933413626}
   m_Layer: 0
-  m_Name: RestShopPageView
+  m_Name: RestShopDialogView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1282,7 +1282,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 211e251bd42f94bcf8a74295d692191a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RestShopPageView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RestShopDialogView
   _canvasGroup: {fileID: 4435882452933413626}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1

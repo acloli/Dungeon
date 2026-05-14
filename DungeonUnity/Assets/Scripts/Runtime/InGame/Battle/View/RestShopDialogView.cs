@@ -11,7 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 補給ダイアログViewクラス
     /// </summary>
-    public sealed class RestShopPageView : UIDialogBase<RestShopDialogAction>, IRestShopPageView
+    public sealed class RestShopDialogView : UIDialogBase<RestShopDialogAction>, IRestShopDialogView
     {
         [SerializeField] private TFTextUGUI _restShopText;
         [SerializeField] private Button _restButton;
