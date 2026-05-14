@@ -44,13 +44,13 @@ namespace Dungeon.Runtime.InGame.Battle
             _hostView.SetBattleVisible(false);
 
             BattleMapPageParam param = new BattleMapPageParam(snapshot, onMapNodeClicked);
-            if (_uiService.CurrentPage is MapPageView currentMapPage)
+            if (_uiService.CurrentPage is MapPage currentMapPage)
             {
                 currentMapPage.Apply(param);
                 return;
             }
 
-            await _uiService.ShowPageAsync<MapPageView>(param, ct);
+            await _uiService.ShowPageAsync<MapPage>(param, ct);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RewardDialogView, CardDefinition>(
+            return await _uiService.ShowDialogAsync<RewardDialog, CardDefinition>(
                 BattleDialogOpenParams.Cached(new BattleRewardDialogParam(snapshot)),
                 ct);
         }
@@ -94,7 +94,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RestShopDialogView, RestShopDialogAction>(
+            return await _uiService.ShowDialogAsync<RestShopDialog, RestShopDialogAction>(
                 BattleDialogOpenParams.Cached(new BattleRestShopDialogParam(snapshot)),
                 ct);
         }
@@ -110,7 +110,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            await _uiService.ShowDialogAsync<ResultDialogView>(
+            await _uiService.ShowDialogAsync<ResultDialog>(
                 BattleDialogOpenParams.SingleUse(new BattleResultDialogParam(snapshot)),
                 ct);
         }

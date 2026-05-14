@@ -9,9 +9,9 @@ using UnityEngine.UI;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 結果ダイアログViewクラス
+    /// 結果ダイアログクラス
     /// </summary>
-    public sealed class ResultDialogView : UIDialogBase, IResultDialogView
+    public sealed class ResultDialog : UIDialogBase, IResultDialogView
     {
         [SerializeField] private TFTextUGUI _resultText;
         [SerializeField] private Button _backButton;

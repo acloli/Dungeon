@@ -10,9 +10,9 @@ using UnityEngine;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// マップ画面Viewクラス
+    /// マップ画面クラス
     /// </summary>
-    public sealed class MapPageView : UIPageBase, IMapPageView
+    public sealed class MapPage : UIPageBase, IMapPageView
     {
         [SerializeField] private Transform _nodeRoot;
         [SerializeField] private BattleOptionButtonView _nodeButtonTemplate;

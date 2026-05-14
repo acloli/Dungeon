@@ -10,9 +10,9 @@ using UnityEngine;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 報酬ダイアログViewクラス
+    /// 報酬ダイアログクラス
     /// </summary>
-    public sealed class RewardDialogView : UIDialogBase<CardDefinition>, IRewardDialogView
+    public sealed class RewardDialog : UIDialogBase<CardDefinition>, IRewardDialogView
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;

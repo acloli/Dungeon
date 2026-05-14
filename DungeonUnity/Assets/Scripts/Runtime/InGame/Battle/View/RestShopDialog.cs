@@ -9,9 +9,9 @@ using UnityEngine.UI;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// 補給ダイアログViewクラス
+    /// 補給ダイアログクラス
     /// </summary>
-    public sealed class RestShopDialogView : UIDialogBase<RestShopDialogAction>, IRestShopDialogView
+    public sealed class RestShopDialog : UIDialogBase<RestShopDialogAction>, IRestShopDialogView
     {
         [SerializeField] private TFTextUGUI _restShopText;
         [SerializeField] private Button _restButton;
