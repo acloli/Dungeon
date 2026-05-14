@@ -4,6 +4,8 @@
   "references": [
     "Dungeon.Runtime.InGame.Battle",
     "Dungeon.Runtime.InGame.Domain",
+    "TFramework.Core",
+    "TFramework.UI",
     "UniTask"
   ],
   "includePlatforms": [

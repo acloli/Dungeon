@@ -12,7 +12,7 @@ using NUnit.Framework;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleScenePresenterのEditモード試験クラス
+    /// BattleScenePresenterのEditモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleScenePresenterTests
