@@ -4,7 +4,7 @@
 ![C#](https://img.shields.io/badge/C%23-9.0-blue?style=flat-square&logo=c-sharp)
 ![Architecture](https://img.shields.io/badge/Architecture-VContainer%20%7C%20R3%20%7C%20UniTask-brightgreen?style=flat-square)
 
-Project Dungeon(仮) は、Unityを用いたローグライク・デッキ構築型ゲームの基盤システムの実装と、モダンなゲームアーキテクチャの研究を目的とした個人開発プロジェクトです。
+Project Vox Dungeon(仮) は、Unityを用いたローグライク・デッキ構築型ゲームの基盤システムの実装と、モダンなゲームアーキテクチャの研究を目的とした個人開発プロジェクトです。
 
 
 ## 概要 (Overview)
