@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 413f0ff12542e4136ae6d9db8df31a94, type: 3}
+  m_Name: EncounterGroupMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.EncounterGroupMasterContainer
+  _data:
+  - Id: 5201
+    EncounterGroupId: 6201
+    EnemyId: 3001
+    Weight: 20
+    NodeType: Battle
+  - Id: 5202
+    EncounterGroupId: 6201
+    EnemyId: 3002
+    Weight: 20
+    NodeType: Battle
+  - Id: 5203
+    EncounterGroupId: 6201
+    EnemyId: 3003
+    Weight: 15
+    NodeType: Battle
+  - Id: 5204
+    EncounterGroupId: 6201
+    EnemyId: 3004
+    Weight: 15
+    NodeType: Battle
+  - Id: 5205
+    EncounterGroupId: 6201
+    EnemyId: 3005
+    Weight: 20
+    NodeType: Battle
+  - Id: 5206
+    EncounterGroupId: 6202
+    EnemyId: 3006
+    Weight: 100
+    NodeType: EliteBattle
+  - Id: 5207
+    EncounterGroupId: 6203
+    EnemyId: 3007
+    Weight: 100
+    NodeType: Boss

@@ -1,0 +1,231 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54a977cb52e034473a0a8d8bf19ba8f0, type: 3}
+  m_Name: EnemyActionMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.EnemyActionMasterContainer
+  _data:
+  - Id: 4101
+    EnemyId: 3001
+    Order: 1
+    IntentType: Buff
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: Ritual
+    BuffValue: 3
+    RepeatRule: OpeningOnly
+  - Id: 4102
+    EnemyId: 3001
+    Order: 2
+    IntentType: Attack
+    Damage: 6
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: RepeatAfterOpening
+  - Id: 4111
+    EnemyId: 3002
+    Order: 1
+    IntentType: Attack
+    Damage: 11
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: OpeningOnly
+  - Id: 4112
+    EnemyId: 3002
+    Order: 2
+    IntentType: AttackDefend
+    Damage: 7
+    HitCount: 1
+    Block: 5
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: AfterOpeningRandom
+  - Id: 4113
+    EnemyId: 3002
+    Order: 3
+    IntentType: Buff
+    Damage: 0
+    HitCount: 1
+    Block: 6
+    StatusType: None
+    StatusValue: 0
+    BuffType: Strength
+    BuffValue: 3
+    RepeatRule: AfterOpeningRandom
+  - Id: 4121
+    EnemyId: 3003
+    Order: 1
+    IntentType: Attack
+    Damage: 6
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4122
+    EnemyId: 3003
+    Order: 2
+    IntentType: Buff
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: Strength
+    BuffValue: 3
+    RepeatRule: Random
+  - Id: 4131
+    EnemyId: 3004
+    Order: 1
+    IntentType: Attack
+    Damage: 6
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4132
+    EnemyId: 3004
+    Order: 2
+    IntentType: Debuff
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: Weak
+    StatusValue: 2
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4141
+    EnemyId: 3005
+    Order: 1
+    IntentType: AttackDebuff
+    Damage: 7
+    HitCount: 1
+    Block: 0
+    StatusType: Slimed
+    StatusValue: 1
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4142
+    EnemyId: 3005
+    Order: 2
+    IntentType: Debuff
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: Weak
+    StatusValue: 1
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4143
+    EnemyId: 3005
+    Order: 3
+    IntentType: Attack
+    Damage: 10
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Random
+  - Id: 4151
+    EnemyId: 3006
+    Order: 1
+    IntentType: Buff
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: Enrage
+    BuffValue: 2
+    RepeatRule: OpeningOnly
+  - Id: 4152
+    EnemyId: 3006
+    Order: 2
+    IntentType: AttackDebuff
+    Damage: 6
+    HitCount: 1
+    Block: 0
+    StatusType: Vulnerable
+    StatusValue: 2
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Cycle
+  - Id: 4153
+    EnemyId: 3006
+    Order: 3
+    IntentType: Attack
+    Damage: 14
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Cycle
+  - Id: 4161
+    EnemyId: 3007
+    Order: 1
+    IntentType: Special
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: Slimed
+    StatusValue: 3
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Cycle
+  - Id: 4162
+    EnemyId: 3007
+    Order: 2
+    IntentType: Idle
+    Damage: 0
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Cycle
+  - Id: 4163
+    EnemyId: 3007
+    Order: 3
+    IntentType: Attack
+    Damage: 35
+    HitCount: 1
+    Block: 0
+    StatusType: None
+    StatusValue: 0
+    BuffType: None
+    BuffValue: 0
+    RepeatRule: Cycle

@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e56b2437fa574a34b788e19d4a7d343, type: 3}
+  m_Name: CardMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.CardMasterContainer
+  _data:
+  - Id: 1001
+    Key: card_cinder_slash
+    Name: Cinder Slash
+    LocalizationKey: card.name.cinder_slash
+    CardType: Attack
+    Rarity: Basic
+    Cost: 1
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 0
+  - Id: 1002
+    Key: card_ash_guard
+    Name: Ash Guard
+    LocalizationKey: card.name.ash_guard
+    CardType: Skill
+    Rarity: Basic
+    Cost: 1
+    TargetType: Self
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 0
+  - Id: 1003
+    Key: card_crystal_bash
+    Name: Crystal Bash
+    LocalizationKey: card.name.crystal_bash
+    CardType: Attack
+    Rarity: Basic
+    Cost: 2
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 0
+  - Id: 1004
+    Key: card_ember_knuckle
+    Name: Ember Knuckle
+    LocalizationKey: card.name.ember_knuckle
+    CardType: Attack
+    Rarity: Common
+    Cost: 1
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1005
+    Key: card_shell_up
+    Name: Shell Up
+    LocalizationKey: card.name.shell_up
+    CardType: Skill
+    Rarity: Common
+    Cost: 1
+    TargetType: Self
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1006
+    Key: card_dual_fang
+    Name: Dual Fang
+    LocalizationKey: card.name.dual_fang
+    CardType: Attack
+    Rarity: Common
+    Cost: 1
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1007
+    Key: card_iron_tide
+    Name: Iron Tide
+    LocalizationKey: card.name.iron_tide
+    CardType: Attack
+    Rarity: Common
+    Cost: 1
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1008
+    Key: card_storm_clap
+    Name: Storm Clap
+    LocalizationKey: card.name.storm_clap
+    CardType: Attack
+    Rarity: Common
+    Cost: 1
+    TargetType: AllEnemies
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1009
+    Key: card_char_sweep
+    Name: Char Sweep
+    LocalizationKey: card.name.char_sweep
+    CardType: Attack
+    Rarity: Common
+    Cost: 1
+    TargetType: AllEnemies
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1
+  - Id: 1010
+    Key: card_grim_line
+    Name: Grim Line
+    LocalizationKey: card.name.grim_line
+    CardType: Attack
+    Rarity: Common
+    Cost: 2
+    TargetType: SingleEnemy
+    CharacterArchetype: CrimsonExile
+    CanAppearInReward: 1

@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 212d637f583564b2b9591a79157f60e3, type: 3}
+  m_Name: MapNodeMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.MapNodeMasterContainer
+  _data:
+  - Id: 5301
+    MapTemplateId: 6301
+    NodeKey: node_01
+    Floor: 1
+    NodeType: Battle
+    Name: Ruins Path I
+    LocalizationKey: map.node.ruins_path_1
+  - Id: 5302
+    MapTemplateId: 6301
+    NodeKey: node_02
+    Floor: 2
+    NodeType: RestShop
+    Name: Cinder Rest
+    LocalizationKey: map.node.cinder_rest
+  - Id: 5303
+    MapTemplateId: 6301
+    NodeKey: node_03
+    Floor: 3
+    NodeType: Battle
+    Name: Ruins Path II
+    LocalizationKey: map.node.ruins_path_2
+  - Id: 5304
+    MapTemplateId: 6301
+    NodeKey: node_04
+    Floor: 4
+    NodeType: EliteBattle
+    Name: Abyss Gate
+    LocalizationKey: map.node.abyss_gate
+  - Id: 5305
+    MapTemplateId: 6301
+    NodeKey: node_05
+    Floor: 5
+    NodeType: RestShop
+    Name: Supply Post
+    LocalizationKey: map.node.supply_post
+  - Id: 5306
+    MapTemplateId: 6301
+    NodeKey: node_06
+    Floor: 6
+    NodeType: Boss
+    Name: Throne Gate
+    LocalizationKey: map.node.throne_gate

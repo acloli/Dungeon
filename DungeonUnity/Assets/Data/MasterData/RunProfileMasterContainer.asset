@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ceda15427bc2451f9548707aaebe64e, type: 3}
+  m_Name: RunProfileMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.RunProfileMasterContainer
+  _data:
+  - Id: 5501
+    Key: run_crimson_exile_act1
+    CharacterArchetype: CrimsonExile
+    PlayerMaxHp: 80
+    StartingGold: 99
+    StarterDeckGroupId: 6001
+    RewardPoolId: 6101
+    MapTemplateId: 6301
+    NormalEncounterGroupId: 6201
+    EliteEncounterGroupId: 6202
+    BossEncounterGroupId: 6203
+    CardRewardChoiceCount: 3
