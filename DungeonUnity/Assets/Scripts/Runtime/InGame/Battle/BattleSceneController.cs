@@ -2,7 +2,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
+using TFramework.Debug;
 using TFramework.Scene;
 using UnityEngine;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -16,7 +16,7 @@ namespace Dungeon.Runtime.InGame.Battle
     public sealed class BattleSceneController : SceneControllerBase
     {
         [Header("Config")]
-        [SerializeField] private RunStartConfig _runStartConfig;
+        [SerializeField] private int _runProfileId = 5501;
         [SerializeField] private string _mainSceneName = BattleSceneConstants.MainSceneName;
 
         [Header("View")]
@@ -39,11 +39,11 @@ namespace Dungeon.Runtime.InGame.Battle
 
             if (_view == null)
             {
-                Debug.LogError("BattleSceneView is missing.");
+                TLogger.Error("BattleSceneView is missing.", "Battle");
                 return;
             }
 
-            await _presenter.InitializeAsync(_view, _runStartConfig, OnResultBackClicked, ct);
+            await _presenter.InitializeAsync(_view, _runProfileId, OnResultBackClicked, ct);
         }
 
         /// <summary>
@@ -67,9 +67,9 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         private void ValidateConfiguration()
         {
-            if (_runStartConfig == null)
+            if (_runProfileId <= 0)
             {
-                Debug.LogError(BattleSceneConstants.MissingRunConfig);
+                TLogger.Error(BattleSceneConstants.MissingRunProfile, "Battle");
             }
         }
 

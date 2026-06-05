@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// Run状態初期化
         /// </summary>
-        void InitializeRun(BattleSceneState state, RunStartConfig runStartConfig);
+        void InitializeRun(BattleSceneState state, RuntimeRunDefinition runDefinition);
 
         /// <summary>
         /// 手札補充
@@ -22,32 +22,32 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵選出
         /// </summary>
-        EnemyDefinition SelectEnemy(RunStartConfig runStartConfig, InGameNodeType nodeType);
+        RuntimeEnemy SelectEnemy(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider);
+
+        /// <summary>
+        /// 敵初期HP取得
+        /// </summary>
+        int RollEnemyHp(RuntimeEnemy enemy, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 報酬候補選出
         /// </summary>
-        IReadOnlyList<CardDefinition> SelectRewardChoices(BattleSceneState state, RunStartConfig runStartConfig, IBattleRandomProvider randomProvider);
+        IReadOnlyList<RuntimeCard> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 使用可否判定
         /// </summary>
-        bool CanPlayCard(BattleSceneState state, CardDefinition card);
+        bool CanPlayCard(BattleSceneState state, RuntimeCard card);
 
         /// <summary>
         /// カード適用
         /// </summary>
-        void PlayCard(BattleSceneState state, CardDefinition card);
+        BattleCardResolutionResult PlayCard(BattleSceneState state, RuntimeCard card, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 敵ターン解決
         /// </summary>
-        int ResolveEnemyTurn(BattleSceneState state);
-
-        /// <summary>
-        /// 戦闘報酬金額取得
-        /// </summary>
-        int GetBattleGoldReward(InGameNodeType nodeType);
+        BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 休憩適用
