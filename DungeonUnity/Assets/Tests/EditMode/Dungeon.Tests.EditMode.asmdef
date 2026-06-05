@@ -4,7 +4,10 @@
   "references": [
     "Dungeon.Runtime.InGame.Battle",
     "Dungeon.Runtime.InGame.Domain",
+    "Game.MasterData.Generated",
     "TFramework.Core",
+    "TFramework.Localization",
+    "TFramework.MasterData",
     "TFramework.UI",
     "UniTask"
   ],

@@ -6,7 +6,6 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
 using NUnit.Framework;
 
 namespace Dungeon.Tests.EditMode
@@ -25,7 +24,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiCoordinator.InitializeCallCount, Is.EqualTo(1));
             Assert.That(uiCoordinator.ShowMapCallCount, Is.EqualTo(1));
@@ -41,7 +40,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnEndTurnClicked();
 
             Assert.That(flowService.EndTurnCallCount, Is.EqualTo(1));
@@ -52,15 +51,17 @@ namespace Dungeon.Tests.EditMode
         {
             return new BattleSceneSnapshot(
                 page,
-                new List<MapTemplate.Node>(),
-                new List<CardDefinition>(),
-                new List<CardDefinition>(),
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeCard>(),
                 -1,
                 40,
                 40,
                 3,
+                0,
                 100,
                 null,
+                0,
                 0,
                 false,
                 -1,
@@ -82,7 +83,7 @@ namespace Dungeon.Tests.EditMode
 
             public int EndTurnCallCount { get; private set; }
 
-            public void Initialize(RunStartConfig runStartConfig)
+            public void Initialize(int runProfileId)
             {
             }
 
@@ -108,7 +109,7 @@ namespace Dungeon.Tests.EditMode
                 EndTurnCallCount++;
             }
 
-            public void SelectReward(CardDefinition card)
+            public void SelectReward(RuntimeCard card)
             {
             }
 
@@ -158,7 +159,7 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
-            public void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked)
+            public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
             {
                 BuildCallCount++;
             }
@@ -194,10 +195,10 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.CompletedTask;
             }
 
-            public UniTask<CardDefinition> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 LastSnapshot = snapshot;
-                return UniTask.FromResult<CardDefinition>(null);
+                return UniTask.FromResult<RuntimeCard>(null);
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Reflection;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -16,22 +14,9 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void Initialize_OpensMapWithRunDefaults()
         {
-            BattleSceneFlowService service = CreateService(0);
-            RunStartConfig config = CreateRunStartConfig(
-                playerMaxHp: 50,
-                startingGold: 120,
-                mapNodes: new[]
-                {
-                    CreateNode(InGameNodeType.Battle, "B1"),
-                    CreateNode(InGameNodeType.Boss, "Boss")
-                },
-                starterDeck: new[] { CreateCard("strike", "Strike", 1, 6) },
-                rewardPool: new[] { CreateCard("burst", "Burst", 2, 12) },
-                normalEnemy: CreateEnemy("slime", "Slime", 18, 4),
-                eliteEnemy: CreateEnemy("guard", "Guard", 24, 6),
-                bossEnemy: CreateEnemy("boss", "Boss", 40, 8));
+            BattleSceneFlowService service = CreateService(CreateRunDefinition(), 0);
 
-            service.Initialize(config);
+            service.Initialize(5501);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
@@ -45,22 +30,15 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void SelectMapNode_BattleNode_OpensBattleAndDrawsHand()
         {
-            BattleSceneFlowService service = CreateService(0, 0, 0, 0, 0);
-            CardDefinition strike = CreateCard("strike", "Strike", 1, 6);
-            RunStartConfig config = CreateRunStartConfig(
-                playerMaxHp: 40,
-                startingGold: 100,
-                mapNodes: new[]
-                {
-                    CreateNode(InGameNodeType.Battle, "B1")
-                },
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 starterDeck: new[] { strike, strike, strike },
-                rewardPool: new[] { CreateCard("burst", "Burst", 2, 12) },
-                normalEnemy: CreateEnemy("slime", "Slime", 18, 4),
-                eliteEnemy: null,
-                bossEnemy: null);
+                rewardCards: new[] { CreateRewardEntry(CreateCard(2001, "Burst", 2, 12), 10, 1, 99) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
-            service.Initialize(config);
+            service.Initialize(5501);
             service.SelectMapNode(0);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
@@ -73,30 +51,23 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void TryPlaySelectedCard_KillEnemy_OpensRewardAndAddsGold()
         {
-            BattleSceneFlowService service = CreateService(0, 0, 0, 0, 0);
-            CardDefinition finisher = CreateCard("finisher", "Finisher", 1, 99);
-            CardDefinition reward = CreateCard("reward", "Reward", 1, 5);
-            RunStartConfig config = CreateRunStartConfig(
-                playerMaxHp: 40,
-                startingGold: 100,
-                mapNodes: new[]
-                {
-                    CreateNode(InGameNodeType.Battle, "B1")
-                },
+            RuntimeCard finisher = CreateCard(1001, "Finisher", 1, 99);
+            RuntimeCard reward = CreateCard(1002, "Reward", 1, 5);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 starterDeck: new[] { finisher },
-                rewardPool: new[] { reward },
-                normalEnemy: CreateEnemy("slime", "Slime", 18, 4),
-                eliteEnemy: null,
-                bossEnemy: null);
+                rewardCards: new[] { CreateRewardEntry(reward, 10, 1, 99) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
-            service.Initialize(config);
+            service.Initialize(5501);
             service.SelectMapNode(0);
             service.SelectHandCard(0);
             service.TryPlaySelectedCard();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(130));
+            Assert.That(snapshot.Gold, Is.EqualTo(150));
             Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
             Assert.That(snapshot.RewardChoices[0].DisplayName, Is.EqualTo("Reward"));
         }
@@ -104,21 +75,15 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void EndTurn_WhenPlayerDies_OpensResult()
         {
-            BattleSceneFlowService service = CreateService(0, 0, 0, 0, 0);
-            RunStartConfig config = CreateRunStartConfig(
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 playerMaxHp: 3,
-                startingGold: 100,
-                mapNodes: new[]
-                {
-                    CreateNode(InGameNodeType.Battle, "B1")
-                },
-                starterDeck: new[] { CreateCard("strike", "Strike", 1, 1) },
-                rewardPool: new[] { CreateCard("reward", "Reward", 1, 5) },
-                normalEnemy: CreateEnemy("slime", "Slime", 18, 5),
-                eliteEnemy: null,
-                bossEnemy: null);
+                starterDeck: new[] { CreateCard(1001, "Strike", 1, 1) },
+                rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 5, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
-            service.Initialize(config);
+            service.Initialize(5501);
             service.SelectMapNode(0);
             service.EndTurn();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
@@ -130,21 +95,11 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void RestShopFlow_RestAndContinue_ReturnsToMap()
         {
-            BattleSceneFlowService service = CreateService(0, 0, 0, 0, 0);
-            RunStartConfig config = CreateRunStartConfig(
-                playerMaxHp: 40,
-                startingGold: 100,
-                mapNodes: new[]
-                {
-                    CreateNode(InGameNodeType.RestShop, "Rest")
-                },
-                starterDeck: new[] { CreateCard("strike", "Strike", 1, 6) },
-                rewardPool: new[] { CreateCard("reward", "Reward", 1, 5) },
-                normalEnemy: CreateEnemy("slime", "Slime", 18, 4),
-                eliteEnemy: null,
-                bossEnemy: null);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
-            service.Initialize(config);
+            service.Initialize(5501);
             service.SelectMapNode(0);
             service.ApplyRest();
             BattleSceneSnapshot restSnapshot = service.CreateSnapshot();
@@ -159,70 +114,149 @@ namespace Dungeon.Tests.EditMode
             Assert.That(mapSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
         }
 
-        private static BattleSceneFlowService CreateService(params int[] values)
+        [Test]
+        public void TryPlaySelectedCard_GainBlock_ReducesIncomingDamage()
         {
-            return new BattleSceneFlowService(new BattleSceneRules(), new SequenceRandomProvider(values));
-        }
-
-        private static RunStartConfig CreateRunStartConfig(
-            int playerMaxHp,
-            int startingGold,
-            IReadOnlyList<MapTemplate.Node> mapNodes,
-            IReadOnlyList<CardDefinition> starterDeck,
-            IReadOnlyList<CardDefinition> rewardPool,
-            EnemyDefinition normalEnemy,
-            EnemyDefinition eliteEnemy,
-            EnemyDefinition bossEnemy)
-        {
-            RunStartConfig config = ScriptableObject.CreateInstance<RunStartConfig>();
-            MapTemplate mapTemplate = ScriptableObject.CreateInstance<MapTemplate>();
-
-            SetField(config, "_playerMaxHp", playerMaxHp);
-            SetField(config, "_startingGold", startingGold);
-            SetField(config, "_mapTemplate", mapTemplate);
-            SetField(config, "_starterDeck", new List<CardDefinition>(starterDeck));
-            SetField(config, "_rewardPool", new List<CardDefinition>(rewardPool));
-            SetField(config, "_normalEnemy", normalEnemy);
-            SetField(config, "_eliteEnemy", eliteEnemy);
-            SetField(config, "_bossEnemy", bossEnemy);
-            SetField(mapTemplate, "_nodes", new List<MapTemplate.Node>(mapNodes));
-
-            return config;
-        }
-
-        private static CardDefinition CreateCard(string cardId, string displayName, int cost, int damage)
-        {
-            CardDefinition card = ScriptableObject.CreateInstance<CardDefinition>();
-            SetField(card, "_cardId", cardId);
-            SetField(card, "_displayName", displayName);
-            SetField(card, "_cost", cost);
-            SetField(card, "_damage", damage);
-            return card;
-        }
-
-        private static EnemyDefinition CreateEnemy(string enemyId, string displayName, int maxHp, int intentDamage)
-        {
-            EnemyDefinition enemy = ScriptableObject.CreateInstance<EnemyDefinition>();
-            SetField(enemy, "_enemyId", enemyId);
-            SetField(enemy, "_displayName", displayName);
-            SetField(enemy, "_maxHp", maxHp);
-            SetField(enemy, "_intentDamage", intentDamage);
-            return enemy;
-        }
-
-        private static MapTemplate.Node CreateNode(InGameNodeType nodeType, string label)
-        {
-            return new MapTemplate.Node
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
             {
-                NodeType = nodeType,
-                Label = label
-            };
+                new RuntimeCardEffect(1, BattleEffectType.GainBlock, 5, 1, BattleStatusType.None, 0, BattleTargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 10, CreateAction(1, 7, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.PlayerHp, Is.EqualTo(48));
         }
 
-        private static void SetField(object target, string fieldName, object value)
+        private static BattleSceneFlowService CreateService(RuntimeRunDefinition runDefinition, params int[] values)
         {
-            FieldInfo field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-            field.SetValue(target, value);
+            return new BattleSceneFlowService(
+                new BattleSceneRules(),
+                new SequenceRandomProvider(values),
+                new FakeBattleMasterDataFacade(runDefinition));
+        }
+
+        private static RuntimeRunDefinition CreateRunDefinition(
+            int playerMaxHp = 50,
+            int startingGold = 120,
+            IReadOnlyList<RuntimeMapNode> nodes = null,
+            IReadOnlyList<RuntimeCard> starterDeck = null,
+            IReadOnlyList<RuntimeRewardEntry> rewardCards = null,
+            IReadOnlyList<RuntimeEncounterEntry> battleEncounters = null,
+            IReadOnlyList<RuntimeEncounterEntry> eliteEncounters = null,
+            IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null)
+        {
+            Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
+                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
+                {
+                    { InGameNodeType.Battle, battleEncounters ?? new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } },
+                    { InGameNodeType.EliteBattle, eliteEncounters ?? new[] { CreateEncounter(CreateEnemy(3002, "Guard", 24, 24, 30, CreateAction(1, 6, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } },
+                    { InGameNodeType.Boss, bossEncounters ?? new[] { CreateEncounter(CreateEnemy(3003, "Boss", 40, 40, 100, CreateAction(1, 8, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } }
+                };
+
+            return new RuntimeRunDefinition(
+                5501,
+                "run_test",
+                "CrimsonExile",
+                playerMaxHp,
+                startingGold,
+                3,
+                starterDeck ?? new[] { CreateCard(1001, "Strike", 1, 6) },
+                rewardCards ?? new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
+                nodes ?? new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+                },
+                encounters);
+        }
+
+        private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null)
+        {
+            return new RuntimeCard(
+                id,
+                $"card_{id}",
+                displayName,
+                string.Empty,
+                cost,
+                "Attack",
+                "Common",
+                "CrimsonExile",
+                effects ?? new[]
+                {
+                    new RuntimeCardEffect(1, BattleEffectType.DealDamage, damage, 1, BattleStatusType.None, 0, BattleTargetSide.Enemy)
+                });
+        }
+
+        private static RuntimeEnemy CreateEnemy(int id, string displayName, int hpMin, int hpMax, int goldReward, params RuntimeEnemyAction[] actions)
+        {
+            return new RuntimeEnemy(
+                id,
+                $"enemy_{id}",
+                displayName,
+                string.Empty,
+                "Normal",
+                hpMin,
+                hpMax,
+                goldReward,
+                actions);
+        }
+
+        private static RuntimeEnemyAction CreateAction(int order, int damage, BattleEnemyRepeatRule repeatRule)
+        {
+            return new RuntimeEnemyAction(
+                order,
+                "Attack",
+                damage,
+                1,
+                0,
+                BattleStatusType.None,
+                0,
+                BattleStatusType.None,
+                0,
+                repeatRule);
+        }
+
+        private static RuntimeMapNode CreateNode(int id, int floor, InGameNodeType nodeType, string displayName, IReadOnlyList<int> nextNodeIndices)
+        {
+            return new RuntimeMapNode(id, $"node_{id}", floor, nodeType, displayName, string.Empty, nextNodeIndices);
+        }
+
+        private static RuntimeEncounterEntry CreateEncounter(RuntimeEnemy enemy, int weight)
+        {
+            return new RuntimeEncounterEntry(enemy, weight);
+        }
+
+        private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
+        {
+            return new RuntimeRewardEntry(card, weight, minFloor, maxFloor);
+        }
+
+        /// <summary>
+        /// テスト用MasterDataFacade
+        /// </summary>
+        private sealed class FakeBattleMasterDataFacade : IBattleMasterDataFacade
+        {
+            private readonly RuntimeRunDefinition _runDefinition;
+
+            public FakeBattleMasterDataFacade(RuntimeRunDefinition runDefinition)
+            {
+                _runDefinition = runDefinition;
+            }
+
+            public RuntimeRunDefinition BuildRunDefinition(int runProfileId)
+            {
+                return _runDefinition;
+            }
         }
 
         /// <summary>

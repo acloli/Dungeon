@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
 using NUnit.Framework;
 using TFramework.UI;
 
@@ -40,15 +39,17 @@ namespace Dungeon.Tests.EditMode
         {
             return new BattleSceneSnapshot(
                 page,
-                Array.Empty<MapTemplate.Node>(),
-                Array.Empty<CardDefinition>(),
-                Array.Empty<CardDefinition>(),
+                Array.Empty<RuntimeMapNode>(),
+                Array.Empty<RuntimeCard>(),
+                Array.Empty<RuntimeCard>(),
                 -1,
                 40,
                 40,
                 3,
+                0,
                 100,
                 null,
+                0,
                 0,
                 false,
                 -1,
@@ -100,7 +101,7 @@ namespace Dungeon.Tests.EditMode
 
             public UniTask<TResult> ShowDialogAsync<TDialog, TResult>(object param = null, CancellationToken ct = default) where TDialog : UIDialogBase<TResult>
             {
-                // 型ごとの受け取り方だけを検証できれば十分なので、結果は常にdefaultを返す
+                // 型ごとの受け取り方だけを検証できれば十分なので、結果は常にdefaultを返す。
                 if (typeof(TDialog) == typeof(RewardDialog))
                 {
                     LastRewardDialogParam = param as UIDialogOpenParam;
