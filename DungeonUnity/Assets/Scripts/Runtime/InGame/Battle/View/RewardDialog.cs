@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
-using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
 using UnityEngine;
 
@@ -12,7 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 報酬ダイアログクラス
     /// </summary>
-    public sealed class RewardDialog : UIDialogBase<CardDefinition>, IRewardDialogView
+    public sealed class RewardDialog : UIDialogBase<RuntimeCard>, IRewardDialogView
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;
@@ -23,7 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 報酬ボタン構築
         /// </summary>
-        public void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked)
+        public void BuildRewardButtons(IReadOnlyList<RuntimeCard> cards, Action<RuntimeCard> onClicked)
         {
             ClearDynamicButtons();
 
@@ -36,11 +35,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             for (int i = 0; i < cards.Count; i++)
             {
-                CardDefinition card = cards[i];
+                RuntimeCard card = cards[i];
                 BattleOptionButtonView button = Instantiate(_rewardButtonTemplate, _rewardRoot);
                 button.gameObject.SetActive(true);
                 button.Configure(
-                    string.Format(BattleSceneConstants.RewardLabelFormat, card.DisplayName, card.Cost, card.Damage),
+                    string.Format(BattleSceneConstants.RewardLabelFormat, card.DisplayName, card.Cost, card.PreviewDamage),
                     delegate
                     {
                         onClicked?.Invoke(card);

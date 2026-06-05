@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
-using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,7 +75,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 手札ボタン構築
         /// </summary>
-        public void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked)
+        public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
         {
             ClearDynamicButtons();
 
@@ -90,11 +89,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < hand.Count; i++)
             {
                 int handIndex = i;
-                CardDefinition card = hand[handIndex];
+                RuntimeCard card = hand[handIndex];
                 BattleOptionButtonView button = Instantiate(_handCardButtonTemplate, _handCardRoot);
                 button.gameObject.SetActive(true);
                 button.Configure(
-                    string.Format(BattleSceneConstants.CardLabelFormat, card.DisplayName, card.Cost, card.Damage),
+                    string.Format(BattleSceneConstants.CardLabelFormat, card.DisplayName, card.Cost, card.PreviewDamage),
                     delegate
                     {
                         onClicked?.Invoke(handIndex);

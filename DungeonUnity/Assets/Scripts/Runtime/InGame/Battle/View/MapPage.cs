@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
-using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
 using UnityEngine;
 
@@ -53,7 +52,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// ノード選択ボタン構築
         /// </summary>
-        public void BuildMapButtons(IReadOnlyList<MapTemplate.Node> nodes, Action<int> onClicked)
+        public void BuildMapButtons(IReadOnlyList<RuntimeMapNode> nodes, Action<int> onClicked)
         {
             ClearDynamicButtons();
             if (_nodeRoot == null || _nodeButtonTemplate == null || nodes == null)
@@ -66,11 +65,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < nodes.Count; i++)
             {
                 int nodeIndex = i;
-                MapTemplate.Node node = nodes[nodeIndex];
+                RuntimeMapNode node = nodes[nodeIndex];
                 BattleOptionButtonView button = Instantiate(_nodeButtonTemplate, _nodeRoot);
                 button.gameObject.SetActive(true);
                 button.Configure(
-                    string.Format(BattleSceneConstants.MapNodeLabelFormat, nodeIndex + 1, node.Label),
+                    string.Format(BattleSceneConstants.MapNodeLabelFormat, node.Floor, node.DisplayName),
                     delegate
                     {
                         onClicked?.Invoke(nodeIndex);

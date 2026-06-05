@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
 
 namespace Dungeon.Runtime.InGame.Battle
@@ -70,7 +69,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 報酬ダイアログ表示
         /// </summary>
-        public async UniTask<CardDefinition> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -78,7 +77,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RewardDialog, CardDefinition>(
+            return await _uiService.ShowDialogAsync<RewardDialog, RuntimeCard>(
                 BattleDialogOpenParams.Cached(new BattleRewardDialogParam(snapshot)),
                 ct);
         }

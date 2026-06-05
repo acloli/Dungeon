@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.InGame.Battle.Model;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked);
         void UnwireButtons();
         void SetBattleStateText(string playerText, string enemyText, string hintText);
-        void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked);
+        void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked);
         void ClearDynamicButtons();
     }
 }

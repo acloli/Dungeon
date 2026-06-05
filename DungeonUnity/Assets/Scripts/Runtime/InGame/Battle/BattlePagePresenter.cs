@@ -42,12 +42,14 @@ namespace Dungeon.Runtime.InGame.Battle
                     BattleSceneConstants.PlayerStateFormat,
                     snapshot.PlayerHp,
                     snapshot.PlayerMaxHp,
+                    snapshot.PlayerBlock,
                     snapshot.PlayerEnergy,
                     snapshot.Gold),
                 string.Format(
                     BattleSceneConstants.EnemyStateFormat,
-                    snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : "Enemy",
-                    snapshot.EnemyHp),
+                    snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : BattleSceneConstants.UnknownEnemyName,
+                    snapshot.EnemyHp,
+                    snapshot.EnemyBlock),
                 snapshot.BattleHintMessage);
         }
 
