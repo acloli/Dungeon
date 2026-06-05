@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
@@ -11,8 +12,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> RewardChoices { get; } = new List<RuntimeCard>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
-        public Dictionary<BattleStatusType, int> PlayerStatuses { get; } = new Dictionary<BattleStatusType, int>();
-        public Dictionary<BattleStatusType, int> EnemyStatuses { get; } = new Dictionary<BattleStatusType, int>();
+        public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
+        public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
+        public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();
+        public Dictionary<BuffType, int> EnemyBuffs { get; } = new Dictionary<BuffType, int>();
 
         public BattleScenePage CurrentPage { get; set; } = BattleScenePage.Map;
         public int CurrentNodeIndex { get; set; } = BattleSceneConstants.DefaultNodeIndex;

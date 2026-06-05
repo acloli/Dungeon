@@ -254,6 +254,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             _state.PlayerBlock = 0;
             _state.EnemyStatuses.Clear();
+            _state.EnemyBuffs.Clear();
             _state.EnemyTurnCount = 0;
             _state.EnemyCycleIndex = 0;
             _state.CurrentEnemy = _rules.SelectEnemy(_runDefinition, nodeType, _randomProvider);

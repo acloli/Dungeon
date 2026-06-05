@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 using NUnit.Framework;
 
 namespace Dungeon.Tests.EditMode
@@ -35,7 +36,7 @@ namespace Dungeon.Tests.EditMode
                 starterDeck: new[] { strike, strike, strike },
                 rewardCards: new[] { CreateRewardEntry(CreateCard(2001, "Burst", 2, 12), 10, 1, 99) },
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
-                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) });
             BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
             service.Initialize(5501);
@@ -57,7 +58,7 @@ namespace Dungeon.Tests.EditMode
                 starterDeck: new[] { finisher },
                 rewardCards: new[] { CreateRewardEntry(reward, 10, 1, 99) },
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
-                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) });
             BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
             service.Initialize(5501);
@@ -80,7 +81,7 @@ namespace Dungeon.Tests.EditMode
                 starterDeck: new[] { CreateCard(1001, "Strike", 1, 1) },
                 rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
-                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 5, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 5, RepeatRule.RepeatAfterOpening)), 10) });
             BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
             service.Initialize(5501);
@@ -119,12 +120,12 @@ namespace Dungeon.Tests.EditMode
         {
             RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
             {
-                new RuntimeCardEffect(1, BattleEffectType.GainBlock, 5, 1, BattleStatusType.None, 0, BattleTargetSide.Self)
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
             });
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 starterDeck: new[] { guard },
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
-                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 10, CreateAction(1, 7, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) });
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 10, CreateAction(1, 7, RepeatRule.RepeatAfterOpening)), 10) });
             BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
 
             service.Initialize(5501);
@@ -158,15 +159,15 @@ namespace Dungeon.Tests.EditMode
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
                 {
-                    { InGameNodeType.Battle, battleEncounters ?? new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } },
-                    { InGameNodeType.EliteBattle, eliteEncounters ?? new[] { CreateEncounter(CreateEnemy(3002, "Guard", 24, 24, 30, CreateAction(1, 6, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } },
-                    { InGameNodeType.Boss, bossEncounters ?? new[] { CreateEncounter(CreateEnemy(3003, "Boss", 40, 40, 100, CreateAction(1, 8, BattleEnemyRepeatRule.RepeatAfterOpening)), 10) } }
+                    { InGameNodeType.Battle, battleEncounters ?? new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) } },
+                    { InGameNodeType.EliteBattle, eliteEncounters ?? new[] { CreateEncounter(CreateEnemy(3002, "Guard", 24, 24, 30, CreateAction(1, 6, RepeatRule.RepeatAfterOpening)), 10) } },
+                    { InGameNodeType.Boss, bossEncounters ?? new[] { CreateEncounter(CreateEnemy(3003, "Boss", 40, 40, 100, CreateAction(1, 8, RepeatRule.RepeatAfterOpening)), 10) } }
                 };
 
             return new RuntimeRunDefinition(
                 5501,
                 "run_test",
-                "CrimsonExile",
+                CharacterArchetype.CrimsonExile,
                 playerMaxHp,
                 startingGold,
                 3,
@@ -188,12 +189,12 @@ namespace Dungeon.Tests.EditMode
                 displayName,
                 string.Empty,
                 cost,
-                "Attack",
-                "Common",
-                "CrimsonExile",
+                CardType.Attack,
+                CardRarity.Common,
+                CharacterArchetype.CrimsonExile,
                 effects ?? new[]
                 {
-                    new RuntimeCardEffect(1, BattleEffectType.DealDamage, damage, 1, BattleStatusType.None, 0, BattleTargetSide.Enemy)
+                    new RuntimeCardEffect(1, EffectType.DealDamage, damage, 1, StatusType.None, 0, TargetSide.Enemy)
                 });
         }
 
@@ -204,24 +205,24 @@ namespace Dungeon.Tests.EditMode
                 $"enemy_{id}",
                 displayName,
                 string.Empty,
-                "Normal",
+                EnemyTier.Normal,
                 hpMin,
                 hpMax,
                 goldReward,
                 actions);
         }
 
-        private static RuntimeEnemyAction CreateAction(int order, int damage, BattleEnemyRepeatRule repeatRule)
+        private static RuntimeEnemyAction CreateAction(int order, int damage, RepeatRule repeatRule)
         {
             return new RuntimeEnemyAction(
                 order,
-                "Attack",
+                IntentType.Attack,
                 damage,
                 1,
                 0,
-                BattleStatusType.None,
+                StatusType.None,
                 0,
-                BattleStatusType.None,
+                BuffType.None,
                 0,
                 repeatRule);
         }

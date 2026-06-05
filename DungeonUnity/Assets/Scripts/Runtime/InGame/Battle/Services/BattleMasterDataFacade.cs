@@ -7,7 +7,6 @@ using Game.MasterData.Generated;
 using TFramework.Debug;
 using TFramework.Localization;
 using TFramework.MasterData;
-using UnityEngine;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -70,12 +69,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         .OrderBy(effect => effect.Order)
                         .Select(effect => new RuntimeCardEffect(
                             effect.Order,
-                            ParseEffectType(effect.EffectType),
+                            effect.EffectType,
                             effect.Value,
                             effect.HitCount,
-                            ParseStatusType(effect.StatusType),
+                            effect.StatusType,
                             effect.StatusValue,
-                            ParseTargetSide(effect.TargetSide)))
+                            effect.TargetSide))
                         .ToList());
 
             Dictionary<int, RuntimeCard> cards = new Dictionary<int, RuntimeCard>();
@@ -117,11 +116,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                             action.Damage,
                             action.HitCount,
                             action.Block,
-                            ParseStatusType(action.StatusType),
+                            action.StatusType,
                             action.StatusValue,
-                            ParseStatusType(action.BuffType),
+                            action.BuffType,
                             action.BuffValue,
-                            ParseRepeatRule(action.RepeatRule)))
+                            action.RepeatRule))
                         .ToList());
 
             Dictionary<int, RuntimeEnemy> enemies = new Dictionary<int, RuntimeEnemy>();
@@ -240,7 +239,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     master.Id,
                     master.NodeKey,
                     master.Floor,
-                    ParseNodeType(master.NodeType),
+                    ConvertNodeType(master.NodeType),
                     ResolveLocalizedText(master.LocalizationKey, master.Name),
                     master.LocalizationKey,
                     nextNodeIndices));
@@ -314,77 +313,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// カード効果種別変換
-        /// </summary>
-        private static BattleEffectType ParseEffectType(string rawValue)
-        {
-            return rawValue switch
-            {
-                "DealDamage" => BattleEffectType.DealDamage,
-                "GainBlock" => BattleEffectType.GainBlock,
-                "ApplyStatus" => BattleEffectType.ApplyStatus,
-                "DrawCards" => BattleEffectType.DrawCards,
-                _ => BattleEffectType.Unknown
-            };
-        }
-
-        /// <summary>
-        /// 対象側種別変換
-        /// </summary>
-        private static BattleTargetSide ParseTargetSide(string rawValue)
-        {
-            return rawValue switch
-            {
-                "Self" => BattleTargetSide.Self,
-                "Enemy" => BattleTargetSide.Enemy,
-                "AllEnemies" => BattleTargetSide.AllEnemies,
-                _ => BattleTargetSide.None
-            };
-        }
-
-        /// <summary>
-        /// 状態種別変換
-        /// </summary>
-        private static BattleStatusType ParseStatusType(string rawValue)
-        {
-            return rawValue switch
-            {
-                "Weak" => BattleStatusType.Weak,
-                "Vulnerable" => BattleStatusType.Vulnerable,
-                "Slimed" => BattleStatusType.Slimed,
-                "Strength" => BattleStatusType.Strength,
-                "Ritual" => BattleStatusType.Ritual,
-                "Enrage" => BattleStatusType.Enrage,
-                _ => BattleStatusType.None
-            };
-        }
-
-        /// <summary>
-        /// 反復規則変換
-        /// </summary>
-        private static BattleEnemyRepeatRule ParseRepeatRule(string rawValue)
-        {
-            return rawValue switch
-            {
-                "OpeningOnly" => BattleEnemyRepeatRule.OpeningOnly,
-                "RepeatAfterOpening" => BattleEnemyRepeatRule.RepeatAfterOpening,
-                "AfterOpeningRandom" => BattleEnemyRepeatRule.AfterOpeningRandom,
-                "Random" => BattleEnemyRepeatRule.Random,
-                "Cycle" => BattleEnemyRepeatRule.Cycle,
-                _ => BattleEnemyRepeatRule.None
-            };
-        }
-
-        /// <summary>
         /// ノード種別変換
         /// </summary>
-        private static InGameNodeType ParseNodeType(string rawValue)
+        private static InGameNodeType ConvertNodeType(NodeType nodeType)
         {
-            return rawValue switch
+            return nodeType switch
             {
-                "EliteBattle" => InGameNodeType.EliteBattle,
-                "RestShop" => InGameNodeType.RestShop,
-                "Boss" => InGameNodeType.Boss,
+                NodeType.EliteBattle => InGameNodeType.EliteBattle,
+                NodeType.RestShop => InGameNodeType.RestShop,
+                NodeType.Boss => InGameNodeType.Boss,
                 _ => InGameNodeType.Battle
             };
         }

@@ -1,59 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
-    /// <summary>
-    /// Battle用カード効果種別
-    /// </summary>
-    public enum BattleEffectType
-    {
-        Unknown = 0,
-        DealDamage = 1,
-        GainBlock = 2,
-        ApplyStatus = 3,
-        DrawCards = 4
-    }
-
-    /// <summary>
-    /// Battle用対象側種別
-    /// </summary>
-    public enum BattleTargetSide
-    {
-        None = 0,
-        Self = 1,
-        Enemy = 2,
-        AllEnemies = 3
-    }
-
-    /// <summary>
-    /// Battle用状態種別
-    /// </summary>
-    public enum BattleStatusType
-    {
-        None = 0,
-        Weak = 1,
-        Vulnerable = 2,
-        Slimed = 3,
-        Strength = 4,
-        Ritual = 5,
-        Enrage = 6
-    }
-
-    /// <summary>
-    /// 敵行動の反復規則
-    /// </summary>
-    public enum BattleEnemyRepeatRule
-    {
-        None = 0,
-        OpeningOnly = 1,
-        RepeatAfterOpening = 2,
-        AfterOpeningRandom = 3,
-        Random = 4,
-        Cycle = 5
-    }
-
     /// <summary>
     /// ランタイム用カード効果定義
     /// </summary>
@@ -61,12 +12,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     {
         public RuntimeCardEffect(
             int order,
-            BattleEffectType effectType,
+            EffectType effectType,
             int value,
             int hitCount,
-            BattleStatusType statusType,
+            StatusType statusType,
             int statusValue,
-            BattleTargetSide targetSide)
+            TargetSide targetSide)
         {
             Order = order;
             EffectType = effectType;
@@ -78,12 +29,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         public int Order { get; }
-        public BattleEffectType EffectType { get; }
+        public EffectType EffectType { get; }
         public int Value { get; }
         public int HitCount { get; }
-        public BattleStatusType StatusType { get; }
+        public StatusType StatusType { get; }
         public int StatusValue { get; }
-        public BattleTargetSide TargetSide { get; }
+        public TargetSide TargetSide { get; }
     }
 
     /// <summary>
@@ -97,9 +48,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string displayName,
             string localizationKey,
             int cost,
-            string cardType,
-            string rarity,
-            string characterArchetype,
+            CardType cardType,
+            CardRarity rarity,
+            CharacterArchetype characterArchetype,
             IReadOnlyList<RuntimeCardEffect> effects)
         {
             Id = id;
@@ -118,9 +69,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string DisplayName { get; }
         public string LocalizationKey { get; }
         public int Cost { get; }
-        public string CardType { get; }
-        public string Rarity { get; }
-        public string CharacterArchetype { get; }
+        public CardType CardType { get; }
+        public CardRarity Rarity { get; }
+        public CharacterArchetype CharacterArchetype { get; }
         public IReadOnlyList<RuntimeCardEffect> Effects { get; }
 
         /// <summary>
@@ -134,7 +85,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 for (int i = 0; i < Effects.Count; i++)
                 {
                     RuntimeCardEffect effect = Effects[i];
-                    if (effect.EffectType != BattleEffectType.DealDamage)
+                    if (effect.EffectType != EffectType.DealDamage)
                     {
                         continue;
                     }
@@ -154,15 +105,15 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     {
         public RuntimeEnemyAction(
             int order,
-            string intentType,
+            IntentType intentType,
             int damage,
             int hitCount,
             int block,
-            BattleStatusType statusType,
+            StatusType statusType,
             int statusValue,
-            BattleStatusType buffType,
+            BuffType buffType,
             int buffValue,
-            BattleEnemyRepeatRule repeatRule)
+            RepeatRule repeatRule)
         {
             Order = order;
             IntentType = intentType;
@@ -177,15 +128,15 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         public int Order { get; }
-        public string IntentType { get; }
+        public IntentType IntentType { get; }
         public int Damage { get; }
         public int HitCount { get; }
         public int Block { get; }
-        public BattleStatusType StatusType { get; }
+        public StatusType StatusType { get; }
         public int StatusValue { get; }
-        public BattleStatusType BuffType { get; }
+        public BuffType BuffType { get; }
         public int BuffValue { get; }
-        public BattleEnemyRepeatRule RepeatRule { get; }
+        public RepeatRule RepeatRule { get; }
     }
 
     /// <summary>
@@ -198,7 +149,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string key,
             string displayName,
             string localizationKey,
-            string enemyTier,
+            EnemyTier enemyTier,
             int hpMin,
             int hpMax,
             int goldReward,
@@ -219,7 +170,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string Key { get; }
         public string DisplayName { get; }
         public string LocalizationKey { get; }
-        public string EnemyTier { get; }
+        public EnemyTier EnemyTier { get; }
         public int HpMin { get; }
         public int HpMax { get; }
         public int GoldReward { get; }
@@ -300,7 +251,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimeRunDefinition(
             int runProfileId,
             string key,
-            string characterArchetype,
+            CharacterArchetype characterArchetype,
             int playerMaxHp,
             int startingGold,
             int cardRewardChoiceCount,
@@ -324,7 +275,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         public int RunProfileId { get; }
         public string Key { get; }
-        public string CharacterArchetype { get; }
+        public CharacterArchetype CharacterArchetype { get; }
         public int PlayerMaxHp { get; }
         public int StartingGold { get; }
         public int CardRewardChoiceCount { get; }

@@ -27,7 +27,7 @@ namespace Dungeon.Tests.EditMode
                 {
                     Id = 5501,
                     Key = "run_test",
-                    CharacterArchetype = "CrimsonExile",
+                    CharacterArchetype = CharacterArchetype.CrimsonExile,
                     PlayerMaxHp = 80,
                     StartingGold = 99,
                     StarterDeckGroupId = 6001,
@@ -41,13 +41,13 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", Cost = 1, CardType = "Attack", Rarity = "Basic", CharacterArchetype = "CrimsonExile", CanAppearInReward = false },
-                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", Cost = 2, CardType = "Skill", Rarity = "Common", CharacterArchetype = "CrimsonExile", CanAppearInReward = true }
+                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", Cost = 1, CardType = CardType.Attack, Rarity = CardRarity.Basic, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = false },
+                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", Cost = 2, CardType = CardType.Skill, Rarity = CardRarity.Common, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = true }
             });
             masterDataService.SetAll(new[]
             {
-                new CardEffectMaster { Id = 2001, CardId = 1001, Order = 1, EffectType = "DealDamage", Value = 6, HitCount = 1, StatusType = "None", StatusValue = 0, TargetSide = "Enemy" },
-                new CardEffectMaster { Id = 2002, CardId = 1002, Order = 1, EffectType = "GainBlock", Value = 5, HitCount = 1, StatusType = "None", StatusValue = 0, TargetSide = "Self" }
+                new CardEffectMaster { Id = 2001, CardId = 1001, Order = 1, EffectType = EffectType.DealDamage, Value = 6, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Enemy },
+                new CardEffectMaster { Id = 2002, CardId = 1002, Order = 1, EffectType = EffectType.GainBlock, Value = 5, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Self }
             });
             masterDataService.SetAll(new[]
             {
@@ -59,8 +59,8 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new MapNodeMaster { Id = 5301, MapTemplateId = 6301, NodeKey = "node_01", Floor = 1, NodeType = "Battle", Name = "Node1", LocalizationKey = "map.node.1" },
-                new MapNodeMaster { Id = 5302, MapTemplateId = 6301, NodeKey = "node_02", Floor = 2, NodeType = "Boss", Name = "Node2", LocalizationKey = "map.node.2" }
+                new MapNodeMaster { Id = 5301, MapTemplateId = 6301, NodeKey = "node_01", Floor = 1, NodeType = NodeType.Battle, Name = "Node1", LocalizationKey = "map.node.1" },
+                new MapNodeMaster { Id = 5302, MapTemplateId = 6301, NodeKey = "node_02", Floor = 2, NodeType = NodeType.Boss, Name = "Node2", LocalizationKey = "map.node.2" }
             });
             masterDataService.SetAll(new[]
             {
@@ -68,18 +68,18 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new EnemyMaster { Id = 3001, Key = "enemy_a", Name = "EnemyA", LocalizationKey = "enemy.a", EnemyTier = "Normal", HpMin = 10, HpMax = 12, GoldReward = 14, ActionPatternId = 4001 },
-                new EnemyMaster { Id = 3002, Key = "enemy_b", Name = "EnemyB", LocalizationKey = "enemy.b", EnemyTier = "Boss", HpMin = 30, HpMax = 30, GoldReward = 100, ActionPatternId = 4002 }
+                new EnemyMaster { Id = 3001, Key = "enemy_a", Name = "EnemyA", LocalizationKey = "enemy.a", EnemyTier = EnemyTier.Normal, HpMin = 10, HpMax = 12, GoldReward = 14, ActionPatternId = 4001 },
+                new EnemyMaster { Id = 3002, Key = "enemy_b", Name = "EnemyB", LocalizationKey = "enemy.b", EnemyTier = EnemyTier.Boss, HpMin = 30, HpMax = 30, GoldReward = 100, ActionPatternId = 4002 }
             });
             masterDataService.SetAll(new[]
             {
-                new EnemyActionMaster { Id = 4101, EnemyId = 3001, Order = 1, IntentType = "Attack", Damage = 4, HitCount = 1, Block = 0, StatusType = "None", StatusValue = 0, BuffType = "None", BuffValue = 0, RepeatRule = "Random" },
-                new EnemyActionMaster { Id = 4201, EnemyId = 3002, Order = 1, IntentType = "Attack", Damage = 12, HitCount = 1, Block = 0, StatusType = "None", StatusValue = 0, BuffType = "None", BuffValue = 0, RepeatRule = "Cycle" }
+                new EnemyActionMaster { Id = 4101, EnemyId = 3001, Order = 1, IntentType = IntentType.Attack, Damage = 4, HitCount = 1, Block = 0, StatusType = StatusType.None, StatusValue = 0, BuffType = BuffType.None, BuffValue = 0, RepeatRule = RepeatRule.Random },
+                new EnemyActionMaster { Id = 4201, EnemyId = 3002, Order = 1, IntentType = IntentType.Attack, Damage = 12, HitCount = 1, Block = 0, StatusType = StatusType.None, StatusValue = 0, BuffType = BuffType.None, BuffValue = 0, RepeatRule = RepeatRule.Cycle }
             });
             masterDataService.SetAll(new[]
             {
-                new EncounterGroupMaster { Id = 5201, EncounterGroupId = 6201, EnemyId = 3001, Weight = 10, NodeType = "Battle" },
-                new EncounterGroupMaster { Id = 5202, EncounterGroupId = 6203, EnemyId = 3002, Weight = 10, NodeType = "Boss" }
+                new EncounterGroupMaster { Id = 5201, EncounterGroupId = 6201, EnemyId = 3001, Weight = 10, NodeType = NodeType.Battle },
+                new EncounterGroupMaster { Id = 5202, EncounterGroupId = 6203, EnemyId = 3002, Weight = 10, NodeType = NodeType.Boss }
             });
 
             BattleMasterDataFacade facade = new BattleMasterDataFacade(masterDataService);

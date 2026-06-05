@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 using UnityEngine;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -40,6 +41,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.Nodes.Clear();
             state.PlayerStatuses.Clear();
             state.EnemyStatuses.Clear();
+            state.PlayerBuffs.Clear();
+            state.EnemyBuffs.Clear();
 
             if (runDefinition != null)
             {
@@ -199,17 +202,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 RuntimeCardEffect effect = effects[i];
                 switch (effect.EffectType)
                 {
-                    case BattleEffectType.DealDamage:
+                    case EffectType.DealDamage:
                         totalDamage += ResolveCardDamage(state, effect);
                         break;
-                    case BattleEffectType.GainBlock:
+                    case EffectType.GainBlock:
                         state.PlayerBlock += effect.Value;
                         totalBlock += effect.Value;
                         break;
-                    case BattleEffectType.ApplyStatus:
+                    case EffectType.ApplyStatus:
                         ApplyCardStatus(state, effect);
                         break;
-                    case BattleEffectType.DrawCards:
+                    case EffectType.DrawCards:
                         DrawCards(state, randomProvider, effect.Value);
                         totalDraw += effect.Value;
                         break;
@@ -247,7 +250,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             ApplyStatus(state.PlayerStatuses, action.StatusType, action.StatusValue);
-            ApplyStatus(state.EnemyStatuses, action.BuffType, action.BuffValue);
+            ApplyBuff(state.EnemyBuffs, action.BuffType, action.BuffValue);
 
             state.EnemyTurnCount++;
             TickExpiringStatuses(state.EnemyStatuses);
@@ -299,7 +302,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             int totalDamage = 0;
             for (int i = 0; i < hitCount; i++)
             {
-                int damage = ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses);
+                int damage = ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses, state.PlayerBuffs);
                 damage = ApplyIncomingModifiers(damage, state.EnemyStatuses);
                 totalDamage += ApplyDamageToEnemy(state, damage);
             }
@@ -312,13 +315,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private static void ApplyCardStatus(BattleSceneState state, RuntimeCardEffect effect)
         {
-            if (effect.TargetSide == BattleTargetSide.Self)
+            if (effect.TargetSide == TargetSide.Self)
             {
                 ApplyStatus(state.PlayerStatuses, effect.StatusType, effect.StatusValue);
                 return;
             }
 
-            if (effect.TargetSide == BattleTargetSide.Enemy || effect.TargetSide == BattleTargetSide.AllEnemies)
+            if (effect.TargetSide == TargetSide.Enemy || effect.TargetSide == TargetSide.AllEnemies)
             {
                 ApplyStatus(state.EnemyStatuses, effect.StatusType, effect.StatusValue);
             }
@@ -333,7 +336,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             int totalDamage = 0;
             for (int i = 0; i < hitCount; i++)
             {
-                int damage = ApplyOutgoingModifiers(action.Damage, state.EnemyStatuses);
+                int damage = ApplyOutgoingModifiers(action.Damage, state.EnemyStatuses, state.EnemyBuffs);
                 damage = ApplyIncomingModifiers(damage, state.PlayerStatuses);
                 totalDamage += ApplyDamageToPlayer(state, damage);
             }
@@ -366,25 +369,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 与ダメージ側補正
         /// </summary>
-        private static int ApplyOutgoingModifiers(int baseDamage, IReadOnlyDictionary<BattleStatusType, int> statuses)
+        private static int ApplyOutgoingModifiers(
+            int baseDamage,
+            IReadOnlyDictionary<StatusType, int> statuses,
+            IReadOnlyDictionary<BuffType, int> buffs)
         {
             int damage = Mathf.Max(0, baseDamage);
-            if (TryGetStatusValue(statuses, BattleStatusType.Weak, out int weakValue) && weakValue > 0)
+            if (TryGetStatusValue(statuses, StatusType.Weak, out int weakValue) && weakValue > 0)
             {
                 damage = Mathf.FloorToInt(damage * 0.75f);
             }
 
-            damage += GetBuffValue(statuses);
+            damage += GetBuffValue(buffs);
             return Mathf.Max(0, damage);
         }
 
         /// <summary>
         /// 被ダメージ側補正
         /// </summary>
-        private static int ApplyIncomingModifiers(int damage, IReadOnlyDictionary<BattleStatusType, int> statuses)
+        private static int ApplyIncomingModifiers(int damage, IReadOnlyDictionary<StatusType, int> statuses)
         {
             int result = Mathf.Max(0, damage);
-            if (TryGetStatusValue(statuses, BattleStatusType.Vulnerable, out int vulnerableValue) && vulnerableValue > 0)
+            if (TryGetStatusValue(statuses, StatusType.Vulnerable, out int vulnerableValue) && vulnerableValue > 0)
             {
                 result = Mathf.CeilToInt(result * 1.5f);
             }
@@ -395,9 +401,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// ステータス付与
         /// </summary>
-        private static void ApplyStatus(IDictionary<BattleStatusType, int> statuses, BattleStatusType statusType, int value)
+        private static void ApplyStatus(IDictionary<StatusType, int> statuses, StatusType statusType, int value)
         {
-            if (statuses == null || statusType == BattleStatusType.None || value <= 0)
+            if (statuses == null || statusType == StatusType.None || value <= 0)
             {
                 return;
             }
@@ -412,19 +418,38 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// バフ付与
+        /// </summary>
+        private static void ApplyBuff(IDictionary<BuffType, int> buffs, BuffType buffType, int value)
+        {
+            if (buffs == null || buffType == BuffType.None || value <= 0)
+            {
+                return;
+            }
+
+            if (buffs.TryGetValue(buffType, out int currentValue))
+            {
+                buffs[buffType] = currentValue + value;
+                return;
+            }
+
+            buffs[buffType] = value;
+        }
+
+        /// <summary>
         /// ターンで自然減衰する状態を更新する
         /// </summary>
-        private static void TickExpiringStatuses(IDictionary<BattleStatusType, int> statuses)
+        private static void TickExpiringStatuses(IDictionary<StatusType, int> statuses)
         {
             if (statuses == null || statuses.Count == 0)
             {
                 return;
             }
 
-            List<BattleStatusType> keys = new List<BattleStatusType>(statuses.Keys);
+            List<StatusType> keys = new List<StatusType>(statuses.Keys);
             for (int i = 0; i < keys.Count; i++)
             {
-                BattleStatusType statusType = keys[i];
+                StatusType statusType = keys[i];
                 if (!ShouldExpire(statusType))
                 {
                     continue;
@@ -444,28 +469,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 自然減衰対象判定
         /// </summary>
-        private static bool ShouldExpire(BattleStatusType statusType)
+        private static bool ShouldExpire(StatusType statusType)
         {
-            return statusType == BattleStatusType.Weak ||
-                   statusType == BattleStatusType.Vulnerable ||
-                   statusType == BattleStatusType.Slimed;
+            return statusType == StatusType.Weak ||
+                   statusType == StatusType.Vulnerable ||
+                   statusType == StatusType.Slimed;
         }
 
         /// <summary>
         /// バフ値合算
         /// </summary>
-        private static int GetBuffValue(IReadOnlyDictionary<BattleStatusType, int> statuses)
+        private static int GetBuffValue(IReadOnlyDictionary<BuffType, int> buffs)
         {
             int total = 0;
-            if (TryGetStatusValue(statuses, BattleStatusType.Strength, out int strengthValue))
+            if (TryGetBuffValue(buffs, BuffType.Strength, out int strengthValue))
             {
                 total += strengthValue;
             }
-            if (TryGetStatusValue(statuses, BattleStatusType.Ritual, out int ritualValue))
+            if (TryGetBuffValue(buffs, BuffType.Ritual, out int ritualValue))
             {
                 total += ritualValue;
             }
-            if (TryGetStatusValue(statuses, BattleStatusType.Enrage, out int enrageValue))
+            if (TryGetBuffValue(buffs, BuffType.Enrage, out int enrageValue))
             {
                 total += enrageValue;
             }
@@ -476,10 +501,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// ステータス値取得
         /// </summary>
-        private static bool TryGetStatusValue(IReadOnlyDictionary<BattleStatusType, int> statuses, BattleStatusType statusType, out int value)
+        private static bool TryGetStatusValue(IReadOnlyDictionary<StatusType, int> statuses, StatusType statusType, out int value)
         {
             value = 0;
             return statuses != null && statuses.TryGetValue(statusType, out value);
+        }
+
+        /// <summary>
+        /// バフ値取得
+        /// </summary>
+        private static bool TryGetBuffValue(IReadOnlyDictionary<BuffType, int> buffs, BuffType buffType, out int value)
+        {
+            value = 0;
+            return buffs != null && buffs.TryGetValue(buffType, out value);
         }
 
         /// <summary>
@@ -515,33 +549,33 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            List<RuntimeEnemyAction> openingActions = FilterActions(actions, BattleEnemyRepeatRule.OpeningOnly);
+            List<RuntimeEnemyAction> openingActions = FilterActions(actions, RepeatRule.OpeningOnly);
             if (state.EnemyTurnCount == 0 && openingActions.Count > 0)
             {
                 return openingActions[0];
             }
 
-            List<RuntimeEnemyAction> repeatActions = FilterActions(actions, BattleEnemyRepeatRule.RepeatAfterOpening);
+            List<RuntimeEnemyAction> repeatActions = FilterActions(actions, RepeatRule.RepeatAfterOpening);
             if (state.EnemyTurnCount > 0 && repeatActions.Count > 0)
             {
                 return repeatActions[0];
             }
 
-            List<RuntimeEnemyAction> afterOpeningRandomActions = FilterActions(actions, BattleEnemyRepeatRule.AfterOpeningRandom);
+            List<RuntimeEnemyAction> afterOpeningRandomActions = FilterActions(actions, RepeatRule.AfterOpeningRandom);
             if (state.EnemyTurnCount > 0 && afterOpeningRandomActions.Count > 0)
             {
                 int index = randomProvider.Range(0, afterOpeningRandomActions.Count);
                 return afterOpeningRandomActions[index];
             }
 
-            List<RuntimeEnemyAction> randomActions = FilterActions(actions, BattleEnemyRepeatRule.Random);
+            List<RuntimeEnemyAction> randomActions = FilterActions(actions, RepeatRule.Random);
             if (randomActions.Count > 0)
             {
                 int index = randomProvider.Range(0, randomActions.Count);
                 return randomActions[index];
             }
 
-            List<RuntimeEnemyAction> cycleActions = FilterActions(actions, BattleEnemyRepeatRule.Cycle);
+            List<RuntimeEnemyAction> cycleActions = FilterActions(actions, RepeatRule.Cycle);
             if (cycleActions.Count > 0)
             {
                 RuntimeEnemyAction selected = cycleActions[state.EnemyCycleIndex % cycleActions.Count];
@@ -555,7 +589,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 反復規則ごとに行動を抽出する
         /// </summary>
-        private static List<RuntimeEnemyAction> FilterActions(IReadOnlyList<RuntimeEnemyAction> actions, BattleEnemyRepeatRule repeatRule)
+        private static List<RuntimeEnemyAction> FilterActions(IReadOnlyList<RuntimeEnemyAction> actions, RepeatRule repeatRule)
         {
             List<RuntimeEnemyAction> filtered = new List<RuntimeEnemyAction>();
             for (int i = 0; i < actions.Count; i++)
@@ -689,22 +723,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             int damage = nodeType == InGameNodeType.EliteBattle ? 8 : 4;
             RuntimeEnemyAction action = new RuntimeEnemyAction(
                 1,
-                "Attack",
+                IntentType.Attack,
                 damage,
                 1,
                 0,
-                BattleStatusType.None,
+                StatusType.None,
                 0,
-                BattleStatusType.None,
+                BuffType.None,
                 0,
-                BattleEnemyRepeatRule.RepeatAfterOpening);
+                RepeatRule.RepeatAfterOpening);
 
             return new RuntimeEnemy(
                 0,
                 "fallback_enemy",
                 BattleSceneConstants.UnknownEnemyName,
                 string.Empty,
-                nodeType.ToString(),
+                nodeType == InGameNodeType.Boss ? EnemyTier.Boss : nodeType == InGameNodeType.EliteBattle ? EnemyTier.Elite : EnemyTier.Normal,
                 baseHp,
                 baseHp,
                 20,
