@@ -14,6 +14,7 @@ namespace Dungeon.Runtime.InGame.Battle
         protected override void Configure(IContainerBuilder builder)
         {
             builder.Register<Services.BattleRandomProvider>(Lifetime.Singleton).As<Services.IBattleRandomProvider>();
+            builder.Register<Services.BattleMasterDataFacade>(Lifetime.Singleton).As<Services.IBattleMasterDataFacade>();
             builder.Register<Services.BattleSceneRules>(Lifetime.Singleton).As<Services.IBattleSceneRules>();
             builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService>();
             builder.Register<BattlePagePresenter>(Lifetime.Scoped);
