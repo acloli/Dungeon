@@ -27,7 +27,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// キャラクター系統
         /// </summary>
-        public string CharacterArchetype;
+        public CharacterArchetype CharacterArchetype;
 
         /// <summary>
         /// プレイヤー最大HP

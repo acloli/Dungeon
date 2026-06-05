@@ -32,7 +32,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 効果種別
         /// </summary>
-        public string EffectType;
+        public EffectType EffectType;
 
         /// <summary>
         /// 主値
@@ -47,7 +47,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 状態種別
         /// </summary>
-        public string StatusType;
+        public StatusType StatusType;
 
         /// <summary>
         /// 状態値
@@ -57,7 +57,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 対象側
         /// </summary>
-        public string TargetSide;
+        public TargetSide TargetSide;
 
         public int GetKey() => Id;
     }

@@ -37,7 +37,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// ノード種別
         /// </summary>
-        public string NodeType;
+        public NodeType NodeType;
 
         public int GetKey() => Id;
     }

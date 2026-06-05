@@ -37,7 +37,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 敵階層
         /// </summary>
-        public string EnemyTier;
+        public EnemyTier EnemyTier;
 
         /// <summary>
         /// HP最小

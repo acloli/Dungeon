@@ -32,7 +32,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 意思表示
         /// </summary>
-        public string IntentType;
+        public IntentType IntentType;
 
         /// <summary>
         /// ダメージ
@@ -52,7 +52,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 状態種別
         /// </summary>
-        public string StatusType;
+        public StatusType StatusType;
 
         /// <summary>
         /// 状態値
@@ -62,7 +62,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 強化種別
         /// </summary>
-        public string BuffType;
+        public BuffType BuffType;
 
         /// <summary>
         /// 強化値
@@ -72,7 +72,7 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 反復規則
         /// </summary>
-        public string RepeatRule;
+        public RepeatRule RepeatRule;
 
         public int GetKey() => Id;
     }

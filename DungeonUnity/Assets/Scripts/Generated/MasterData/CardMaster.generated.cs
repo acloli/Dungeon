@@ -37,12 +37,12 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// カード種別
         /// </summary>
-        public string CardType;
+        public CardType CardType;
 
         /// <summary>
         /// レアリティ
         /// </summary>
-        public string Rarity;
+        public CardRarity Rarity;
 
         /// <summary>
         /// コスト
@@ -52,12 +52,12 @@ namespace Game.MasterData.Generated
         /// <summary>
         /// 対象種別
         /// </summary>
-        public string TargetType;
+        public TargetType TargetType;
 
         /// <summary>
         /// キャラクター系統
         /// </summary>
-        public string CharacterArchetype;
+        public CharacterArchetype CharacterArchetype;
 
         /// <summary>
         /// 報酬出現可否
