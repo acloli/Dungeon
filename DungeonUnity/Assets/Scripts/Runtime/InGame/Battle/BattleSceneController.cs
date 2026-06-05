@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
@@ -5,7 +6,6 @@ using Dungeon.Runtime.InGame.Battle.View;
 using TFramework.Debug;
 using TFramework.Scene;
 using UnityEngine;
-using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 using VContainer;
 
 namespace Dungeon.Runtime.InGame.Battle
@@ -35,7 +35,11 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         protected override async UniTask OnInitializeInternalAsync(ISceneBridgeData bridgeData, CancellationToken ct)
         {
-            ValidateConfiguration();
+            int runProfileId = BattleRunProfileResolver.ResolveRunProfileId(bridgeData, _runProfileId);
+            if (!ValidateConfiguration(runProfileId))
+            {
+                return;
+            }
 
             if (_view == null)
             {
@@ -43,7 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            await _presenter.InitializeAsync(_view, _runProfileId, OnResultBackClicked, ct);
+            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct);
         }
 
         /// <summary>
@@ -65,12 +69,15 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 設定参照検証
         /// </summary>
-        private void ValidateConfiguration()
+        private bool ValidateConfiguration(int runProfileId)
         {
-            if (_runProfileId <= 0)
+            if (runProfileId <= 0)
             {
                 TLogger.Error(BattleSceneConstants.MissingRunProfile, "Battle");
+                return false;
             }
+
+            return true;
         }
 
         /// <summary>
@@ -78,7 +85,25 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         private void OnResultBackClicked()
         {
-            UnitySceneManager.LoadScene(_mainSceneName);
+            LoadMainSceneAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        /// <summary>
+        /// MainSceneへの遷移処理
+        /// </summary>
+        private async UniTaskVoid LoadMainSceneAsync(CancellationToken ct)
+        {
+            try
+            {
+                await SceneService.LoadSceneAsync(_mainSceneName, null, true, ct);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                TLogger.Error($"MainScene load failed: {ex.Message}", "Battle");
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
   "references": [
     "TFramework.Core",
     "TFramework.Scene",
+    "TFramework.Debug",
     "UniTask",
     "VContainer"
   ],

@@ -1,9 +1,10 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using TFramework.Debug;
 using TFramework.Scene;
 using UnityEngine;
 using UnityEngine.UI;
-using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Dungeon.Runtime.OutGame.Title
 {
@@ -44,7 +45,25 @@ namespace Dungeon.Runtime.OutGame.Title
 
         private void OnStartClicked()
         {
-            UnitySceneManager.LoadScene(_mainSceneName);
+            LoadMainSceneAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        /// <summary>
+        /// MainSceneへの遷移処理
+        /// </summary>
+        private async UniTaskVoid LoadMainSceneAsync(CancellationToken ct)
+        {
+            try
+            {
+                await SceneService.LoadSceneAsync(_mainSceneName, null, true, ct);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                TLogger.Error($"MainScene load failed: {ex.Message}", "Title");
+            }
         }
     }
 }
