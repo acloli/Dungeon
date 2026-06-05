@@ -72,6 +72,17 @@ namespace Dungeon.Tests.EditMode
             StringAssert.DoesNotContain("m_Address: ResultDialogView", yaml);
         }
 
+        [Test]
+        public void AddressableGroup_UsesSceneNamesAsKeys()
+        {
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string yaml = File.ReadAllText(Path.Combine(projectRoot, AddressGroupPath));
+
+            StringAssert.Contains("m_Address: TitleScene", yaml);
+            StringAssert.Contains("m_Address: MainScene", yaml);
+            StringAssert.Contains("m_Address: BattleScene", yaml);
+        }
+
         private static void AssertPrefabContainsComponent<T>(string prefabName) where T : Component
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
