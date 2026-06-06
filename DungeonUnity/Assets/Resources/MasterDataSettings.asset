@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: TFramework.MasterData::TFramework.MasterData.MasterDataSettings
   _codeOutputPath: Scripts/Generated/MasterData
   _assetOutputPath: Data/MasterData
+  _generateAssemblyDefinition: 1
+  _assemblyDefinitionName: Game.MasterData.Generated
   _autoLoadOnStartup: 1
   _containers:
   - {fileID: 11400000, guid: ff767d0e1a1564900a7ee6a45f3bef32, type: 2}
