@@ -141,10 +141,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 状態表示行追加
         /// </summary>
-        private static void AppendStatusLine(
-            StringBuilder builder,
-            string label,
-            IReadOnlyList<BattleStatusViewModel> statuses)
+        private static void AppendStatusLine(StringBuilder builder, string label, IReadOnlyList<BattleStatusViewModel> statuses)
         {
             if (statuses == null || statuses.Count == 0)
             {

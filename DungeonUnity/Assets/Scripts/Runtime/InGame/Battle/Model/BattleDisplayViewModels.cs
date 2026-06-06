@@ -7,15 +7,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleIntentViewModel
     {
-        public BattleIntentViewModel(
-            IntentType intentType,
-            int damage,
-            int hitCount,
-            int block,
-            StatusType statusType,
-            int statusValue,
-            BuffType buffType,
-            int buffValue)
+        public BattleIntentViewModel(IntentType intentType, int damage, int hitCount, int block, StatusType statusType, int statusValue, BuffType buffType, int buffValue)
         {
             IntentType = intentType;
             Damage = damage;
