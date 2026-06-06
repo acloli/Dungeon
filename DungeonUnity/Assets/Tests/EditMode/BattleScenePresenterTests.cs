@@ -59,15 +59,15 @@ namespace Dungeon.Tests.EditMode
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
-            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Status: Vulnerable:2"));
-            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Buff: Strength:1"));
-            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Intent: AttackDefend"));
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Status: 脆弱:2"));
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Buff: 筋力:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Intent: 攻防"));
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("D7x2"));
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("B5"));
-            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status Weak:2"));
-            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff Ritual:3"));
-            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status: Weak:1"));
-            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: Ritual:3"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status 脱力:2"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff 儀式:3"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status: 脱力:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: 儀式:3"));
         }
 
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
@@ -120,17 +120,20 @@ namespace Dungeon.Tests.EditMode
                 "result",
                 new BattleIntentViewModel(
                     IntentType.AttackDefend,
+                    "攻防",
                     7,
                     2,
                     5,
                     StatusType.Weak,
+                    "脱力",
                     2,
                     BuffType.Ritual,
+                    "儀式",
                     3),
-                new[] { new BattleStatusViewModel(nameof(StatusType.Vulnerable), 2, false) },
-                new[] { new BattleStatusViewModel(nameof(StatusType.Weak), 1, false) },
-                new[] { new BattleStatusViewModel(nameof(BuffType.Strength), 1, true) },
-                new[] { new BattleStatusViewModel(nameof(BuffType.Ritual), 3, true) });
+                new[] { new BattleStatusViewModel("脆弱", 2, false) },
+                new[] { new BattleStatusViewModel("脱力", 1, false) },
+                new[] { new BattleStatusViewModel("筋力", 1, true) },
+                new[] { new BattleStatusViewModel("儀式", 3, true) });
         }
 
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService

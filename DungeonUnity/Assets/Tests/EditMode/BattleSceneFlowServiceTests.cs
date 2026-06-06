@@ -74,12 +74,15 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(snapshot.EnemyIntent, Is.Not.Null);
             Assert.That(snapshot.EnemyIntent.IntentType, Is.EqualTo(IntentType.AttackDefend));
+            Assert.That(snapshot.EnemyIntent.IntentName, Is.EqualTo(nameof(IntentType.AttackDefend)));
             Assert.That(snapshot.EnemyIntent.Damage, Is.EqualTo(7));
             Assert.That(snapshot.EnemyIntent.HitCount, Is.EqualTo(2));
             Assert.That(snapshot.EnemyIntent.Block, Is.EqualTo(5));
             Assert.That(snapshot.EnemyIntent.StatusType, Is.EqualTo(StatusType.Weak));
+            Assert.That(snapshot.EnemyIntent.StatusName, Is.EqualTo(nameof(StatusType.Weak)));
             Assert.That(snapshot.EnemyIntent.StatusValue, Is.EqualTo(2));
             Assert.That(snapshot.EnemyIntent.BuffType, Is.EqualTo(BuffType.Ritual));
+            Assert.That(snapshot.EnemyIntent.BuffName, Is.EqualTo(nameof(BuffType.Ritual)));
             Assert.That(snapshot.EnemyIntent.BuffValue, Is.EqualTo(3));
         }
 
@@ -105,7 +108,7 @@ namespace Dungeon.Tests.EditMode
                 starterDeck: new[] { weakCard },
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
                 battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, action), 10) });
-            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+            BattleSceneFlowService service = CreateServiceWithDisplayText(runDefinition, new FakeBattleDisplayTextService(), 0, 0, 0, 0, 0);
 
             service.Initialize(5501);
             service.SelectMapNode(0);
@@ -115,13 +118,13 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.PlayerStatuses.Count, Is.EqualTo(1));
-            Assert.That(snapshot.PlayerStatuses[0].Name, Is.EqualTo(nameof(StatusType.Vulnerable)));
+            Assert.That(snapshot.PlayerStatuses[0].Name, Is.EqualTo("表示Vulnerable"));
             Assert.That(snapshot.PlayerStatuses[0].Value, Is.EqualTo(2));
             Assert.That(snapshot.EnemyStatuses.Count, Is.EqualTo(1));
-            Assert.That(snapshot.EnemyStatuses[0].Name, Is.EqualTo(nameof(StatusType.Weak)));
+            Assert.That(snapshot.EnemyStatuses[0].Name, Is.EqualTo("表示Weak"));
             Assert.That(snapshot.EnemyStatuses[0].Value, Is.EqualTo(1));
             Assert.That(snapshot.EnemyBuffs.Count, Is.EqualTo(1));
-            Assert.That(snapshot.EnemyBuffs[0].Name, Is.EqualTo(nameof(BuffType.Ritual)));
+            Assert.That(snapshot.EnemyBuffs[0].Name, Is.EqualTo("表示Ritual"));
             Assert.That(snapshot.EnemyBuffs[0].Value, Is.EqualTo(3));
         }
 
@@ -220,6 +223,18 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition));
+        }
+
+        private static BattleSceneFlowService CreateServiceWithDisplayText(
+            RuntimeRunDefinition runDefinition,
+            IBattleDisplayTextService displayTextService,
+            params int[] values)
+        {
+            return new BattleSceneFlowService(
+                new BattleSceneRules(),
+                new SequenceRandomProvider(values),
+                new FakeBattleMasterDataFacade(runDefinition),
+                displayTextService);
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
@@ -343,6 +358,27 @@ namespace Dungeon.Tests.EditMode
             public RuntimeRunDefinition BuildRunDefinition(int runProfileId)
             {
                 return _runDefinition;
+            }
+        }
+
+        /// <summary>
+        /// テスト用Battle表示名解決クラス
+        /// </summary>
+        private sealed class FakeBattleDisplayTextService : IBattleDisplayTextService
+        {
+            public string GetIntentName(IntentType intentType)
+            {
+                return $"表示{intentType}";
+            }
+
+            public string GetStatusName(StatusType statusType)
+            {
+                return $"表示{statusType}";
+            }
+
+            public string GetBuffName(BuffType buffType)
+            {
+                return $"表示{buffType}";
             }
         }
 
