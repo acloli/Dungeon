@@ -17,41 +17,41 @@ MonoBehaviour:
     MapTemplateId: 6301
     NodeKey: node_01
     Floor: 1
-    NodeType: Battle
+    NodeType: 0
     Name: Ruins Path I
     LocalizationKey: map.node.ruins_path_1
   - Id: 5302
     MapTemplateId: 6301
     NodeKey: node_02
     Floor: 2
-    NodeType: RestShop
+    NodeType: 3
     Name: Cinder Rest
     LocalizationKey: map.node.cinder_rest
   - Id: 5303
     MapTemplateId: 6301
     NodeKey: node_03
     Floor: 3
-    NodeType: Battle
+    NodeType: 0
     Name: Ruins Path II
     LocalizationKey: map.node.ruins_path_2
   - Id: 5304
     MapTemplateId: 6301
     NodeKey: node_04
     Floor: 4
-    NodeType: EliteBattle
+    NodeType: 2
     Name: Abyss Gate
     LocalizationKey: map.node.abyss_gate
   - Id: 5305
     MapTemplateId: 6301
     NodeKey: node_05
     Floor: 5
-    NodeType: RestShop
+    NodeType: 3
     Name: Supply Post
     LocalizationKey: map.node.supply_post
   - Id: 5306
     MapTemplateId: 6301
     NodeKey: node_06
     Floor: 6
-    NodeType: Boss
+    NodeType: 1
     Name: Throne Gate
     LocalizationKey: map.node.throne_gate

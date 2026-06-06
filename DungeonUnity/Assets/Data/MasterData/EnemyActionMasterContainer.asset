@@ -16,216 +16,216 @@ MonoBehaviour:
   - Id: 4101
     EnemyId: 3001
     Order: 1
-    IntentType: Buff
+    IntentType: 3
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: Ritual
+    BuffType: 2
     BuffValue: 3
-    RepeatRule: OpeningOnly
+    RepeatRule: 2
   - Id: 4102
     EnemyId: 3001
     Order: 2
-    IntentType: Attack
+    IntentType: 0
     Damage: 6
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: RepeatAfterOpening
+    RepeatRule: 4
   - Id: 4111
     EnemyId: 3002
     Order: 1
-    IntentType: Attack
+    IntentType: 0
     Damage: 11
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: OpeningOnly
+    RepeatRule: 2
   - Id: 4112
     EnemyId: 3002
     Order: 2
-    IntentType: AttackDefend
+    IntentType: 2
     Damage: 7
     HitCount: 1
     Block: 5
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: AfterOpeningRandom
+    RepeatRule: 0
   - Id: 4113
     EnemyId: 3002
     Order: 3
-    IntentType: Buff
+    IntentType: 3
     Damage: 0
     HitCount: 1
     Block: 6
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: Strength
+    BuffType: 3
     BuffValue: 3
-    RepeatRule: AfterOpeningRandom
+    RepeatRule: 0
   - Id: 4121
     EnemyId: 3003
     Order: 1
-    IntentType: Attack
+    IntentType: 0
     Damage: 6
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4122
     EnemyId: 3003
     Order: 2
-    IntentType: Buff
+    IntentType: 3
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: Strength
+    BuffType: 3
     BuffValue: 3
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4131
     EnemyId: 3004
     Order: 1
-    IntentType: Attack
+    IntentType: 0
     Damage: 6
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4132
     EnemyId: 3004
     Order: 2
-    IntentType: Debuff
+    IntentType: 4
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: Weak
+    StatusType: 3
     StatusValue: 2
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4141
     EnemyId: 3005
     Order: 1
-    IntentType: AttackDebuff
+    IntentType: 1
     Damage: 7
     HitCount: 1
     Block: 0
-    StatusType: Slimed
+    StatusType: 1
     StatusValue: 1
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4142
     EnemyId: 3005
     Order: 2
-    IntentType: Debuff
+    IntentType: 4
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: Weak
+    StatusType: 3
     StatusValue: 1
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4143
     EnemyId: 3005
     Order: 3
-    IntentType: Attack
+    IntentType: 0
     Damage: 10
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Random
+    RepeatRule: 3
   - Id: 4151
     EnemyId: 3006
     Order: 1
-    IntentType: Buff
+    IntentType: 3
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: Enrage
+    BuffType: 0
     BuffValue: 2
-    RepeatRule: OpeningOnly
+    RepeatRule: 2
   - Id: 4152
     EnemyId: 3006
     Order: 2
-    IntentType: AttackDebuff
+    IntentType: 1
     Damage: 6
     HitCount: 1
     Block: 0
-    StatusType: Vulnerable
+    StatusType: 2
     StatusValue: 2
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Cycle
+    RepeatRule: 1
   - Id: 4153
     EnemyId: 3006
     Order: 3
-    IntentType: Attack
+    IntentType: 0
     Damage: 14
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Cycle
+    RepeatRule: 1
   - Id: 4161
     EnemyId: 3007
     Order: 1
-    IntentType: Special
+    IntentType: 6
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: Slimed
+    StatusType: 1
     StatusValue: 3
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Cycle
+    RepeatRule: 1
   - Id: 4162
     EnemyId: 3007
     Order: 2
-    IntentType: Idle
+    IntentType: 5
     Damage: 0
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Cycle
+    RepeatRule: 1
   - Id: 4163
     EnemyId: 3007
     Order: 3
-    IntentType: Attack
+    IntentType: 0
     Damage: 35
     HitCount: 1
     Block: 0
-    StatusType: None
+    StatusType: 0
     StatusValue: 0
-    BuffType: None
+    BuffType: 1
     BuffValue: 0
-    RepeatRule: Cycle
+    RepeatRule: 1

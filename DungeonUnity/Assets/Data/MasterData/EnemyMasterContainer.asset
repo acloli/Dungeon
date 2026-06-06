@@ -17,7 +17,7 @@ MonoBehaviour:
     Key: enemy_ash_cultist
     Name: Ash Cultist
     LocalizationKey: enemy.name.ash_cultist
-    EnemyTier: Normal
+    EnemyTier: 2
     HpMin: 48
     HpMax: 54
     GoldReward: 14
@@ -26,7 +26,7 @@ MonoBehaviour:
     Key: enemy_gnaw_beast
     Name: Gnaw Beast
     LocalizationKey: enemy.name.gnaw_beast
-    EnemyTier: Normal
+    EnemyTier: 2
     HpMin: 40
     HpMax: 44
     GoldReward: 16
@@ -35,7 +35,7 @@ MonoBehaviour:
     Key: enemy_red_mite
     Name: Red Mite
     LocalizationKey: enemy.name.red_mite
-    EnemyTier: Normal
+    EnemyTier: 2
     HpMin: 10
     HpMax: 15
     GoldReward: 11
@@ -44,7 +44,7 @@ MonoBehaviour:
     Key: enemy_green_mite
     Name: Green Mite
     LocalizationKey: enemy.name.green_mite
-    EnemyTier: Normal
+    EnemyTier: 2
     HpMin: 11
     HpMax: 17
     GoldReward: 11
@@ -53,7 +53,7 @@ MonoBehaviour:
     Key: enemy_mire_slime
     Name: Mire Slime
     LocalizationKey: enemy.name.mire_slime
-    EnemyTier: Normal
+    EnemyTier: 2
     HpMin: 28
     HpMax: 32
     GoldReward: 15
@@ -62,7 +62,7 @@ MonoBehaviour:
     Key: enemy_nob_reaver
     Name: Nob Reaver
     LocalizationKey: enemy.name.nob_reaver
-    EnemyTier: Elite
+    EnemyTier: 1
     HpMin: 82
     HpMax: 86
     GoldReward: 30
@@ -71,7 +71,7 @@ MonoBehaviour:
     Key: enemy_sludge_monarch
     Name: Sludge Monarch
     LocalizationKey: enemy.name.sludge_monarch
-    EnemyTier: Boss
+    EnemyTier: 0
     HpMin: 140
     HpMax: 140
     GoldReward: 100

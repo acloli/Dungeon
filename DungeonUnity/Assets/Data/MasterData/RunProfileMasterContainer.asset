@@ -15,7 +15,7 @@ MonoBehaviour:
   _data:
   - Id: 5501
     Key: run_crimson_exile_act1
-    CharacterArchetype: CrimsonExile
+    CharacterArchetype: 0
     PlayerMaxHp: 80
     StartingGold: 99
     StarterDeckGroupId: 6001
