@@ -14,17 +14,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
+        private readonly IBattleDisplayTextService _displayTextService;
 
         private RuntimeRunDefinition _runDefinition;
 
         public BattleSceneFlowService(
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
-            IBattleMasterDataFacade masterDataFacade)
+            IBattleMasterDataFacade masterDataFacade,
+            IBattleDisplayTextService displayTextService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
+            _displayTextService = displayTextService ?? new BattleDisplayTextService();
         }
 
         /// <summary>
@@ -402,12 +405,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             return new BattleIntentViewModel(
                 action.IntentType,
+                _displayTextService.GetIntentName(action.IntentType),
                 action.Damage,
                 action.HitCount,
                 action.Block,
                 action.StatusType,
+                _displayTextService.GetStatusName(action.StatusType),
                 action.StatusValue,
                 action.BuffType,
+                _displayTextService.GetBuffName(action.BuffType),
                 action.BuffValue);
         }
 
@@ -497,7 +503,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 状態表示一覧構築
         /// </summary>
-        private static IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
+        private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
         {
             List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
             if (statuses == null)
@@ -512,7 +518,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(new BattleStatusViewModel(status.Key.ToString(), status.Value, false));
+                views.Add(new BattleStatusViewModel(_displayTextService.GetStatusName(status.Key), status.Value, false));
             }
 
             return views;
@@ -521,7 +527,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// buff表示一覧構築
         /// </summary>
-        private static IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
+        private IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
         {
             List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
             if (buffs == null)
@@ -536,7 +542,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(new BattleStatusViewModel(buff.Key.ToString(), buff.Value, true));
+                views.Add(new BattleStatusViewModel(_displayTextService.GetBuffName(buff.Key), buff.Value, true));
             }
 
             return views;

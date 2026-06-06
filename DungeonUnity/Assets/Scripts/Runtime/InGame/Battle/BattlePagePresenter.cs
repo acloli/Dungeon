@@ -116,7 +116,7 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             builder.AppendLine();
-            builder.AppendFormat(BattleSceneConstants.IntentLabelFormat, intent.IntentType);
+            builder.AppendFormat(BattleSceneConstants.IntentLabelFormat, intent.IntentName);
             if (intent.Damage > 0)
             {
                 builder.AppendFormat(BattleSceneConstants.IntentDamageFormat, intent.Damage, Math.Max(1, intent.HitCount));
@@ -129,12 +129,12 @@ namespace Dungeon.Runtime.InGame.Battle
 
             if (intent.StatusType != Game.MasterData.Generated.StatusType.None && intent.StatusValue > 0)
             {
-                builder.AppendFormat(BattleSceneConstants.IntentStatusFormat, intent.StatusType, intent.StatusValue);
+                builder.AppendFormat(BattleSceneConstants.IntentStatusFormat, intent.StatusName, intent.StatusValue);
             }
 
             if (intent.BuffType != Game.MasterData.Generated.BuffType.None && intent.BuffValue > 0)
             {
-                builder.AppendFormat(BattleSceneConstants.IntentBuffFormat, intent.BuffType, intent.BuffValue);
+                builder.AppendFormat(BattleSceneConstants.IntentBuffFormat, intent.BuffName, intent.BuffValue);
             }
         }
 
