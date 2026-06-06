@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
+using Game.MasterData.Generated;
 using NUnit.Framework;
 
 namespace Dungeon.Tests.EditMode
@@ -47,6 +48,28 @@ namespace Dungeon.Tests.EditMode
             Assert.That(uiCoordinator.ShowBattleCallCount, Is.GreaterThanOrEqualTo(1));
         }
 
+        [Test]
+        public void InitializeAsync_BattleState_RendersIntentStatusAndBuffText()
+        {
+            BattleSceneSnapshot snapshot = CreateBattleSnapshotWithDisplayInfo();
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Status: Vulnerable:2"));
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Buff: Strength:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Intent: AttackDefend"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("D7x2"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("B5"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status Weak:2"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff Ritual:3"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status: Weak:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: Ritual:3"));
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -70,6 +93,44 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result");
+        }
+
+        private static BattleSceneSnapshot CreateBattleSnapshotWithDisplayInfo()
+        {
+            return new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeCard>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                20,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                new BattleIntentViewModel(
+                    IntentType.AttackDefend,
+                    7,
+                    2,
+                    5,
+                    StatusType.Weak,
+                    2,
+                    BuffType.Ritual,
+                    3),
+                new[] { new BattleStatusViewModel(nameof(StatusType.Vulnerable), 2, false) },
+                new[] { new BattleStatusViewModel(nameof(StatusType.Weak), 1, false) },
+                new[] { new BattleStatusViewModel(nameof(BuffType.Strength), 1, true) },
+                new[] { new BattleStatusViewModel(nameof(BuffType.Ritual), 3, true) });
         }
 
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
@@ -146,6 +207,9 @@ namespace Dungeon.Tests.EditMode
         private sealed class FakeBattlePageView : IBattlePageView
         {
             public int BuildCallCount { get; private set; }
+            public string LastPlayerText { get; private set; }
+            public string LastEnemyText { get; private set; }
+            public string LastHintText { get; private set; }
 
             public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
             {
@@ -157,6 +221,9 @@ namespace Dungeon.Tests.EditMode
 
             public void SetBattleStateText(string playerText, string enemyText, string hintText)
             {
+                LastPlayerText = playerText;
+                LastEnemyText = enemyText;
+                LastHintText = hintText;
             }
 
             public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)

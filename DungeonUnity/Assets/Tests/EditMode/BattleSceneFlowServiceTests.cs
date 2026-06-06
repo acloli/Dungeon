@@ -50,6 +50,82 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_BattleNode_CreatesEnemyIntentPreview()
+        {
+            RuntimeEnemyAction action = CreateAction(
+                1,
+                7,
+                RepeatRule.OpeningOnly,
+                IntentType.AttackDefend,
+                2,
+                5,
+                StatusType.Weak,
+                2,
+                BuffType.Ritual,
+                3);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, action), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.EnemyIntent, Is.Not.Null);
+            Assert.That(snapshot.EnemyIntent.IntentType, Is.EqualTo(IntentType.AttackDefend));
+            Assert.That(snapshot.EnemyIntent.Damage, Is.EqualTo(7));
+            Assert.That(snapshot.EnemyIntent.HitCount, Is.EqualTo(2));
+            Assert.That(snapshot.EnemyIntent.Block, Is.EqualTo(5));
+            Assert.That(snapshot.EnemyIntent.StatusType, Is.EqualTo(StatusType.Weak));
+            Assert.That(snapshot.EnemyIntent.StatusValue, Is.EqualTo(2));
+            Assert.That(snapshot.EnemyIntent.BuffType, Is.EqualTo(BuffType.Ritual));
+            Assert.That(snapshot.EnemyIntent.BuffValue, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void CreateSnapshot_BattleState_IncludesStatusAndBuffViews()
+        {
+            RuntimeCard weakCard = CreateCard(1001, "Weak", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.ApplyStatus, 0, 1, StatusType.Weak, 2, TargetSide.Enemy)
+            });
+            RuntimeEnemyAction action = CreateAction(
+                1,
+                0,
+                RepeatRule.OpeningOnly,
+                IntentType.Buff,
+                1,
+                0,
+                StatusType.Vulnerable,
+                2,
+                BuffType.Ritual,
+                3);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { weakCard },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, action), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.PlayerStatuses.Count, Is.EqualTo(1));
+            Assert.That(snapshot.PlayerStatuses[0].Name, Is.EqualTo(nameof(StatusType.Vulnerable)));
+            Assert.That(snapshot.PlayerStatuses[0].Value, Is.EqualTo(2));
+            Assert.That(snapshot.EnemyStatuses.Count, Is.EqualTo(1));
+            Assert.That(snapshot.EnemyStatuses[0].Name, Is.EqualTo(nameof(StatusType.Weak)));
+            Assert.That(snapshot.EnemyStatuses[0].Value, Is.EqualTo(1));
+            Assert.That(snapshot.EnemyBuffs.Count, Is.EqualTo(1));
+            Assert.That(snapshot.EnemyBuffs[0].Name, Is.EqualTo(nameof(BuffType.Ritual)));
+            Assert.That(snapshot.EnemyBuffs[0].Value, Is.EqualTo(3));
+        }
+
+        [Test]
         public void TryPlaySelectedCard_KillEnemy_OpensRewardAndAddsGold()
         {
             RuntimeCard finisher = CreateCard(1001, "Finisher", 1, 99);
@@ -212,18 +288,28 @@ namespace Dungeon.Tests.EditMode
                 actions);
         }
 
-        private static RuntimeEnemyAction CreateAction(int order, int damage, RepeatRule repeatRule)
+        private static RuntimeEnemyAction CreateAction(
+            int order,
+            int damage,
+            RepeatRule repeatRule,
+            IntentType intentType = IntentType.Attack,
+            int hitCount = 1,
+            int block = 0,
+            StatusType statusType = StatusType.None,
+            int statusValue = 0,
+            BuffType buffType = BuffType.None,
+            int buffValue = 0)
         {
             return new RuntimeEnemyAction(
                 order,
-                IntentType.Attack,
+                intentType,
                 damage,
-                1,
-                0,
-                StatusType.None,
-                0,
-                BuffType.None,
-                0,
+                hitCount,
+                block,
+                statusType,
+                statusValue,
+                buffType,
+                buffValue,
                 repeatRule);
         }
 
