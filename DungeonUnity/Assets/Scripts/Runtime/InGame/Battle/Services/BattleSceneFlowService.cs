@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -62,7 +63,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _state.MapMessage,
                 _state.BattleHintMessage,
                 _state.RestShopMessage,
-                _state.ResultMessage);
+                _state.ResultMessage,
+                BuildEnemyIntent(),
+                BuildStatusViews(_state.PlayerStatuses),
+                BuildStatusViews(_state.EnemyStatuses),
+                BuildBuffViews(_state.PlayerBuffs),
+                BuildBuffViews(_state.EnemyBuffs));
         }
 
         /// <summary>
@@ -381,6 +387,159 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return index == _state.CurrentNodeIndex + 1;
+        }
+
+        /// <summary>
+        /// 表示用敵意図構築
+        /// </summary>
+        private BattleIntentViewModel BuildEnemyIntent()
+        {
+            RuntimeEnemyAction action = SelectEnemyActionPreview();
+            if (action == null)
+            {
+                return null;
+            }
+
+            return new BattleIntentViewModel(
+                action.IntentType,
+                action.Damage,
+                action.HitCount,
+                action.Block,
+                action.StatusType,
+                action.StatusValue,
+                action.BuffType,
+                action.BuffValue);
+        }
+
+        /// <summary>
+        /// 表示用敵行動選択
+        /// </summary>
+        private RuntimeEnemyAction SelectEnemyActionPreview()
+        {
+            if (_state.CurrentPage != BattleScenePage.Battle ||
+                _state.CurrentEnemy == null ||
+                _state.CurrentEnemy.Actions == null ||
+                _state.CurrentEnemy.Actions.Count == 0)
+            {
+                return null;
+            }
+
+            RuntimeEnemyAction openingAction = FindFirstAction(RepeatRule.OpeningOnly);
+            if (_state.EnemyTurnCount == 0 && openingAction != null)
+            {
+                return openingAction;
+            }
+
+            RuntimeEnemyAction repeatAction = FindFirstAction(RepeatRule.RepeatAfterOpening);
+            if (_state.EnemyTurnCount > 0 && repeatAction != null)
+            {
+                return repeatAction;
+            }
+
+            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(RepeatRule.AfterOpeningRandom);
+            if (_state.EnemyTurnCount > 0 && afterOpeningRandomAction != null)
+            {
+                return afterOpeningRandomAction;
+            }
+
+            RuntimeEnemyAction randomAction = FindFirstAction(RepeatRule.Random);
+            if (randomAction != null)
+            {
+                return randomAction;
+            }
+
+            RuntimeEnemyAction cycleAction = FindCycleActionPreview();
+            return cycleAction ?? _state.CurrentEnemy.Actions[0];
+        }
+
+        /// <summary>
+        /// 指定反復規則の先頭行動取得
+        /// </summary>
+        private RuntimeEnemyAction FindFirstAction(RepeatRule repeatRule)
+        {
+            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            for (int i = 0; i < actions.Count; i++)
+            {
+                RuntimeEnemyAction action = actions[i];
+                if (action.RepeatRule == repeatRule)
+                {
+                    return action;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// cycle行動の表示用取得
+        /// </summary>
+        private RuntimeEnemyAction FindCycleActionPreview()
+        {
+            List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
+            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            for (int i = 0; i < actions.Count; i++)
+            {
+                RuntimeEnemyAction action = actions[i];
+                if (action.RepeatRule == RepeatRule.Cycle)
+                {
+                    cycleActions.Add(action);
+                }
+            }
+
+            if (cycleActions.Count == 0)
+            {
+                return null;
+            }
+
+            return cycleActions[_state.EnemyCycleIndex % cycleActions.Count];
+        }
+
+        /// <summary>
+        /// 状態表示一覧構築
+        /// </summary>
+        private static IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
+        {
+            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
+            if (statuses == null)
+            {
+                return views;
+            }
+
+            foreach (KeyValuePair<StatusType, int> status in statuses)
+            {
+                if (status.Key == StatusType.None || status.Value <= 0)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleStatusViewModel(status.Key.ToString(), status.Value, false));
+            }
+
+            return views;
+        }
+
+        /// <summary>
+        /// buff表示一覧構築
+        /// </summary>
+        private static IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
+        {
+            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
+            if (buffs == null)
+            {
+                return views;
+            }
+
+            foreach (KeyValuePair<BuffType, int> buff in buffs)
+            {
+                if (buff.Key == BuffType.None || buff.Value <= 0)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleStatusViewModel(buff.Key.ToString(), buff.Value, true));
+            }
+
+            return views;
         }
     }
 }

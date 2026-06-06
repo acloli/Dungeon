@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
     /// <summary>
@@ -26,7 +28,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string mapMessage,
             string battleHintMessage,
             string restShopMessage,
-            string resultMessage)
+            string resultMessage,
+            BattleIntentViewModel enemyIntent = null,
+            IReadOnlyList<BattleStatusViewModel> playerStatuses = null,
+            IReadOnlyList<BattleStatusViewModel> enemyStatuses = null,
+            IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
+            IReadOnlyList<BattleStatusViewModel> enemyBuffs = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -48,6 +55,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BattleHintMessage = battleHintMessage;
             RestShopMessage = restShopMessage;
             ResultMessage = resultMessage;
+            EnemyIntent = enemyIntent;
+            PlayerStatuses = playerStatuses ?? Array.Empty<BattleStatusViewModel>();
+            EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
+            PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
+            EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -70,5 +82,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string BattleHintMessage { get; }
         public string RestShopMessage { get; }
         public string ResultMessage { get; }
+        public BattleIntentViewModel EnemyIntent { get; }
+        public IReadOnlyList<BattleStatusViewModel> PlayerStatuses { get; }
+        public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
+        public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
+        public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
     }
 }
