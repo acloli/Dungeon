@@ -29,6 +29,16 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string MapStateFormat = "HP {0}/{1}  Gold {2}  Next {3}/{4}";
         public const string PlayerStateFormat = "Player HP {0}/{1}  Block {2}  Energy {3}  Gold {4}";
         public const string EnemyStateFormat = "{0} HP {1}  Block {2}";
+        public const string IntentLabelFormat = "Intent: {0}";
+        public const string IntentDamageFormat = " D{0}x{1}";
+        public const string IntentBlockFormat = " B{0}";
+        public const string IntentStatusFormat = " Status {0}:{1}";
+        public const string IntentBuffFormat = " Buff {0}:{1}";
+        public const string StatusLabel = "Status";
+        public const string BuffLabel = "Buff";
+        public const string LabelSeparator = ": ";
+        public const string ValueSeparator = "  ";
+        public const string StatusValueFormat = "{0}:{1}";
         public const string RestShopStateFormat = "Rest Shop: HP {0}/{1}  Gold {2}";
         public const string ResultVictoryFormat = "Run Clear!\nHP {0}/{1}\nGold {2}";
         public const string EnemyTurnFormat = "Enemy turn: {0} damage.";
