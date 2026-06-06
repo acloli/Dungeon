@@ -1111,7 +1111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -200}
+  m_AnchoredPosition: {x: 0, y: -360}
   m_SizeDelta: {x: 1000, y: 80}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &1370625579
@@ -1252,7 +1252,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -120}
+  m_AnchoredPosition: {x: 0, y: -200}
   m_SizeDelta: {x: 1000, y: 80}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &1444426554
@@ -1742,7 +1742,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f288942c39fb643a49a320be63e17316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.BattleSceneController
-  _runStartConfig: {fileID: 11400000, guid: 78d22b7f18b2149ada46333ab7f6cbd8, type: 2}
+  _runProfileId: 5501
   _mainSceneName: MainScene
   _view: {fileID: 1010868275}
 --- !u!4 &1823499126
