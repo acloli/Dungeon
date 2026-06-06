@@ -28,3 +28,16 @@ map.node.ruins_path_2,廃墟通路II,Ruins Path II,废墟通路II,廢墟通路II
 map.node.abyss_gate,深淵の門,Abyss Gate,深渊之门,深淵之門,심연의 문
 map.node.supply_post,前線補給所,Supply Post,前线补给站,前線補給站,전선 보급소
 map.node.throne_gate,玉座の門,Throne Gate,王座之门,王座之門,왕좌의 문
+battle.intent.attack,攻撃,Attack,攻击,攻擊,공격
+battle.intent.attack_debuff,攻撃弱体,Attack Debuff,攻击弱化,攻擊弱化,공격 약화
+battle.intent.attack_defend,攻防,Attack Defend,攻防,攻防,공방
+battle.intent.buff,強化,Buff,强化,強化,강화
+battle.intent.debuff,弱体,Debuff,弱化,弱化,약화
+battle.intent.idle,待機,Idle,待机,待機,대기
+battle.intent.special,特殊,Special,特殊,特殊,특수
+battle.status.weak,脱力,Weak,虚弱,虛弱,약화
+battle.status.vulnerable,脆弱,Vulnerable,易伤,易傷,취약
+battle.status.slimed,粘液,Slimed,黏液,黏液,점액
+battle.buff.strength,筋力,Strength,力量,力量,힘
+battle.buff.ritual,儀式,Ritual,仪式,儀式,의식
+battle.buff.enrage,激昂,Enrage,激怒,激怒,격노
