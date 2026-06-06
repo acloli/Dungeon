@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
 
@@ -38,16 +40,8 @@ namespace Dungeon.Runtime.InGame.Battle
 
             _view.BuildHandButtons(snapshot.Hand, _onHandCardClicked);
             _view.SetBattleStateText(
-                string.Format(
-                    BattleSceneConstants.PlayerStateFormat,
-                    snapshot.PlayerHp,
-                    snapshot.PlayerMaxHp,
-                    snapshot.PlayerEnergy,
-                    snapshot.Gold),
-                string.Format(
-                    BattleSceneConstants.EnemyStateFormat,
-                    snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : "Enemy",
-                    snapshot.EnemyHp),
+                BuildPlayerText(snapshot),
+                BuildEnemyText(snapshot),
                 snapshot.BattleHintMessage);
         }
 
@@ -74,6 +68,99 @@ namespace Dungeon.Runtime.InGame.Battle
             }
             _view.UnwireButtons();
             _view = null;
+        }
+
+        /// <summary>
+        /// player表示文言構築
+        /// </summary>
+        private static string BuildPlayerText(BattleSceneSnapshot snapshot)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat(
+                BattleSceneConstants.PlayerStateFormat,
+                snapshot.PlayerHp,
+                snapshot.PlayerMaxHp,
+                snapshot.PlayerBlock,
+                snapshot.PlayerEnergy,
+                snapshot.Gold);
+            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, snapshot.PlayerStatuses);
+            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, snapshot.PlayerBuffs);
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// enemy表示文言構築
+        /// </summary>
+        private static string BuildEnemyText(BattleSceneSnapshot snapshot)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat(
+                BattleSceneConstants.EnemyStateFormat,
+                snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : BattleSceneConstants.UnknownEnemyName,
+                snapshot.EnemyHp,
+                snapshot.EnemyBlock);
+            AppendIntentLine(builder, snapshot.EnemyIntent);
+            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, snapshot.EnemyStatuses);
+            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, snapshot.EnemyBuffs);
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// intent表示行追加
+        /// </summary>
+        private static void AppendIntentLine(StringBuilder builder, BattleIntentViewModel intent)
+        {
+            if (intent == null)
+            {
+                return;
+            }
+
+            builder.AppendLine();
+            builder.AppendFormat(BattleSceneConstants.IntentLabelFormat, intent.IntentName);
+            if (intent.Damage > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentDamageFormat, intent.Damage, Math.Max(1, intent.HitCount));
+            }
+
+            if (intent.Block > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentBlockFormat, intent.Block);
+            }
+
+            if (intent.StatusType != Game.MasterData.Generated.StatusType.None && intent.StatusValue > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentStatusFormat, intent.StatusName, intent.StatusValue);
+            }
+
+            if (intent.BuffType != Game.MasterData.Generated.BuffType.None && intent.BuffValue > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentBuffFormat, intent.BuffName, intent.BuffValue);
+            }
+        }
+
+        /// <summary>
+        /// 状態表示行追加
+        /// </summary>
+        private static void AppendStatusLine(StringBuilder builder, string label, IReadOnlyList<BattleStatusViewModel> statuses)
+        {
+            if (statuses == null || statuses.Count == 0)
+            {
+                return;
+            }
+
+            builder.AppendLine();
+            builder.Append(label);
+            builder.Append(BattleSceneConstants.LabelSeparator);
+            for (int i = 0; i < statuses.Count; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(BattleSceneConstants.ValueSeparator);
+                }
+
+                BattleStatusViewModel status = statuses[i];
+                builder.AppendFormat(BattleSceneConstants.StatusValueFormat, status.Name, status.Value);
+            }
         }
     }
 }

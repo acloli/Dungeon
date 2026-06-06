@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
 
 namespace Dungeon.Runtime.InGame.Battle
 {
@@ -34,7 +33,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public async UniTask InitializeAsync(IBattleSceneHostView view, RunStartConfig runStartConfig, Action onResultBackClicked, CancellationToken ct)
+        public async UniTask InitializeAsync(IBattleSceneHostView view, int runProfileId, Action onResultBackClicked, CancellationToken ct)
         {
             _view = view;
             _onResultBackClicked = onResultBackClicked;
@@ -42,7 +41,7 @@ namespace Dungeon.Runtime.InGame.Battle
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
-            _flowService.Initialize(runStartConfig);
+            _flowService.Initialize(runProfileId);
             await RenderAsync(ct);
         }
 
@@ -117,7 +116,7 @@ namespace Dungeon.Runtime.InGame.Battle
                     _battlePagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Reward:
-                    CardDefinition reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                    RuntimeCard reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
                     if (reward != null)
                     {
                         _flowService.SelectReward(reward);

@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0dcfe5ef6838427dbd364ecdb5c7c83, type: 3}
+  m_Name: RewardPoolMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.RewardPoolMasterContainer
+  _data:
+  - Id: 5101
+    RewardPoolId: 6101
+    CardId: 1004
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5102
+    RewardPoolId: 6101
+    CardId: 1005
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5103
+    RewardPoolId: 6101
+    CardId: 1006
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5104
+    RewardPoolId: 6101
+    CardId: 1007
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5105
+    RewardPoolId: 6101
+    CardId: 1008
+    Weight: 8
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5106
+    RewardPoolId: 6101
+    CardId: 1009
+    Weight: 8
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5107
+    RewardPoolId: 6101
+    CardId: 1010
+    Weight: 6
+    MinFloor: 1
+    MaxFloor: 99

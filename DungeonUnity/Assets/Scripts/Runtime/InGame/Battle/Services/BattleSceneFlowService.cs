@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -12,22 +13,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly BattleSceneState _state = new BattleSceneState();
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
+        private readonly IBattleMasterDataFacade _masterDataFacade;
+        private readonly IBattleDisplayTextService _displayTextService;
 
-        private RunStartConfig _runStartConfig;
+        private RuntimeRunDefinition _runDefinition;
 
-        public BattleSceneFlowService(IBattleSceneRules rules, IBattleRandomProvider randomProvider)
+        public BattleSceneFlowService(
+            IBattleSceneRules rules,
+            IBattleRandomProvider randomProvider,
+            IBattleMasterDataFacade masterDataFacade,
+            IBattleDisplayTextService displayTextService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
+            _masterDataFacade = masterDataFacade;
+            _displayTextService = displayTextService ?? new BattleDisplayTextService();
         }
 
         /// <summary>
         /// Run初期化
         /// </summary>
-        public void Initialize(RunStartConfig runStartConfig)
+        public void Initialize(int runProfileId)
         {
-            _runStartConfig = runStartConfig;
-            _rules.InitializeRun(_state, _runStartConfig);
+            _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
+            _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             OpenMap();
         }
@@ -46,16 +55,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _state.PlayerMaxHp,
                 _state.PlayerHp,
                 _state.PlayerEnergy,
+                _state.PlayerBlock,
                 _state.Gold,
                 _state.CurrentEnemy,
                 _state.EnemyHp,
+                _state.EnemyBlock,
                 _state.BattleFinished,
                 _state.SelectedCardIndex,
                 _state.IsRestShopContinueEnabled,
                 _state.MapMessage,
                 _state.BattleHintMessage,
                 _state.RestShopMessage,
-                _state.ResultMessage);
+                _state.ResultMessage,
+                BuildEnemyIntent(),
+                BuildStatusViews(_state.PlayerStatuses),
+                BuildStatusViews(_state.EnemyStatuses),
+                BuildBuffViews(_state.PlayerBuffs),
+                BuildBuffViews(_state.EnemyBuffs));
         }
 
         /// <summary>
@@ -63,15 +79,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectMapNode(int index)
         {
-            int expectedIndex = _state.CurrentNodeIndex + 1;
-            if (index != expectedIndex)
+            if (_state.Nodes == null || index < 0 || index >= _state.Nodes.Count)
             {
-                _state.MapMessage = BattleSceneConstants.NextNodeOnly;
                 return;
             }
 
-            if (_state.Nodes == null || index < 0 || index >= _state.Nodes.Count)
+            if (!CanMoveToNode(index))
             {
+                _state.MapMessage = BattleSceneConstants.NextNodeOnly;
                 return;
             }
 
@@ -102,7 +117,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.SelectedCardIndex = index;
-            CardDefinition card = _state.Hand[index];
+            RuntimeCard card = _state.Hand[index];
             if (card != null)
             {
                 _state.BattleHintMessage = string.Format(BattleSceneConstants.CardSelectedFormat, card.DisplayName);
@@ -125,7 +140,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            CardDefinition card = _state.Hand[_state.SelectedCardIndex];
+            RuntimeCard card = _state.Hand[_state.SelectedCardIndex];
             if (!_rules.CanPlayCard(_state, card))
             {
                 _state.BattleHintMessage = BattleSceneConstants.NotEnoughEnergy;
@@ -133,8 +148,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            _rules.PlayCard(_state, card);
-            _state.BattleHintMessage = string.Format(BattleSceneConstants.DealDamageFormat, card.Damage);
+            BattleCardResolutionResult result = _rules.PlayCard(_state, card, _randomProvider);
+            _state.BattleHintMessage = BuildCardHint(card, result);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
             if (_state.EnemyHp <= 0)
@@ -153,8 +168,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            int intentDamage = _rules.ResolveEnemyTurn(_state);
-            _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTurnFormat, intentDamage);
+            BattleEnemyTurnResult result = _rules.ResolveEnemyTurn(_state, _randomProvider);
+            _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTurnFormat, result.DamageDealt);
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             _rules.DrawHand(_state, _randomProvider);
 
@@ -167,7 +182,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択処理
         /// </summary>
-        public void SelectReward(CardDefinition card)
+        public void SelectReward(RuntimeCard card)
         {
             if (card != null)
             {
@@ -246,8 +261,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.BattleFinished = false;
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
-            _state.CurrentEnemy = _rules.SelectEnemy(_runStartConfig, nodeType);
-            _state.EnemyHp = _state.CurrentEnemy != null ? _state.CurrentEnemy.MaxHp : BattleSceneConstants.DefaultEnemyHp;
+            _state.PlayerBlock = 0;
+            _state.EnemyStatuses.Clear();
+            _state.EnemyBuffs.Clear();
+            _state.EnemyTurnCount = 0;
+            _state.EnemyCycleIndex = 0;
+            _state.CurrentEnemy = _rules.SelectEnemy(_runDefinition, nodeType, _randomProvider);
+            _state.EnemyHp = _rules.RollEnemyHp(_state.CurrentEnemy, _randomProvider);
+            _state.EnemyBlock = 0;
             _rules.DrawHand(_state, _randomProvider);
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }
@@ -258,7 +279,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OnBattleVictory()
         {
             _state.BattleFinished = true;
-            _state.Gold += _rules.GetBattleGoldReward(GetCurrentNodeType());
+            _state.Gold += _state.CurrentEnemy != null ? _state.CurrentEnemy.GoldReward : 0;
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
             {
@@ -276,7 +297,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.Reward;
             _state.RewardChoices.Clear();
-            IReadOnlyList<CardDefinition> rewardCards = _rules.SelectRewardChoices(_state, _runStartConfig, _randomProvider);
+            IReadOnlyList<RuntimeCard> rewardCards = _rules.SelectRewardChoices(_state, _runDefinition, _randomProvider);
             for (int i = 0; i < rewardCards.Count; i++)
             {
                 _state.RewardChoices.Add(rewardCards[i]);
@@ -324,6 +345,207 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return _state.Nodes[_state.CurrentNodeIndex].NodeType;
+        }
+
+        /// <summary>
+        /// カード使用後ヒント文言生成
+        /// </summary>
+        private static string BuildCardHint(RuntimeCard card, BattleCardResolutionResult result)
+        {
+            if (result.TotalDamage > 0)
+            {
+                return string.Format(BattleSceneConstants.DealDamageFormat, result.TotalDamage);
+            }
+
+            if (result.TotalBlock > 0)
+            {
+                return string.Format(BattleSceneConstants.GainBlockFormat, result.TotalBlock);
+            }
+
+            return string.Format(BattleSceneConstants.CardResolvedFormat, card.DisplayName);
+        }
+
+        /// <summary>
+        /// ノード遷移可能判定
+        /// </summary>
+        private bool CanMoveToNode(int index)
+        {
+            if (_state.CurrentNodeIndex < 0)
+            {
+                return index == 0;
+            }
+
+            RuntimeMapNode currentNode = _state.Nodes[_state.CurrentNodeIndex];
+            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
+            {
+                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
+                {
+                    if (currentNode.NextNodeIndices[i] == index)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            return index == _state.CurrentNodeIndex + 1;
+        }
+
+        /// <summary>
+        /// 表示用敵意図構築
+        /// </summary>
+        private BattleIntentViewModel BuildEnemyIntent()
+        {
+            RuntimeEnemyAction action = SelectEnemyActionPreview();
+            if (action == null)
+            {
+                return null;
+            }
+
+            return new BattleIntentViewModel(
+                action.IntentType,
+                _displayTextService.GetIntentName(action.IntentType),
+                action.Damage,
+                action.HitCount,
+                action.Block,
+                action.StatusType,
+                _displayTextService.GetStatusName(action.StatusType),
+                action.StatusValue,
+                action.BuffType,
+                _displayTextService.GetBuffName(action.BuffType),
+                action.BuffValue);
+        }
+
+        /// <summary>
+        /// 表示用敵行動選択
+        /// </summary>
+        private RuntimeEnemyAction SelectEnemyActionPreview()
+        {
+            if (_state.CurrentPage != BattleScenePage.Battle ||
+                _state.CurrentEnemy == null ||
+                _state.CurrentEnemy.Actions == null ||
+                _state.CurrentEnemy.Actions.Count == 0)
+            {
+                return null;
+            }
+
+            RuntimeEnemyAction openingAction = FindFirstAction(RepeatRule.OpeningOnly);
+            if (_state.EnemyTurnCount == 0 && openingAction != null)
+            {
+                return openingAction;
+            }
+
+            RuntimeEnemyAction repeatAction = FindFirstAction(RepeatRule.RepeatAfterOpening);
+            if (_state.EnemyTurnCount > 0 && repeatAction != null)
+            {
+                return repeatAction;
+            }
+
+            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(RepeatRule.AfterOpeningRandom);
+            if (_state.EnemyTurnCount > 0 && afterOpeningRandomAction != null)
+            {
+                return afterOpeningRandomAction;
+            }
+
+            RuntimeEnemyAction randomAction = FindFirstAction(RepeatRule.Random);
+            if (randomAction != null)
+            {
+                return randomAction;
+            }
+
+            RuntimeEnemyAction cycleAction = FindCycleActionPreview();
+            return cycleAction ?? _state.CurrentEnemy.Actions[0];
+        }
+
+        /// <summary>
+        /// 指定反復規則の先頭行動取得
+        /// </summary>
+        private RuntimeEnemyAction FindFirstAction(RepeatRule repeatRule)
+        {
+            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            for (int i = 0; i < actions.Count; i++)
+            {
+                RuntimeEnemyAction action = actions[i];
+                if (action.RepeatRule == repeatRule)
+                {
+                    return action;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// cycle行動の表示用取得
+        /// </summary>
+        private RuntimeEnemyAction FindCycleActionPreview()
+        {
+            List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
+            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            for (int i = 0; i < actions.Count; i++)
+            {
+                RuntimeEnemyAction action = actions[i];
+                if (action.RepeatRule == RepeatRule.Cycle)
+                {
+                    cycleActions.Add(action);
+                }
+            }
+
+            if (cycleActions.Count == 0)
+            {
+                return null;
+            }
+
+            return cycleActions[_state.EnemyCycleIndex % cycleActions.Count];
+        }
+
+        /// <summary>
+        /// 状態表示一覧構築
+        /// </summary>
+        private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
+        {
+            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
+            if (statuses == null)
+            {
+                return views;
+            }
+
+            foreach (KeyValuePair<StatusType, int> status in statuses)
+            {
+                if (status.Key == StatusType.None || status.Value <= 0)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleStatusViewModel(_displayTextService.GetStatusName(status.Key), status.Value, false));
+            }
+
+            return views;
+        }
+
+        /// <summary>
+        /// buff表示一覧構築
+        /// </summary>
+        private IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
+        {
+            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
+            if (buffs == null)
+            {
+                return views;
+            }
+
+            foreach (KeyValuePair<BuffType, int> buff in buffs)
+            {
+                if (buff.Key == BuffType.None || buff.Value <= 0)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleStatusViewModel(_displayTextService.GetBuffName(buff.Key), buff.Value, true));
+            }
+
+            return views;
         }
     }
 }

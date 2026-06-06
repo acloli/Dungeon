@@ -1,11 +1,11 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
+using TFramework.Debug;
 using TFramework.Scene;
 using UnityEngine;
-using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 using VContainer;
 
 namespace Dungeon.Runtime.InGame.Battle
@@ -16,7 +16,7 @@ namespace Dungeon.Runtime.InGame.Battle
     public sealed class BattleSceneController : SceneControllerBase
     {
         [Header("Config")]
-        [SerializeField] private RunStartConfig _runStartConfig;
+        [SerializeField] private int _runProfileId = 5501;
         [SerializeField] private string _mainSceneName = BattleSceneConstants.MainSceneName;
 
         [Header("View")]
@@ -35,15 +35,19 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         protected override async UniTask OnInitializeInternalAsync(ISceneBridgeData bridgeData, CancellationToken ct)
         {
-            ValidateConfiguration();
-
-            if (_view == null)
+            int runProfileId = BattleRunProfileResolver.ResolveRunProfileId(bridgeData, _runProfileId);
+            if (!ValidateConfiguration(runProfileId))
             {
-                Debug.LogError("BattleSceneView is missing.");
                 return;
             }
 
-            await _presenter.InitializeAsync(_view, _runStartConfig, OnResultBackClicked, ct);
+            if (_view == null)
+            {
+                TLogger.Error("BattleSceneView is missing.", "Battle");
+                return;
+            }
+
+            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct);
         }
 
         /// <summary>
@@ -65,12 +69,15 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 設定参照検証
         /// </summary>
-        private void ValidateConfiguration()
+        private bool ValidateConfiguration(int runProfileId)
         {
-            if (_runStartConfig == null)
+            if (runProfileId <= 0)
             {
-                Debug.LogError(BattleSceneConstants.MissingRunConfig);
+                TLogger.Error(BattleSceneConstants.MissingRunProfile, "Battle");
+                return false;
             }
+
+            return true;
         }
 
         /// <summary>
@@ -78,7 +85,25 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         private void OnResultBackClicked()
         {
-            UnitySceneManager.LoadScene(_mainSceneName);
+            LoadMainSceneAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        /// <summary>
+        /// MainSceneへの遷移処理
+        /// </summary>
+        private async UniTaskVoid LoadMainSceneAsync(CancellationToken ct)
+        {
+            try
+            {
+                await SceneService.LoadSceneAsync(_mainSceneName, null, true, ct);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                TLogger.Error($"MainScene load failed: {ex.Message}", "Battle");
+            }
         }
     }
 }

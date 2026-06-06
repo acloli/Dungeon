@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.InGame.Battle.Model;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
@@ -10,7 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public interface IMapPageView
     {
         void SetMapStateText(string message);
-        void BuildMapButtons(IReadOnlyList<MapTemplate.Node> nodes, Action<int> onClicked);
+        void BuildMapButtons(IReadOnlyList<RuntimeMapNode> nodes, Action<int> onClicked);
         void SetMapButtonInteractable(int allowedIndex);
         void ClearDynamicButtons();
     }

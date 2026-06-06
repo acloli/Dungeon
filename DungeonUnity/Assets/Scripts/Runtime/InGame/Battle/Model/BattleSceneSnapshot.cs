@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Domain;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
@@ -10,23 +10,30 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     {
         public BattleSceneSnapshot(
             BattleScenePage currentPage,
-            IReadOnlyList<MapTemplate.Node> nodes,
-            IReadOnlyList<CardDefinition> hand,
-            IReadOnlyList<CardDefinition> rewardChoices,
+            IReadOnlyList<RuntimeMapNode> nodes,
+            IReadOnlyList<RuntimeCard> hand,
+            IReadOnlyList<RuntimeCard> rewardChoices,
             int currentNodeIndex,
             int playerMaxHp,
             int playerHp,
             int playerEnergy,
+            int playerBlock,
             int gold,
-            EnemyDefinition currentEnemy,
+            RuntimeEnemy currentEnemy,
             int enemyHp,
+            int enemyBlock,
             bool battleFinished,
             int selectedCardIndex,
             bool isRestShopContinueEnabled,
             string mapMessage,
             string battleHintMessage,
             string restShopMessage,
-            string resultMessage)
+            string resultMessage,
+            BattleIntentViewModel enemyIntent = null,
+            IReadOnlyList<BattleStatusViewModel> playerStatuses = null,
+            IReadOnlyList<BattleStatusViewModel> enemyStatuses = null,
+            IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
+            IReadOnlyList<BattleStatusViewModel> enemyBuffs = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -36,9 +43,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PlayerMaxHp = playerMaxHp;
             PlayerHp = playerHp;
             PlayerEnergy = playerEnergy;
+            PlayerBlock = playerBlock;
             Gold = gold;
             CurrentEnemy = currentEnemy;
             EnemyHp = enemyHp;
+            EnemyBlock = enemyBlock;
             BattleFinished = battleFinished;
             SelectedCardIndex = selectedCardIndex;
             IsRestShopContinueEnabled = isRestShopContinueEnabled;
@@ -46,19 +55,26 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BattleHintMessage = battleHintMessage;
             RestShopMessage = restShopMessage;
             ResultMessage = resultMessage;
+            EnemyIntent = enemyIntent;
+            PlayerStatuses = playerStatuses ?? Array.Empty<BattleStatusViewModel>();
+            EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
+            PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
+            EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
         }
 
         public BattleScenePage CurrentPage { get; }
-        public IReadOnlyList<MapTemplate.Node> Nodes { get; }
-        public IReadOnlyList<CardDefinition> Hand { get; }
-        public IReadOnlyList<CardDefinition> RewardChoices { get; }
+        public IReadOnlyList<RuntimeMapNode> Nodes { get; }
+        public IReadOnlyList<RuntimeCard> Hand { get; }
+        public IReadOnlyList<RuntimeCard> RewardChoices { get; }
         public int CurrentNodeIndex { get; }
         public int PlayerMaxHp { get; }
         public int PlayerHp { get; }
         public int PlayerEnergy { get; }
+        public int PlayerBlock { get; }
         public int Gold { get; }
-        public EnemyDefinition CurrentEnemy { get; }
+        public RuntimeEnemy CurrentEnemy { get; }
         public int EnemyHp { get; }
+        public int EnemyBlock { get; }
         public bool BattleFinished { get; }
         public int SelectedCardIndex { get; }
         public bool IsRestShopContinueEnabled { get; }
@@ -66,5 +82,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string BattleHintMessage { get; }
         public string RestShopMessage { get; }
         public string ResultMessage { get; }
+        public BattleIntentViewModel EnemyIntent { get; }
+        public IReadOnlyList<BattleStatusViewModel> PlayerStatuses { get; }
+        public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
+        public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
+        public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
     }
 }

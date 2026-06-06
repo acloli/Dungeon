@@ -3,10 +3,14 @@
   "rootNamespace": "Dungeon.Runtime.InGame.Battle",
   "references": [
     "TFramework.Core",
+    "TFramework.Localization",
+    "TFramework.MasterData",
     "TFramework.Scene",
     "TFramework.UI",
     "Unity.TextMeshPro",
     "Dungeon.Runtime.InGame.Domain",
+    "Dungeon.Runtime.SceneFlow",
+    "Game.MasterData.Generated",
     "UniTask",
     "VContainer"
   ],

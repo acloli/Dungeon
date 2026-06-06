@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: TFramework.MasterData::TFramework.MasterData.MasterDataSettings
   _codeOutputPath: Scripts/Generated/MasterData
   _assetOutputPath: Data/MasterData
+  _generateAssemblyDefinition: 1
+  _assemblyDefinitionName: Game.MasterData.Generated
   _autoLoadOnStartup: 1
-  _containers: []
+  _containers:
+  - {fileID: 11400000, guid: ff767d0e1a1564900a7ee6a45f3bef32, type: 2}
+  - {fileID: 11400000, guid: dbaec778639464c1b816a4d5c532be20, type: 2}
+  - {fileID: 11400000, guid: c141b3d128ea044769a794931974495e, type: 2}
+  - {fileID: 11400000, guid: a5e4ecd6472404c2dbaff64095476a58, type: 2}
+  - {fileID: 11400000, guid: f4e400a65a02240e89ffdfecde49f662, type: 2}
+  - {fileID: 11400000, guid: 36e15f101c64a430c86d3d19c0ca1b2f, type: 2}
+  - {fileID: 11400000, guid: 6a49e64a589204570a05eabbd911b7cc, type: 2}
+  - {fileID: 11400000, guid: 29931de824e814d08b07fbdbdff5108e, type: 2}
+  - {fileID: 11400000, guid: 81dfaca2d2f404a6babd24739cb2b862, type: 2}
+  - {fileID: 11400000, guid: fe8e0261052ed42d2ae9c1ef9255aeca, type: 2}
   _enableServerSync: 0
   _serverUrl: https://example.com/api/masterdata

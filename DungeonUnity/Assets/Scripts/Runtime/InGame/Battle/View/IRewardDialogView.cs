@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.InGame.Battle.Model;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
@@ -9,7 +9,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// </summary>
     public interface IRewardDialogView
     {
-        void BuildRewardButtons(IReadOnlyList<CardDefinition> cards, Action<CardDefinition> onClicked);
+        void BuildRewardButtons(IReadOnlyList<RuntimeCard> cards, Action<RuntimeCard> onClicked);
         void ClearDynamicButtons();
     }
 }

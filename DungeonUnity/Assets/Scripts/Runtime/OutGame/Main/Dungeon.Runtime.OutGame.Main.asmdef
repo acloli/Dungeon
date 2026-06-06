@@ -4,6 +4,8 @@
   "references": [
     "TFramework.Core",
     "TFramework.Scene",
+    "TFramework.Debug",
+    "Dungeon.Runtime.SceneFlow",
     "UniTask",
     "VContainer"
   ],

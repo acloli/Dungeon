@@ -1,0 +1,16 @@
+﻿{
+  "name": "Game.MasterData.Generated",
+  "rootNamespace": "Game.MasterData.Generated",
+  "references": [
+    "TFramework.MasterData"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

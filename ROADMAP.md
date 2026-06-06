@@ -21,9 +21,17 @@
 プロトタイプのコードを整理し、よりスケーラブルな構造へとリファクタリングを行うフェーズ。
 
 - [ ] **UIの責務分割:** `BattleSceneController` などを整理し、View / Presenter パターンへのリファクタリング（TFramework の Page フロー移行）
-- [ ] **正式なデータパイプライン:** ScriptableObject の手打ち運用から、CSV/Excel等を用いたマスターデータ自動生成ワークフローへの移行
+- [~] **正式なデータパイプライン:** CSV/Excel等を用いたマスターデータ自動生成ワークフローを導入し、Battle runtime の参照先を MasterData ベースへ移行
 - [ ] **リソース管理の最適化:** Addressables を本格運用し、プレハブやアセットの非同期ロード・メモリ管理を徹底
 - [ ] **UIUXの改善:** プレースホルダーUIを排し、DOTween等を用いたリッチなインタラクションとアニメーションの実装
+
+### 現在のフォーカス
+
+- [x] BattleScene の UI 責務分割と Page/Dialog 化
+- [x] MasterData の生成コードとアセット導入
+- [x] BattleScene の初期化、報酬、遭遇、マップ参照を MasterData ベースへ移行
+- [ ] Main / Title / Run 入口側の RunProfile 指定導線を整理
+- [ ] 状態異常・Intent 表示・複数対象処理などの Battle 仕様を MasterData 定義へ追従
 
 ---
 

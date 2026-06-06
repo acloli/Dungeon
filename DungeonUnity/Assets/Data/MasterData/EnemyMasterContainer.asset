@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06d8e68ec65a44d58af9e190d3b92f47, type: 3}
+  m_Name: EnemyMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.EnemyMasterContainer
+  _data:
+  - Id: 3001
+    Key: enemy_ash_cultist
+    Name: Ash Cultist
+    LocalizationKey: enemy.name.ash_cultist
+    EnemyTier: 2
+    HpMin: 48
+    HpMax: 54
+    GoldReward: 14
+    ActionPatternId: 4001
+  - Id: 3002
+    Key: enemy_gnaw_beast
+    Name: Gnaw Beast
+    LocalizationKey: enemy.name.gnaw_beast
+    EnemyTier: 2
+    HpMin: 40
+    HpMax: 44
+    GoldReward: 16
+    ActionPatternId: 4002
+  - Id: 3003
+    Key: enemy_red_mite
+    Name: Red Mite
+    LocalizationKey: enemy.name.red_mite
+    EnemyTier: 2
+    HpMin: 10
+    HpMax: 15
+    GoldReward: 11
+    ActionPatternId: 4003
+  - Id: 3004
+    Key: enemy_green_mite
+    Name: Green Mite
+    LocalizationKey: enemy.name.green_mite
+    EnemyTier: 2
+    HpMin: 11
+    HpMax: 17
+    GoldReward: 11
+    ActionPatternId: 4004
+  - Id: 3005
+    Key: enemy_mire_slime
+    Name: Mire Slime
+    LocalizationKey: enemy.name.mire_slime
+    EnemyTier: 2
+    HpMin: 28
+    HpMax: 32
+    GoldReward: 15
+    ActionPatternId: 4005
+  - Id: 3006
+    Key: enemy_nob_reaver
+    Name: Nob Reaver
+    LocalizationKey: enemy.name.nob_reaver
+    EnemyTier: 1
+    HpMin: 82
+    HpMax: 86
+    GoldReward: 30
+    ActionPatternId: 4006
+  - Id: 3007
+    Key: enemy_sludge_monarch
+    Name: Sludge Monarch
+    LocalizationKey: enemy.name.sludge_monarch
+    EnemyTier: 0
+    HpMin: 140
+    HpMax: 140
+    GoldReward: 100
+    ActionPatternId: 4007

@@ -6,7 +6,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
-using Dungeon.Runtime.InGame.Domain;
+using Game.MasterData.Generated;
 using NUnit.Framework;
 
 namespace Dungeon.Tests.EditMode
@@ -25,7 +25,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiCoordinator.InitializeCallCount, Is.EqualTo(1));
             Assert.That(uiCoordinator.ShowMapCallCount, Is.EqualTo(1));
@@ -41,26 +41,50 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
-            presenter.InitializeAsync(view, null, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnEndTurnClicked();
 
             Assert.That(flowService.EndTurnCallCount, Is.EqualTo(1));
             Assert.That(uiCoordinator.ShowBattleCallCount, Is.GreaterThanOrEqualTo(1));
         }
 
+        [Test]
+        public void InitializeAsync_BattleState_RendersIntentStatusAndBuffText()
+        {
+            BattleSceneSnapshot snapshot = CreateBattleSnapshotWithDisplayInfo();
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Status: 脆弱:2"));
+            Assert.That(view.BattlePageView.LastPlayerText, Does.Contain("Buff: 筋力:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Intent: 攻防"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("D7x2"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("B5"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status 脱力:2"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff 儀式:3"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status: 脱力:1"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: 儀式:3"));
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
                 page,
-                new List<MapTemplate.Node>(),
-                new List<CardDefinition>(),
-                new List<CardDefinition>(),
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeCard>(),
                 -1,
                 40,
                 40,
                 3,
+                0,
                 100,
                 null,
+                0,
                 0,
                 false,
                 -1,
@@ -69,6 +93,47 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result");
+        }
+
+        private static BattleSceneSnapshot CreateBattleSnapshotWithDisplayInfo()
+        {
+            return new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeCard>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                20,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                new BattleIntentViewModel(
+                    IntentType.AttackDefend,
+                    "攻防",
+                    7,
+                    2,
+                    5,
+                    StatusType.Weak,
+                    "脱力",
+                    2,
+                    BuffType.Ritual,
+                    "儀式",
+                    3),
+                new[] { new BattleStatusViewModel("脆弱", 2, false) },
+                new[] { new BattleStatusViewModel("脱力", 1, false) },
+                new[] { new BattleStatusViewModel("筋力", 1, true) },
+                new[] { new BattleStatusViewModel("儀式", 3, true) });
         }
 
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
@@ -82,7 +147,7 @@ namespace Dungeon.Tests.EditMode
 
             public int EndTurnCallCount { get; private set; }
 
-            public void Initialize(RunStartConfig runStartConfig)
+            public void Initialize(int runProfileId)
             {
             }
 
@@ -108,7 +173,7 @@ namespace Dungeon.Tests.EditMode
                 EndTurnCallCount++;
             }
 
-            public void SelectReward(CardDefinition card)
+            public void SelectReward(RuntimeCard card)
             {
             }
 
@@ -145,6 +210,9 @@ namespace Dungeon.Tests.EditMode
         private sealed class FakeBattlePageView : IBattlePageView
         {
             public int BuildCallCount { get; private set; }
+            public string LastPlayerText { get; private set; }
+            public string LastEnemyText { get; private set; }
+            public string LastHintText { get; private set; }
 
             public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
             {
@@ -156,9 +224,12 @@ namespace Dungeon.Tests.EditMode
 
             public void SetBattleStateText(string playerText, string enemyText, string hintText)
             {
+                LastPlayerText = playerText;
+                LastEnemyText = enemyText;
+                LastHintText = hintText;
             }
 
-            public void BuildHandButtons(IReadOnlyList<CardDefinition> hand, Action<int> onClicked)
+            public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
             {
                 BuildCallCount++;
             }
@@ -194,10 +265,10 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.CompletedTask;
             }
 
-            public UniTask<CardDefinition> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 LastSnapshot = snapshot;
-                return UniTask.FromResult<CardDefinition>(null);
+                return UniTask.FromResult<RuntimeCard>(null);
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

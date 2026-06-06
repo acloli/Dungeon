@@ -1,0 +1,159 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b27498d3687ec4c2fa9b0fe3258f286f, type: 3}
+  m_Name: CardEffectMasterContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.CardEffectMasterContainer
+  _data:
+  - Id: 2001
+    CardId: 1001
+    Order: 1
+    EffectType: 1
+    Value: 6
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2002
+    CardId: 1002
+    Order: 1
+    EffectType: 3
+    Value: 5
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2003
+    CardId: 1003
+    Order: 1
+    EffectType: 1
+    Value: 8
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2004
+    CardId: 1003
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 2
+    StatusValue: 2
+    TargetSide: 1
+  - Id: 2005
+    CardId: 1004
+    Order: 1
+    EffectType: 1
+    Value: 9
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2006
+    CardId: 1004
+    Order: 2
+    EffectType: 2
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2007
+    CardId: 1005
+    Order: 1
+    EffectType: 3
+    Value: 8
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2008
+    CardId: 1005
+    Order: 2
+    EffectType: 2
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2009
+    CardId: 1006
+    Order: 1
+    EffectType: 1
+    Value: 5
+    HitCount: 2
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2010
+    CardId: 1007
+    Order: 1
+    EffectType: 1
+    Value: 5
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2011
+    CardId: 1007
+    Order: 2
+    EffectType: 3
+    Value: 5
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2012
+    CardId: 1008
+    Order: 1
+    EffectType: 1
+    Value: 4
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 0
+  - Id: 2013
+    CardId: 1008
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 2
+    StatusValue: 1
+    TargetSide: 0
+  - Id: 2014
+    CardId: 1009
+    Order: 1
+    EffectType: 1
+    Value: 8
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 0
+  - Id: 2015
+    CardId: 1010
+    Order: 1
+    EffectType: 1
+    Value: 12
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2016
+    CardId: 1010
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 3
+    StatusValue: 2
+    TargetSide: 1

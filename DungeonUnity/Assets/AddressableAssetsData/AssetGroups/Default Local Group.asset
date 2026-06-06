@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 94d4af94a22b6406986ff7e11ae45e14
+    m_Address: TitleScene
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b9ec2f5e18a984f2bbd6ae791efc44df
     m_Address: UIRoot
     m_ReadOnly: 0
@@ -42,6 +47,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c09578c21cf9e46d7b2c96efe0b670ed
     m_Address: ResultDialog
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d56de4c1e0fcd40b69d89bfac36b5fae
+    m_Address: BattleScene
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fac8baafa220b418dbc42ee83243aaf5
+    m_Address: MainScene
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

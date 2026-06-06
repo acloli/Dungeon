@@ -5,3 +5,39 @@ ui.title.settings,設定,Settings,设置,設定,설정
 ui.message.complete,完了,Complete,完成,完成,완료
 ui.button.confirm,確認,Confirm,确认,確認,확인
 ui.button.cancel,キャンセル,Cancel,取消,取消,취소
+card.name.cinder_slash,シンダースラッシュ,Cinder Slash,余烬斩,餘燼斬,신더 슬래시
+card.name.ash_guard,アッシュガード,Ash Guard,灰烬壁垒,灰燼壁壘,애시 가드
+card.name.crystal_bash,クリスタルバッシュ,Crystal Bash,晶簇猛击,晶簇猛擊,크리스탈 배시
+card.name.ember_knuckle,エンバーナックル,Ember Knuckle,余火重拳,餘火重拳,엠버 너클
+card.name.shell_up,シェルアップ,Shell Up,甲壳架势,甲殼架勢,셸 업
+card.name.dual_fang,デュアルファング,Dual Fang,双牙连击,雙牙連擊,듀얼 팽
+card.name.iron_tide,アイアンタイド,Iron Tide,铁潮拍击,鐵潮拍擊,아이언 타이드
+card.name.storm_clap,ストームクラップ,Storm Clap,风暴震击,風暴震擊,스톰 클랩
+card.name.char_sweep,チャースイープ,Char Sweep,焦炭横扫,焦炭橫掃,숯먼지 휩쓸기
+card.name.grim_line,グリムライン,Grim Line,沉重打击,沉重打擊,그림 라인
+enemy.name.ash_cultist,アッシュカルティスト,Ash Cultist,灰烬邪教徒,灰燼邪教徒,애시 컬티스트
+enemy.name.gnaw_beast,噛みつき獣,Gnaw Beast,噬咬兽,噬咬獸,물어뜯는 야수
+enemy.name.red_mite,赤ダニ,Red Mite,赤螨,赤蟎,붉은 진드기
+enemy.name.green_mite,緑ダニ,Green Mite,绿螨,綠蟎,초록 진드기
+enemy.name.mire_slime,マイアスライム,Mire Slime,泥沼史莱姆,泥沼史萊姆,수렁 슬라임
+enemy.name.nob_reaver,ノブリーバー,Nob Reaver,豪腕掠夺者,豪腕掠奪者,노브 리버
+enemy.name.sludge_monarch,スラッジモナーク,Sludge Monarch,淤泥君王,淤泥君王,슬러지 모나크
+map.node.ruins_path_1,廃墟通路I,Ruins Path I,废墟通路I,廢墟通路I,폐허 통로 I
+map.node.cinder_rest,残り火の休息所,Cinder Rest,余烬营地,餘燼營地,잿불 휴식처
+map.node.ruins_path_2,廃墟通路II,Ruins Path II,废墟通路II,廢墟通路II,폐허 통로 II
+map.node.abyss_gate,深淵の門,Abyss Gate,深渊之门,深淵之門,심연의 문
+map.node.supply_post,前線補給所,Supply Post,前线补给站,前線補給站,전선 보급소
+map.node.throne_gate,玉座の門,Throne Gate,王座之门,王座之門,왕좌의 문
+battle.intent.attack,攻撃,Attack,攻击,攻擊,공격
+battle.intent.attack_debuff,攻撃弱体,Attack Debuff,攻击弱化,攻擊弱化,공격 약화
+battle.intent.attack_defend,攻防,Attack Defend,攻防,攻防,공방
+battle.intent.buff,強化,Buff,强化,強化,강화
+battle.intent.debuff,弱体,Debuff,弱化,弱化,약화
+battle.intent.idle,待機,Idle,待机,待機,대기
+battle.intent.special,特殊,Special,特殊,特殊,특수
+battle.status.weak,脱力,Weak,虚弱,虛弱,약화
+battle.status.vulnerable,脆弱,Vulnerable,易伤,易傷,취약
+battle.status.slimed,粘液,Slimed,黏液,黏液,점액
+battle.buff.strength,筋力,Strength,力量,力量,힘
+battle.buff.ritual,儀式,Ritual,仪式,儀式,의식
+battle.buff.enrage,激昂,Enrage,激怒,激怒,격노

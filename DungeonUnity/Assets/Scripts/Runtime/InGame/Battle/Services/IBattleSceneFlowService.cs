@@ -1,6 +1,4 @@
 using Dungeon.Runtime.InGame.Battle.Model;
-using Dungeon.Runtime.InGame.Domain;
-
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
     /// <summary>
@@ -11,7 +9,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// Run初期化
         /// </summary>
-        void Initialize(RunStartConfig runStartConfig);
+        void Initialize(int runProfileId);
 
         /// <summary>
         /// 現在状態取得
@@ -41,7 +39,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択
         /// </summary>
-        void SelectReward(CardDefinition card);
+        void SelectReward(RuntimeCard card);
 
         /// <summary>
         /// 休憩適用
