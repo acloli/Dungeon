@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec58e8a2850b34d288a2669468d75918, type: 3}
+  m_Name: EncounterFormationMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.EncounterFormationMasterContainer
+  _data:
+  - Id: 7001
+    Key: formation_ash_cultist
+    Name: Ash Cultist
+    NodeType: 0
+  - Id: 7002
+    Key: formation_gnaw_beast
+    Name: Gnaw Beast
+    NodeType: 0
+  - Id: 7003
+    Key: formation_mite_pair
+    Name: Mite Pair
+    NodeType: 0
+  - Id: 7004
+    Key: formation_mite_slime_pack
+    Name: Mite Slime Pack
+    NodeType: 0
+  - Id: 7005
+    Key: formation_mire_slime
+    Name: Mire Slime
+    NodeType: 0
+  - Id: 7006
+    Key: formation_nob_reaver
+    Name: Nob Reaver
+    NodeType: 2
+  - Id: 7007
+    Key: formation_sludge_monarch
+    Name: Sludge Monarch
+    NodeType: 1

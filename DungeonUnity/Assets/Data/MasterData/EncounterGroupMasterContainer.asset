@@ -15,36 +15,36 @@ MonoBehaviour:
   _data:
   - Id: 5201
     EncounterGroupId: 6201
-    EnemyId: 3001
+    FormationId: 7001
     Weight: 20
     NodeType: 0
   - Id: 5202
     EncounterGroupId: 6201
-    EnemyId: 3002
+    FormationId: 7002
     Weight: 20
     NodeType: 0
   - Id: 5203
     EncounterGroupId: 6201
-    EnemyId: 3003
+    FormationId: 7003
     Weight: 15
     NodeType: 0
   - Id: 5204
     EncounterGroupId: 6201
-    EnemyId: 3004
+    FormationId: 7004
     Weight: 15
     NodeType: 0
   - Id: 5205
     EncounterGroupId: 6201
-    EnemyId: 3005
+    FormationId: 7005
     Weight: 20
     NodeType: 0
   - Id: 5206
     EncounterGroupId: 6202
-    EnemyId: 3006
+    FormationId: 7006
     Weight: 100
     NodeType: 2
   - Id: 5207
     EncounterGroupId: 6203
-    EnemyId: 3007
+    FormationId: 7007
     Weight: 100
     NodeType: 1
