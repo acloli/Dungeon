@@ -32,6 +32,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void SelectEnemyTarget(int index);
 
         /// <summary>
+        /// 選択カードが敵個別対象を必要とするか
+        /// </summary>
+        bool DoesSelectedCardRequireEnemyTarget();
+
+        /// <summary>
         /// 選択カード使用
         /// </summary>
         void TryPlaySelectedCard();

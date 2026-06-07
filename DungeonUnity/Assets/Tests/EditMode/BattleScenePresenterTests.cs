@@ -49,6 +49,38 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void OnHandCardClicked_WhenCardDoesNotRequireEnemyTarget_PlaysSelectedCard()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            flowService.DoesSelectedCardRequireEnemyTargetResult = false;
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.OnHandCardClicked(0);
+
+            Assert.That(flowService.SelectHandCardCallCount, Is.EqualTo(1));
+            Assert.That(flowService.TryPlaySelectedCardCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void OnHandCardClicked_WhenCardRequiresEnemyTarget_DoesNotPlaySelectedCard()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            flowService.DoesSelectedCardRequireEnemyTargetResult = true;
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.OnHandCardClicked(0);
+
+            Assert.That(flowService.SelectHandCardCallCount, Is.EqualTo(1));
+            Assert.That(flowService.TryPlaySelectedCardCallCount, Is.EqualTo(0));
+        }
+
+        [Test]
         public void InitializeAsync_BattleState_RendersIntentStatusAndBuffText()
         {
             BattleSceneSnapshot snapshot = CreateBattleSnapshotWithDisplayInfo();
@@ -146,6 +178,9 @@ namespace Dungeon.Tests.EditMode
             }
 
             public int EndTurnCallCount { get; private set; }
+            public int SelectHandCardCallCount { get; private set; }
+            public int TryPlaySelectedCardCallCount { get; private set; }
+            public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
 
             public void Initialize(int runProfileId)
             {
@@ -162,10 +197,17 @@ namespace Dungeon.Tests.EditMode
 
             public void SelectHandCard(int index)
             {
+                SelectHandCardCallCount++;
             }
 
             public void TryPlaySelectedCard()
             {
+                TryPlaySelectedCardCallCount++;
+            }
+
+            public bool DoesSelectedCardRequireEnemyTarget()
+            {
+                return DoesSelectedCardRequireEnemyTargetResult;
             }
 
             public void EndTurn()

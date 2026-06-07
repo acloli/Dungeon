@@ -152,6 +152,34 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 選択カードが敵個別対象を必要とするか
+        /// </summary>
+        public bool DoesSelectedCardRequireEnemyTarget()
+        {
+            if (_state.SelectedCardIndex < 0 || _state.SelectedCardIndex >= _state.Hand.Count)
+            {
+                return false;
+            }
+
+            RuntimeCard card = _state.Hand[_state.SelectedCardIndex];
+            if (card == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < card.Effects.Count; i++)
+            {
+                RuntimeCardEffect effect = card.Effects[i];
+                if (effect.TargetSide == TargetSide.Enemy)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// 選択カード使用処理
         /// </summary>
         public void TryPlaySelectedCard()

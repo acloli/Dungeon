@@ -72,6 +72,10 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnHandCardClicked(int index)
         {
             _flowService.SelectHandCard(index);
+            if (!_flowService.DoesSelectedCardRequireEnemyTarget())
+            {
+                _flowService.TryPlaySelectedCard();
+            }
             RenderAsync(_presenterCts.Token).Forget();
         }
 

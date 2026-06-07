@@ -208,6 +208,56 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void DoesSelectedCardRequireEnemyTarget_TargetSideEnemy_ReturnsTrue()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { CreateCard(1001, "Strike", 1, 6) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.True);
+        }
+
+        [Test]
+        public void DoesSelectedCardRequireEnemyTarget_AllEnemies_ReturnsFalse()
+        {
+            RuntimeCard sweep = CreateCard(1001, "Sweep", 1, 12, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, 12, 1, StatusType.None, 0, TargetSide.AllEnemies)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { sweep });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.False);
+        }
+
+        [Test]
+        public void DoesSelectedCardRequireEnemyTarget_Self_ReturnsFalse()
+        {
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.False);
+        }
+
+        [Test]
         public void TryPlaySelectedCard_AllEnemies_DamagesAllAndRewardsAfterAllDefeated()
         {
             RuntimeCard sweep = CreateCard(1001, "Sweep", 1, 12, new[]
