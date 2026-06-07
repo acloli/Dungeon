@@ -192,6 +192,10 @@ namespace Dungeon.Tests.EditMode
             public void ContinueFromRestShop()
             {
             }
+
+            public void SelectEnemyTarget(int index)
+            {
+            }
         }
 
         private sealed class FakeBattleSceneHostView : IBattleSceneHostView
@@ -214,7 +218,7 @@ namespace Dungeon.Tests.EditMode
             public string LastEnemyText { get; private set; }
             public string LastHintText { get; private set; }
 
-            public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
+            public void WireButtons(Action onEndTurnClicked)
             {
             }
 
@@ -232,6 +236,10 @@ namespace Dungeon.Tests.EditMode
             public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
             {
                 BuildCallCount++;
+            }
+
+            public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)
+            {
             }
 
             public void ClearDynamicButtons()
