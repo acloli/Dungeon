@@ -30,9 +30,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string MapStateFormat = "HP {0}/{1}  Gold {2}  Next {3}/{4}";
         public const string PlayerStateFormat = "Player HP {0}/{1}  Block {2}  Energy {3}  Gold {4}";
         public const string EnemyStateFormat = "{0} HP {1}  Block {2}";
-        public const string EnemyTargetButtonFormat = "{0}[{1}] {2} HP {3} B{4}";
-        public const string EnemyTargetButtonIntentFormat = "{0}  {1}";
+        public const string EnemyTargetButtonFormat = "{0}[{1}] {2}\nHP {3}  Block {4}";
+        public const string EnemyTargetButtonIntentFormat = "{0}\nIntent {1}";
         public const string DefeatedEnemyLabel = "Defeated";
+        public const string SelectedEnemyMarker = ">";
         public const string IntentLabelFormat = "Intent: {0}";
         public const string IntentDamageFormat = " D{0}x{1}";
         public const string IntentBlockFormat = " B{0}";

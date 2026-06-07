@@ -94,31 +94,13 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         private static string BuildEnemyText(BattleSceneSnapshot snapshot)
         {
-            StringBuilder builder = new StringBuilder();
-            if (snapshot.Enemies != null && snapshot.Enemies.Count > 0)
+            BattleEnemyViewModel selectedEnemy = FindSelectedEnemy(snapshot);
+            if (selectedEnemy != null)
             {
-                for (int i = 0; i < snapshot.Enemies.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        builder.AppendLine();
-                    }
-
-                    BattleEnemyViewModel enemy = snapshot.Enemies[i];
-                    string marker = i == snapshot.SelectedEnemyIndex ? ">" : string.Empty;
-                    builder.AppendFormat(
-                        BattleSceneConstants.EnemyStateFormat,
-                        $"{marker}{enemy.DisplayName}",
-                        enemy.Hp,
-                        enemy.Block);
-                    AppendIntentLine(builder, enemy.Intent);
-                    AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
-                    AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
-                }
-
-                return builder.ToString();
+                return BuildEnemyViewText(selectedEnemy);
             }
 
+            StringBuilder builder = new StringBuilder();
             builder.AppendFormat(
                 BattleSceneConstants.EnemyStateFormat,
                 snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : BattleSceneConstants.UnknownEnemyName,
@@ -127,6 +109,41 @@ namespace Dungeon.Runtime.InGame.Battle
             AppendIntentLine(builder, snapshot.EnemyIntent);
             AppendStatusLine(builder, BattleSceneConstants.StatusLabel, snapshot.EnemyStatuses);
             AppendStatusLine(builder, BattleSceneConstants.BuffLabel, snapshot.EnemyBuffs);
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 選択中敵表示モデル取得
+        /// </summary>
+        private static BattleEnemyViewModel FindSelectedEnemy(BattleSceneSnapshot snapshot)
+        {
+            if (snapshot.Enemies == null || snapshot.Enemies.Count == 0)
+            {
+                return null;
+            }
+
+            if (snapshot.SelectedEnemyIndex >= 0 && snapshot.SelectedEnemyIndex < snapshot.Enemies.Count)
+            {
+                return snapshot.Enemies[snapshot.SelectedEnemyIndex];
+            }
+
+            return snapshot.Enemies[0];
+        }
+
+        /// <summary>
+        /// 敵詳細表示文言構築
+        /// </summary>
+        private static string BuildEnemyViewText(BattleEnemyViewModel enemy)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat(
+                BattleSceneConstants.EnemyStateFormat,
+                enemy.DisplayName,
+                enemy.Hp,
+                enemy.Block);
+            AppendIntentLine(builder, enemy.Intent);
+            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
+            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
             return builder.ToString();
         }
 

@@ -102,6 +102,22 @@ namespace Dungeon.Tests.EditMode
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: 儀式:3"));
         }
 
+        [Test]
+        public void InitializeAsync_MultiEnemyBattleState_RendersSelectedEnemyTextOnly()
+        {
+            BattleSceneSnapshot snapshot = CreateMultiEnemySnapshot();
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Green Mite"));
+            Assert.That(view.BattlePageView.LastEnemyText, Does.Not.Contain("Red Mite"));
+            Assert.That(view.BattlePageView.LastEnemyButtonCount, Is.EqualTo(2));
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -166,6 +182,42 @@ namespace Dungeon.Tests.EditMode
                 new[] { new BattleStatusViewModel("脱力", 1, false) },
                 new[] { new BattleStatusViewModel("筋力", 1, true) },
                 new[] { new BattleStatusViewModel("儀式", 3, true) });
+        }
+
+        private static BattleSceneSnapshot CreateMultiEnemySnapshot()
+        {
+            return new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeCard>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                null,
+                Array.Empty<BattleStatusViewModel>(),
+                Array.Empty<BattleStatusViewModel>(),
+                Array.Empty<BattleStatusViewModel>(),
+                Array.Empty<BattleStatusViewModel>(),
+                new[]
+                {
+                    new BattleEnemyViewModel(0, "Red Mite", 12, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>()),
+                    new BattleEnemyViewModel(1, "Green Mite", 8, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>())
+                },
+                1);
         }
 
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
@@ -256,6 +308,7 @@ namespace Dungeon.Tests.EditMode
         private sealed class FakeBattlePageView : IBattlePageView
         {
             public int BuildCallCount { get; private set; }
+            public int LastEnemyButtonCount { get; private set; }
             public string LastPlayerText { get; private set; }
             public string LastEnemyText { get; private set; }
             public string LastHintText { get; private set; }
@@ -282,6 +335,7 @@ namespace Dungeon.Tests.EditMode
 
             public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)
             {
+                LastEnemyButtonCount = enemies.Count;
             }
 
             public void ClearDynamicButtons()
