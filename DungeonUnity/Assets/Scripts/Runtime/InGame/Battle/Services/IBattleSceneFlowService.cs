@@ -27,6 +27,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void SelectHandCard(int index);
 
         /// <summary>
+        /// 敵対象選択
+        /// </summary>
+        void SelectEnemyTarget(int index);
+
+        /// <summary>
         /// 選択カード使用
         /// </summary>
         void TryPlaySelectedCard();

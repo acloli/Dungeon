@@ -275,6 +275,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             List<RuntimeEncounterEntry> entries = new List<RuntimeEncounterEntry>();
             IReadOnlyList<EncounterGroupMaster> encounterMasters = _masterDataService.GetAll<EncounterGroupMaster>();
+            IReadOnlyDictionary<int, RuntimeEncounterFormation> formationCatalog = BuildFormationCatalog(enemyCatalog);
             for (int i = 0; i < encounterMasters.Count; i++)
             {
                 EncounterGroupMaster master = encounterMasters[i];
@@ -283,15 +284,46 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                if (!enemyCatalog.TryGetValue(master.EnemyId, out RuntimeEnemy enemy))
+                if (!formationCatalog.TryGetValue(master.FormationId, out RuntimeEncounterFormation formation))
                 {
                     continue;
                 }
 
-                entries.Add(new RuntimeEncounterEntry(enemy, master.Weight));
+                entries.Add(new RuntimeEncounterEntry(formation, master.Weight));
             }
 
             return entries;
+        }
+
+        /// <summary>
+        /// 敵編成辞書を構築する
+        /// </summary>
+        private IReadOnlyDictionary<int, RuntimeEncounterFormation> BuildFormationCatalog(IReadOnlyDictionary<int, RuntimeEnemy> enemyCatalog)
+        {
+            Dictionary<int, List<RuntimeEncounterEnemyEntry>> enemiesByFormationId = _masterDataService.GetAll<EncounterFormationEnemyMaster>()
+                .GroupBy(entry => entry.FormationId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderBy(entry => entry.SlotIndex)
+                        .Where(entry => enemyCatalog.ContainsKey(entry.EnemyId))
+                        .Select(entry => new RuntimeEncounterEnemyEntry(enemyCatalog[entry.EnemyId], entry.SlotIndex))
+                        .ToList());
+
+            Dictionary<int, RuntimeEncounterFormation> formations = new Dictionary<int, RuntimeEncounterFormation>();
+            IReadOnlyList<EncounterFormationMaster> formationMasters = _masterDataService.GetAll<EncounterFormationMaster>();
+            for (int i = 0; i < formationMasters.Count; i++)
+            {
+                EncounterFormationMaster master = formationMasters[i];
+                enemiesByFormationId.TryGetValue(master.Id, out List<RuntimeEncounterEnemyEntry> enemies);
+                formations[master.Id] = new RuntimeEncounterFormation(
+                    master.Id,
+                    master.Key,
+                    master.Name,
+                    enemies ?? new List<RuntimeEncounterEnemyEntry>());
+            }
+
+            return formations;
         }
 
         /// <summary>

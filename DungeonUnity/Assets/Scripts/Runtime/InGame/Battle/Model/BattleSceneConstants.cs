@@ -11,6 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const int DefaultEnemyHp = 20;
         public const int DefaultNodeIndex = -1;
         public const int UnselectedCardIndex = -1;
+        public const int DefaultEnemyTargetIndex = 0;
         public const int DefaultRewardChoiceCount = 3;
         public const int RestHealAmount = 12;
         public const int ShopPurchaseCost = 50;
@@ -46,6 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string GainBlockFormat = "Gained {0} block.";
         public const string CardResolvedFormat = "Used {0}.";
         public const string CardSelectedFormat = "Selected {0}, click enemy target.";
+        public const string EnemyTargetSelectedFormat = "Target {0}.";
         public const string SelectCardFirst = "Select a card first.";
         public const string SelectCardAndTarget = "Select a card, then click enemy target.";
         public const string NotEnoughEnergy = "Not enough energy.";

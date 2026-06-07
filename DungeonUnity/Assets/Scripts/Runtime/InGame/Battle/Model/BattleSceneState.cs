@@ -12,6 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> RewardChoices { get; } = new List<RuntimeCard>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
+        public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();
@@ -29,6 +30,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int EnemyBlock { get; set; }
         public bool BattleFinished { get; set; }
         public int SelectedCardIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public int SelectedEnemyIndex { get; set; } = BattleSceneConstants.DefaultEnemyTargetIndex;
         public bool IsRestShopContinueEnabled { get; set; }
         public int EnemyTurnCount { get; set; }
         public int EnemyCycleIndex { get; set; }

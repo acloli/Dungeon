@@ -21,17 +21,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Button _endTurnButton;
 
         private readonly List<BattleOptionButtonView> _handButtons = new List<BattleOptionButtonView>();
+        private readonly List<Button> _enemyButtons = new List<Button>();
 
         /// <summary>
         /// 固定ボタン登録
         /// </summary>
-        public void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked)
+        public void WireButtons(Action onEndTurnClicked)
         {
             UnwireButtons();
-            if (_enemyTargetButton != null)
-            {
-                _enemyTargetButton.onClick.AddListener(() => onEnemyTargetClicked?.Invoke());
-            }
             if (_endTurnButton != null)
             {
                 _endTurnButton.onClick.AddListener(() => onEndTurnClicked?.Invoke());
@@ -50,6 +47,39 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_endTurnButton != null)
             {
                 _endTurnButton.onClick.RemoveAllListeners();
+            }
+        }
+
+        /// <summary>
+        /// 敵対象ボタン構築
+        /// </summary>
+        public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)
+        {
+            ClearEnemyButtons();
+            if (_enemyTargetButton == null || enemies == null)
+            {
+                return;
+            }
+
+            _enemyTargetButton.gameObject.SetActive(false);
+            Transform root = _enemyTargetButton.transform.parent;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                int enemyIndex = i;
+                BattleEnemyViewModel enemy = enemies[enemyIndex];
+                Button button = Instantiate(_enemyTargetButton, root);
+                button.gameObject.SetActive(true);
+                button.interactable = !enemy.IsDefeated;
+                TFTextUGUI label = button.GetComponentInChildren<TFTextUGUI>();
+                if (label != null)
+                {
+                    string marker = enemyIndex == selectedEnemyIndex ? ">" : string.Empty;
+                    string state = enemy.IsDefeated ? "Defeated" : $"{enemy.Hp}";
+                    label.text = $"{marker}{enemy.DisplayName} HP {state}";
+                }
+
+                button.onClick.AddListener(() => onClicked?.Invoke(enemyIndex));
+                _enemyButtons.Add(button);
             }
         }
 
@@ -77,7 +107,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// </summary>
         public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
         {
-            ClearDynamicButtons();
+            ClearButtons(_handButtons);
 
             if (_handCardRoot == null || _handCardButtonTemplate == null || hand == null)
             {
@@ -108,6 +138,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         public void ClearDynamicButtons()
         {
             ClearButtons(_handButtons);
+            ClearEnemyButtons();
         }
 
         /// <summary>
@@ -128,6 +159,26 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
+        }
+
+        /// <summary>
+        /// 敵対象ボタン消去
+        /// </summary>
+        private void ClearEnemyButtons()
+        {
+            for (int i = 0; i < _enemyButtons.Count; i++)
+            {
+                Button button = _enemyButtons[i];
+                if (button == null)
+                {
+                    continue;
+                }
+
+                button.onClick.RemoveAllListeners();
+                Destroy(button.gameObject);
+            }
+
+            _enemyButtons.Clear();
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
@@ -50,5 +52,40 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string Name { get; }
         public int Value { get; }
         public bool IsBuff { get; }
+    }
+
+    /// <summary>
+    /// 敵表示用モデル
+    /// </summary>
+    public sealed class BattleEnemyViewModel
+    {
+        public BattleEnemyViewModel(
+            int slotIndex,
+            string displayName,
+            int hp,
+            int block,
+            bool isDefeated,
+            BattleIntentViewModel intent,
+            IReadOnlyList<BattleStatusViewModel> statuses,
+            IReadOnlyList<BattleStatusViewModel> buffs)
+        {
+            SlotIndex = slotIndex;
+            DisplayName = displayName;
+            Hp = hp;
+            Block = block;
+            IsDefeated = isDefeated;
+            Intent = intent;
+            Statuses = statuses ?? Array.Empty<BattleStatusViewModel>();
+            Buffs = buffs ?? Array.Empty<BattleStatusViewModel>();
+        }
+
+        public int SlotIndex { get; }
+        public string DisplayName { get; }
+        public int Hp { get; }
+        public int Block { get; }
+        public bool IsDefeated { get; }
+        public BattleIntentViewModel Intent { get; }
+        public IReadOnlyList<BattleStatusViewModel> Statuses { get; }
+        public IReadOnlyList<BattleStatusViewModel> Buffs { get; }
     }
 }

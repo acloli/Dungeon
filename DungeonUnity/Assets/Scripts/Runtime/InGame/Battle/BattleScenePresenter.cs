@@ -78,8 +78,9 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 敵対象クリック通知
         /// </summary>
-        public void OnEnemyTargetClicked()
+        public void OnEnemyTargetClicked(int index)
         {
+            _flowService.SelectEnemyTarget(index);
             _flowService.TryPlaySelectedCard();
             RenderAsync(_presenterCts.Token).Forget();
         }

@@ -13,19 +13,19 @@ namespace Dungeon.Runtime.InGame.Battle
     {
         private IBattlePageView _view;
         private Action<int> _onHandCardClicked;
-        private Action _onEnemyTargetClicked;
+        private Action<int> _onEnemyTargetClicked;
         private Action _onEndTurnClicked;
 
         /// <summary>
-        /// View 接続初期化
+        /// View接続初期化
         /// </summary>
-        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action onEnemyTargetClicked, Action onEndTurnClicked)
+        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked)
         {
             _view = view;
             _onHandCardClicked = onHandCardClicked;
             _onEnemyTargetClicked = onEnemyTargetClicked;
             _onEndTurnClicked = onEndTurnClicked;
-            _view.WireButtons(_onEnemyTargetClicked, _onEndTurnClicked);
+            _view.WireButtons(_onEndTurnClicked);
         }
 
         /// <summary>
@@ -39,6 +39,7 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             _view.BuildHandButtons(snapshot.Hand, _onHandCardClicked);
+            _view.BuildEnemyButtons(snapshot.Enemies, snapshot.SelectedEnemyIndex, _onEnemyTargetClicked);
             _view.SetBattleStateText(
                 BuildPlayerText(snapshot),
                 BuildEnemyText(snapshot),
@@ -94,6 +95,30 @@ namespace Dungeon.Runtime.InGame.Battle
         private static string BuildEnemyText(BattleSceneSnapshot snapshot)
         {
             StringBuilder builder = new StringBuilder();
+            if (snapshot.Enemies != null && snapshot.Enemies.Count > 0)
+            {
+                for (int i = 0; i < snapshot.Enemies.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        builder.AppendLine();
+                    }
+
+                    BattleEnemyViewModel enemy = snapshot.Enemies[i];
+                    string marker = i == snapshot.SelectedEnemyIndex ? ">" : string.Empty;
+                    builder.AppendFormat(
+                        BattleSceneConstants.EnemyStateFormat,
+                        $"{marker}{enemy.DisplayName}",
+                        enemy.Hp,
+                        enemy.Block);
+                    AppendIntentLine(builder, enemy.Intent);
+                    AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
+                    AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
+                }
+
+                return builder.ToString();
+            }
+
             builder.AppendFormat(
                 BattleSceneConstants.EnemyStateFormat,
                 snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : BattleSceneConstants.UnknownEnemyName,

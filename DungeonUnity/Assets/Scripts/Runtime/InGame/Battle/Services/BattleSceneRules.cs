@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
 using Game.MasterData.Generated;
@@ -8,12 +9,12 @@ using UnityEngine;
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
     /// <summary>
-    /// BattleScene の基本ルールクラス
+    /// BattleScene基本ルールクラス
     /// </summary>
     public sealed class BattleSceneRules : IBattleSceneRules
     {
         /// <summary>
-        /// Run 状態初期化
+        /// Run状態初期化
         /// </summary>
         public void InitializeRun(BattleSceneState state, RuntimeRunDefinition runDefinition)
         {
@@ -31,10 +32,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.CurrentEnemy = null;
             state.EnemyHp = 0;
             state.EnemyBlock = 0;
+            state.Enemies.Clear();
             state.BattleFinished = false;
             state.EnemyTurnCount = 0;
             state.EnemyCycleIndex = 0;
             state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            state.SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
             state.RewardChoices.Clear();
             state.Deck.Clear();
             state.Hand.Clear();
@@ -84,18 +87,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵選出
         /// </summary>
-        public RuntimeEnemy SelectEnemy(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider)
+        public RuntimeEncounterFormation SelectEncounterFormation(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider)
         {
             if (runDefinition == null ||
                 !runDefinition.EncountersByNodeType.TryGetValue(nodeType, out IReadOnlyList<RuntimeEncounterEntry> encounters) ||
                 encounters == null ||
                 encounters.Count == 0)
             {
-                return CreateFallbackEnemy(nodeType);
+                return CreateFallbackFormation(nodeType);
             }
 
             RuntimeEncounterEntry selected = SelectWeightedEntry(encounters, randomProvider);
-            return selected != null ? selected.Enemy : CreateFallbackEnemy(nodeType);
+            return selected != null ? selected.Formation : CreateFallbackFormation(nodeType);
         }
 
         /// <summary>
@@ -152,7 +155,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return rewards;
             }
 
-            // 報酬定義が不足している場合は、現在デッキから重複を避けて補完する。
+            // 報酬定義が不足している場合は現在デッキから重複を避けて補完する
             HashSet<int> pickedCardIds = new HashSet<int>();
             for (int i = 0; i < state.Deck.Count && rewards.Count < BattleSceneConstants.DefaultRewardChoiceCount; i++)
             {
@@ -191,6 +194,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return default;
             }
 
+            NormalizeSelectedEnemyIndex(state);
             state.PlayerEnergy -= card.Cost;
 
             int totalDamage = 0;
@@ -227,36 +231,48 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state, IBattleRandomProvider randomProvider)
         {
-            if (state == null || state.CurrentEnemy == null)
+            if (state == null || state.Enemies.Count == 0)
             {
                 return default;
             }
 
-            // プレイヤーターン終了時点で切れる状態を先に整理する。
+            // プレイヤーターン終了時点で切れる状態を先に整理する
             TickExpiringStatuses(state.PlayerStatuses);
-            state.EnemyBlock = 0;
 
-            RuntimeEnemyAction action = SelectEnemyAction(state, randomProvider);
-            if (action == null)
+            RuntimeEnemyAction lastAction = null;
+            int totalDamage = 0;
+            List<BattleEnemyState> orderedEnemies = state.Enemies
+                .Where(enemy => enemy != null && !enemy.IsDefeated)
+                .OrderBy(enemy => enemy.SlotIndex)
+                .ToList();
+            for (int i = 0; i < orderedEnemies.Count; i++)
             {
-                state.PlayerBlock = 0;
-                return default;
+                BattleEnemyState enemyState = orderedEnemies[i];
+                enemyState.Block = 0;
+                RuntimeEnemyAction action = SelectEnemyAction(enemyState, randomProvider);
+                if (action == null)
+                {
+                    continue;
+                }
+
+                totalDamage += ResolveEnemyDamage(state, enemyState, action);
+                if (action.Block > 0)
+                {
+                    enemyState.Block += action.Block;
+                }
+
+                ApplyStatus(state.PlayerStatuses, action.StatusType, action.StatusValue);
+                ApplyBuff(enemyState.Buffs, action.BuffType, action.BuffValue);
+
+                enemyState.TurnCount++;
+                TickExpiringStatuses(enemyState.Statuses);
+                lastAction = action;
             }
 
-            int damageDealt = ResolveEnemyDamage(state, action);
-            if (action.Block > 0)
-            {
-                state.EnemyBlock += action.Block;
-            }
-
-            ApplyStatus(state.PlayerStatuses, action.StatusType, action.StatusValue);
-            ApplyBuff(state.EnemyBuffs, action.BuffType, action.BuffValue);
-
-            state.EnemyTurnCount++;
-            TickExpiringStatuses(state.EnemyStatuses);
             state.PlayerBlock = 0;
+            SyncPrimaryEnemyState(state);
 
-            return new BattleEnemyTurnResult(action, damageDealt);
+            return new BattleEnemyTurnResult(lastAction, totalDamage);
         }
 
         /// <summary>
@@ -300,13 +316,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             int hitCount = Math.Max(1, effect.HitCount);
             int totalDamage = 0;
-            for (int i = 0; i < hitCount; i++)
+            foreach (BattleEnemyState enemyState in GetTargetEnemies(state, effect.TargetSide))
             {
-                int damage = ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses, state.PlayerBuffs);
-                damage = ApplyIncomingModifiers(damage, state.EnemyStatuses);
-                totalDamage += ApplyDamageToEnemy(state, damage);
+                for (int i = 0; i < hitCount; i++)
+                {
+                    int damage = ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses, state.PlayerBuffs);
+                    damage = ApplyIncomingModifiers(damage, enemyState.Statuses);
+                    totalDamage += ApplyDamageToEnemy(state, enemyState, damage);
+                }
             }
 
+            SyncPrimaryEnemyState(state);
             return totalDamage;
         }
 
@@ -321,22 +341,24 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            if (effect.TargetSide == TargetSide.Enemy || effect.TargetSide == TargetSide.AllEnemies)
+            foreach (BattleEnemyState enemyState in GetTargetEnemies(state, effect.TargetSide))
             {
-                ApplyStatus(state.EnemyStatuses, effect.StatusType, effect.StatusValue);
+                ApplyStatus(enemyState.Statuses, effect.StatusType, effect.StatusValue);
             }
+
+            SyncPrimaryEnemyState(state);
         }
 
         /// <summary>
         /// 敵のダメージ行動を解決する
         /// </summary>
-        private static int ResolveEnemyDamage(BattleSceneState state, RuntimeEnemyAction action)
+        private static int ResolveEnemyDamage(BattleSceneState state, BattleEnemyState enemyState, RuntimeEnemyAction action)
         {
             int hitCount = Math.Max(1, action.HitCount);
             int totalDamage = 0;
             for (int i = 0; i < hitCount; i++)
             {
-                int damage = ApplyOutgoingModifiers(action.Damage, state.EnemyStatuses, state.EnemyBuffs);
+                int damage = ApplyOutgoingModifiers(action.Damage, enemyState.Statuses, enemyState.Buffs);
                 damage = ApplyIncomingModifiers(damage, state.PlayerStatuses);
                 totalDamage += ApplyDamageToPlayer(state, damage);
             }
@@ -358,11 +380,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵へのダメージをBlock込みで適用する
         /// </summary>
-        private static int ApplyDamageToEnemy(BattleSceneState state, int damage)
+        private static int ApplyDamageToEnemy(BattleSceneState state, BattleEnemyState enemyState, int damage)
         {
-            int remainingDamage = Mathf.Max(0, damage - state.EnemyBlock);
-            state.EnemyBlock = Mathf.Max(0, state.EnemyBlock - damage);
-            state.EnemyHp -= remainingDamage;
+            int remainingDamage = Mathf.Max(0, damage - enemyState.Block);
+            enemyState.Block = Mathf.Max(0, enemyState.Block - damage);
+            enemyState.Hp -= remainingDamage;
+            if (enemyState.Hp <= 0)
+            {
+                enemyState.Hp = 0;
+                enemyState.IsDefeated = true;
+                NormalizeSelectedEnemyIndex(state);
+            }
+
             return remainingDamage;
         }
 
@@ -541,28 +570,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 現在の敵行動を選出する
         /// </summary>
-        private static RuntimeEnemyAction SelectEnemyAction(BattleSceneState state, IBattleRandomProvider randomProvider)
+        private static RuntimeEnemyAction SelectEnemyAction(BattleEnemyState enemyState, IBattleRandomProvider randomProvider)
         {
-            IReadOnlyList<RuntimeEnemyAction> actions = state.CurrentEnemy.Actions;
+            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
             if (actions == null || actions.Count == 0)
             {
                 return null;
             }
 
             List<RuntimeEnemyAction> openingActions = FilterActions(actions, RepeatRule.OpeningOnly);
-            if (state.EnemyTurnCount == 0 && openingActions.Count > 0)
+            if (enemyState.TurnCount == 0 && openingActions.Count > 0)
             {
                 return openingActions[0];
             }
 
             List<RuntimeEnemyAction> repeatActions = FilterActions(actions, RepeatRule.RepeatAfterOpening);
-            if (state.EnemyTurnCount > 0 && repeatActions.Count > 0)
+            if (enemyState.TurnCount > 0 && repeatActions.Count > 0)
             {
                 return repeatActions[0];
             }
 
             List<RuntimeEnemyAction> afterOpeningRandomActions = FilterActions(actions, RepeatRule.AfterOpeningRandom);
-            if (state.EnemyTurnCount > 0 && afterOpeningRandomActions.Count > 0)
+            if (enemyState.TurnCount > 0 && afterOpeningRandomActions.Count > 0)
             {
                 int index = randomProvider.Range(0, afterOpeningRandomActions.Count);
                 return afterOpeningRandomActions[index];
@@ -578,12 +607,123 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             List<RuntimeEnemyAction> cycleActions = FilterActions(actions, RepeatRule.Cycle);
             if (cycleActions.Count > 0)
             {
-                RuntimeEnemyAction selected = cycleActions[state.EnemyCycleIndex % cycleActions.Count];
-                state.EnemyCycleIndex++;
+                RuntimeEnemyAction selected = cycleActions[enemyState.CycleIndex % cycleActions.Count];
+                enemyState.CycleIndex++;
                 return selected;
             }
 
             return actions[0];
+        }
+
+        /// <summary>
+        /// 効果対象の敵一覧取得
+        /// </summary>
+        private static IEnumerable<BattleEnemyState> GetTargetEnemies(BattleSceneState state, TargetSide targetSide)
+        {
+            if (state == null)
+            {
+                yield break;
+            }
+
+            if (targetSide == TargetSide.AllEnemies)
+            {
+                for (int i = 0; i < state.Enemies.Count; i++)
+                {
+                    BattleEnemyState enemyState = state.Enemies[i];
+                    if (enemyState != null && !enemyState.IsDefeated)
+                    {
+                        yield return enemyState;
+                    }
+                }
+
+                yield break;
+            }
+
+            BattleEnemyState selectedEnemy = GetSelectedEnemy(state);
+            if (selectedEnemy != null)
+            {
+                yield return selectedEnemy;
+            }
+        }
+
+        /// <summary>
+        /// 選択中の生存敵取得
+        /// </summary>
+        private static BattleEnemyState GetSelectedEnemy(BattleSceneState state)
+        {
+            NormalizeSelectedEnemyIndex(state);
+            if (state.SelectedEnemyIndex < 0 || state.SelectedEnemyIndex >= state.Enemies.Count)
+            {
+                return null;
+            }
+
+            BattleEnemyState enemyState = state.Enemies[state.SelectedEnemyIndex];
+            return enemyState != null && !enemyState.IsDefeated ? enemyState : null;
+        }
+
+        /// <summary>
+        /// 敵選択を生存敵へ補正する
+        /// </summary>
+        private static void NormalizeSelectedEnemyIndex(BattleSceneState state)
+        {
+            if (state == null || state.Enemies.Count == 0)
+            {
+                return;
+            }
+
+            if (state.SelectedEnemyIndex >= 0 &&
+                state.SelectedEnemyIndex < state.Enemies.Count &&
+                state.Enemies[state.SelectedEnemyIndex] != null &&
+                !state.Enemies[state.SelectedEnemyIndex].IsDefeated)
+            {
+                return;
+            }
+
+            for (int i = 0; i < state.Enemies.Count; i++)
+            {
+                if (state.Enemies[i] != null && !state.Enemies[i].IsDefeated)
+                {
+                    state.SelectedEnemyIndex = i;
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 単体敵表示互換用stateを同期する
+        /// </summary>
+        private static void SyncPrimaryEnemyState(BattleSceneState state)
+        {
+            BattleEnemyState selectedEnemy = GetSelectedEnemy(state);
+            if (selectedEnemy == null)
+            {
+                state.CurrentEnemy = null;
+                state.EnemyHp = 0;
+                state.EnemyBlock = 0;
+                state.EnemyStatuses.Clear();
+                state.EnemyBuffs.Clear();
+                return;
+            }
+
+            state.CurrentEnemy = selectedEnemy.Enemy;
+            state.EnemyHp = selectedEnemy.Hp;
+            state.EnemyBlock = selectedEnemy.Block;
+            CopyDictionary(selectedEnemy.Statuses, state.EnemyStatuses);
+            CopyDictionary(selectedEnemy.Buffs, state.EnemyBuffs);
+            state.EnemyTurnCount = selectedEnemy.TurnCount;
+            state.EnemyCycleIndex = selectedEnemy.CycleIndex;
+        }
+
+        /// <summary>
+        /// 表示互換用辞書コピー
+        /// </summary>
+        private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
+        {
+            destination.Clear();
+            foreach (KeyValuePair<TKey, int> entry in source)
+            {
+                destination[entry.Key] = entry.Value;
+            }
         }
 
         /// <summary>
@@ -717,7 +857,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// データ不足時のフォールバック敵生成
         /// </summary>
-        private static RuntimeEnemy CreateFallbackEnemy(InGameNodeType nodeType)
+        private static RuntimeEncounterFormation CreateFallbackFormation(InGameNodeType nodeType)
         {
             int baseHp = nodeType == InGameNodeType.Boss ? 60 : BattleSceneConstants.DefaultEnemyHp;
             int damage = nodeType == InGameNodeType.EliteBattle ? 8 : 4;
@@ -733,7 +873,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 0,
                 RepeatRule.RepeatAfterOpening);
 
-            return new RuntimeEnemy(
+            RuntimeEnemy enemy = new RuntimeEnemy(
                 0,
                 "fallback_enemy",
                 BattleSceneConstants.UnknownEnemyName,
@@ -743,6 +883,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 baseHp,
                 20,
                 new[] { action });
+            return new RuntimeEncounterFormation(
+                0,
+                "fallback_formation",
+                BattleSceneConstants.UnknownEnemyName,
+                new[] { new RuntimeEncounterEnemyEntry(enemy, 0) });
         }
     }
 }
