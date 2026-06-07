@@ -13,19 +13,19 @@ namespace Dungeon.Runtime.InGame.Battle
     {
         private IBattlePageView _view;
         private Action<int> _onHandCardClicked;
-        private Action _onEnemyTargetClicked;
+        private Action<int> _onEnemyTargetClicked;
         private Action _onEndTurnClicked;
 
         /// <summary>
-        /// View 接続初期化
+        /// View接続初期化
         /// </summary>
-        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action onEnemyTargetClicked, Action onEndTurnClicked)
+        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked)
         {
             _view = view;
             _onHandCardClicked = onHandCardClicked;
             _onEnemyTargetClicked = onEnemyTargetClicked;
             _onEndTurnClicked = onEndTurnClicked;
-            _view.WireButtons(_onEnemyTargetClicked, _onEndTurnClicked);
+            _view.WireButtons(_onEndTurnClicked);
         }
 
         /// <summary>
@@ -39,6 +39,7 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             _view.BuildHandButtons(snapshot.Hand, _onHandCardClicked);
+            _view.BuildEnemyButtons(snapshot.Enemies, snapshot.SelectedEnemyIndex, _onEnemyTargetClicked);
             _view.SetBattleStateText(
                 BuildPlayerText(snapshot),
                 BuildEnemyText(snapshot),
@@ -93,6 +94,12 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         private static string BuildEnemyText(BattleSceneSnapshot snapshot)
         {
+            BattleEnemyViewModel selectedEnemy = FindSelectedEnemy(snapshot);
+            if (selectedEnemy != null)
+            {
+                return BuildEnemyViewText(selectedEnemy);
+            }
+
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat(
                 BattleSceneConstants.EnemyStateFormat,
@@ -102,6 +109,41 @@ namespace Dungeon.Runtime.InGame.Battle
             AppendIntentLine(builder, snapshot.EnemyIntent);
             AppendStatusLine(builder, BattleSceneConstants.StatusLabel, snapshot.EnemyStatuses);
             AppendStatusLine(builder, BattleSceneConstants.BuffLabel, snapshot.EnemyBuffs);
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 選択中敵表示モデル取得
+        /// </summary>
+        private static BattleEnemyViewModel FindSelectedEnemy(BattleSceneSnapshot snapshot)
+        {
+            if (snapshot.Enemies == null || snapshot.Enemies.Count == 0)
+            {
+                return null;
+            }
+
+            if (snapshot.SelectedEnemyIndex >= 0 && snapshot.SelectedEnemyIndex < snapshot.Enemies.Count)
+            {
+                return snapshot.Enemies[snapshot.SelectedEnemyIndex];
+            }
+
+            return snapshot.Enemies[0];
+        }
+
+        /// <summary>
+        /// 敵詳細表示文言構築
+        /// </summary>
+        private static string BuildEnemyViewText(BattleEnemyViewModel enemy)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat(
+                BattleSceneConstants.EnemyStateFormat,
+                enemy.DisplayName,
+                enemy.Hp,
+                enemy.Block);
+            AppendIntentLine(builder, enemy.Intent);
+            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
+            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
             return builder.ToString();
         }
 

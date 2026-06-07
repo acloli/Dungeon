@@ -29,6 +29,16 @@ namespace Game.MasterData.Generated
             return self.GetContainer<EncounterGroupMasterContainer>();
         }
 
+        public static EncounterFormationMasterContainer EncounterFormationMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<EncounterFormationMasterContainer>();
+        }
+
+        public static EncounterFormationEnemyMasterContainer EncounterFormationEnemyMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<EncounterFormationEnemyMasterContainer>();
+        }
+
         public static EnemyActionMasterContainer EnemyActionMaster(this IMasterDataService self)
         {
             return self.GetContainer<EnemyActionMasterContainer>();

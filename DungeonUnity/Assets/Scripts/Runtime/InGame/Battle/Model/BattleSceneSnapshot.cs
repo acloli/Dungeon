@@ -33,7 +33,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleStatusViewModel> playerStatuses = null,
             IReadOnlyList<BattleStatusViewModel> enemyStatuses = null,
             IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
-            IReadOnlyList<BattleStatusViewModel> enemyBuffs = null)
+            IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
+            IReadOnlyList<BattleEnemyViewModel> enemies = null,
+            int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -60,6 +62,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
             PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
             EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
+            Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
+            SelectedEnemyIndex = selectedEnemyIndex;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -87,5 +91,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
         public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
+        public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
+        public int SelectedEnemyIndex { get; }
     }
 }

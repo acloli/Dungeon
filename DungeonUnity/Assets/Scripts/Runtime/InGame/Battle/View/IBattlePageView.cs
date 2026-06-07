@@ -9,9 +9,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// </summary>
     public interface IBattlePageView
     {
-        void WireButtons(Action onEnemyTargetClicked, Action onEndTurnClicked);
+        void WireButtons(Action onEndTurnClicked);
         void UnwireButtons();
         void SetBattleStateText(string playerText, string enemyText, string hintText);
+        void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked);
         void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked);
         void ClearDynamicButtons();
     }

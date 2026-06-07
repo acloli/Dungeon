@@ -11,8 +11,8 @@ using TFramework.MasterData;
 namespace Game.MasterData.Generated
 {
     [Serializable]
-    [MasterData("EncounterGroupMaster")]
-    public partial class EncounterGroupMaster : IMasterDataObject<int>
+    [MasterData("EncounterFormationMaster")]
+    public partial class EncounterFormationMaster : IMasterDataObject<int>
     {
         /// <summary>
         /// 行ID
@@ -20,19 +20,14 @@ namespace Game.MasterData.Generated
         public int Id;
 
         /// <summary>
-        /// 遭遇グループID
+        /// 内部キー
         /// </summary>
-        public int EncounterGroupId;
+        public string Key;
 
         /// <summary>
-        /// 敵編成ID
+        /// 英語名
         /// </summary>
-        public int FormationId;
-
-        /// <summary>
-        /// 重み
-        /// </summary>
-        public int Weight;
+        public string Name;
 
         /// <summary>
         /// ノード種別

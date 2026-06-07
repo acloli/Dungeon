@@ -72,14 +72,19 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnHandCardClicked(int index)
         {
             _flowService.SelectHandCard(index);
+            if (!_flowService.DoesSelectedCardRequireEnemyTarget())
+            {
+                _flowService.TryPlaySelectedCard();
+            }
             RenderAsync(_presenterCts.Token).Forget();
         }
 
         /// <summary>
         /// 敵対象クリック通知
         /// </summary>
-        public void OnEnemyTargetClicked()
+        public void OnEnemyTargetClicked(int index)
         {
+            _flowService.SelectEnemyTarget(index);
             _flowService.TryPlaySelectedCard();
             RenderAsync(_presenterCts.Token).Forget();
         }

@@ -78,8 +78,18 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new EncounterGroupMaster { Id = 5201, EncounterGroupId = 6201, EnemyId = 3001, Weight = 10, NodeType = NodeType.Battle },
-                new EncounterGroupMaster { Id = 5202, EncounterGroupId = 6203, EnemyId = 3002, Weight = 10, NodeType = NodeType.Boss }
+                new EncounterGroupMaster { Id = 5201, EncounterGroupId = 6201, FormationId = 7001, Weight = 10, NodeType = NodeType.Battle },
+                new EncounterGroupMaster { Id = 5202, EncounterGroupId = 6203, FormationId = 7002, Weight = 10, NodeType = NodeType.Boss }
+            });
+            masterDataService.SetAll(new[]
+            {
+                new EncounterFormationMaster { Id = 7001, Key = "formation_a", Name = "FormationA", NodeType = NodeType.Battle },
+                new EncounterFormationMaster { Id = 7002, Key = "formation_b", Name = "FormationB", NodeType = NodeType.Boss }
+            });
+            masterDataService.SetAll(new[]
+            {
+                new EncounterFormationEnemyMaster { Id = 7101, FormationId = 7001, EnemyId = 3001, SlotIndex = 0 },
+                new EncounterFormationEnemyMaster { Id = 7102, FormationId = 7002, EnemyId = 3002, SlotIndex = 0 }
             });
 
             BattleMasterDataFacade facade = new BattleMasterDataFacade(masterDataService);
@@ -96,8 +106,8 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.Nodes.Count, Is.EqualTo(2));
             Assert.That(runDefinition.Nodes[0].DisplayName, Is.EqualTo("Node1"));
             Assert.That(runDefinition.Nodes[0].NextNodeIndices.Count, Is.EqualTo(1));
-            Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Battle][0].Enemy.DisplayName, Is.EqualTo("EnemyA"));
-            Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Boss][0].Enemy.DisplayName, Is.EqualTo("EnemyB"));
+            Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Battle][0].Formation.Enemies[0].Enemy.DisplayName, Is.EqualTo("EnemyA"));
+            Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Boss][0].Formation.Enemies[0].Enemy.DisplayName, Is.EqualTo("EnemyB"));
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵選出
         /// </summary>
-        RuntimeEnemy SelectEnemy(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider);
+        RuntimeEncounterFormation SelectEncounterFormation(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 敵初期HP取得

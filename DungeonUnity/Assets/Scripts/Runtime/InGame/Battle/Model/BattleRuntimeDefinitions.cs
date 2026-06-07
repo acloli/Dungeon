@@ -182,14 +182,71 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeEncounterEntry
     {
-        public RuntimeEncounterEntry(RuntimeEnemy enemy, int weight)
+        public RuntimeEncounterEntry(RuntimeEncounterFormation formation, int weight)
         {
-            Enemy = enemy;
+            Formation = formation;
             Weight = weight;
         }
 
-        public RuntimeEnemy Enemy { get; }
+        public RuntimeEncounterFormation Formation { get; }
         public int Weight { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用敵編成
+    /// </summary>
+    public sealed class RuntimeEncounterFormation
+    {
+        public RuntimeEncounterFormation(int id, string key, string displayName, IReadOnlyList<RuntimeEncounterEnemyEntry> enemies)
+        {
+            Id = id;
+            Key = key;
+            DisplayName = displayName;
+            Enemies = enemies ?? Array.Empty<RuntimeEncounterEnemyEntry>();
+        }
+
+        public int Id { get; }
+        public string Key { get; }
+        public string DisplayName { get; }
+        public IReadOnlyList<RuntimeEncounterEnemyEntry> Enemies { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用敵編成要素
+    /// </summary>
+    public sealed class RuntimeEncounterEnemyEntry
+    {
+        public RuntimeEncounterEnemyEntry(RuntimeEnemy enemy, int slotIndex)
+        {
+            Enemy = enemy;
+            SlotIndex = slotIndex;
+        }
+
+        public RuntimeEnemy Enemy { get; }
+        public int SlotIndex { get; }
+    }
+
+    /// <summary>
+    /// 戦闘中の敵状態
+    /// </summary>
+    public sealed class BattleEnemyState
+    {
+        public BattleEnemyState(RuntimeEnemy enemy, int slotIndex, int hp)
+        {
+            Enemy = enemy;
+            SlotIndex = slotIndex;
+            Hp = hp;
+        }
+
+        public RuntimeEnemy Enemy { get; }
+        public int SlotIndex { get; }
+        public int Hp { get; set; }
+        public int Block { get; set; }
+        public bool IsDefeated { get; set; }
+        public int TurnCount { get; set; }
+        public int CycleIndex { get; set; }
+        public Dictionary<StatusType, int> Statuses { get; } = new Dictionary<StatusType, int>();
+        public Dictionary<BuffType, int> Buffs { get; } = new Dictionary<BuffType, int>();
     }
 
     /// <summary>

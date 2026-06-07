@@ -71,7 +71,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildStatusViews(_state.PlayerStatuses),
                 BuildStatusViews(_state.EnemyStatuses),
                 BuildBuffViews(_state.PlayerBuffs),
-                BuildBuffViews(_state.EnemyBuffs));
+                BuildBuffViews(_state.EnemyBuffs),
+                BuildEnemyViews(),
+                _state.SelectedEnemyIndex);
         }
 
         /// <summary>
@@ -125,6 +127,59 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 敵対象選択処理
+        /// </summary>
+        public void SelectEnemyTarget(int index)
+        {
+            if (index < 0 || index >= _state.Enemies.Count)
+            {
+                return;
+            }
+
+            BattleEnemyState enemyState = _state.Enemies[index];
+            if (enemyState == null || enemyState.IsDefeated)
+            {
+                return;
+            }
+
+            _state.SelectedEnemyIndex = index;
+            _state.CurrentEnemy = enemyState.Enemy;
+            _state.EnemyHp = enemyState.Hp;
+            _state.EnemyBlock = enemyState.Block;
+            CopyDictionary(enemyState.Statuses, _state.EnemyStatuses);
+            CopyDictionary(enemyState.Buffs, _state.EnemyBuffs);
+            _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTargetSelectedFormat, enemyState.Enemy.DisplayName);
+        }
+
+        /// <summary>
+        /// 選択カードが敵個別対象を必要とするか
+        /// </summary>
+        public bool DoesSelectedCardRequireEnemyTarget()
+        {
+            if (_state.SelectedCardIndex < 0 || _state.SelectedCardIndex >= _state.Hand.Count)
+            {
+                return false;
+            }
+
+            RuntimeCard card = _state.Hand[_state.SelectedCardIndex];
+            if (card == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < card.Effects.Count; i++)
+            {
+                RuntimeCardEffect effect = card.Effects[i];
+                if (effect.TargetSide == TargetSide.Enemy)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// 選択カード使用処理
         /// </summary>
         public void TryPlaySelectedCard()
@@ -152,7 +207,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.BattleHintMessage = BuildCardHint(card, result);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
-            if (_state.EnemyHp <= 0)
+            if (AreAllEnemiesDefeated())
             {
                 OnBattleVictory();
             }
@@ -266,9 +321,24 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.EnemyBuffs.Clear();
             _state.EnemyTurnCount = 0;
             _state.EnemyCycleIndex = 0;
-            _state.CurrentEnemy = _rules.SelectEnemy(_runDefinition, nodeType, _randomProvider);
-            _state.EnemyHp = _rules.RollEnemyHp(_state.CurrentEnemy, _randomProvider);
-            _state.EnemyBlock = 0;
+            _state.Enemies.Clear();
+            _state.SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
+            RuntimeEncounterFormation formation = _rules.SelectEncounterFormation(_runDefinition, nodeType, _randomProvider);
+            if (formation != null)
+            {
+                for (int i = 0; i < formation.Enemies.Count; i++)
+                {
+                    RuntimeEncounterEnemyEntry entry = formation.Enemies[i];
+                    if (entry == null || entry.Enemy == null)
+                    {
+                        continue;
+                    }
+
+                    _state.Enemies.Add(new BattleEnemyState(entry.Enemy, entry.SlotIndex, _rules.RollEnemyHp(entry.Enemy, _randomProvider)));
+                }
+            }
+
+            SyncSelectedEnemyForDisplay();
             _rules.DrawHand(_state, _randomProvider);
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }
@@ -279,7 +349,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OnBattleVictory()
         {
             _state.BattleFinished = true;
-            _state.Gold += _state.CurrentEnemy != null ? _state.CurrentEnemy.GoldReward : 0;
+            _state.Gold += CalculateBattleGoldReward();
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
             {
@@ -397,7 +467,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private BattleIntentViewModel BuildEnemyIntent()
         {
-            RuntimeEnemyAction action = SelectEnemyActionPreview();
+            BattleEnemyState enemyState = GetSelectedEnemy();
+            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
             if (action == null)
             {
                 return null;
@@ -420,50 +491,52 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 表示用敵行動選択
         /// </summary>
-        private RuntimeEnemyAction SelectEnemyActionPreview()
+        private RuntimeEnemyAction SelectEnemyActionPreview(BattleEnemyState enemyState)
         {
             if (_state.CurrentPage != BattleScenePage.Battle ||
-                _state.CurrentEnemy == null ||
-                _state.CurrentEnemy.Actions == null ||
-                _state.CurrentEnemy.Actions.Count == 0)
+                enemyState == null ||
+                enemyState.Enemy == null ||
+                enemyState.Enemy.Actions == null ||
+                enemyState.Enemy.Actions.Count == 0 ||
+                enemyState.IsDefeated)
             {
                 return null;
             }
 
-            RuntimeEnemyAction openingAction = FindFirstAction(RepeatRule.OpeningOnly);
-            if (_state.EnemyTurnCount == 0 && openingAction != null)
+            RuntimeEnemyAction openingAction = FindFirstAction(enemyState, RepeatRule.OpeningOnly);
+            if (enemyState.TurnCount == 0 && openingAction != null)
             {
                 return openingAction;
             }
 
-            RuntimeEnemyAction repeatAction = FindFirstAction(RepeatRule.RepeatAfterOpening);
-            if (_state.EnemyTurnCount > 0 && repeatAction != null)
+            RuntimeEnemyAction repeatAction = FindFirstAction(enemyState, RepeatRule.RepeatAfterOpening);
+            if (enemyState.TurnCount > 0 && repeatAction != null)
             {
                 return repeatAction;
             }
 
-            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(RepeatRule.AfterOpeningRandom);
-            if (_state.EnemyTurnCount > 0 && afterOpeningRandomAction != null)
+            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(enemyState, RepeatRule.AfterOpeningRandom);
+            if (enemyState.TurnCount > 0 && afterOpeningRandomAction != null)
             {
                 return afterOpeningRandomAction;
             }
 
-            RuntimeEnemyAction randomAction = FindFirstAction(RepeatRule.Random);
+            RuntimeEnemyAction randomAction = FindFirstAction(enemyState, RepeatRule.Random);
             if (randomAction != null)
             {
                 return randomAction;
             }
 
-            RuntimeEnemyAction cycleAction = FindCycleActionPreview();
-            return cycleAction ?? _state.CurrentEnemy.Actions[0];
+            RuntimeEnemyAction cycleAction = FindCycleActionPreview(enemyState);
+            return cycleAction ?? enemyState.Enemy.Actions[0];
         }
 
         /// <summary>
         /// 指定反復規則の先頭行動取得
         /// </summary>
-        private RuntimeEnemyAction FindFirstAction(RepeatRule repeatRule)
+        private RuntimeEnemyAction FindFirstAction(BattleEnemyState enemyState, RepeatRule repeatRule)
         {
-            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
             for (int i = 0; i < actions.Count; i++)
             {
                 RuntimeEnemyAction action = actions[i];
@@ -479,10 +552,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// cycle行動の表示用取得
         /// </summary>
-        private RuntimeEnemyAction FindCycleActionPreview()
+        private RuntimeEnemyAction FindCycleActionPreview(BattleEnemyState enemyState)
         {
             List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
-            IReadOnlyList<RuntimeEnemyAction> actions = _state.CurrentEnemy.Actions;
+            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
             for (int i = 0; i < actions.Count; i++)
             {
                 RuntimeEnemyAction action = actions[i];
@@ -497,7 +570,163 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            return cycleActions[_state.EnemyCycleIndex % cycleActions.Count];
+            return cycleActions[enemyState.CycleIndex % cycleActions.Count];
+        }
+
+        /// <summary>
+        /// 敵表示一覧構築
+        /// </summary>
+        private IReadOnlyList<BattleEnemyViewModel> BuildEnemyViews()
+        {
+            List<BattleEnemyViewModel> views = new List<BattleEnemyViewModel>();
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState == null || enemyState.Enemy == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleEnemyViewModel(
+                    enemyState.SlotIndex,
+                    enemyState.Enemy.DisplayName,
+                    enemyState.Hp,
+                    enemyState.Block,
+                    enemyState.IsDefeated,
+                    BuildIntentView(enemyState),
+                    BuildStatusViews(enemyState.Statuses),
+                    BuildBuffViews(enemyState.Buffs)));
+            }
+
+            return views;
+        }
+
+        /// <summary>
+        /// 敵意図表示モデル構築
+        /// </summary>
+        private BattleIntentViewModel BuildIntentView(BattleEnemyState enemyState)
+        {
+            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
+            if (action == null)
+            {
+                return null;
+            }
+
+            return new BattleIntentViewModel(
+                action.IntentType,
+                _displayTextService.GetIntentName(action.IntentType),
+                action.Damage,
+                action.HitCount,
+                action.Block,
+                action.StatusType,
+                _displayTextService.GetStatusName(action.StatusType),
+                action.StatusValue,
+                action.BuffType,
+                _displayTextService.GetBuffName(action.BuffType),
+                action.BuffValue);
+        }
+
+        /// <summary>
+        /// 選択中敵取得
+        /// </summary>
+        private BattleEnemyState GetSelectedEnemy()
+        {
+            if (_state.SelectedEnemyIndex >= 0 && _state.SelectedEnemyIndex < _state.Enemies.Count)
+            {
+                BattleEnemyState enemyState = _state.Enemies[_state.SelectedEnemyIndex];
+                if (enemyState != null && !enemyState.IsDefeated)
+                {
+                    return enemyState;
+                }
+            }
+
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState != null && !enemyState.IsDefeated)
+                {
+                    _state.SelectedEnemyIndex = i;
+                    return enemyState;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 選択敵を旧表示項目へ同期する
+        /// </summary>
+        private void SyncSelectedEnemyForDisplay()
+        {
+            BattleEnemyState enemyState = GetSelectedEnemy();
+            if (enemyState == null)
+            {
+                _state.CurrentEnemy = null;
+                _state.EnemyHp = 0;
+                _state.EnemyBlock = 0;
+                _state.EnemyStatuses.Clear();
+                _state.EnemyBuffs.Clear();
+                return;
+            }
+
+            _state.CurrentEnemy = enemyState.Enemy;
+            _state.EnemyHp = enemyState.Hp;
+            _state.EnemyBlock = enemyState.Block;
+            CopyDictionary(enemyState.Statuses, _state.EnemyStatuses);
+            CopyDictionary(enemyState.Buffs, _state.EnemyBuffs);
+        }
+
+        /// <summary>
+        /// 全敵撃破判定
+        /// </summary>
+        private bool AreAllEnemiesDefeated()
+        {
+            if (_state.Enemies.Count == 0)
+            {
+                return _state.EnemyHp <= 0;
+            }
+
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState != null && !enemyState.IsDefeated && enemyState.Hp > 0)
+                {
+                    return false;
+                }
+            }
+
+            SyncSelectedEnemyForDisplay();
+            return true;
+        }
+
+        /// <summary>
+        /// 戦闘報酬ゴールド合算
+        /// </summary>
+        private int CalculateBattleGoldReward()
+        {
+            int total = 0;
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState != null && enemyState.Enemy != null)
+                {
+                    total += enemyState.Enemy.GoldReward;
+                }
+            }
+
+            return total > 0 ? total : _state.CurrentEnemy != null ? _state.CurrentEnemy.GoldReward : 0;
+        }
+
+        /// <summary>
+        /// 辞書内容コピー
+        /// </summary>
+        private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
+        {
+            destination.Clear();
+            foreach (KeyValuePair<TKey, int> entry in source)
+            {
+                destination[entry.Key] = entry.Value;
+            }
         }
 
         /// <summary>

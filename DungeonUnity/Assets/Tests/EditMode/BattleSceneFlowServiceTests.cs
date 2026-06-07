@@ -46,7 +46,33 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
             Assert.That(snapshot.Hand.Count, Is.EqualTo(3));
             Assert.That(snapshot.CurrentEnemy.DisplayName, Is.EqualTo("Slime"));
+            Assert.That(snapshot.Enemies.Count, Is.EqualTo(1));
             Assert.That(snapshot.BattleHintMessage, Is.EqualTo("Select a card, then click enemy target."));
+        }
+
+        [Test]
+        public void SelectMapNode_MultiEnemyFormation_OpensBattleWithAllEnemies()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3001, "Mite", 8, 8, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3002, "Slime", 12, 12, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.Enemies.Count, Is.EqualTo(2));
+            Assert.That(snapshot.Enemies[0].DisplayName, Is.EqualTo("Mite"));
+            Assert.That(snapshot.Enemies[1].DisplayName, Is.EqualTo("Slime"));
+            Assert.That(snapshot.SelectedEnemyIndex, Is.EqualTo(0));
         }
 
         [Test]
@@ -150,6 +176,116 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.Gold, Is.EqualTo(150));
             Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
             Assert.That(snapshot.RewardChoices[0].DisplayName, Is.EqualTo("Reward"));
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_TargetEnemy_DamagesSelectedEnemyOnly()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { strike },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3001, "Mite", 10, 10, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3002, "Slime", 12, 12, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.SelectEnemyTarget(1);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.Enemies[0].Hp, Is.EqualTo(10));
+            Assert.That(snapshot.Enemies[1].Hp, Is.EqualTo(6));
+            Assert.That(snapshot.SelectedEnemyIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void DoesSelectedCardRequireEnemyTarget_TargetSideEnemy_ReturnsTrue()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { CreateCard(1001, "Strike", 1, 6) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.True);
+        }
+
+        [Test]
+        public void DoesSelectedCardRequireEnemyTarget_AllEnemies_ReturnsFalse()
+        {
+            RuntimeCard sweep = CreateCard(1001, "Sweep", 1, 12, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, 12, 1, StatusType.None, 0, TargetSide.AllEnemies)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { sweep });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.False);
+        }
+
+        [Test]
+        public void DoesSelectedCardRequireEnemyTarget_Self_ReturnsFalse()
+        {
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+
+            Assert.That(service.DoesSelectedCardRequireEnemyTarget(), Is.False);
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_AllEnemies_DamagesAllAndRewardsAfterAllDefeated()
+        {
+            RuntimeCard sweep = CreateCard(1001, "Sweep", 1, 12, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, 12, 1, StatusType.None, 0, TargetSide.AllEnemies)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { sweep },
+                rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3001, "Mite", 8, 8, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3002, "Slime", 12, 12, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(snapshot.Gold, Is.EqualTo(132));
         }
 
         [Test]
@@ -335,7 +471,22 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeEncounterEntry CreateEncounter(RuntimeEnemy enemy, int weight)
         {
-            return new RuntimeEncounterEntry(enemy, weight);
+            return CreateEncounter(CreateFormation(CreateEnemyEntry(enemy, 0)), weight);
+        }
+
+        private static RuntimeEncounterEntry CreateEncounter(RuntimeEncounterFormation formation, int weight)
+        {
+            return new RuntimeEncounterEntry(formation, weight);
+        }
+
+        private static RuntimeEncounterFormation CreateFormation(params RuntimeEncounterEnemyEntry[] enemies)
+        {
+            return new RuntimeEncounterFormation(7001, "formation_test", "Formation", enemies);
+        }
+
+        private static RuntimeEncounterEnemyEntry CreateEnemyEntry(RuntimeEnemy enemy, int slotIndex)
+        {
+            return new RuntimeEncounterEnemyEntry(enemy, slotIndex);
         }
 
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
