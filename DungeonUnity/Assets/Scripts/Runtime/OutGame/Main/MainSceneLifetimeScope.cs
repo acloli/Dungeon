@@ -7,6 +7,7 @@ namespace Dungeon.Runtime.OutGame.Main
     {
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.Register<MainRunProfileService>(Lifetime.Singleton).As<IMainRunProfileService>();
             builder.RegisterComponentInHierarchy<MainSceneController>().AsImplementedInterfaces();
         }
     }

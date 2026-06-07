@@ -4,6 +4,7 @@
   "references": [
     "Dungeon.Runtime.InGame.Battle",
     "Dungeon.Runtime.InGame.Domain",
+    "Dungeon.Runtime.OutGame.Main",
     "Dungeon.Runtime.SceneFlow",
     "Game.MasterData.Generated",
     "TFramework.Core",
