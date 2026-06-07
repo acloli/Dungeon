@@ -73,9 +73,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 TFTextUGUI label = button.GetComponentInChildren<TFTextUGUI>();
                 if (label != null)
                 {
-                    string marker = enemyIndex == selectedEnemyIndex ? ">" : string.Empty;
-                    string state = enemy.IsDefeated ? "Defeated" : $"{enemy.Hp}";
-                    label.text = $"{marker}{enemy.DisplayName} HP {state}";
+                    label.text = BuildEnemyButtonLabel(enemy, enemyIndex == selectedEnemyIndex);
                 }
 
                 button.onClick.AddListener(() => onClicked?.Invoke(enemyIndex));
@@ -139,6 +137,29 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             ClearButtons(_handButtons);
             ClearEnemyButtons();
+        }
+
+        /// <summary>
+        /// 敵対象ボタン表示文言構築
+        /// </summary>
+        private static string BuildEnemyButtonLabel(BattleEnemyViewModel enemy, bool isSelected)
+        {
+            string marker = isSelected ? ">" : string.Empty;
+            string state = enemy.IsDefeated ? BattleSceneConstants.DefeatedEnemyLabel : enemy.Hp.ToString();
+            string label = string.Format(
+                BattleSceneConstants.EnemyTargetButtonFormat,
+                marker,
+                enemy.SlotIndex + 1,
+                enemy.DisplayName,
+                state,
+                enemy.Block);
+
+            if (enemy.Intent == null)
+            {
+                return label;
+            }
+
+            return string.Format(BattleSceneConstants.EnemyTargetButtonIntentFormat, label, enemy.Intent.IntentName);
         }
 
         /// <summary>
