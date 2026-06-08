@@ -8,6 +8,7 @@ using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
+using Dungeon.Runtime.InGame.Save.Services;
 
 namespace Dungeon.Runtime.OutGame.Main
 {
@@ -20,11 +21,13 @@ namespace Dungeon.Runtime.OutGame.Main
 
         private IMainRunProfileService _runProfileService;
         private MainRunProfileViewModel _runProfile;
+        private IRunSaveService _runSaveService;
 
         [Inject]
-        private void Construct(IMainRunProfileService runProfileService)
+        private void Construct(IMainRunProfileService runProfileService, IRunSaveService runSaveService = null)
         {
             _runProfileService = runProfileService;
+            _runSaveService = runSaveService;
         }
 
         protected override UniTask OnInitializeInternalAsync(ISceneBridgeData bridgeData, CancellationToken ct)
@@ -106,8 +109,16 @@ namespace Dungeon.Runtime.OutGame.Main
         /// </summary>
         private void RefreshRunProfileText()
         {
-            SetSelectedRunProfileText(
-                $"{_runProfile.DisplayName}\nHP {_runProfile.PlayerMaxHp}  Gold {_runProfile.StartingGold}  Archetype {_runProfile.CharacterArchetype}");
+            if (_runSaveService != null && _runSaveService.HasSavedRun())
+            {
+                SetSelectedRunProfileText(
+                    $"<color=yellow>[Continue Run]</color>\n{_runProfile.DisplayName}\nHP {_runProfile.PlayerMaxHp}  Gold {_runProfile.StartingGold}  Archetype {_runProfile.CharacterArchetype}");
+            }
+            else
+            {
+                SetSelectedRunProfileText(
+                    $"{_runProfile.DisplayName}\nHP {_runProfile.PlayerMaxHp}  Gold {_runProfile.StartingGold}  Archetype {_runProfile.CharacterArchetype}");
+            }
         }
 
         private void OnStartRunClicked()

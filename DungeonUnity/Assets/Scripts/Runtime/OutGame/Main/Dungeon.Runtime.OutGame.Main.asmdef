@@ -12,7 +12,8 @@
     "Dungeon.Runtime.SceneFlow",
     "Game.MasterData.Generated",
     "UniTask",
-    "VContainer"
+    "VContainer",
+    "Dungeon.Runtime.InGame.Save"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
