@@ -158,10 +158,10 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.Reward:
                     _view.SetSaveQuitVisible(false);
-                    RuntimeCard reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
-                    if (reward != null)
+                    RuntimeRewardEntry rewardEntry = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                    if (rewardEntry != null)
                     {
-                        _flowService.SelectReward(reward);
+                        _flowService.SelectReward(rewardEntry);
                         await RenderAsync(ct);
                     }
                     break;

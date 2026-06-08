@@ -10,6 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         [SerializeField] private Button _button;
         [SerializeField] private TFTextUGUI _labelText;
+        [SerializeField] private Image _icon;
 
         public void Configure(string label, Action onClick)
         {
@@ -22,6 +23,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_labelText != null)
             {
                 _labelText.text = label;
+            }
+        }
+
+        public void SetIcon(Sprite icon)
+        {
+            if (_icon != null)
+            {
+                _icon.sprite = icon;
+                _icon.gameObject.SetActive(icon != null);
             }
         }
 

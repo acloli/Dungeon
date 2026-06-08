@@ -69,7 +69,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 報酬ダイアログ表示
         /// </summary>
-        public async UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RuntimeRewardEntry> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -77,7 +77,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RewardDialog, RuntimeCard>(
+            return await _uiService.ShowDialogAsync<RewardDialog, RuntimeRewardEntry>(
                 BattleDialogOpenParams.Cached(new BattleRewardDialogParam(snapshot)),
                 ct);
         }

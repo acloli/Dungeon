@@ -11,7 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// <summary>
     /// 報酬ダイアログクラス
     /// </summary>
-    public sealed class RewardDialog : UIDialogBase<RuntimeCard>, IRewardDialogView
+    public sealed class RewardDialog : UIDialogBase<RuntimeRewardEntry>, IRewardDialogView
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;
@@ -22,27 +22,42 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 報酬ボタン構築
         /// </summary>
-        public void BuildRewardButtons(IReadOnlyList<RuntimeCard> cards, Action<RuntimeCard> onClicked)
+        public void BuildRewardButtons(IReadOnlyList<RuntimeRewardEntry> entries, Action<RuntimeRewardEntry> onClicked)
         {
             ClearDynamicButtons();
 
-            if (_rewardRoot == null || _rewardButtonTemplate == null || cards == null)
+            if (_rewardRoot == null || _rewardButtonTemplate == null || entries == null)
             {
                 return;
             }
 
             _rewardButtonTemplate.gameObject.SetActive(false);
 
-            for (int i = 0; i < cards.Count; i++)
+            for (int i = 0; i < entries.Count; i++)
             {
-                RuntimeCard card = cards[i];
+                RuntimeRewardEntry entry = entries[i];
                 BattleOptionButtonView button = Instantiate(_rewardButtonTemplate, _rewardRoot);
                 button.gameObject.SetActive(true);
+
+                string label = string.Empty;
+                if (entry.RewardType == Game.MasterData.Generated.RewardType.Card && entry.Card != null)
+                {
+                    label = string.Format(BattleSceneConstants.RewardLabelFormat, entry.Card.DisplayName, entry.Card.Cost, entry.Card.PreviewDamage);
+                }
+                else if (entry.RewardType == Game.MasterData.Generated.RewardType.Gold)
+                {
+                    label = $"{entry.RewardValue} Gold";
+                }
+                else
+                {
+                    label = $"{entry.RewardType}";
+                }
+
                 button.Configure(
-                    string.Format(BattleSceneConstants.RewardLabelFormat, card.DisplayName, card.Cost, card.PreviewDamage),
+                    label,
                     delegate
                     {
-                        onClicked?.Invoke(card);
+                        onClicked?.Invoke(entry);
                     });
                 _buttons.Add(button);
             }
@@ -70,7 +85,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 return;
             }
 
-            BuildRewardButtons(_param.Snapshot.RewardChoices, card => CloseWithResult(card));
+            BuildRewardButtons(_param.Snapshot.RewardChoices, entry => CloseWithResult(entry));
         }
 
         protected override void OnClosed()
