@@ -49,13 +49,12 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void OnHandCardClicked_WhenCardDoesNotRequireEnemyTarget_PlaysSelectedCard()
+        public void OnHandCardClicked_PlaysSelectedCard()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
-            flowService.DoesSelectedCardRequireEnemyTargetResult = false;
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnHandCardClicked(0);
@@ -64,21 +63,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(flowService.TryPlaySelectedCardCallCount, Is.EqualTo(1));
         }
 
-        [Test]
-        public void OnHandCardClicked_WhenCardRequiresEnemyTarget_DoesNotPlaySelectedCard()
-        {
-            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
-            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
-            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
-            flowService.DoesSelectedCardRequireEnemyTargetResult = true;
 
-            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
-            presenter.OnHandCardClicked(0);
-
-            Assert.That(flowService.SelectHandCardCallCount, Is.EqualTo(1));
-            Assert.That(flowService.TryPlaySelectedCardCallCount, Is.EqualTo(0));
-        }
 
         [Test]
         public void InitializeAsync_BattleState_RendersIntentStatusAndBuffText()

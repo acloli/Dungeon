@@ -85,7 +85,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.Hand.Count, Is.EqualTo(3));
             Assert.That(snapshot.CurrentEnemy.DisplayName, Is.EqualTo("Slime"));
             Assert.That(snapshot.Enemies.Count, Is.EqualTo(1));
-            Assert.That(snapshot.BattleHintMessage, Is.EqualTo("Select a card, then click enemy target."));
+            Assert.That(snapshot.BattleHintMessage, Is.EqualTo("Select target, then use card."));
         }
 
         [Test]
@@ -235,8 +235,8 @@ namespace Dungeon.Tests.EditMode
 
             service.Initialize(5501);
             service.SelectMapNode(0);
-            service.SelectHandCard(0);
             service.SelectEnemyTarget(1);
+            service.SelectHandCard(0);
             service.TryPlaySelectedCard();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
