@@ -10,12 +10,12 @@ namespace Dungeon.Runtime.InGame.Save.Services
     public interface IRunSaveService
     {
         /// <summary>
-        /// 現在の局内状態を保存する
+        /// 現在のゲーム内状態を保存する
         /// </summary>
         UniTask SaveCurrentRunAsync(RunSaveData data, CancellationToken token = default);
 
         /// <summary>
-        /// 保存された局内状態を読み込む
+        /// 保存されたゲーム内状態を読み込む
         /// </summary>
         UniTask<RunSaveData> LoadCurrentRunAsync(CancellationToken token = default);
 
