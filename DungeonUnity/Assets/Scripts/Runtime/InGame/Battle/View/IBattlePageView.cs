@@ -11,6 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         void WireButtons(Action onEndTurnClicked);
         void UnwireButtons();
+        void SetBattleHud(BattleHudViewModel hud);
         void SetBattleStateText(string playerText, string enemyText, string hintText);
         void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked);
         void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked);

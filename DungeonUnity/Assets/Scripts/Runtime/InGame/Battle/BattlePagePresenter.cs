@@ -44,6 +44,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 BuildPlayerText(snapshot),
                 BuildEnemyText(snapshot),
                 snapshot.BattleHintMessage);
+            _view.SetBattleHud(BuildBattleHud(snapshot));
         }
 
         /// <summary>
@@ -77,13 +78,7 @@ namespace Dungeon.Runtime.InGame.Battle
         private static string BuildPlayerText(BattleSceneSnapshot snapshot)
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat(
-                BattleSceneConstants.PlayerStateFormat,
-                snapshot.PlayerHp,
-                snapshot.PlayerMaxHp,
-                snapshot.PlayerBlock,
-                snapshot.PlayerEnergy,
-                snapshot.Gold);
+            builder.Append(BuildPlayerSummary(snapshot));
             AppendStatusLine(builder, BattleSceneConstants.StatusLabel, snapshot.PlayerStatuses);
             AppendStatusLine(builder, BattleSceneConstants.BuffLabel, snapshot.PlayerBuffs);
             return builder.ToString();
@@ -136,14 +131,111 @@ namespace Dungeon.Runtime.InGame.Battle
         private static string BuildEnemyViewText(BattleEnemyViewModel enemy)
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat(
+            builder.Append(BuildEnemySummary(enemy));
+            AppendIntentLine(builder, enemy.Intent);
+            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
+            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 戦闘HUD表示モデル構築
+        /// </summary>
+        private static BattleHudViewModel BuildBattleHud(BattleSceneSnapshot snapshot)
+        {
+            BattleEnemyViewModel selectedEnemy = FindSelectedEnemy(snapshot);
+            if (selectedEnemy != null)
+            {
+                return new BattleHudViewModel(
+                    BuildPlayerSummary(snapshot),
+                    BuildEnemySummary(selectedEnemy),
+                    BuildIntentSummary(selectedEnemy.Intent),
+                    snapshot.PlayerStatuses,
+                    snapshot.PlayerBuffs,
+                    selectedEnemy.Statuses,
+                    selectedEnemy.Buffs);
+            }
+
+            return new BattleHudViewModel(
+                BuildPlayerSummary(snapshot),
+                BuildFallbackEnemySummary(snapshot),
+                BuildIntentSummary(snapshot.EnemyIntent),
+                snapshot.PlayerStatuses,
+                snapshot.PlayerBuffs,
+                snapshot.EnemyStatuses,
+                snapshot.EnemyBuffs);
+        }
+
+        /// <summary>
+        /// player概要文言構築
+        /// </summary>
+        private static string BuildPlayerSummary(BattleSceneSnapshot snapshot)
+        {
+            return string.Format(
+                BattleSceneConstants.PlayerStateFormat,
+                snapshot.PlayerHp,
+                snapshot.PlayerMaxHp,
+                snapshot.PlayerBlock,
+                snapshot.PlayerEnergy,
+                snapshot.Gold);
+        }
+
+        /// <summary>
+        /// enemy概要文言構築
+        /// </summary>
+        private static string BuildEnemySummary(BattleEnemyViewModel enemy)
+        {
+            return string.Format(
                 BattleSceneConstants.EnemyStateFormat,
                 enemy.DisplayName,
                 enemy.Hp,
                 enemy.Block);
-            AppendIntentLine(builder, enemy.Intent);
-            AppendStatusLine(builder, BattleSceneConstants.StatusLabel, enemy.Statuses);
-            AppendStatusLine(builder, BattleSceneConstants.BuffLabel, enemy.Buffs);
+        }
+
+        /// <summary>
+        /// 代替enemy概要文言構築
+        /// </summary>
+        private static string BuildFallbackEnemySummary(BattleSceneSnapshot snapshot)
+        {
+            return string.Format(
+                BattleSceneConstants.EnemyStateFormat,
+                snapshot.CurrentEnemy != null ? snapshot.CurrentEnemy.DisplayName : BattleSceneConstants.UnknownEnemyName,
+                snapshot.EnemyHp,
+                snapshot.EnemyBlock);
+        }
+
+        /// <summary>
+        /// intent概要文言構築
+        /// </summary>
+        private static string BuildIntentSummary(BattleIntentViewModel intent)
+        {
+            if (intent == null)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat(BattleSceneConstants.IntentLabelFormat, intent.IntentName);
+            if (intent.Damage > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentDamageFormat, intent.Damage, Math.Max(1, intent.HitCount));
+            }
+
+            if (intent.Block > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentBlockFormat, intent.Block);
+            }
+
+            if (intent.StatusType != Game.MasterData.Generated.StatusType.None && intent.StatusValue > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentStatusFormat, intent.StatusName, intent.StatusValue);
+            }
+
+            if (intent.BuffType != Game.MasterData.Generated.BuffType.None && intent.BuffValue > 0)
+            {
+                builder.AppendFormat(BattleSceneConstants.IntentBuffFormat, intent.BuffName, intent.BuffValue);
+            }
+
             return builder.ToString();
         }
 
