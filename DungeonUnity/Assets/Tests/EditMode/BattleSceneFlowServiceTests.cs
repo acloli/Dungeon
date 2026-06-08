@@ -553,7 +553,11 @@ namespace Dungeon.Tests.EditMode
                     CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }),
                     CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
                 },
-                encounters);
+                encounters,
+                null,
+                null,
+                null,
+                null);
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null)

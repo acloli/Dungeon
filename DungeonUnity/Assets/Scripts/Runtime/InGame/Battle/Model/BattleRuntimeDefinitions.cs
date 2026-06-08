@@ -273,6 +273,116 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ランタイム用イベント選択肢定義
+    /// </summary>
+    public sealed class RuntimeEventChoice
+    {
+        public RuntimeEventChoice(int choiceId, string localizationKey, EffectType effectType, int effectValue)
+        {
+            ChoiceId = choiceId;
+            LocalizationKey = localizationKey;
+            EffectType = effectType;
+            EffectValue = effectValue;
+        }
+
+        public int ChoiceId { get; }
+        public string LocalizationKey { get; }
+        public EffectType EffectType { get; }
+        public int EffectValue { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用イベント定義
+    /// </summary>
+    public sealed class RuntimeEvent
+    {
+        public RuntimeEvent(int id, string eventName, string localizationKey, string imageId, IReadOnlyList<RuntimeEventChoice> choices)
+        {
+            Id = id;
+            EventName = eventName;
+            LocalizationKey = localizationKey;
+            ImageId = imageId;
+            Choices = choices ?? Array.Empty<RuntimeEventChoice>();
+        }
+
+        public int Id { get; }
+        public string EventName { get; }
+        public string LocalizationKey { get; }
+        public string ImageId { get; }
+        public IReadOnlyList<RuntimeEventChoice> Choices { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用ショップスロット
+    /// </summary>
+    public sealed class RuntimeShopSlot
+    {
+        public RuntimeShopSlot(int slotIndex, RewardType rewardType, CardType requiredCardType, int weight)
+        {
+            SlotIndex = slotIndex;
+            RewardType = rewardType;
+            RequiredCardType = requiredCardType;
+            Weight = weight;
+        }
+
+        public int SlotIndex { get; }
+        public RewardType RewardType { get; }
+        public CardType RequiredCardType { get; }
+        public int Weight { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用ショップラインナップ
+    /// </summary>
+    public sealed class RuntimeShopLineup
+    {
+        public RuntimeShopLineup(int shopId, IReadOnlyList<RuntimeShopSlot> slots)
+        {
+            ShopId = shopId;
+            Slots = slots ?? Array.Empty<RuntimeShopSlot>();
+        }
+
+        public int ShopId { get; }
+        public IReadOnlyList<RuntimeShopSlot> Slots { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用カード価格ルール
+    /// </summary>
+    public sealed class RuntimeCardPriceRule
+    {
+        public RuntimeCardPriceRule(CardRarity rarity, int basePrice, int jitterPercent)
+        {
+            Rarity = rarity;
+            BasePrice = basePrice;
+            JitterPercent = jitterPercent;
+        }
+
+        public CardRarity Rarity { get; }
+        public int BasePrice { get; }
+        public int JitterPercent { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用アイテム価格ルール
+    /// </summary>
+    public sealed class RuntimeItemPriceRule
+    {
+        public RuntimeItemPriceRule(RewardType itemType, int itemId, int basePrice, int jitterPercent)
+        {
+            ItemType = itemType;
+            ItemId = itemId;
+            BasePrice = basePrice;
+            JitterPercent = jitterPercent;
+        }
+
+        public RewardType ItemType { get; }
+        public int ItemId { get; }
+        public int BasePrice { get; }
+        public int JitterPercent { get; }
+    }
+
+    /// <summary>
     /// ランタイム用マップノード
     /// </summary>
     public sealed class RuntimeMapNode
@@ -319,7 +429,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<RuntimeCard> starterDeck,
             IReadOnlyList<RuntimeRewardEntry> rewardPool,
             IReadOnlyList<RuntimeMapNode> nodes,
-            IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encountersByNodeType)
+            IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encountersByNodeType,
+            IReadOnlyList<RuntimeEvent> possibleEvents,
+            RuntimeShopLineup shopLineup,
+            IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules,
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules)
         {
             RunProfileId = runProfileId;
             Key = key;
@@ -332,6 +446,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Nodes = nodes ?? Array.Empty<RuntimeMapNode>();
             EncountersByNodeType = encountersByNodeType
                 ?? new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>();
+            PossibleEvents = possibleEvents ?? Array.Empty<RuntimeEvent>();
+            ShopLineup = shopLineup;
+            CardPriceRules = cardPriceRules ?? new Dictionary<CardRarity, RuntimeCardPriceRule>();
+            ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
         }
 
         public int RunProfileId { get; }
@@ -344,6 +462,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<RuntimeRewardEntry> RewardPool { get; }
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> EncountersByNodeType { get; }
+        public IReadOnlyList<RuntimeEvent> PossibleEvents { get; }
+        public RuntimeShopLineup ShopLineup { get; }
+        public IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> CardPriceRules { get; }
+        public IReadOnlyList<RuntimeItemPriceRule> ItemPriceRules { get; }
     }
 
     /// <summary>

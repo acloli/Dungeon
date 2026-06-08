@@ -42,6 +42,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 BuildEncounterTable(profile, enemyCatalog);
 
+            IReadOnlyList<RuntimeEvent> possibleEvents = BuildEvents(profile.EventPoolId);
+            RuntimeShopLineup shopLineup = BuildShopLineup(profile.ShopId);
+            IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules = BuildCardPriceRules();
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = BuildItemPriceRules();
+
             return new RuntimeRunDefinition(
                 profile.Id,
                 profile.Key,
@@ -52,7 +57,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildStarterDeck(profile.StarterDeckGroupId, cardCatalog),
                 BuildRewardPool(profile.RewardPoolId, cardCatalog),
                 nodes,
-                encounters);
+                encounters,
+                possibleEvents,
+                shopLineup,
+                cardPriceRules,
+                itemPriceRules);
         }
 
         /// <summary>
@@ -353,6 +362,74 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return _localizationService.Get(localizationKey);
         }
 
+        private IReadOnlyList<RuntimeEvent> BuildEvents(int eventPoolId)
+        {
+            IReadOnlyList<EventChoiceMaster> choiceMasters = _masterDataService.GetAll<EventChoiceMaster>();
+            ILookup<int, EventChoiceMaster> choicesByEventId = choiceMasters.ToLookup(c => c.EventId);
+
+            List<RuntimeEvent> events = new List<RuntimeEvent>();
+            IReadOnlyList<EventMaster> eventMasters = _masterDataService.GetAll<EventMaster>();
+            for (int i = 0; i < eventMasters.Count; i++)
+            {
+                EventMaster master = eventMasters[i];
+                List<RuntimeEventChoice> choices = new List<RuntimeEventChoice>();
+                foreach (EventChoiceMaster c in choicesByEventId[master.Id])
+                {
+                    choices.Add(new RuntimeEventChoice(
+                        c.ChoiceId,
+                        c.LocalizationKey,
+                        c.EffectType,
+                        c.EffectValue));
+                }
+
+                events.Add(new RuntimeEvent(
+                    master.Id,
+                    master.EventName,
+                    master.LocalizationKey,
+                    master.ImageId,
+                    choices));
+            }
+            return events;
+        }
+
+        private RuntimeShopLineup BuildShopLineup(int shopId)
+        {
+            IReadOnlyList<ShopLineupMaster> lineupMasters = _masterDataService.GetAll<ShopLineupMaster>();
+            List<RuntimeShopSlot> slots = new List<RuntimeShopSlot>();
+            for (int i = 0; i < lineupMasters.Count; i++)
+            {
+                ShopLineupMaster master = lineupMasters[i];
+                if (master.ShopId != shopId) continue;
+                
+                slots.Add(new RuntimeShopSlot(master.SlotIndex, master.RewardType, master.RequiredCardType, master.Weight));
+            }
+            return new RuntimeShopLineup(shopId, slots);
+        }
+
+        private IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> BuildCardPriceRules()
+        {
+            IReadOnlyList<ShopCardPriceMaster> masters = _masterDataService.GetAll<ShopCardPriceMaster>();
+            Dictionary<CardRarity, RuntimeCardPriceRule> rules = new Dictionary<CardRarity, RuntimeCardPriceRule>();
+            for (int i = 0; i < masters.Count; i++)
+            {
+                ShopCardPriceMaster master = masters[i];
+                rules[master.CardRarity] = new RuntimeCardPriceRule(master.CardRarity, master.BasePrice, master.JitterPercent);
+            }
+            return rules;
+        }
+
+        private IReadOnlyList<RuntimeItemPriceRule> BuildItemPriceRules()
+        {
+            IReadOnlyList<ShopItemPriceMaster> masters = _masterDataService.GetAll<ShopItemPriceMaster>();
+            List<RuntimeItemPriceRule> rules = new List<RuntimeItemPriceRule>();
+            for (int i = 0; i < masters.Count; i++)
+            {
+                ShopItemPriceMaster master = masters[i];
+                rules.Add(new RuntimeItemPriceRule(master.ItemType, master.ItemId, master.BasePrice, master.JitterPercent));
+            }
+            return rules;
+        }
+
         /// <summary>
         /// ノード種別変換
         /// </summary>
@@ -363,6 +440,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 NodeType.EliteBattle => InGameNodeType.EliteBattle,
                 NodeType.RestShop => InGameNodeType.RestShop,
                 NodeType.Boss => InGameNodeType.Boss,
+                NodeType.Event => InGameNodeType.Event,
                 _ => InGameNodeType.Battle
             };
         }
