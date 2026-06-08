@@ -11,8 +11,8 @@ using TFramework.MasterData;
 namespace Game.MasterData.Generated
 {
     [Serializable]
-    [MasterData("RewardPoolMaster")]
-    public partial class RewardPoolMaster : IMasterDataObject<int>
+    [MasterData("ShopItemPriceMaster")]
+    public partial class ShopItemPriceMaster : IMasterDataObject<int>
     {
         /// <summary>
         /// 行ID
@@ -20,34 +20,24 @@ namespace Game.MasterData.Generated
         public int Id;
 
         /// <summary>
-        /// 報酬プールID
+        /// アイテム種別
         /// </summary>
-        public int RewardPoolId;
+        public RewardType ItemType;
 
         /// <summary>
-        /// 報酬種別
+        /// アイテムID
         /// </summary>
-        public RewardType RewardType;
+        public int ItemId;
 
         /// <summary>
-        /// 報酬値
+        /// 基本価格
         /// </summary>
-        public int RewardValue;
+        public int BasePrice;
 
         /// <summary>
-        /// 重み
+        /// 価格変動幅(%)
         /// </summary>
-        public int Weight;
-
-        /// <summary>
-        /// 最小階層
-        /// </summary>
-        public int MinFloor;
-
-        /// <summary>
-        /// 最大階層
-        /// </summary>
-        public int MaxFloor;
+        public int JitterPercent;
 
         public int GetKey() => Id;
     }

@@ -49,6 +49,16 @@ namespace Game.MasterData.Generated
             return self.GetContainer<EnemyMasterContainer>();
         }
 
+        public static EventChoiceMasterContainer EventChoiceMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<EventChoiceMasterContainer>();
+        }
+
+        public static EventMasterContainer EventMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<EventMasterContainer>();
+        }
+
         public static MapEdgeMasterContainer MapEdgeMaster(this IMasterDataService self)
         {
             return self.GetContainer<MapEdgeMasterContainer>();
@@ -67,6 +77,21 @@ namespace Game.MasterData.Generated
         public static RunProfileMasterContainer RunProfileMaster(this IMasterDataService self)
         {
             return self.GetContainer<RunProfileMasterContainer>();
+        }
+
+        public static ShopCardPriceMasterContainer ShopCardPriceMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<ShopCardPriceMasterContainer>();
+        }
+
+        public static ShopItemPriceMasterContainer ShopItemPriceMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<ShopItemPriceMasterContainer>();
+        }
+
+        public static ShopLineupMasterContainer ShopLineupMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<ShopLineupMasterContainer>();
         }
 
     }

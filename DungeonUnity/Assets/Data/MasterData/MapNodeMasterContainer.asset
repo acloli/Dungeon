@@ -31,7 +31,7 @@ MonoBehaviour:
     MapTemplateId: 6301
     NodeKey: node_03
     Floor: 2
-    NodeType: 3
+    NodeType: 4
     Name: Cinder Rest
     LocalizationKey: map.node.cinder_rest
   - Id: 5304
@@ -52,7 +52,7 @@ MonoBehaviour:
     MapTemplateId: 6301
     NodeKey: node_06
     Floor: 5
-    NodeType: 3
+    NodeType: 4
     Name: Supply Post
     LocalizationKey: map.node.supply_post
   - Id: 5307
@@ -62,3 +62,10 @@ MonoBehaviour:
     NodeType: 1
     Name: Throne Gate
     LocalizationKey: map.node.throne_gate
+  - Id: 5308
+    MapTemplateId: 6301
+    NodeKey: node_08
+    Floor: 7
+    NodeType: 3
+    Name: Event Dummy
+    LocalizationKey: map.node.event_dummy
