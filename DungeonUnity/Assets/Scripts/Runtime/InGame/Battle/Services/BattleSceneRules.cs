@@ -124,9 +124,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬候補選出
         /// </summary>
-        public IReadOnlyList<RuntimeCard> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        public IReadOnlyList<RuntimeRewardEntry> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
-            List<RuntimeCard> rewards = new List<RuntimeCard>();
+            List<RuntimeRewardEntry> rewards = new List<RuntimeRewardEntry>();
             if (state == null)
             {
                 return rewards;
@@ -146,7 +146,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     break;
                 }
 
-                rewards.Add(selected.Card);
+                rewards.Add(selected);
                 candidates.Remove(selected);
             }
 
@@ -165,7 +165,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                rewards.Add(card);
+                rewards.Add(new RuntimeRewardEntry(RewardType.Card, 1, card, 1, 1, 999));
             }
 
             return rewards;
