@@ -51,10 +51,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string DealDamageFormat = "Dealt {0} damage to enemy.";
         public const string GainBlockFormat = "Gained {0} block.";
         public const string CardResolvedFormat = "Used {0}.";
-        public const string CardSelectedFormat = "Selected {0}, click enemy target.";
+        public const string CardSelectedFormat = "Selected {0}.";
         public const string EnemyTargetSelectedFormat = "Target {0}.";
         public const string SelectCardFirst = "Select a card first.";
-        public const string SelectCardAndTarget = "Select a card, then click enemy target.";
+        public const string SelectCardAndTarget = "Select target, then use card.";
         public const string NotEnoughEnergy = "Not enough energy.";
         public const string NextNodeOnly = "You can only go to the next node.";
         public const string RestDoneFormat = "Rest done. HP {0}/{1}";
