@@ -184,17 +184,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < rewardEntries.Count; i++)
             {
                 RewardPoolMaster entry = rewardEntries[i];
-                if (entry.RewardPoolId != rewardPoolId || !rewardableCardIds.Contains(entry.CardId))
+                if (entry.RewardPoolId != rewardPoolId)
                 {
                     continue;
                 }
 
-                if (!cardCatalog.TryGetValue(entry.CardId, out RuntimeCard card))
+                RuntimeCard card = null;
+                if (entry.RewardType == RewardType.Card)
                 {
-                    continue;
+                    if (!rewardableCardIds.Contains(entry.RewardValue))
+                    {
+                        continue;
+                    }
+
+                    if (!cardCatalog.TryGetValue(entry.RewardValue, out card))
+                    {
+                        continue;
+                    }
                 }
 
-                rewards.Add(new RuntimeRewardEntry(card, entry.Weight, entry.MinFloor, entry.MaxFloor));
+                rewards.Add(new RuntimeRewardEntry(entry.RewardType, entry.RewardValue, card, entry.Weight, entry.MinFloor, entry.MaxFloor));
             }
 
             return rewards;

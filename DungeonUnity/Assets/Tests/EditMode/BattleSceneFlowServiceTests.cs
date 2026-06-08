@@ -639,7 +639,7 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
-            return new RuntimeRewardEntry(card, weight, minFloor, maxFloor);
+            return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, weight, minFloor, maxFloor);
         }
 
         /// <summary>

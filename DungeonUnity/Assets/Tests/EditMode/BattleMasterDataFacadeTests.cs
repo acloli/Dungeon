@@ -55,7 +55,7 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new RewardPoolMaster { Id = 5101, RewardPoolId = 6101, CardId = 1002, Weight = 10, MinFloor = 1, MaxFloor = 99 }
+                new RewardPoolMaster { Id = 5101, RewardPoolId = 6101, RewardType = RewardType.Card, RewardValue = 1002, Weight = 10, MinFloor = 1, MaxFloor = 99 }
             });
             masterDataService.SetAll(new[]
             {

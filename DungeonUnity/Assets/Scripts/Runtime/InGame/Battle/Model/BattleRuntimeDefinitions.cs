@@ -254,14 +254,18 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeRewardEntry
     {
-        public RuntimeRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
+        public RuntimeRewardEntry(RewardType rewardType, int rewardValue, RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
+            RewardType = rewardType;
+            RewardValue = rewardValue;
             Card = card;
             Weight = weight;
             MinFloor = minFloor;
             MaxFloor = maxFloor;
         }
 
+        public RewardType RewardType { get; }
+        public int RewardValue { get; }
         public RuntimeCard Card { get; }
         public int Weight { get; }
         public int MinFloor { get; }
