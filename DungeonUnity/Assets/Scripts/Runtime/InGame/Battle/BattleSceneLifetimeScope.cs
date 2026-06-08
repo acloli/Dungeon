@@ -19,6 +19,8 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.ShopMasterDataFacade>(Lifetime.Singleton);
             builder.Register<Services.BattleMasterDataFacade>(Lifetime.Singleton).As<Services.IBattleMasterDataFacade>();
             builder.Register<Services.BattleDisplayTextService>(Lifetime.Singleton).As<Services.IBattleDisplayTextService>();
+            builder.Register<Services.BattleRewardService>(Lifetime.Singleton).As<Services.IBattleRewardService>();
+            builder.Register<Services.BattleSnapshotFactory>(Lifetime.Singleton).As<Services.IBattleSnapshotFactory>();
             builder.Register<Services.BattleSceneRules>(Lifetime.Singleton).As<Services.IBattleSceneRules>();
             builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService>();
             builder.Register<BattlePagePresenter>(Lifetime.Scoped);

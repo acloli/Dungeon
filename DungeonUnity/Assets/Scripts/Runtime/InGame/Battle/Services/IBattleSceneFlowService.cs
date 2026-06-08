@@ -56,7 +56,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択
         /// </summary>
-        void SelectReward(RuntimeCard card);
+        void SelectReward(RuntimeRewardEntry rewardEntry);
 
         /// <summary>
         /// 休憩適用

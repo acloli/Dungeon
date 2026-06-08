@@ -18,7 +18,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
-        private readonly IBattleDisplayTextService _displayTextService;
+        private readonly IBattleRewardService _rewardService;
+        private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IRunSaveService _runSaveService;
 
         private RuntimeRunDefinition _runDefinition;
@@ -27,13 +28,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleMasterDataFacade masterDataFacade,
-            IBattleDisplayTextService displayTextService = null,
+            IBattleRewardService rewardService,
+            IBattleSnapshotFactory snapshotFactory,
             IRunSaveService runSaveService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
-            _displayTextService = displayTextService ?? new BattleDisplayTextService();
+            _rewardService = rewardService;
+            _snapshotFactory = snapshotFactory;
             _runSaveService = runSaveService;
         }
 
@@ -98,35 +101,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public BattleSceneSnapshot CreateSnapshot()
         {
-            return new BattleSceneSnapshot(
-                _state.CurrentPage,
-                _state.Nodes,
-                _state.Hand,
-                _state.RewardChoices,
-                _state.CurrentNodeIndex,
-                _state.PlayerMaxHp,
-                _state.PlayerHp,
-                _state.PlayerEnergy,
-                _state.PlayerBlock,
-                _state.Gold,
-                _state.CurrentEnemy,
-                _state.EnemyHp,
-                _state.EnemyBlock,
-                _state.BattleFinished,
-                _state.SelectedCardIndex,
-                _state.IsRestShopContinueEnabled,
-                _state.MapMessage,
-                _state.BattleHintMessage,
-                _state.RestShopMessage,
-                _state.ResultMessage,
-                BuildEnemyIntent(),
-                BuildStatusViews(_state.PlayerStatuses),
-                BuildStatusViews(_state.EnemyStatuses),
-                BuildBuffViews(_state.PlayerBuffs),
-                BuildBuffViews(_state.EnemyBuffs),
-                BuildEnemyViews(),
-                _state.SelectedEnemyIndex,
-                BuildAvailableNodeIndices());
+            return _snapshotFactory.CreateSnapshot(_state);
         }
 
         /// <summary>
@@ -291,11 +266,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択処理
         /// </summary>
-        public void SelectReward(RuntimeCard card)
+        public void SelectReward(RuntimeRewardEntry rewardEntry)
         {
-            if (card != null)
+            if (rewardEntry != null)
             {
-                _state.Deck.Add(card);
+                _rewardService.ApplyReward(_state, rewardEntry);
             }
 
             OpenMap();
@@ -423,10 +398,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.Reward;
             _state.RewardChoices.Clear();
-            IReadOnlyList<RuntimeCard> rewardCards = _rules.SelectRewardChoices(_state, _runDefinition, _randomProvider);
-            for (int i = 0; i < rewardCards.Count; i++)
+            IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectRewardChoices(_state, _runDefinition, _randomProvider);
+            for (int i = 0; i < rewardChoices.Count; i++)
             {
-                _state.RewardChoices.Add(rewardCards[i]);
+                _state.RewardChoices.Add(rewardChoices[i]);
             }
         }
 
@@ -520,191 +495,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return index == _state.CurrentNodeIndex + 1;
         }
 
-        /// <summary>
-        /// 遷移可能ノード一覧構築
-        /// </summary>
-        private IReadOnlyList<int> BuildAvailableNodeIndices()
-        {
-            List<int> indices = new List<int>();
-            if (_state.CurrentPage != BattleScenePage.Map || _state.Nodes == null)
-            {
-                return indices;
-            }
-
-            for (int i = 0; i < _state.Nodes.Count; i++)
-            {
-                if (CanMoveToNode(i))
-                {
-                    indices.Add(i);
-                }
-            }
-
-            return indices;
-        }
-
-        /// <summary>
-        /// 表示用敵意図構築
-        /// </summary>
-        private BattleIntentViewModel BuildEnemyIntent()
-        {
-            BattleEnemyState enemyState = GetSelectedEnemy();
-            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return new BattleIntentViewModel(
-                action.IntentType,
-                _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
-                _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
-        }
-
-        /// <summary>
-        /// 表示用敵行動選択
-        /// </summary>
-        private RuntimeEnemyAction SelectEnemyActionPreview(BattleEnemyState enemyState)
-        {
-            if (_state.CurrentPage != BattleScenePage.Battle ||
-                enemyState == null ||
-                enemyState.Enemy == null ||
-                enemyState.Enemy.Actions == null ||
-                enemyState.Enemy.Actions.Count == 0 ||
-                enemyState.IsDefeated)
-            {
-                return null;
-            }
-
-            RuntimeEnemyAction openingAction = FindFirstAction(enemyState, RepeatRule.OpeningOnly);
-            if (enemyState.TurnCount == 0 && openingAction != null)
-            {
-                return openingAction;
-            }
-
-            RuntimeEnemyAction repeatAction = FindFirstAction(enemyState, RepeatRule.RepeatAfterOpening);
-            if (enemyState.TurnCount > 0 && repeatAction != null)
-            {
-                return repeatAction;
-            }
-
-            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(enemyState, RepeatRule.AfterOpeningRandom);
-            if (enemyState.TurnCount > 0 && afterOpeningRandomAction != null)
-            {
-                return afterOpeningRandomAction;
-            }
-
-            RuntimeEnemyAction randomAction = FindFirstAction(enemyState, RepeatRule.Random);
-            if (randomAction != null)
-            {
-                return randomAction;
-            }
-
-            RuntimeEnemyAction cycleAction = FindCycleActionPreview(enemyState);
-            return cycleAction ?? enemyState.Enemy.Actions[0];
-        }
-
-        /// <summary>
-        /// 指定反復規則の先頭行動取得
-        /// </summary>
-        private RuntimeEnemyAction FindFirstAction(BattleEnemyState enemyState, RepeatRule repeatRule)
-        {
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == repeatRule)
-                {
-                    return action;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// cycle行動の表示用取得
-        /// </summary>
-        private RuntimeEnemyAction FindCycleActionPreview(BattleEnemyState enemyState)
-        {
-            List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == RepeatRule.Cycle)
-                {
-                    cycleActions.Add(action);
-                }
-            }
-
-            if (cycleActions.Count == 0)
-            {
-                return null;
-            }
-
-            return cycleActions[enemyState.CycleIndex % cycleActions.Count];
-        }
-
-        /// <summary>
-        /// 敵表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleEnemyViewModel> BuildEnemyViews()
-        {
-            List<BattleEnemyViewModel> views = new List<BattleEnemyViewModel>();
-            for (int i = 0; i < _state.Enemies.Count; i++)
-            {
-                BattleEnemyState enemyState = _state.Enemies[i];
-                if (enemyState == null || enemyState.Enemy == null)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleEnemyViewModel(
-                    enemyState.SlotIndex,
-                    enemyState.Enemy.DisplayName,
-                    enemyState.Hp,
-                    enemyState.Block,
-                    enemyState.IsDefeated,
-                    BuildIntentView(enemyState),
-                    BuildStatusViews(enemyState.Statuses),
-                    BuildBuffViews(enemyState.Buffs)));
-            }
-
-            return views;
-        }
-
-        /// <summary>
-        /// 敵意図表示モデル構築
-        /// </summary>
-        private BattleIntentViewModel BuildIntentView(BattleEnemyState enemyState)
-        {
-            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return new BattleIntentViewModel(
-                action.IntentType,
-                _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
-                _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
-        }
 
         /// <summary>
         /// 選択中敵取得
@@ -809,53 +599,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
         }
 
-        /// <summary>
-        /// 状態表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
-        {
-            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
-            if (statuses == null)
-            {
-                return views;
-            }
-
-            foreach (KeyValuePair<StatusType, int> status in statuses)
-            {
-                if (status.Key == StatusType.None || status.Value <= 0)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleStatusViewModel(_displayTextService.GetStatusName(status.Key), status.Value, false));
-            }
-
-            return views;
-        }
-
-        /// <summary>
-        /// buff表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
-        {
-            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
-            if (buffs == null)
-            {
-                return views;
-            }
-
-            foreach (KeyValuePair<BuffType, int> buff in buffs)
-            {
-                if (buff.Key == BuffType.None || buff.Value <= 0)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleStatusViewModel(_displayTextService.GetBuffName(buff.Key), buff.Value, true));
-            }
-
-            return views;
-        }
 
         /// <summary>
         /// 状態をセーブする
