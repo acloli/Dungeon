@@ -1,15 +1,13 @@
-using System.Collections.Generic;
-
 namespace Dungeon.Runtime.OutGame.Main
 {
     /// <summary>
-    /// MainSceneRunProfile取得インターフェース
+    /// MainSceneRunProfile概要取得インターフェース
     /// </summary>
     public interface IMainRunProfileService
     {
         /// <summary>
-        /// RunProfile一覧取得
+        /// RunProfile概要取得
         /// </summary>
-        IReadOnlyList<MainRunProfileViewModel> BuildRunProfiles();
+        MainRunProfileViewModel BuildRunProfile(int runProfileId);
     }
 }

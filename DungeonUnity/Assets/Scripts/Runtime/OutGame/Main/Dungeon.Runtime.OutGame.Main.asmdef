@@ -5,6 +5,7 @@
     "TFramework.Core",
     "TFramework.Scene",
     "TFramework.Debug",
+    "TFramework.Localization",
     "TFramework.MasterData",
     "TFramework.UI",
     "Unity.TextMeshPro",
