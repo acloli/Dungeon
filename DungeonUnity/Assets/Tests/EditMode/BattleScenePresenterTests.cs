@@ -367,7 +367,7 @@ namespace Dungeon.Tests.EditMode
                 EndTurnCallCount++;
             }
 
-            public void SelectReward(RuntimeCard card)
+            public void SelectReward(RuntimeRewardEntry rewardEntry)
             {
             }
 
@@ -497,10 +497,10 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.CompletedTask;
             }
 
-            public UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<RuntimeRewardEntry> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 LastSnapshot = snapshot;
-                return UniTask.FromResult<RuntimeCard>(null);
+                return UniTask.FromResult<RuntimeRewardEntry>(null);
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

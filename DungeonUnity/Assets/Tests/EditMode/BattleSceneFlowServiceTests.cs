@@ -405,10 +405,11 @@ namespace Dungeon.Tests.EditMode
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
             RuntimeCard reward = CreateCard(1002, "Reward", 1, 5);
+            RuntimeRewardEntry rewardEntry = CreateRewardEntry(reward, 10, 1, 99);
             BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
 
             service.Initialize(5501);
-            service.SelectReward(reward);
+            service.SelectReward(rewardEntry);
 
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.DeckCardIds, Does.Contain(1002));
@@ -493,7 +494,9 @@ namespace Dungeon.Tests.EditMode
             return new BattleSceneFlowService(
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
-                new FakeBattleMasterDataFacade(runDefinition));
+                new FakeBattleMasterDataFacade(runDefinition),
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService()));
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -505,7 +508,8 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
-                null,
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService()),
                 runSaveService);
         }
 
@@ -518,7 +522,8 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
-                displayTextService);
+                new BattleRewardService(),
+                new BattleSnapshotFactory(displayTextService));
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(

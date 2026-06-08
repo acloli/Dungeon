@@ -41,7 +41,7 @@ namespace Dungeon.Tests.EditMode
                 page,
                 Array.Empty<RuntimeMapNode>(),
                 Array.Empty<RuntimeCard>(),
-                Array.Empty<RuntimeCard>(),
+                Array.Empty<RuntimeRewardEntry>(),
                 -1,
                 40,
                 40,
