@@ -15,13 +15,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _playerStatText;
         [SerializeField] private TFTextUGUI _enemyStatText;
         [SerializeField] private TFTextUGUI _battleHintText;
-        [SerializeField] private TFTextUGUI _playerSummaryText;
-        [SerializeField] private TFTextUGUI _enemySummaryText;
-        [SerializeField] private TFTextUGUI _intentText;
-        [SerializeField] private TFTextUGUI _playerStatusText;
-        [SerializeField] private TFTextUGUI _playerBuffText;
-        [SerializeField] private TFTextUGUI _enemyStatusText;
-        [SerializeField] private TFTextUGUI _enemyBuffText;
         [SerializeField] private Transform _handCardRoot;
         [SerializeField] private BattleOptionButtonView _handCardButtonTemplate;
         [SerializeField] private Transform _enemyTargetRoot;
@@ -91,32 +84,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 button.onClick.AddListener(() => onClicked?.Invoke(enemyIndex));
                 _enemyButtons.Add(button);
             }
-        }
-
-        /// <summary>
-        /// 戦闘HUD文言反映
-        /// </summary>
-        public void SetBattleHud(BattleHudViewModel hud)
-        {
-            if (hud == null)
-            {
-                SetText(_playerSummaryText, string.Empty);
-                SetText(_enemySummaryText, string.Empty);
-                SetText(_intentText, string.Empty);
-                SetText(_playerStatusText, string.Empty);
-                SetText(_playerBuffText, string.Empty);
-                SetText(_enemyStatusText, string.Empty);
-                SetText(_enemyBuffText, string.Empty);
-                return;
-            }
-
-            SetText(_playerSummaryText, hud.PlayerSummary);
-            SetText(_enemySummaryText, hud.EnemySummary);
-            SetText(_intentText, hud.IntentSummary);
-            SetText(_playerStatusText, BuildStatusText(BattleSceneConstants.StatusLabel, hud.PlayerStatuses));
-            SetText(_playerBuffText, BuildStatusText(BattleSceneConstants.BuffLabel, hud.PlayerBuffs));
-            SetText(_enemyStatusText, BuildStatusText(BattleSceneConstants.StatusLabel, hud.EnemyStatuses));
-            SetText(_enemyBuffText, BuildStatusText(BattleSceneConstants.BuffLabel, hud.EnemyBuffs));
         }
 
         /// <summary>
@@ -198,39 +165,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             return string.Format(BattleSceneConstants.EnemyTargetButtonIntentFormat, label, enemy.Intent.IntentName);
-        }
-
-        /// <summary>
-        /// 状態badge文言構築
-        /// </summary>
-        private static string BuildStatusText(string label, IReadOnlyList<BattleStatusViewModel> statuses)
-        {
-            if (statuses == null || statuses.Count == 0)
-            {
-                return label + BattleSceneConstants.LabelSeparator + BattleSceneConstants.EmptyValueLabel;
-            }
-
-            List<string> values = new List<string>(statuses.Count);
-            for (int i = 0; i < statuses.Count; i++)
-            {
-                BattleStatusViewModel status = statuses[i];
-                values.Add(string.Format(BattleSceneConstants.StatusValueFormat, status.Name, status.Value));
-            }
-
-            return label + BattleSceneConstants.LabelSeparator + string.Join(BattleSceneConstants.ValueSeparator, values);
-        }
-
-        /// <summary>
-        /// text文言反映
-        /// </summary>
-        private static void SetText(TFTextUGUI text, string value)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            text.text = value ?? string.Empty;
         }
 
         /// <summary>

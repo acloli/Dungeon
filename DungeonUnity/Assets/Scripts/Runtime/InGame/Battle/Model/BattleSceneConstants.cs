@@ -43,7 +43,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string BuffLabel = "Buff";
         public const string LabelSeparator = ": ";
         public const string ValueSeparator = "  ";
-        public const string EmptyValueLabel = "-";
         public const string StatusValueFormat = "{0}:{1}";
         public const string RestShopStateFormat = "Rest Shop: HP {0}/{1}  Gold {2}";
         public const string ResultVictoryFormat = "Run Clear!\nHP {0}/{1}\nGold {2}";

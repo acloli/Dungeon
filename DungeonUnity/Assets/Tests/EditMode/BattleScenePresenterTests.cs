@@ -100,13 +100,6 @@ namespace Dungeon.Tests.EditMode
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff 儀式:3"));
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Status: 脱力:1"));
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Buff: 儀式:3"));
-            Assert.That(view.BattlePageView.LastHud, Is.Not.Null);
-            Assert.That(view.BattlePageView.LastHud.IntentSummary, Does.Contain("Intent: 攻防"));
-            Assert.That(view.BattlePageView.LastHud.IntentSummary, Does.Contain("D7x2"));
-            Assert.That(view.BattlePageView.LastHud.PlayerStatuses[0].Name, Is.EqualTo("脆弱"));
-            Assert.That(view.BattlePageView.LastHud.PlayerBuffs[0].Name, Is.EqualTo("筋力"));
-            Assert.That(view.BattlePageView.LastHud.EnemyStatuses[0].Name, Is.EqualTo("脱力"));
-            Assert.That(view.BattlePageView.LastHud.EnemyBuffs[0].Name, Is.EqualTo("儀式"));
         }
 
         [Test]
@@ -122,8 +115,6 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(view.BattlePageView.LastEnemyText, Does.Contain("Green Mite"));
             Assert.That(view.BattlePageView.LastEnemyText, Does.Not.Contain("Red Mite"));
-            Assert.That(view.BattlePageView.LastHud.EnemySummary, Does.Contain("Green Mite"));
-            Assert.That(view.BattlePageView.LastHud.EnemySummary, Does.Not.Contain("Red Mite"));
             Assert.That(view.BattlePageView.LastEnemyButtonCount, Is.EqualTo(2));
         }
 
@@ -321,7 +312,6 @@ namespace Dungeon.Tests.EditMode
             public string LastPlayerText { get; private set; }
             public string LastEnemyText { get; private set; }
             public string LastHintText { get; private set; }
-            public BattleHudViewModel LastHud { get; private set; }
 
             public void WireButtons(Action onEndTurnClicked)
             {
@@ -336,11 +326,6 @@ namespace Dungeon.Tests.EditMode
                 LastPlayerText = playerText;
                 LastEnemyText = enemyText;
                 LastHintText = hintText;
-            }
-
-            public void SetBattleHud(BattleHudViewModel hud)
-            {
-                LastHud = hud;
             }
 
             public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)

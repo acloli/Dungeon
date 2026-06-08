@@ -55,31 +55,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
-    /// 戦闘HUD表示用モデル
-    /// </summary>
-    public sealed class BattleHudViewModel
-    {
-        public BattleHudViewModel(string playerSummary, string enemySummary, string intentSummary, IReadOnlyList<BattleStatusViewModel> playerStatuses, IReadOnlyList<BattleStatusViewModel> playerBuffs, IReadOnlyList<BattleStatusViewModel> enemyStatuses, IReadOnlyList<BattleStatusViewModel> enemyBuffs)
-        {
-            PlayerSummary = playerSummary;
-            EnemySummary = enemySummary;
-            IntentSummary = intentSummary;
-            PlayerStatuses = playerStatuses ?? Array.Empty<BattleStatusViewModel>();
-            PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
-            EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
-            EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
-        }
-
-        public string PlayerSummary { get; }
-        public string EnemySummary { get; }
-        public string IntentSummary { get; }
-        public IReadOnlyList<BattleStatusViewModel> PlayerStatuses { get; }
-        public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
-        public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
-        public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
-    }
-
-    /// <summary>
     /// 敵表示用モデル
     /// </summary>
     public sealed class BattleEnemyViewModel
