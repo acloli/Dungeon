@@ -11,7 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         void SetMapStateText(string message);
         void BuildMapButtons(IReadOnlyList<RuntimeMapNode> nodes, Action<int> onClicked);
-        void SetMapButtonInteractable(int allowedIndex);
+        void SetMapButtonInteractable(IReadOnlyList<int> allowedIndices);
         void ClearDynamicButtons();
     }
 }

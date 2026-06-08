@@ -34,7 +34,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             BuildMapButtons(_param.Snapshot.Nodes, _param.OnMapNodeClicked);
-            SetMapButtonInteractable(_param.Snapshot.CurrentNodeIndex + 1);
+            SetMapButtonInteractable(_param.Snapshot.AvailableNodeIndices);
             SetMapStateText(_param.Snapshot.MapMessage);
         }
 
@@ -81,11 +81,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 遷移可能ノード反映
         /// </summary>
-        public void SetMapButtonInteractable(int allowedIndex)
+        public void SetMapButtonInteractable(IReadOnlyList<int> allowedIndices)
         {
             for (int i = 0; i < _buttons.Count; i++)
             {
-                _buttons[i].SetInteractable(i == allowedIndex);
+                _buttons[i].SetInteractable(ContainsIndex(allowedIndices, i));
             }
         }
 
@@ -131,6 +131,27 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             buttons.Clear();
+        }
+
+        /// <summary>
+        /// 遷移可能ノード判定
+        /// </summary>
+        private static bool ContainsIndex(IReadOnlyList<int> indices, int index)
+        {
+            if (indices == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < indices.Count; i++)
+            {
+                if (indices[i] == index)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
