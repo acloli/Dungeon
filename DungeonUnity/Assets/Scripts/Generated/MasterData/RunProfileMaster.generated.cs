@@ -25,6 +25,16 @@ namespace Game.MasterData.Generated
         public string Key;
 
         /// <summary>
+        /// 英語名
+        /// </summary>
+        public string Name;
+
+        /// <summary>
+        /// localization参照キー
+        /// </summary>
+        public string LocalizationKey;
+
+        /// <summary>
         /// キャラクター系統
         /// </summary>
         public CharacterArchetype CharacterArchetype;
