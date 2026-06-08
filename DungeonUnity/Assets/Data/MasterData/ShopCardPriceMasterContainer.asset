@@ -12,4 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dd81363e0afc47ed8b64bc2a28e471e, type: 3}
   m_Name: ShopCardPriceMasterContainer
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.ShopCardPriceMasterContainer
-  _data: []
+  _data:
+  - Id: 8101
+    CardRarity: 1
+    BasePrice: 50
+    JitterPercent: 10
+  - Id: 8102
+    CardRarity: 4
+    BasePrice: 75
+    JitterPercent: 10
+  - Id: 8103
+    CardRarity: 2
+    BasePrice: 150
+    JitterPercent: 15
+  - Id: 8104
+    CardRarity: 3
+    BasePrice: 250
+    JitterPercent: 15

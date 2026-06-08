@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 880dda28d8b9c431788f45e89f67c4f7, type: 3}
   m_Name: EventMasterContainer
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.EventMasterContainer
-  _data: []
+  _data:
+  - Id: 9001
+    EventName: Slime Fountain
+    LocalizationKey: event_fountain_desc
+    ImageId: event_fountain

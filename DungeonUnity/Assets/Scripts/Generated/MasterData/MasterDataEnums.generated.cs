@@ -34,6 +34,8 @@ namespace Game.MasterData.Generated
     public enum CardType
     {
         Attack,
+        None,
+        Power,
         Skill,
     }
 

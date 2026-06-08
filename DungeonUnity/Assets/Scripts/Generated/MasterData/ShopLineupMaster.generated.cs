@@ -35,6 +35,11 @@ namespace Game.MasterData.Generated
         public RewardType RewardType;
 
         /// <summary>
+        /// 要求カード種別
+        /// </summary>
+        public CardType RequiredCardType;
+
+        /// <summary>
         /// 重み
         /// </summary>
         public int Weight;

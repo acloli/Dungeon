@@ -22,6 +22,8 @@ MonoBehaviour:
     StartingGold: 99
     StarterDeckGroupId: 6001
     RewardPoolId: 6101
+    ShopId: 1
+    EventPoolId: 1
     MapTemplateId: 6301
     NormalEncounterGroupId: 6201
     EliteEncounterGroupId: 6202

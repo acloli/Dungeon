@@ -60,6 +60,16 @@ namespace Game.MasterData.Generated
         public int RewardPoolId;
 
         /// <summary>
+        /// ショップID
+        /// </summary>
+        public int ShopId;
+
+        /// <summary>
+        /// イベントプールID
+        /// </summary>
+        public int EventPoolId;
+
+        /// <summary>
         /// マップテンプレートID
         /// </summary>
         public int MapTemplateId;
