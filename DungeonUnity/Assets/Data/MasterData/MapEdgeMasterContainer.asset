@@ -19,17 +19,25 @@ MonoBehaviour:
     ToNodeKey: node_02
   - Id: 5402
     MapTemplateId: 6301
-    FromNodeKey: node_02
+    FromNodeKey: node_01
     ToNodeKey: node_03
   - Id: 5403
     MapTemplateId: 6301
-    FromNodeKey: node_03
+    FromNodeKey: node_02
     ToNodeKey: node_04
   - Id: 5404
     MapTemplateId: 6301
+    FromNodeKey: node_03
+    ToNodeKey: node_04
+  - Id: 5405
+    MapTemplateId: 6301
     FromNodeKey: node_04
     ToNodeKey: node_05
-  - Id: 5405
+  - Id: 5406
     MapTemplateId: 6301
     FromNodeKey: node_05
     ToNodeKey: node_06
+  - Id: 5407
+    MapTemplateId: 6301
+    FromNodeKey: node_06
+    ToNodeKey: node_07

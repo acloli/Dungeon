@@ -24,33 +24,40 @@ MonoBehaviour:
     MapTemplateId: 6301
     NodeKey: node_02
     Floor: 2
-    NodeType: 3
-    Name: Cinder Rest
-    LocalizationKey: map.node.cinder_rest
+    NodeType: 0
+    Name: Broken Bridge
+    LocalizationKey: map.node.broken_bridge
   - Id: 5303
     MapTemplateId: 6301
     NodeKey: node_03
+    Floor: 2
+    NodeType: 3
+    Name: Cinder Rest
+    LocalizationKey: map.node.cinder_rest
+  - Id: 5304
+    MapTemplateId: 6301
+    NodeKey: node_04
     Floor: 3
     NodeType: 0
     Name: Ruins Path II
     LocalizationKey: map.node.ruins_path_2
-  - Id: 5304
+  - Id: 5305
     MapTemplateId: 6301
-    NodeKey: node_04
+    NodeKey: node_05
     Floor: 4
     NodeType: 2
     Name: Abyss Gate
     LocalizationKey: map.node.abyss_gate
-  - Id: 5305
+  - Id: 5306
     MapTemplateId: 6301
-    NodeKey: node_05
+    NodeKey: node_06
     Floor: 5
     NodeType: 3
     Name: Supply Post
     LocalizationKey: map.node.supply_post
-  - Id: 5306
+  - Id: 5307
     MapTemplateId: 6301
-    NodeKey: node_06
+    NodeKey: node_07
     Floor: 6
     NodeType: 1
     Name: Throne Gate

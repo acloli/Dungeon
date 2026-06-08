@@ -23,6 +23,7 @@ enemy.name.mire_slime,マイアスライム,Mire Slime,泥沼史莱姆,泥沼史
 enemy.name.nob_reaver,ノブリーバー,Nob Reaver,豪腕掠夺者,豪腕掠奪者,노브 리버
 enemy.name.sludge_monarch,スラッジモナーク,Sludge Monarch,淤泥君王,淤泥君王,슬러지 모나크
 map.node.ruins_path_1,廃墟通路I,Ruins Path I,废墟通路I,廢墟通路I,폐허 통로 I
+map.node.broken_bridge,崩れた橋,Broken Bridge,断裂桥,斷裂橋,무너진 다리
 map.node.cinder_rest,残り火の休息所,Cinder Rest,余烬营地,餘燼營地,잿불 휴식처
 map.node.ruins_path_2,廃墟通路II,Ruins Path II,废墟通路II,廢墟通路II,폐허 통로 II
 map.node.abyss_gate,深淵の門,Abyss Gate,深渊之门,深淵之門,심연의 문
