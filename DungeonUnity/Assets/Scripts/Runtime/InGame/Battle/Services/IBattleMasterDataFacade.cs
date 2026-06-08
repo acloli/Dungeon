@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -11,5 +12,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// RunProfileからBattle実行定義を組み立てる
         /// </summary>
         RuntimeRunDefinition BuildRunDefinition(int runProfileId);
+
+        /// <summary>
+        /// 全てのカードの定義カタログを構築する
+        /// </summary>
+        IReadOnlyDictionary<int, RuntimeCard> BuildCardCatalog();
     }
 }

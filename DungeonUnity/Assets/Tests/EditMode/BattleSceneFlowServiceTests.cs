@@ -548,6 +548,35 @@ namespace Dungeon.Tests.EditMode
             {
                 return _runDefinition;
             }
+
+            public IReadOnlyDictionary<int, RuntimeCard> BuildCardCatalog()
+            {
+                Dictionary<int, RuntimeCard> catalog = new Dictionary<int, RuntimeCard>();
+                if (_runDefinition != null)
+                {
+                    if (_runDefinition.StarterDeck != null)
+                    {
+                        foreach (RuntimeCard card in _runDefinition.StarterDeck)
+                        {
+                            if (card != null && !catalog.ContainsKey(card.Id))
+                            {
+                                catalog.Add(card.Id, card);
+                            }
+                        }
+                    }
+                    if (_runDefinition.RewardPool != null)
+                    {
+                        foreach (RuntimeRewardEntry entry in _runDefinition.RewardPool)
+                        {
+                            if (entry != null && entry.Card != null && !catalog.ContainsKey(entry.Card.Id))
+                            {
+                                catalog.Add(entry.Card.Id, entry.Card);
+                            }
+                        }
+                    }
+                }
+                return catalog;
+            }
         }
 
         /// <summary>

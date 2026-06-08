@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Battle.Model;
-
 namespace Dungeon.Runtime.InGame.Save.Model
 {
     /// <summary>
@@ -16,7 +14,7 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int PlayerEnergy;
         public int Gold;
         public int CurrentNodeIndex;
-        public BattleScenePage CurrentPage;
+        public int CurrentPage;
 
         // MasterDataのCardIDリスト
         public List<int> DeckCardIds = new List<int>();

@@ -9,6 +9,7 @@
     "TFramework.UI",
     "Unity.TextMeshPro",
     "Dungeon.Runtime.InGame.Domain",
+    "Dungeon.Runtime.InGame.Save",
     "Dungeon.Runtime.SceneFlow",
     "Game.MasterData.Generated",
     "UniTask",

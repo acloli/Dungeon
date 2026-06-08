@@ -36,7 +36,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            Dictionary<int, RuntimeCard> cardCatalog = BuildCardCatalog();
+            IReadOnlyDictionary<int, RuntimeCard> cardCatalog = BuildCardCatalog();
             Dictionary<int, RuntimeEnemy> enemyCatalog = BuildEnemyCatalog();
             IReadOnlyList<RuntimeMapNode> nodes = BuildMapNodes(profile.MapTemplateId);
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
@@ -58,7 +58,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// カード定義辞書を構築する
         /// </summary>
-        private Dictionary<int, RuntimeCard> BuildCardCatalog()
+        public IReadOnlyDictionary<int, RuntimeCard> BuildCardCatalog()
         {
             IReadOnlyList<CardEffectMaster> effectMasters = _masterDataService.GetAll<CardEffectMaster>();
             Dictionary<int, List<RuntimeCardEffect>> effectsByCardId = effectMasters

@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.InGame.Save.Model;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 
@@ -229,6 +230,10 @@ namespace Dungeon.Tests.EditMode
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
 
             public void Initialize(int runProfileId)
+            {
+            }
+
+            public void InitializeFromSave(RunSaveData saveData)
             {
             }
 

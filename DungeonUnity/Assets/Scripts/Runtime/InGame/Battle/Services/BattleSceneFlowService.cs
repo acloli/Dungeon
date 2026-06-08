@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.InGame.Save.Model;
+using Dungeon.Runtime.InGame.Save.Services;
 using Game.MasterData.Generated;
+using Cysharp.Threading.Tasks;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -15,6 +18,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
         private readonly IBattleDisplayTextService _displayTextService;
+        private readonly IRunSaveService _runSaveService;
 
         private RuntimeRunDefinition _runDefinition;
 
@@ -22,12 +26,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleMasterDataFacade masterDataFacade,
-            IBattleDisplayTextService displayTextService = null)
+            IBattleDisplayTextService displayTextService = null,
+            IRunSaveService runSaveService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
             _displayTextService = displayTextService ?? new BattleDisplayTextService();
+            _runSaveService = runSaveService;
         }
 
         /// <summary>
@@ -39,6 +45,51 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             OpenMap();
+            RequestSave();
+        }
+
+        /// <summary>
+        /// セーブデータからの初期化
+        /// </summary>
+        public void InitializeFromSave(RunSaveData saveData)
+        {
+            _runDefinition = _masterDataFacade.BuildRunDefinition(saveData.RunProfileId);
+            _rules.InitializeRun(_state, _runDefinition);
+
+            _state.PlayerMaxHp = saveData.PlayerMaxHp;
+            _state.PlayerHp = saveData.PlayerHp;
+            _state.PlayerEnergy = saveData.PlayerEnergy;
+            _state.Gold = saveData.Gold;
+            _state.CurrentNodeIndex = saveData.CurrentNodeIndex;
+            _state.CurrentPage = (BattleScenePage)saveData.CurrentPage;
+
+            IReadOnlyDictionary<int, RuntimeCard> cardCatalog = _masterDataFacade.BuildCardCatalog();
+            _state.Deck.Clear();
+            if (saveData.DeckCardIds != null)
+            {
+                foreach (int cardId in saveData.DeckCardIds)
+                {
+                    if (cardCatalog.TryGetValue(cardId, out RuntimeCard card))
+                    {
+                        _state.Deck.Add(card);
+                    }
+                }
+            }
+
+            _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+
+            if (_state.CurrentPage == BattleScenePage.Map)
+            {
+                OpenMap();
+            }
+            else if (_state.CurrentPage == BattleScenePage.RestShop)
+            {
+                OpenRestShop();
+            }
+            else
+            {
+                OpenMap();
+            }
         }
 
         /// <summary>
@@ -246,6 +297,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             OpenMap();
+            RequestSave();
         }
 
         /// <summary>
@@ -288,6 +340,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public void ContinueFromRestShop()
         {
             OpenMap();
+            RequestSave();
         }
 
         /// <summary>
@@ -398,6 +451,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.ResultMessage = victory
                 ? string.Format(BattleSceneConstants.ResultVictoryFormat, _state.PlayerHp, _state.PlayerMaxHp, _state.Gold)
                 : BattleSceneConstants.RunFailedMessage;
+                
+            _runSaveService?.DeleteSavedRun();
         }
 
         /// <summary>
@@ -798,6 +853,36 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return views;
+        }
+
+        /// <summary>
+        /// 状態をセーブする
+        /// </summary>
+        private void RequestSave()
+        {
+            if (_runSaveService == null || _runDefinition == null) return;
+            
+            RunSaveData data = new RunSaveData
+            {
+                RunProfileId = _runDefinition.RunProfileId,
+                PlayerMaxHp = _state.PlayerMaxHp,
+                PlayerHp = _state.PlayerHp,
+                PlayerEnergy = _state.PlayerEnergy,
+                Gold = _state.Gold,
+                CurrentNodeIndex = _state.CurrentNodeIndex,
+                CurrentPage = (int)_state.CurrentPage,
+                DeckCardIds = new List<int>()
+            };
+            
+            for (int i = 0; i < _state.Deck.Count; i++)
+            {
+                if (_state.Deck[i] != null)
+                {
+                    data.DeckCardIds.Add(_state.Deck[i].Id);
+                }
+            }
+            
+            _runSaveService.SaveCurrentRunAsync(data).Forget();
         }
     }
 }

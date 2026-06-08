@@ -1,4 +1,6 @@
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Save.Model;
+
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
     /// <summary>
@@ -10,6 +12,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// Run初期化
         /// </summary>
         void Initialize(int runProfileId);
+
+        /// <summary>
+        /// セーブデータからの初期化
+        /// </summary>
+        void InitializeFromSave(RunSaveData saveData);
 
         /// <summary>
         /// 現在状態取得

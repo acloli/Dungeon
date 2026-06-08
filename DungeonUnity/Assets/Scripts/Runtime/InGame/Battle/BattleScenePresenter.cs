@@ -4,6 +4,8 @@ using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.InGame.Save.Model;
+using Dungeon.Runtime.InGame.Save.Services;
 
 namespace Dungeon.Runtime.InGame.Battle
 {
@@ -15,6 +17,7 @@ namespace Dungeon.Runtime.InGame.Battle
         private readonly IBattleSceneFlowService _flowService;
         private readonly BattlePagePresenter _battlePagePresenter;
         private readonly IBattleSceneUiCoordinator _uiCoordinator;
+        private readonly IRunSaveService _runSaveService;
         private readonly CancellationTokenSource _presenterCts = new CancellationTokenSource();
 
         private IBattleSceneHostView _view;
@@ -23,11 +26,13 @@ namespace Dungeon.Runtime.InGame.Battle
         public BattleScenePresenter(
             IBattleSceneFlowService flowService,
             BattlePagePresenter battlePagePresenter,
-            IBattleSceneUiCoordinator uiCoordinator)
+            IBattleSceneUiCoordinator uiCoordinator,
+            IRunSaveService runSaveService = null)
         {
             _flowService = flowService;
             _battlePagePresenter = battlePagePresenter;
             _uiCoordinator = uiCoordinator;
+            _runSaveService = runSaveService;
         }
 
         /// <summary>
@@ -41,7 +46,23 @@ namespace Dungeon.Runtime.InGame.Battle
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
-            _flowService.Initialize(runProfileId);
+            if (_runSaveService != null && _runSaveService.HasSavedRun())
+            {
+                RunSaveData saveData = await _runSaveService.LoadCurrentRunAsync(ct);
+                if (saveData != null && saveData.IsValid)
+                {
+                    _flowService.InitializeFromSave(saveData);
+                }
+                else
+                {
+                    _flowService.Initialize(runProfileId);
+                }
+            }
+            else
+            {
+                _flowService.Initialize(runProfileId);
+            }
+
             await RenderAsync(ct);
         }
 
