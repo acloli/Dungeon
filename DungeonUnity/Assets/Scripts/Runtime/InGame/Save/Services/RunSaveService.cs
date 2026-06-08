@@ -1,10 +1,14 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Save.Model;
+using TFramework.Debug;
 using TFramework.SaveData;
 
 namespace Dungeon.Runtime.InGame.Save.Services
 {
+    /// <summary>
+    /// ゲーム内状態保存サービス
+    /// </summary>
     public class RunSaveService : IRunSaveService
     {
         private const string RunSaveKey = "run_save";
@@ -15,26 +19,88 @@ namespace Dungeon.Runtime.InGame.Save.Services
             _saveDataService = saveDataService;
         }
 
-        public UniTask SaveCurrentRunAsync(RunSaveData data, CancellationToken token = default)
+        /// <summary>
+        /// 現在のゲーム内状態保存
+        /// </summary>
+        public async UniTask SaveCurrentRunAsync(RunSaveData data, CancellationToken token = default)
         {
-            return _saveDataService.SaveAsync(RunSaveKey, data, token);
+            if (data == null || !data.IsValid)
+            {
+                TLogger.Warning("RunSaveData is invalid", "RunSave");
+                return;
+            }
+
+            try
+            {
+                await _saveDataService.SaveAsync(RunSaveKey, data, token);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                TLogger.Error($"RunSave save failed: {ex.Message}", "RunSave");
+            }
         }
 
-        public UniTask<RunSaveData> LoadCurrentRunAsync(CancellationToken token = default)
+        /// <summary>
+        /// 保存済みゲーム内状態読み込み
+        /// </summary>
+        public async UniTask<RunSaveData> LoadCurrentRunAsync(CancellationToken token = default)
         {
-            return _saveDataService.LoadAsync<RunSaveData>(RunSaveKey, null, token);
+            try
+            {
+                RunSaveData data = await _saveDataService.LoadAsync<RunSaveData>(RunSaveKey, null, token);
+                if (data == null || !data.IsValid)
+                {
+                    return null;
+                }
+
+                return data;
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                TLogger.Error($"RunSave load failed: {ex.Message}", "RunSave");
+                return null;
+            }
         }
 
+        /// <summary>
+        /// 保存済みゲーム内状態存在判定
+        /// </summary>
         public bool HasSavedRun()
         {
-            return _saveDataService.Exists(RunSaveKey);
+            try
+            {
+                return _saveDataService.Exists(RunSaveKey);
+            }
+            catch (System.Exception ex)
+            {
+                TLogger.Error($"RunSave exists failed: {ex.Message}", "RunSave");
+                return false;
+            }
         }
 
+        /// <summary>
+        /// 保存済みゲーム内状態削除
+        /// </summary>
         public void DeleteSavedRun()
         {
-            if (_saveDataService.Exists(RunSaveKey))
+            try
             {
-                _saveDataService.Delete(RunSaveKey);
+                if (_saveDataService.Exists(RunSaveKey))
+                {
+                    _saveDataService.Delete(RunSaveKey);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                TLogger.Error($"RunSave delete failed: {ex.Message}", "RunSave");
             }
         }
     }

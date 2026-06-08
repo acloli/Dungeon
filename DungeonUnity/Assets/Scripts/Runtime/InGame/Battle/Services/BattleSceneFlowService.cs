@@ -5,6 +5,7 @@ using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
 using Game.MasterData.Generated;
 using Cysharp.Threading.Tasks;
+using TFramework.Debug;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -149,6 +150,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             if (nodeType == InGameNodeType.RestShop)
             {
                 OpenRestShop();
+                RequestSave();
                 return;
             }
 
@@ -860,7 +862,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void RequestSave()
         {
-            if (_runSaveService == null || _runDefinition == null) return;
+            if (_runSaveService == null || _runDefinition == null)
+            {
+                return;
+            }
             
             RunSaveData data = new RunSaveData
             {
@@ -882,7 +887,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
             }
             
-            _runSaveService.SaveCurrentRunAsync(data).Forget();
+            _runSaveService.SaveCurrentRunAsync(data).Forget(ex =>
+            {
+                TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
+            });
         }
     }
 }

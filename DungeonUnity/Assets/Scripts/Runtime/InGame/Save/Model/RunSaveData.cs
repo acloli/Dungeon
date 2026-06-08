@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 namespace Dungeon.Runtime.InGame.Save.Model
 {
     /// <summary>
@@ -8,6 +9,9 @@ namespace Dungeon.Runtime.InGame.Save.Model
     [Serializable]
     public class RunSaveData
     {
+        private const int MapPage = 0;
+        private const int RestShopPage = 3;
+
         public int RunProfileId;
         public int PlayerMaxHp;
         public int PlayerHp;
@@ -16,12 +20,15 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int CurrentNodeIndex;
         public int CurrentPage;
 
-        // MasterDataのCardIDリスト
         public List<int> DeckCardIds = new List<int>();
 
         /// <summary>
-        /// 有効なデータを持っているかどうかの簡易判定
+        /// 再開できるcheckpointデータか
         /// </summary>
-        public bool IsValid => RunProfileId > 0;
+        public bool IsValid => RunProfileId > 0
+                               && PlayerMaxHp > 0
+                               && PlayerHp > 0
+                               && (CurrentPage == MapPage || CurrentPage == RestShopPage)
+                               && DeckCardIds != null;
     }
 }
