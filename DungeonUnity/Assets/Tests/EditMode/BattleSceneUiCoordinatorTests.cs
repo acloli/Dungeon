@@ -64,10 +64,24 @@ namespace Dungeon.Tests.EditMode
         {
             public IBattlePageView BattlePageView => null;
             public bool IsBattleVisible { get; private set; }
+            public bool IsSaveQuitVisible { get; private set; }
 
             public void SetBattleVisible(bool visible)
             {
                 IsBattleVisible = visible;
+            }
+
+            public void SetSaveQuitVisible(bool visible)
+            {
+                IsSaveQuitVisible = visible;
+            }
+
+            public void WireSaveQuitButton(Action onSaveQuitClicked)
+            {
+            }
+
+            public void UnwireSaveQuitButton()
+            {
             }
         }
 

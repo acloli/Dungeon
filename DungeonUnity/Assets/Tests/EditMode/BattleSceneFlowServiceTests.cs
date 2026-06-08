@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.InGame.Save.Model;
+using Dungeon.Runtime.InGame.Save.Services;
 using Game.MasterData.Generated;
 using NUnit.Framework;
+using Cysharp.Threading.Tasks;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -369,6 +372,100 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void Initialize_RequestSave_SavesMapCheckpoint()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
+
+            service.Initialize(5501);
+
+            Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
+            Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void SelectMapNode_RestShop_SavesRestShopCheckpoint()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+
+            Assert.That(runSaveService.SaveCallCount, Is.EqualTo(2));
+            Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.RestShop));
+            Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void SelectReward_RequestSave_SavesDeckCheckpoint()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeCard reward = CreateCard(1002, "Reward", 1, 5);
+            BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
+
+            service.Initialize(5501);
+            service.SelectReward(reward);
+
+            Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
+            Assert.That(runSaveService.LastSavedData.DeckCardIds, Does.Contain(1002));
+        }
+
+        [Test]
+        public void EndTurn_WhenPlayerDies_DeletesSavedRun()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                playerMaxHp: 3,
+                starterDeck: new[] { CreateCard(1001, "Strike", 1, 1) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 30, CreateAction(1, 5, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.EndTurn();
+
+            Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InitializeFromSave_RestoresSavedState()
+        {
+            RuntimeCard reward = CreateCard(1002, "Reward", 1, 5);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                rewardCards: new[] { CreateRewardEntry(reward, 10, 1, 99) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 23,
+                PlayerEnergy = 3,
+                Gold = 177,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.Map,
+                DeckCardIds = new List<int> { 1002 }
+            };
+
+            service.InitializeFromSave(saveData);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(snapshot.PlayerHp, Is.EqualTo(23));
+            Assert.That(snapshot.Gold, Is.EqualTo(177));
+            Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(0));
+
+            service.SelectMapNode(1);
+            BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
+            Assert.That(battleSnapshot.Hand.Count, Is.EqualTo(1));
+            Assert.That(battleSnapshot.Hand[0].Id, Is.EqualTo(1002));
+        }
+
+        [Test]
         public void TryPlaySelectedCard_GainBlock_ReducesIncomingDamage()
         {
             RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
@@ -397,6 +494,19 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition));
+        }
+
+        private static BattleSceneFlowService CreateServiceWithRunSave(
+            RuntimeRunDefinition runDefinition,
+            IRunSaveService runSaveService,
+            params int[] values)
+        {
+            return new BattleSceneFlowService(
+                new BattleSceneRules(),
+                new SequenceRandomProvider(values),
+                new FakeBattleMasterDataFacade(runDefinition),
+                null,
+                runSaveService);
         }
 
         private static BattleSceneFlowService CreateServiceWithDisplayText(
@@ -597,6 +707,35 @@ namespace Dungeon.Tests.EditMode
             public string GetBuffName(BuffType buffType)
             {
                 return $"表示{buffType}";
+            }
+        }
+
+        private sealed class FakeRunSaveService : IRunSaveService
+        {
+            public int SaveCallCount { get; private set; }
+            public int DeleteCallCount { get; private set; }
+            public RunSaveData LastSavedData { get; private set; }
+
+            public UniTask SaveCurrentRunAsync(RunSaveData data, System.Threading.CancellationToken token = default)
+            {
+                SaveCallCount++;
+                LastSavedData = data;
+                return UniTask.CompletedTask;
+            }
+
+            public UniTask<RunSaveData> LoadCurrentRunAsync(System.Threading.CancellationToken token = default)
+            {
+                return UniTask.FromResult<RunSaveData>(null);
+            }
+
+            public bool HasSavedRun()
+            {
+                return LastSavedData != null;
+            }
+
+            public void DeleteSavedRun()
+            {
+                DeleteCallCount++;
             }
         }
 

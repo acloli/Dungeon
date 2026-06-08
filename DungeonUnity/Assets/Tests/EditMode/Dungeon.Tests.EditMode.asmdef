@@ -12,6 +12,7 @@
         "TFramework.Core",
         "TFramework.Localization",
         "TFramework.MasterData",
+        "TFramework.SaveData",
         "TFramework.Scene",
         "TFramework.UI",
         "UniTask",

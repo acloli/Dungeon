@@ -7,6 +7,7 @@ using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.InGame.Save.Model;
+using Dungeon.Runtime.InGame.Save.Services;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 
@@ -113,6 +114,87 @@ namespace Dungeon.Tests.EditMode
             Assert.That(view.BattlePageView.LastEnemyButtonCount, Is.EqualTo(2));
         }
 
+        [Test]
+        public void InitializeAsync_WithValidSave_InitializesFromSave()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            FakeRunSaveService runSaveService = new FakeRunSaveService
+            {
+                HasSavedRunResult = true,
+                LoadResult = CreateValidSaveData()
+            };
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(flowService.InitializeFromSaveCallCount, Is.EqualTo(1));
+            Assert.That(flowService.InitializeCallCount, Is.EqualTo(0));
+            Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void InitializeAsync_WithInvalidSave_DeletesSaveAndInitializesNewRun()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            FakeRunSaveService runSaveService = new FakeRunSaveService
+            {
+                HasSavedRunResult = true,
+                LoadResult = new RunSaveData { RunProfileId = 0 }
+            };
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(flowService.InitializeFromSaveCallCount, Is.EqualTo(0));
+            Assert.That(flowService.InitializeCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InitializeAsync_MapState_ShowsSaveQuitButton()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.IsSaveQuitVisible, Is.True);
+        }
+
+        [Test]
+        public void InitializeAsync_BattleState_HidesSaveQuitButton()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.IsSaveQuitVisible, Is.False);
+        }
+
+        [Test]
+        public void OnSaveQuitClicked_InvokesQuitCallback()
+        {
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            bool called = false;
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None, () => called = true).GetAwaiter().GetResult();
+            view.InvokeSaveQuit();
+
+            Assert.That(called, Is.True);
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -215,6 +297,21 @@ namespace Dungeon.Tests.EditMode
                 1);
         }
 
+        private static RunSaveData CreateValidSaveData()
+        {
+            return new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 40,
+                PlayerHp = 40,
+                PlayerEnergy = 3,
+                Gold = 100,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                DeckCardIds = new List<int> { 1001 }
+            };
+        }
+
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
         {
             private readonly BattleSceneSnapshot _snapshot;
@@ -227,14 +324,18 @@ namespace Dungeon.Tests.EditMode
             public int EndTurnCallCount { get; private set; }
             public int SelectHandCardCallCount { get; private set; }
             public int TryPlaySelectedCardCallCount { get; private set; }
+            public int InitializeCallCount { get; private set; }
+            public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
 
             public void Initialize(int runProfileId)
             {
+                InitializeCallCount++;
             }
 
             public void InitializeFromSave(RunSaveData saveData)
             {
+                InitializeFromSaveCallCount++;
             }
 
             public BattleSceneSnapshot CreateSnapshot()
@@ -297,10 +398,32 @@ namespace Dungeon.Tests.EditMode
             IBattlePageView IBattleSceneHostView.BattlePageView => BattlePageView;
 
             public bool IsBattleVisible { get; private set; }
+            public bool IsSaveQuitVisible { get; private set; }
+            private Action _onSaveQuitClicked;
 
             public void SetBattleVisible(bool visible)
             {
                 IsBattleVisible = visible;
+            }
+
+            public void SetSaveQuitVisible(bool visible)
+            {
+                IsSaveQuitVisible = visible;
+            }
+
+            public void WireSaveQuitButton(Action onSaveQuitClicked)
+            {
+                _onSaveQuitClicked = onSaveQuitClicked;
+            }
+
+            public void UnwireSaveQuitButton()
+            {
+                _onSaveQuitClicked = null;
+            }
+
+            public void InvokeSaveQuit()
+            {
+                _onSaveQuitClicked?.Invoke();
             }
         }
 
@@ -394,6 +517,33 @@ namespace Dungeon.Tests.EditMode
 
             public void Dispose()
             {
+            }
+        }
+
+        private sealed class FakeRunSaveService : IRunSaveService
+        {
+            public bool HasSavedRunResult { get; set; }
+            public RunSaveData LoadResult { get; set; }
+            public int DeleteCallCount { get; private set; }
+
+            public UniTask SaveCurrentRunAsync(RunSaveData data, CancellationToken token = default)
+            {
+                return UniTask.CompletedTask;
+            }
+
+            public UniTask<RunSaveData> LoadCurrentRunAsync(CancellationToken token = default)
+            {
+                return UniTask.FromResult(LoadResult);
+            }
+
+            public bool HasSavedRun()
+            {
+                return HasSavedRunResult;
+            }
+
+            public void DeleteSavedRun()
+            {
+                DeleteCallCount++;
             }
         }
     }
