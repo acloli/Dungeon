@@ -1,0 +1,19 @@
+{
+    "name": "Dungeon.Runtime.InGame.Save",
+    "rootNamespace": "Dungeon.Runtime.InGame.Save",
+    "references": [
+        "TFramework.Core",
+        "TFramework.SaveData",
+        "UniTask",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

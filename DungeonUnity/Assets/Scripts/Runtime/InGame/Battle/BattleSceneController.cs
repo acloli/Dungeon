@@ -47,7 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct);
+            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct, OnSaveQuitClicked);
         }
 
         /// <summary>
@@ -84,6 +84,14 @@ namespace Dungeon.Runtime.InGame.Battle
         /// MainSceneに戻り処理
         /// </summary>
         private void OnResultBackClicked()
+        {
+            LoadMainSceneAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        /// <summary>
+        /// 中断戻り処理
+        /// </summary>
+        private void OnSaveQuitClicked()
         {
             LoadMainSceneAsync(this.GetCancellationTokenOnDestroy()).Forget();
         }

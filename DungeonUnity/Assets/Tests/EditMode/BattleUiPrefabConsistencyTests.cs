@@ -101,6 +101,21 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: EnemyBuffPanel", yaml);
         }
 
+        [Test]
+        public void RunSaveScenes_HaveEntryAndQuitReferences()
+        {
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string mainSceneYaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/MainScene.unity"));
+            string battleSceneYaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
+
+            StringAssert.Contains("_newRunButton: {fileID:", mainSceneYaml);
+            StringAssert.Contains("_continueRunButton: {fileID:", mainSceneYaml);
+            StringAssert.Contains("value: NewRunButton", mainSceneYaml);
+            StringAssert.Contains("m_Name: ContinueRunButton", mainSceneYaml);
+            StringAssert.Contains("_saveQuitButton: {fileID:", battleSceneYaml);
+            StringAssert.Contains("m_Name: SaveQuitButton", battleSceneYaml);
+        }
+
         private static void AssertPrefabContainsComponent<T>(string prefabName) where T : Component
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");

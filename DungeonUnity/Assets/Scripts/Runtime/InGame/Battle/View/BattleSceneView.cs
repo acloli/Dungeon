@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
@@ -10,6 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [Header("Battle Base")]
         [SerializeField] private GameObject _battlePanel;
         [SerializeField] private BattlePageView _battlePageView;
+        [SerializeField] private Button _saveQuitButton;
 
         /// <summary>
         /// 戦闘画面View取得
@@ -24,6 +27,40 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_battlePanel != null)
             {
                 _battlePanel.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// 中断ボタン表示切り替え
+        /// </summary>
+        public void SetSaveQuitVisible(bool visible)
+        {
+            if (_saveQuitButton != null)
+            {
+                _saveQuitButton.gameObject.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// 中断ボタン登録
+        /// </summary>
+        public void WireSaveQuitButton(Action onSaveQuitClicked)
+        {
+            UnwireSaveQuitButton();
+            if (_saveQuitButton != null)
+            {
+                _saveQuitButton.onClick.AddListener(() => onSaveQuitClicked?.Invoke());
+            }
+        }
+
+        /// <summary>
+        /// 中断ボタン解除
+        /// </summary>
+        public void UnwireSaveQuitButton()
+        {
+            if (_saveQuitButton != null)
+            {
+                _saveQuitButton.onClick.RemoveAllListeners();
             }
         }
     }
