@@ -57,7 +57,7 @@ namespace Dungeon.Runtime.OutGame.Main
             if (_runProfile == null)
             {
                 SetNewRunInteractable(false);
-                SetContinueRunInteractable(false);
+                SetContinueRunActive(false);
                 SetSelectedRunProfileText("RunProfile is not found");
                 TLogger.Warning($"RunProfileMaster is not found id={_defaultRunProfileId}", "Main");
                 return;
@@ -120,11 +120,11 @@ namespace Dungeon.Runtime.OutGame.Main
         /// <summary>
         /// Continueボタン有効状態設定
         /// </summary>
-        private void SetContinueRunInteractable(bool interactable)
+        private void SetContinueRunActive(bool isActive)
         {
             if (_continueRunButton != null)
             {
-                _continueRunButton.interactable = interactable;
+                _continueRunButton.gameObject.SetActive(isActive);
             }
         }
 
@@ -134,7 +134,7 @@ namespace Dungeon.Runtime.OutGame.Main
         private void RefreshRunProfileText()
         {
             bool hasSavedRun = _runSaveService != null && _runSaveService.HasSavedRun();
-            SetContinueRunInteractable(hasSavedRun);
+            SetContinueRunActive(hasSavedRun);
             if (hasSavedRun)
             {
                 SetSelectedRunProfileText(
