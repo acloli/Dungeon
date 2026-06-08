@@ -10,7 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     {
         public List<RuntimeCard> Deck { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
-        public List<RuntimeCard> RewardChoices { get; } = new List<RuntimeCard>();
+        public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
         public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();

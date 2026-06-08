@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BattleScenePage currentPage,
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyList<RuntimeCard> hand,
-            IReadOnlyList<RuntimeCard> rewardChoices,
+            IReadOnlyList<RuntimeRewardEntry> rewardChoices,
             int currentNodeIndex,
             int playerMaxHp,
             int playerHp,
@@ -71,7 +71,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattleScenePage CurrentPage { get; }
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyList<RuntimeCard> Hand { get; }
-        public IReadOnlyList<RuntimeCard> RewardChoices { get; }
+        public IReadOnlyList<RuntimeRewardEntry> RewardChoices { get; }
         public int CurrentNodeIndex { get; }
         public int PlayerMaxHp { get; }
         public int PlayerHp { get; }
