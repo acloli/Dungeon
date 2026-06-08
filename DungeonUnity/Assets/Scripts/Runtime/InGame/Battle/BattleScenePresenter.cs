@@ -22,6 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle
 
         private IBattleSceneHostView _view;
         private Action _onResultBackClicked;
+        private Action _onSaveQuitClicked;
 
         public BattleScenePresenter(
             IBattleSceneFlowService flowService,
@@ -38,12 +39,14 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public async UniTask InitializeAsync(IBattleSceneHostView view, int runProfileId, Action onResultBackClicked, CancellationToken ct)
+        public async UniTask InitializeAsync(IBattleSceneHostView view, int runProfileId, Action onResultBackClicked, CancellationToken ct, Action onSaveQuitClicked = null)
         {
             _view = view;
             _onResultBackClicked = onResultBackClicked;
+            _onSaveQuitClicked = onSaveQuitClicked;
 
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
+            _view.WireSaveQuitButton(OnSaveQuitClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
             if (_runSaveService != null && _runSaveService.HasSavedRun())
@@ -55,6 +58,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 }
                 else
                 {
+                    _runSaveService.DeleteSavedRun();
                     _flowService.Initialize(runProfileId);
                 }
             }
@@ -73,9 +77,14 @@ namespace Dungeon.Runtime.InGame.Battle
         {
             _battlePagePresenter.Dispose();
             _presenterCts.Cancel();
+            if (_view != null)
+            {
+                _view.UnwireSaveQuitButton();
+            }
             _uiCoordinator.Dispose();
             _view = null;
             _onResultBackClicked = null;
+            _onSaveQuitClicked = null;
         }
 
         /// <summary>
@@ -116,6 +125,14 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// 中断ボタン通知
+        /// </summary>
+        public void OnSaveQuitClicked()
+        {
+            _onSaveQuitClicked?.Invoke();
+        }
+
+        /// <summary>
         /// スナップショット反映処理
         /// </summary>
         private async UniTask RenderAsync(CancellationToken ct)
@@ -131,13 +148,16 @@ namespace Dungeon.Runtime.InGame.Battle
             switch (snapshot.CurrentPage)
             {
                 case BattleScenePage.Map:
+                    _view.SetSaveQuitVisible(true);
                     await _uiCoordinator.ShowMapAsync(snapshot, OnMapNodeClicked, ct);
                     break;
                 case BattleScenePage.Battle:
+                    _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowBattleAsync(ct);
                     _battlePagePresenter.Render(snapshot);
                     break;
                 case BattleScenePage.Reward:
+                    _view.SetSaveQuitVisible(false);
                     RuntimeCard reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
                     if (reward != null)
                     {
@@ -146,11 +166,13 @@ namespace Dungeon.Runtime.InGame.Battle
                     }
                     break;
                 case BattleScenePage.RestShop:
+                    _view.SetSaveQuitVisible(true);
                     RestShopDialogAction action = await _uiCoordinator.ShowRestShopAsync(snapshot, ct);
                     ApplyRestShopAction(action);
                     await RenderAsync(ct);
                     break;
                 case BattleScenePage.Result:
+                    _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowResultAsync(snapshot, ct);
                     _onResultBackClicked?.Invoke();
                     break;
