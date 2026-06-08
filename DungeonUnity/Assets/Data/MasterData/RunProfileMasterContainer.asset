@@ -15,6 +15,8 @@ MonoBehaviour:
   _data:
   - Id: 5501
     Key: run_crimson_exile_act1
+    Name: Crimson Exile Standard
+    LocalizationKey: run.profile.crimson_exile_standard
     CharacterArchetype: 0
     PlayerMaxHp: 80
     StartingGold: 99

@@ -73,7 +73,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildBuffViews(_state.PlayerBuffs),
                 BuildBuffViews(_state.EnemyBuffs),
                 BuildEnemyViews(),
-                _state.SelectedEnemyIndex);
+                _state.SelectedEnemyIndex,
+                BuildAvailableNodeIndices());
         }
 
         /// <summary>
@@ -460,6 +461,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return index == _state.CurrentNodeIndex + 1;
+        }
+
+        /// <summary>
+        /// 遷移可能ノード一覧構築
+        /// </summary>
+        private IReadOnlyList<int> BuildAvailableNodeIndices()
+        {
+            List<int> indices = new List<int>();
+            if (_state.CurrentPage != BattleScenePage.Map || _state.Nodes == null)
+            {
+                return indices;
+            }
+
+            for (int i = 0; i < _state.Nodes.Count; i++)
+            {
+                if (CanMoveToNode(i))
+                {
+                    indices.Add(i);
+                }
+            }
+
+            return indices;
         }
 
         /// <summary>

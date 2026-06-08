@@ -24,9 +24,9 @@ namespace Game.MasterData.Generated
             return self.GetContainer<DeckGroupMasterContainer>();
         }
 
-        public static EncounterGroupMasterContainer EncounterGroupMaster(this IMasterDataService self)
+        public static EncounterFormationEnemyMasterContainer EncounterFormationEnemyMaster(this IMasterDataService self)
         {
-            return self.GetContainer<EncounterGroupMasterContainer>();
+            return self.GetContainer<EncounterFormationEnemyMasterContainer>();
         }
 
         public static EncounterFormationMasterContainer EncounterFormationMaster(this IMasterDataService self)
@@ -34,9 +34,9 @@ namespace Game.MasterData.Generated
             return self.GetContainer<EncounterFormationMasterContainer>();
         }
 
-        public static EncounterFormationEnemyMasterContainer EncounterFormationEnemyMaster(this IMasterDataService self)
+        public static EncounterGroupMasterContainer EncounterGroupMaster(this IMasterDataService self)
         {
-            return self.GetContainer<EncounterFormationEnemyMasterContainer>();
+            return self.GetContainer<EncounterGroupMasterContainer>();
         }
 
         public static EnemyActionMasterContainer EnemyActionMaster(this IMasterDataService self)

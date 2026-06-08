@@ -60,11 +60,13 @@ namespace Dungeon.Tests.EditMode
             masterDataService.SetAll(new[]
             {
                 new MapNodeMaster { Id = 5301, MapTemplateId = 6301, NodeKey = "node_01", Floor = 1, NodeType = NodeType.Battle, Name = "Node1", LocalizationKey = "map.node.1" },
-                new MapNodeMaster { Id = 5302, MapTemplateId = 6301, NodeKey = "node_02", Floor = 2, NodeType = NodeType.Boss, Name = "Node2", LocalizationKey = "map.node.2" }
+                new MapNodeMaster { Id = 5302, MapTemplateId = 6301, NodeKey = "node_02", Floor = 2, NodeType = NodeType.Battle, Name = "Node2", LocalizationKey = "map.node.2" },
+                new MapNodeMaster { Id = 5303, MapTemplateId = 6301, NodeKey = "node_03", Floor = 2, NodeType = NodeType.Boss, Name = "Node3", LocalizationKey = "map.node.3" }
             });
             masterDataService.SetAll(new[]
             {
-                new MapEdgeMaster { Id = 5401, MapTemplateId = 6301, FromNodeKey = "node_01", ToNodeKey = "node_02" }
+                new MapEdgeMaster { Id = 5401, MapTemplateId = 6301, FromNodeKey = "node_01", ToNodeKey = "node_02" },
+                new MapEdgeMaster { Id = 5402, MapTemplateId = 6301, FromNodeKey = "node_01", ToNodeKey = "node_03" }
             });
             masterDataService.SetAll(new[]
             {
@@ -103,9 +105,9 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.StarterDeck[0].DisplayName, Is.EqualTo("CardA"));
             Assert.That(runDefinition.RewardPool.Count, Is.EqualTo(1));
             Assert.That(runDefinition.RewardPool[0].Card.DisplayName, Is.EqualTo("CardB"));
-            Assert.That(runDefinition.Nodes.Count, Is.EqualTo(2));
+            Assert.That(runDefinition.Nodes.Count, Is.EqualTo(3));
             Assert.That(runDefinition.Nodes[0].DisplayName, Is.EqualTo("Node1"));
-            Assert.That(runDefinition.Nodes[0].NextNodeIndices.Count, Is.EqualTo(1));
+            Assert.That(runDefinition.Nodes[0].NextNodeIndices, Is.EqualTo(new[] { 1, 2 }));
             Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Battle][0].Formation.Enemies[0].Enemy.DisplayName, Is.EqualTo("EnemyA"));
             Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Boss][0].Formation.Enemies[0].Enemy.DisplayName, Is.EqualTo("EnemyB"));
         }

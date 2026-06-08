@@ -5,7 +5,12 @@
     "TFramework.Core",
     "TFramework.Scene",
     "TFramework.Debug",
+    "TFramework.Localization",
+    "TFramework.MasterData",
+    "TFramework.UI",
+    "Unity.TextMeshPro",
     "Dungeon.Runtime.SceneFlow",
+    "Game.MasterData.Generated",
     "UniTask",
     "VContainer"
   ],

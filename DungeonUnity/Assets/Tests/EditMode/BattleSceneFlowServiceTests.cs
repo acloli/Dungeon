@@ -25,7 +25,45 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.PlayerHp, Is.EqualTo(50));
             Assert.That(snapshot.Gold, Is.EqualTo(120));
             Assert.That(snapshot.Nodes.Count, Is.EqualTo(2));
+            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
             Assert.That(snapshot.MapMessage, Does.Contain("Next 1/2"));
+        }
+
+        [Test]
+        public void CreateSnapshot_AfterBranchNode_ReturnsAvailableNextNodes()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1, 2 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Battle", new[] { 3 }),
+                    CreateNode(5303, 2, InGameNodeType.EliteBattle, "Elite", new[] { 3 }),
+                    CreateNode(5304, 3, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyRest();
+            service.ContinueFromRestShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void SelectMapNode_UnavailableNode_KeepsCurrentNodeAndShowsMessage()
+        {
+            BattleSceneFlowService service = CreateService(CreateRunDefinition(), 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(1);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(-1));
+            Assert.That(snapshot.MapMessage, Is.EqualTo("You can only go to the next node."));
+            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
         }
 
         [Test]
