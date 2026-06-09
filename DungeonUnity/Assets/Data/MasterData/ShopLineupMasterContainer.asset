@@ -52,36 +52,36 @@ MonoBehaviour:
   - Id: 8307
     ShopId: 1
     SlotIndex: 7
-    RewardType: 2
+    RewardType: 3
     RequiredCardType: 1
     Weight: 10
   - Id: 8308
     ShopId: 1
     SlotIndex: 8
-    RewardType: 2
+    RewardType: 3
     RequiredCardType: 1
     Weight: 10
   - Id: 8309
     ShopId: 1
     SlotIndex: 9
-    RewardType: 2
+    RewardType: 3
     RequiredCardType: 1
     Weight: 10
   - Id: 8310
     ShopId: 1
     SlotIndex: 10
-    RewardType: 1
+    RewardType: 2
     RequiredCardType: 1
     Weight: 10
   - Id: 8311
     ShopId: 1
     SlotIndex: 11
-    RewardType: 1
+    RewardType: 2
     RequiredCardType: 1
     Weight: 10
   - Id: 8312
     ShopId: 1
     SlotIndex: 12
-    RewardType: 1
+    RewardType: 2
     RequiredCardType: 1
     Weight: 10

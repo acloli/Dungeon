@@ -62,3 +62,10 @@ MonoBehaviour:
     Weight: 6
     MinFloor: 1
     MaxFloor: 99
+  - Id: 5108
+    RewardPoolId: 6101
+    RewardType: 1
+    RewardValue: 50
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99

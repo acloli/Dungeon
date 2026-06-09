@@ -115,6 +115,7 @@ namespace Game.MasterData.Generated
     public enum RewardType
     {
         Card,
+        Gold,
         Potion,
         Relic,
     }

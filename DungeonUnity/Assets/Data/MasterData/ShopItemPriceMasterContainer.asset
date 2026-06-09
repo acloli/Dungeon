@@ -14,22 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.ShopItemPriceMasterContainer
   _data:
   - Id: 8201
-    ItemType: 2
+    ItemType: 3
     ItemId: 1
     BasePrice: 150
     JitterPercent: 15
   - Id: 8202
-    ItemType: 2
+    ItemType: 3
     ItemId: 2
     BasePrice: 250
     JitterPercent: 15
   - Id: 8203
-    ItemType: 1
+    ItemType: 2
     ItemId: 1
     BasePrice: 50
     JitterPercent: 10
   - Id: 8204
-    ItemType: 1
+    ItemType: 2
     ItemId: 2
     BasePrice: 50
     JitterPercent: 10
