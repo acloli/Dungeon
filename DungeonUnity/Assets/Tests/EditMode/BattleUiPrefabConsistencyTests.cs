@@ -57,6 +57,16 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void RewardDialog_HasGoldRewardIconReference()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/RewardDialog.prefab");
+            RewardDialog rewardDialog = prefab.GetComponent<RewardDialog>();
+
+            SerializedObject serialized = new SerializedObject(rewardDialog);
+            Assert.That(serialized.FindProperty("_goldRewardIcon").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
         public void AddressableGroup_UsesPrefabNamesAsKeys()
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);

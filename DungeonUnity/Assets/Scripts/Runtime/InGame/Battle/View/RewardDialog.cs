@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Game.MasterData.Generated;
 using TFramework.UI;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;
+        [SerializeField] private Sprite _goldRewardIcon;
 
         private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
         private BattleRewardDialogParam _param;
@@ -36,22 +38,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < entries.Count; i++)
             {
                 RuntimeRewardEntry entry = entries[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
                 BattleOptionButtonView button = Instantiate(_rewardButtonTemplate, _rewardRoot);
                 button.gameObject.SetActive(true);
 
-                string label = string.Empty;
-                if (entry.RewardType == Game.MasterData.Generated.RewardType.Card && entry.Card != null)
-                {
-                    label = string.Format(BattleSceneConstants.RewardLabelFormat, entry.Card.DisplayName, entry.Card.Cost, entry.Card.PreviewDamage);
-                }
-                else if (entry.RewardType == Game.MasterData.Generated.RewardType.Gold)
-                {
-                    label = $"{entry.RewardValue} Gold";
-                }
-                else
-                {
-                    label = $"{entry.RewardType}";
-                }
+                string label = BuildRewardLabel(entry);
 
                 button.Configure(
                     label,
@@ -59,6 +54,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     {
                         onClicked?.Invoke(entry);
                     });
+                button.SetIcon(BuildRewardIcon(entry));
                 _buttons.Add(button);
             }
         }
@@ -91,6 +87,42 @@ namespace Dungeon.Runtime.InGame.Battle.View
         protected override void OnClosed()
         {
             ClearDynamicButtons();
+        }
+
+        /// <summary>
+        /// 報酬ボタンの表示文言を組み立てる
+        /// </summary>
+        private static string BuildRewardLabel(RuntimeRewardEntry entry)
+        {
+            if (entry.RewardType == RewardType.Card)
+            {
+                if (entry.Card != null)
+                {
+                    return string.Format(BattleSceneConstants.RewardLabelFormat, entry.Card.DisplayName, entry.Card.Cost, entry.Card.PreviewDamage);
+                }
+
+                return RewardType.Card.ToString();
+            }
+
+            if (entry.RewardType == RewardType.Gold)
+            {
+                return $"{entry.RewardValue} Gold";
+            }
+
+            return entry.RewardType.ToString();
+        }
+
+        /// <summary>
+        /// 報酬タイプごとのアイコンを返す
+        /// </summary>
+        private Sprite BuildRewardIcon(RuntimeRewardEntry entry)
+        {
+            if (entry.RewardType == RewardType.Gold)
+            {
+                return _goldRewardIcon;
+            }
+
+            return null;
         }
 
         /// <summary>

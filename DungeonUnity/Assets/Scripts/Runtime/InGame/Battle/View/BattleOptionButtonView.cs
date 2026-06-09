@@ -28,11 +28,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         public void SetIcon(Sprite icon)
         {
-            if (_icon != null)
+            if (_icon == null)
             {
-                _icon.sprite = icon;
-                _icon.gameObject.SetActive(icon != null);
+                return;
             }
+
+            _icon.sprite = icon;
+            _icon.gameObject.SetActive(icon != null);
         }
 
         public void SetInteractable(bool interactable)
