@@ -216,7 +216,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
             Assert.That(snapshot.Gold, Is.EqualTo(150));
             Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
-            Assert.That(snapshot.RewardChoices[0].DisplayName, Is.EqualTo("Reward"));
+            Assert.That(snapshot.RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
         }
 
         [Test]
