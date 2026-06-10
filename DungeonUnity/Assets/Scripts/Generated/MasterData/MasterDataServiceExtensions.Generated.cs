@@ -84,6 +84,11 @@ namespace Game.MasterData.Generated
             return self.GetContainer<ShopCardPriceMasterContainer>();
         }
 
+        public static ShopCardRemovalMasterContainer ShopCardRemovalMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<ShopCardRemovalMasterContainer>();
+        }
+
         public static ShopItemPriceMasterContainer ShopItemPriceMaster(this IMasterDataService self)
         {
             return self.GetContainer<ShopItemPriceMasterContainer>();

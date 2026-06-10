@@ -33,6 +33,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 81dfaca2d2f404a6babd24739cb2b862, type: 2}
   - {fileID: 11400000, guid: fe8e0261052ed42d2ae9c1ef9255aeca, type: 2}
   - {fileID: 11400000, guid: f58c088d1f0eb4ba9955785c0582f189, type: 2}
+  - {fileID: 11400000, guid: 421e0f2f7d168450fbfe07da9df6106f, type: 2}
   - {fileID: 11400000, guid: 0c47d1430e67946f58fd57ae53d7ff8d, type: 2}
   - {fileID: 11400000, guid: d3beff575cbab4d76a7f656af0cb5da5, type: 2}
   _enableServerSync: 0
