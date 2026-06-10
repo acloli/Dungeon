@@ -343,6 +343,11 @@ namespace Dungeon.Tests.EditMode
                 return _snapshot;
             }
 
+            public IReadOnlyList<RuntimeCard> GetDeckCards()
+            {
+                return new List<RuntimeCard>();
+            }
+
             public void SelectMapNode(int index)
             {
             }
@@ -535,7 +540,7 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
             }
 
-            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
             {
                 LastSnapshot = snapshot;
                 return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });

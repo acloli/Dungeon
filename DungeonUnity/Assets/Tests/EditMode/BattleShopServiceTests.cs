@@ -14,6 +14,21 @@ namespace Dungeon.Tests.EditMode
     [TestFixture]
     public sealed class BattleShopServiceTests
     {
+        private const int RunProfileId = 1;
+        private const int BasePlayerHp = 40;
+        private const int BasePlayerEnergy = 3;
+        private const int BaseStartingGold = 100;
+        private const int SufficientGold = 200;
+        private const int InsufficientGold = 20;
+        private const int ShopSlotCard = 0;
+        private const int ShopSlotRelic = 1;
+        private const int ShopSlotPotion = 2;
+        private const int CardPurchasePrice = 50;
+        private const int RelicPurchasePrice = 80;
+        private const int PotionPurchasePrice = 60;
+        private const int CardRemovalBasePrice = 75;
+        private const int CardRemovalPriceIncrease = 25;
+
         private sealed class FakeMasterDataService : IMasterDataService
         {
             private readonly Dictionary<Type, object> _allData = new Dictionary<Type, object>();
@@ -80,18 +95,25 @@ namespace Dungeon.Tests.EditMode
         private static RuntimeRunDefinition CreateRunDefinition()
         {
             return new RuntimeRunDefinition(
-                1,
+                RunProfileId,
                 "profile_1",
                 CharacterArchetype.CrimsonExile,
-                40,
-                3,
-                100,
+                BasePlayerHp,
+                BasePlayerEnergy,
+                BaseStartingGold,
                 new[] { CreateCard(1) },
                 Array.Empty<RuntimeRewardEntry>(),
                 Array.Empty<RuntimeMapNode>(),
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
                 Array.Empty<RuntimeEvent>(),
-                new RuntimeShopLineup(1, new[] { new RuntimeShopSlot(0, RewardType.Card, CardType.Attack, 100), new RuntimeShopSlot(1, RewardType.Relic, CardType.Attack, 100) }),
+                new RuntimeShopLineup(
+                    1,
+                    new[]
+                    {
+                        new RuntimeShopSlot(ShopSlotCard, RewardType.Card, CardType.Attack, 100),
+                        new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.Attack, 100),
+                        new RuntimeShopSlot(ShopSlotPotion, RewardType.Potion, CardType.Attack, 100)
+                    }),
                 new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, new RuntimeCardPriceRule(CardRarity.Common, 50, 10) } },
                 new[] { new RuntimeItemPriceRule(RewardType.Relic, 1, 100, 20) }
             );
@@ -107,9 +129,10 @@ namespace Dungeon.Tests.EditMode
 
             service.InitializeShop(state, runDef, new FakeRandomProvider());
 
-            Assert.AreEqual(2, state.ShopItems.Count);
+            Assert.AreEqual(3, state.ShopItems.Count);
             Assert.AreEqual(RewardType.Card, state.ShopItems[0].RewardType);
             Assert.AreEqual(RewardType.Relic, state.ShopItems[1].RewardType);
+            Assert.AreEqual(RewardType.Potion, state.ShopItems[2].RewardType);
         }
 
         [Test]
@@ -117,15 +140,15 @@ namespace Dungeon.Tests.EditMode
         {
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
-            var state = new BattleSceneState { Gold = 200 };
-            state.ShopItems.Add(new BattleShopItemState(0, RewardType.Card, CreateCard(1), 0, 50, false));
+            var state = new BattleSceneState { Gold = SufficientGold };
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), 0, CardPurchasePrice, false));
 
-            bool result = service.PurchaseShopItem(state, 0);
+            bool result = service.PurchaseShopItem(state, ShopSlotCard);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(150, state.Gold);
+            Assert.AreEqual(SufficientGold - CardPurchasePrice, state.Gold);
             Assert.IsTrue(state.ShopItems[0].IsSoldOut);
-            Assert.AreEqual(1, state.Deck.Count); // Purchased card should be added to deck
+            Assert.AreEqual(1, state.Deck.Count);
         }
 
         [Test]
@@ -133,14 +156,46 @@ namespace Dungeon.Tests.EditMode
         {
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
-            var state = new BattleSceneState { Gold = 20 };
-            state.ShopItems.Add(new BattleShopItemState(0, RewardType.Card, CreateCard(1), 0, 50, false));
+            var state = new BattleSceneState { Gold = InsufficientGold };
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), 0, CardPurchasePrice, false));
 
-            bool result = service.PurchaseShopItem(state, 0);
+            bool result = service.PurchaseShopItem(state, ShopSlotCard);
 
             Assert.IsFalse(result);
-            Assert.AreEqual(20, state.Gold);
+            Assert.AreEqual(InsufficientGold, state.Gold);
             Assert.IsFalse(state.ShopItems[0].IsSoldOut);
+            Assert.AreEqual(0, state.Deck.Count);
+        }
+
+        [Test]
+        public void PurchaseShopItem_Relic_ShouldDeductGoldAndKeepDeck()
+        {
+            var masterData = new FakeMasterDataService();
+            var service = new BattleShopService(masterData);
+            var state = new BattleSceneState { Gold = SufficientGold };
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotRelic, RewardType.Relic, null, 1, RelicPurchasePrice, false));
+
+            bool result = service.PurchaseShopItem(state, ShopSlotRelic);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(SufficientGold - RelicPurchasePrice, state.Gold);
+            Assert.IsTrue(state.ShopItems[0].IsSoldOut);
+            Assert.AreEqual(0, state.Deck.Count);
+        }
+
+        [Test]
+        public void PurchaseShopItem_Potion_ShouldDeductGoldAndKeepDeck()
+        {
+            var masterData = new FakeMasterDataService();
+            var service = new BattleShopService(masterData);
+            var state = new BattleSceneState { Gold = SufficientGold };
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotPotion, RewardType.Potion, null, 1, PotionPurchasePrice, false));
+
+            bool result = service.PurchaseShopItem(state, ShopSlotPotion);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(SufficientGold - PotionPurchasePrice, state.Gold);
+            Assert.IsTrue(state.ShopItems[0].IsSoldOut);
             Assert.AreEqual(0, state.Deck.Count);
         }
 
@@ -148,29 +203,29 @@ namespace Dungeon.Tests.EditMode
         public void GetCardRemovalPrice_ShouldCalculateCorrectly()
         {
             var masterData = new FakeMasterDataService();
-            masterData.SetAll(new[] { new ShopCardRemovalMaster { Id = 1, BasePrice = 75, PriceIncreasePerPurchase = 25 } });
+            masterData.SetAll(new[] { new ShopCardRemovalMaster { Id = 1, BasePrice = CardRemovalBasePrice, PriceIncreasePerPurchase = CardRemovalPriceIncrease } });
             var service = new BattleShopService(masterData);
             var state = new BattleSceneState { CardRemovalCount = 2 };
 
             int price = service.GetCardRemovalPrice(state);
 
-            Assert.AreEqual(125, price); // 75 + 25 * 2
+            Assert.AreEqual(CardRemovalBasePrice + CardRemovalPriceIncrease * 2, price);
         }
 
         [Test]
         public void PurchaseCardRemoval_WithSufficientGold_ShouldDeductGoldAndRemoveCard()
         {
             var masterData = new FakeMasterDataService();
-            masterData.SetAll(new[] { new ShopCardRemovalMaster { Id = 1, BasePrice = 75, PriceIncreasePerPurchase = 25 } });
+            masterData.SetAll(new[] { new ShopCardRemovalMaster { Id = 1, BasePrice = CardRemovalBasePrice, PriceIncreasePerPurchase = CardRemovalPriceIncrease } });
             var service = new BattleShopService(masterData);
-            var state = new BattleSceneState { Gold = 100, CardRemovalCount = 0 };
+            var state = new BattleSceneState { Gold = BaseStartingGold, CardRemovalCount = 0 };
             var card = CreateCard(1);
             state.Deck.Add(card);
 
             bool result = service.PurchaseCardRemoval(state, card);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(25, state.Gold); // 100 - 75
+            Assert.AreEqual(BaseStartingGold - CardRemovalBasePrice, state.Gold);
             Assert.AreEqual(1, state.CardRemovalCount);
             Assert.IsTrue(state.IsCardRemovalSoldOut);
             Assert.AreEqual(0, state.Deck.Count);
