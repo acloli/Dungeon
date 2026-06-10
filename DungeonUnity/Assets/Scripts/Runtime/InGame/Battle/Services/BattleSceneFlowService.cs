@@ -325,14 +325,54 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 購入適用処理
+        /// ショップを開く
         /// </summary>
-        public void ApplyShopPurchase()
+        public void OpenShop()
         {
-            bool success = _rules.ApplyShopPurchase(_state, _randomProvider);
-            _state.RestShopMessage = success
-                ? string.Format(BattleSceneConstants.PurchaseSuccessFormat, _state.Gold)
-                : BattleSceneConstants.NotEnoughGold;
+            _state.CurrentPage = BattleScenePage.Shop;
+        }
+
+        /// <summary>
+        /// ショップアイテム購入
+        /// </summary>
+        public void PurchaseShopItem(int slotIndex)
+        {
+            if (_shopService.PurchaseShopItem(_state, slotIndex))
+            {
+                RequestSave();
+            }
+        }
+
+        /// <summary>
+        /// カード削除選択を開く
+        /// </summary>
+        public void OpenCardRemoval()
+        {
+            _state.CurrentPage = BattleScenePage.CardSelect;
+        }
+
+        /// <summary>
+        /// カード削除購入
+        /// </summary>
+        public void PurchaseCardRemoval(RuntimeCard card)
+        {
+            if (_shopService.PurchaseCardRemoval(_state, card))
+            {
+                RequestSave();
+            }
+            // 削除後ショップに戻る
+            _state.CurrentPage = BattleScenePage.Shop;
+        }
+
+        /// <summary>
+        /// ショップから退出
+        /// </summary>
+        public void LeaveShop()
+        {
+            // 補給画面に戻る、あるいはそのままマップに進む
+            // RestShopに戻して ContinueFromRestShop() を呼ぶような流れになる場合は RestShop にする
+            _state.CurrentPage = BattleScenePage.RestShop;
+            _state.RestShopMessage = BattleSceneConstants.PurchaseSuccessFormat; // 適当な完了メッセージ
             _state.IsRestShopContinueEnabled = true;
         }
 

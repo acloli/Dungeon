@@ -171,10 +171,49 @@ namespace Dungeon.Runtime.InGame.Battle
                     ApplyRestShopAction(action);
                     await RenderAsync(ct);
                     break;
+                case BattleScenePage.Shop:
+                    _view.SetSaveQuitVisible(true);
+                    ShopDialogResult shopResult = await _uiCoordinator.ShowShopAsync(snapshot, ct);
+                    ApplyShopAction(shopResult);
+                    await RenderAsync(ct);
+                    break;
+                case BattleScenePage.CardSelect:
+                    _view.SetSaveQuitVisible(true);
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, ct);
+                    if (cardSelectResult.IsCanceled)
+                    {
+                        // 削除キャンセル時はショップに戻る
+                        _flowService.OpenShop();
+                    }
+                    else
+                    {
+                        _flowService.PurchaseCardRemoval(cardSelectResult.SelectedCard);
+                    }
+                    await RenderAsync(ct);
+                    break;
                 case BattleScenePage.Result:
                     _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowResultAsync(snapshot, ct);
                     _onResultBackClicked?.Invoke();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// ショップダイアログ結果適用
+        /// </summary>
+        private void ApplyShopAction(ShopDialogResult result)
+        {
+            switch (result.Action)
+            {
+                case ShopDialogActionType.Leave:
+                    _flowService.LeaveShop();
+                    break;
+                case ShopDialogActionType.PurchaseItem:
+                    _flowService.PurchaseShopItem(result.SlotIndex);
+                    break;
+                case ShopDialogActionType.PurchaseCardRemoval:
+                    _flowService.OpenCardRemoval();
                     break;
             }
         }
@@ -193,7 +232,7 @@ namespace Dungeon.Runtime.InGame.Battle
                     _flowService.ApplyUpgrade();
                     break;
                 case RestShopDialogAction.Shop:
-                    _flowService.ApplyShopPurchase();
+                    _flowService.OpenShop();
                     break;
                 case RestShopDialogAction.Continue:
                     _flowService.ContinueFromRestShop();

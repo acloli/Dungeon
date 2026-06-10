@@ -69,9 +69,29 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void ApplyUpgrade();
 
         /// <summary>
-        /// 購入適用
+        /// ショップを開く
         /// </summary>
-        void ApplyShopPurchase();
+        void OpenShop();
+
+        /// <summary>
+        /// ショップアイテム購入
+        /// </summary>
+        void PurchaseShopItem(int slotIndex);
+
+        /// <summary>
+        /// カード削除選択を開く
+        /// </summary>
+        void OpenCardRemoval();
+
+        /// <summary>
+        /// カード削除購入
+        /// </summary>
+        void PurchaseCardRemoval(RuntimeCard card);
+
+        /// <summary>
+        /// ショップから退出
+        /// </summary>
+        void LeaveShop();
 
         /// <summary>
         /// 補給画面継続
