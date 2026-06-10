@@ -412,6 +412,10 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
+            public void SelectEventChoice(int choiceId)
+            {
+            }
+
             public void SelectEnemyTarget(int index)
             {
             }
@@ -544,6 +548,12 @@ namespace Dungeon.Tests.EditMode
             {
                 LastSnapshot = snapshot;
                 return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });
+            }
+
+            public UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                LastSnapshot = snapshot;
+                return UniTask.FromResult(new EventDialogResult { Action = EventDialogActionType.SelectChoice, ChoiceId = 1 });
             }
 
             public UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

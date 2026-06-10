@@ -508,7 +508,8 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService());
+                new FakeBattleShopService(),
+                new BattleEventService());
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -523,6 +524,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
+                new BattleEventService(),
                 runSaveService);
         }
 
@@ -537,7 +539,8 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardService(),
                 new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
-                new FakeBattleShopService());
+                new FakeBattleShopService(),
+                new BattleEventService());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
