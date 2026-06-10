@@ -148,6 +148,22 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// イベントダイアログ表示
+        /// </summary>
+        public async UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<EventDialog, EventDialogResult>(
+                BattleDialogOpenParams.SingleUse(new BattleEventDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
         /// UI切り離し処理
         /// </summary>
         public void Dispose()

@@ -44,5 +44,10 @@ namespace Dungeon.Runtime.InGame.Battle
         /// 共通ダイアログ基底Prefabキー
         /// </summary>
         public const string CommonDialog = "CommonDialog";
+
+        /// <summary>
+        /// イベントダイアログPrefabキー
+        /// </summary>
+        public const string EventDialog = "EventDialog";
     }
 }

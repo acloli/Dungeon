@@ -191,6 +191,12 @@ namespace Dungeon.Runtime.InGame.Battle
                     }
                     await RenderAsync(ct);
                     break;
+                case BattleScenePage.Event:
+                    _view.SetSaveQuitVisible(false);
+                    EventDialogResult eventResult = await _uiCoordinator.ShowEventAsync(snapshot, ct);
+                    _flowService.SelectEventChoice(eventResult.ChoiceId);
+                    await RenderAsync(ct);
+                    break;
                 case BattleScenePage.Result:
                     _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowResultAsync(snapshot, ct);
