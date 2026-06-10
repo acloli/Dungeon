@@ -35,6 +35,36 @@ namespace Dungeon.Tests.EditMode
             Assert.That(hostView.IsBattleVisible, Is.False);
         }
 
+        [Test]
+        public void ShowShopAsync_DispatchesCorrectDialog()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Shop);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowShopAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(1));
+            Assert.That(uiService.LastShopDialogParam, Is.Not.Null);
+        }
+
+        [Test]
+        public void ShowEventAsync_DispatchesCorrectDialog()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Event);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowEventAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(1));
+            Assert.That(uiService.LastEventDialogParam, Is.Not.Null);
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -91,6 +121,8 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastRewardDialogParam { get; private set; }
             public UIDialogOpenParam LastRestShopDialogParam { get; private set; }
             public UIDialogOpenParam LastResultDialogParam { get; private set; }
+            public UIDialogOpenParam LastShopDialogParam { get; private set; }
+            public UIDialogOpenParam LastEventDialogParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
             public int PageStackCount => 0;
@@ -123,6 +155,14 @@ namespace Dungeon.Tests.EditMode
                 else if (typeof(TDialog) == typeof(RestShopDialog))
                 {
                     LastRestShopDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(ShopDialog))
+                {
+                    LastShopDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(EventDialog))
+                {
+                    LastEventDialogParam = param as UIDialogOpenParam;
                 }
 
                 return UniTask.FromResult(default(TResult));

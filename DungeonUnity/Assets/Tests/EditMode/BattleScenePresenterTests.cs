@@ -312,6 +312,36 @@ namespace Dungeon.Tests.EditMode
             };
         }
 
+        [Test]
+        public void InitializeAsync_ShopState_ShowsShopThroughCoordinator()
+        {
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Shop);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.ShowShopCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Shop));
+        }
+
+        [Test]
+        public void InitializeAsync_EventState_ShowsEventThroughCoordinator()
+        {
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Event);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.ShowEventCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Event));
+        }
+
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
         {
             private readonly BattleSceneSnapshot _snapshot;
@@ -505,6 +535,8 @@ namespace Dungeon.Tests.EditMode
             public int InitializeCallCount { get; private set; }
             public int ShowMapCallCount { get; private set; }
             public int ShowBattleCallCount { get; private set; }
+            public int ShowShopCallCount { get; private set; }
+            public int ShowEventCallCount { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
@@ -540,6 +572,7 @@ namespace Dungeon.Tests.EditMode
 
             public UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
+                ShowShopCallCount++;
                 LastSnapshot = snapshot;
                 return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
             }
@@ -552,6 +585,7 @@ namespace Dungeon.Tests.EditMode
 
             public UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
+                ShowEventCallCount++;
                 LastSnapshot = snapshot;
                 return UniTask.FromResult(new EventDialogResult { Action = EventDialogActionType.SelectChoice, ChoiceId = 1 });
             }

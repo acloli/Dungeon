@@ -478,6 +478,80 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void OpenShop_TransitionsToShopPage()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Shop));
+        }
+
+        [Test]
+        public void LeaveShop_ReturnsToRestShopWithContinueEnabled()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+            service.LeaveShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
+        }
+
+        [Test]
+        public void SelectMapNode_EventNode_OpensEventWithEventSet()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "TestEvent", "event.test", "img_test",
+                new[] { new RuntimeEventChoice(1, "Choice 1", EffectType.GainGold, 50) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Event));
+            Assert.That(snapshot.CurrentEvent, Is.Not.Null);
+            Assert.That(snapshot.CurrentEvent.EventName, Is.EqualTo("TestEvent"));
+        }
+
+        [Test]
+        public void SelectEventChoice_GainGold_AppliesEffectAndReturnsToMap()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "GoldFountain", "event.fountain", "img_fountain",
+                new[] { new RuntimeEventChoice(1, "Take Gold", EffectType.GainGold, 50) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                startingGold: 100,
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectEventChoice(1);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(snapshot.Gold, Is.EqualTo(150));
+            Assert.That(snapshot.CurrentEvent, Is.Null);
+        }
+
+        [Test]
         public void TryPlaySelectedCard_GainBlock_ReducesIncomingDamage()
         {
             RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
@@ -551,7 +625,8 @@ namespace Dungeon.Tests.EditMode
             IReadOnlyList<RuntimeRewardEntry> rewardCards = null,
             IReadOnlyList<RuntimeEncounterEntry> battleEncounters = null,
             IReadOnlyList<RuntimeEncounterEntry> eliteEncounters = null,
-            IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null)
+            IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null,
+            IReadOnlyList<RuntimeEvent> events = null)
         {
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
@@ -576,7 +651,7 @@ namespace Dungeon.Tests.EditMode
                     CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
                 },
                 encounters,
-                null,
+                events ?? null,
                 null,
                 null,
                 null);
