@@ -26,6 +26,16 @@ namespace Dungeon.Runtime.InGame.Battle
         public const string ResultDialog = "ResultDialog";
 
         /// <summary>
+        /// ショップダイアログPrefabキー
+        /// </summary>
+        public const string ShopDialog = "ShopDialog";
+
+        /// <summary>
+        /// カード選択ダイアログPrefabキー
+        /// </summary>
+        public const string CardSelectDialog = "CardSelectDialog";
+
+        /// <summary>
         /// 共通ページ基底Prefabキー
         /// </summary>
         public const string CommonPage = "CommonPage";

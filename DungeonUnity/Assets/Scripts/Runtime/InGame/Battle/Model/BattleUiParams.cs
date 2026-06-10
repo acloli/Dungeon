@@ -58,6 +58,60 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ショップダイアログのアクション種別
+    /// </summary>
+    public enum ShopDialogActionType
+    {
+        Leave,
+        PurchaseItem,
+        PurchaseCardRemoval
+    }
+
+    /// <summary>
+    /// ショップダイアログの返却結果
+    /// </summary>
+    public struct ShopDialogResult
+    {
+        public ShopDialogActionType Action;
+        public int SlotIndex; // PurchaseItemの時に使用
+    }
+
+    /// <summary>
+    /// ショップダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattleShopDialogParam
+    {
+        public BattleShopDialogParam(BattleSceneSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
+    /// カード選択ダイアログの返却結果
+    /// </summary>
+    public struct CardSelectDialogResult
+    {
+        public bool IsCanceled;
+        public Game.MasterData.Generated.RuntimeCard SelectedCard;
+    }
+
+    /// <summary>
+    /// カード選択ダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattleCardSelectDialogParam
+    {
+        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
     /// ダイアログ表示要求生成クラス
     /// </summary>
     public static class BattleDialogOpenParams

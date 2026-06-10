@@ -115,6 +115,38 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// ショップダイアログ表示
+        /// </summary>
+        public async UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<ShopDialog, ShopDialogResult>(
+                BattleDialogOpenParams.Cached(new BattleShopDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
+        /// カード選択ダイアログ表示
+        /// </summary>
+        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
+                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
         /// UI切り離し処理
         /// </summary>
         public void Dispose()

@@ -17,6 +17,8 @@ namespace Dungeon.Runtime.InGame.Battle
         UniTask<RuntimeRewardEntry> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
+        UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
+        UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         void Dispose();
     }
 }
