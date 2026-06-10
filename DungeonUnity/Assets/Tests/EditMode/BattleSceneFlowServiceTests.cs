@@ -449,7 +449,13 @@ namespace Dungeon.Tests.EditMode
                 Gold = 177,
                 CurrentNodeIndex = 0,
                 CurrentPage = (int)BattleScenePage.Map,
-                DeckCardIds = new List<int> { 1002 }
+                DeckCardIds = new List<int> { 1002 },
+                IsCardRemovalSoldOut = true,
+                CardRemovalCount = 1,
+                ShopItems = new List<SaveShopItem>
+                {
+                    new SaveShopItem { SlotIndex = 0, RewardType = (int)RewardType.Card, CardId = 1002, ItemId = 0, Price = 50, IsSoldOut = true }
+                }
             };
 
             service.InitializeFromSave(saveData);
@@ -459,6 +465,11 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.PlayerHp, Is.EqualTo(23));
             Assert.That(snapshot.Gold, Is.EqualTo(177));
             Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(0));
+            Assert.That(snapshot.ShopItems.Count, Is.EqualTo(1));
+            Assert.That(snapshot.ShopItems[0].IsSoldOut, Is.True);
+            Assert.That(snapshot.ShopItems[0].CardItem.Id, Is.EqualTo(1002));
+            Assert.That(snapshot.IsCardRemovalSoldOut, Is.True);
+            Assert.That(snapshot.CardRemovalPrice, Is.EqualTo(75)); // FakeBattleShopService returns 75
 
             service.SelectMapNode(1);
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
