@@ -95,7 +95,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public struct CardSelectDialogResult
     {
         public bool IsCanceled;
-        public Game.MasterData.Generated.RuntimeCard SelectedCard;
+        public RuntimeCard SelectedCard;
     }
 
     /// <summary>
