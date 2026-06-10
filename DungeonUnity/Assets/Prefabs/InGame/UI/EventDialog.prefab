@@ -753,6 +753,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 5979232387856582764}
   m_SourcePrefab: {fileID: 100100000, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
+--- !u!225 &3165925870982397741 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 4961211675125816774, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
+  m_PrefabInstance: {fileID: 8013701944645968619}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &5349726558516598973 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2668497678981151318, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
@@ -775,7 +780,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efe6843f97f5a45e187a47d98abf35d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.EventDialog
-  _canvasGroup: {fileID: 0}
+  _canvasGroup: {fileID: 3165925870982397741}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1
   _persistAcrossScenes: 0
