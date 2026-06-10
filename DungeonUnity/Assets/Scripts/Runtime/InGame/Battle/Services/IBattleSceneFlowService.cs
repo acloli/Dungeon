@@ -103,5 +103,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 補給画面継続
         /// </summary>
         void ContinueFromRestShop();
+
+        /// <summary>
+        /// イベント選択肢決定
+        /// </summary>
+        void SelectEventChoice(int choiceId);
     }
 }

@@ -56,7 +56,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildAvailableNodeIndices(state),
                 BuildShopItemViews(state),
                 state.IsCardRemovalSoldOut,
-                _shopService.GetCardRemovalPrice(state));
+                _shopService.GetCardRemovalPrice(state),
+                state.CurrentEvent,
+                state.EventMessage);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)

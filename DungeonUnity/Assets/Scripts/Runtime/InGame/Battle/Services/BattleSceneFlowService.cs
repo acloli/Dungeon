@@ -21,6 +21,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleRewardService _rewardService;
         private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IBattleShopService _shopService;
+        private readonly IBattleEventService _eventService;
         private readonly IRunSaveService _runSaveService;
 
         private RuntimeRunDefinition _runDefinition;
@@ -32,6 +33,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleRewardService rewardService,
             IBattleSnapshotFactory snapshotFactory,
             IBattleShopService shopService,
+            IBattleEventService eventService,
             IRunSaveService runSaveService = null)
         {
             _rules = rules;
@@ -40,6 +42,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rewardService = rewardService;
             _snapshotFactory = snapshotFactory;
             _shopService = shopService;
+            _eventService = eventService;
             _runSaveService = runSaveService;
         }
 
@@ -159,6 +162,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 OpenRestShop();
                 RequestSave();
+                return;
+            }
+
+            if (nodeType == InGameNodeType.Event)
+            {
+                OpenEvent();
                 return;
             }
 
@@ -396,6 +405,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// イベント選択肢決定処理
+        /// </summary>
+        public void SelectEventChoice(int choiceId)
+        {
+            if (_state.CurrentEvent != null)
+            {
+                _eventService.ApplyEventChoice(_state, _state.CurrentEvent, choiceId);
+            }
+
+            _state.CurrentEvent = null;
+            _state.EventMessage = string.Empty;
+            OpenMap();
+            RequestSave();
+        }
+
+        /// <summary>
         /// マップ画面遷移
         /// </summary>
         private void OpenMap()
@@ -478,6 +503,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 _state.RewardChoices.Add(rewardChoices[i]);
             }
+        }
+
+        /// <summary>
+        /// イベント画面遷移
+        /// </summary>
+        private void OpenEvent()
+        {
+            if (_runDefinition == null || _runDefinition.PossibleEvents == null || _runDefinition.PossibleEvents.Count == 0)
+            {
+                TLogger.Warning(BattleSceneConstants.NoEventAvailable, "Battle");
+                OpenMap();
+                return;
+            }
+
+            int index = _randomProvider.Range(0, _runDefinition.PossibleEvents.Count);
+            _state.CurrentEvent = _runDefinition.PossibleEvents[index];
+            _state.CurrentPage = BattleScenePage.Event;
+            _state.EventMessage = string.Format(
+                BattleSceneConstants.EventStateFormat,
+                _state.PlayerHp,
+                _state.PlayerMaxHp,
+                _state.Gold);
         }
 
         /// <summary>
