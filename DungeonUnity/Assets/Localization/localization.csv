@@ -42,3 +42,8 @@ battle.status.slimed,粘液,Slimed,黏液,黏液,점액
 battle.buff.strength,筋力,Strength,力量,力量,힘
 battle.buff.ritual,儀式,Ritual,仪式,儀式,의식
 battle.buff.enrage,激昂,Enrage,激怒,激怒,격노
+restshop.title,補給所,Rest Site,补给站,補給站,보급소
+restshop.rest_button,休憩,Rest,休息,休息,휴식
+restshop.upgrade_button,強化,Upgrade,强化,強化,강화
+restshop.shop_button,ショップ,Shop,商店,商店,상점
+restshop.continue_button,先へ進む,Continue,前进,前進,계속
