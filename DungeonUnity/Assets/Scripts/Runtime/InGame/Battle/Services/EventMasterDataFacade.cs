@@ -4,6 +4,7 @@ using System.Linq;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Game.MasterData.Generated;
 using TFramework.Debug;
+using TFramework.Localization;
 using TFramework.MasterData;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -16,10 +17,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private const int SupportedEventPoolId = 1;
 
         private readonly IMasterDataService _masterDataService;
+        private readonly ILocalizationService _localizationService;
 
-        public EventMasterDataFacade(IMasterDataService masterDataService)
+        public EventMasterDataFacade(IMasterDataService masterDataService, ILocalizationService localizationService = null)
         {
             _masterDataService = masterDataService;
+            _localizationService = localizationService;
         }
 
         /// <summary>
@@ -45,20 +48,36 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 {
                     choices.Add(new RuntimeEventChoice(
                         choice.ChoiceId,
-                        choice.LocalizationKey,
+                        ResolveLocalizedText(choice.LocalizationKey, choice.LocalizationKey),
                         choice.EffectType,
                         choice.EffectValue));
                 }
 
                 events.Add(new RuntimeEvent(
                     master.Id,
-                    master.EventName,
-                    master.LocalizationKey,
+                    ResolveLocalizedText(master.LocalizationKey + "_title", master.EventName),
+                    ResolveLocalizedText(master.LocalizationKey + "_desc", master.LocalizationKey),
                     master.ImageId,
                     choices));
             }
 
             return events;
         }
+
+        private string ResolveLocalizedText(string localizationKey, string fallback)
+        {
+            if (_localizationService == null || string.IsNullOrEmpty(localizationKey))
+            {
+                return fallback;
+            }
+
+            if (!_localizationService.HasKey(localizationKey))
+            {
+                return fallback;
+            }
+
+            return _localizationService.Get(localizationKey);
+        }
     }
 }
+

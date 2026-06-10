@@ -49,7 +49,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             SetTitle(evt.EventName);
-            SetBody(_param.Snapshot.EventMessage);
+            SetBody(evt.LocalizationKey);
             BuildChoiceButtons(evt.Choices);
         }
 
