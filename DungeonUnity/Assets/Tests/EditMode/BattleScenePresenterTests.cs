@@ -383,6 +383,26 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
+            public void OpenShop()
+            {
+            }
+
+            public void PurchaseShopItem(int slotIndex)
+            {
+            }
+
+            public void OpenCardRemoval()
+            {
+            }
+
+            public void PurchaseCardRemoval(RuntimeCard card)
+            {
+            }
+
+            public void LeaveShop()
+            {
+            }
+
             public void ContinueFromRestShop()
             {
             }
@@ -507,6 +527,18 @@ namespace Dungeon.Tests.EditMode
             {
                 LastSnapshot = snapshot;
                 return UniTask.FromResult(RestShopDialogAction.None);
+            }
+
+            public UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                LastSnapshot = snapshot;
+                return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
+            }
+
+            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                LastSnapshot = snapshot;
+                return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });
             }
 
             public UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

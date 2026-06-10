@@ -22,6 +22,8 @@ namespace Dungeon.Tests.EditMode
         [TestCase("RewardDialog", true, "CommonDialog")]
         [TestCase("RestShopDialog", true, "CommonDialog")]
         [TestCase("ResultDialog", true, "CommonDialog")]
+        [TestCase("ShopDialog", true, "CommonDialog")]
+        [TestCase("CardSelectDialog", true, "CommonDialog")]
         public void Prefabs_FollowNamingAndVariantRules(string prefabName, bool shouldBeVariant, string parentPrefabName)
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
@@ -49,6 +51,8 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<RewardDialog>("RewardDialog");
             AssertPrefabContainsComponent<RestShopDialog>("RestShopDialog");
             AssertPrefabContainsComponent<ResultDialog>("ResultDialog");
+            AssertPrefabContainsComponent<ShopDialog>("ShopDialog");
+            AssertPrefabContainsComponent<CardSelectDialog>("CardSelectDialog");
 
             GameObject mapPagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/MapPage.prefab");
             MapPage mapPageComponent = mapPagePrefab.GetComponent<MapPage>();
@@ -76,6 +80,8 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.RewardDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.RestShopDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ResultDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ShopDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.CardSelectDialog}", yaml);
             StringAssert.DoesNotContain("m_Address: MapPageView", yaml);
             StringAssert.DoesNotContain("m_Address: RewardDialogView", yaml);
             StringAssert.DoesNotContain("m_Address: RestShopDialogView", yaml);

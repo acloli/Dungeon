@@ -467,7 +467,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(0));
             Assert.That(snapshot.ShopItems.Count, Is.EqualTo(1));
             Assert.That(snapshot.ShopItems[0].IsSoldOut, Is.True);
-            Assert.That(snapshot.ShopItems[0].CardItem.Id, Is.EqualTo(1002));
+            Assert.That(snapshot.ShopItems[0].Card.Id, Is.EqualTo(1002));
             Assert.That(snapshot.IsCardRemovalSoldOut, Is.True);
             Assert.That(snapshot.CardRemovalPrice, Is.EqualTo(75)); // FakeBattleShopService returns 75
 
