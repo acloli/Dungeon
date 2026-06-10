@@ -496,7 +496,8 @@ namespace Dungeon.Tests.EditMode
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService()));
+                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
+                new FakeBattleShopService());
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -509,7 +510,8 @@ namespace Dungeon.Tests.EditMode
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService()),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
+                new FakeBattleShopService(),
                 runSaveService);
         }
 
@@ -523,7 +525,8 @@ namespace Dungeon.Tests.EditMode
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardService(),
-                new BattleSnapshotFactory(displayTextService));
+                new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
+                new FakeBattleShopService());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
@@ -780,6 +783,14 @@ namespace Dungeon.Tests.EditMode
 
                 return value;
             }
+        }
+
+        private sealed class FakeBattleShopService : IBattleShopService
+        {
+            public void InitializeShop(BattleSceneState state, RuntimeRunDefinition runDef, IBattleRandomProvider random) {}
+            public bool PurchaseShopItem(BattleSceneState state, int slotIndex) => false;
+            public int GetCardRemovalPrice(BattleSceneState state) => 75;
+            public bool PurchaseCardRemoval(BattleSceneState state, RuntimeCard card) => false;
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleMasterDataFacade _masterDataFacade;
         private readonly IBattleRewardService _rewardService;
         private readonly IBattleSnapshotFactory _snapshotFactory;
+        private readonly IBattleShopService _shopService;
         private readonly IRunSaveService _runSaveService;
 
         private RuntimeRunDefinition _runDefinition;
@@ -30,6 +31,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleMasterDataFacade masterDataFacade,
             IBattleRewardService rewardService,
             IBattleSnapshotFactory snapshotFactory,
+            IBattleShopService shopService,
             IRunSaveService runSaveService = null)
         {
             _rules = rules;
@@ -37,6 +39,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _masterDataFacade = masterDataFacade;
             _rewardService = rewardService;
             _snapshotFactory = snapshotFactory;
+            _shopService = shopService;
             _runSaveService = runSaveService;
         }
 
@@ -81,6 +84,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+
+            _state.ShopItems.Clear();
+            _state.IsCardRemovalSoldOut = saveData.IsCardRemovalSoldOut;
+            _state.CardRemovalCount = saveData.CardRemovalCount;
+            if (saveData.ShopItems != null)
+            {
+                foreach (SaveShopItem savedItem in saveData.ShopItems)
+                {
+                    RuntimeCard card = null;
+                    if (savedItem.RewardType == (int)RewardType.Card && savedItem.CardId > 0)
+                    {
+                        cardCatalog.TryGetValue(savedItem.CardId, out card);
+                    }
+                    _state.ShopItems.Add(new BattleShopItemState(
+                        savedItem.SlotIndex,
+                        (RewardType)savedItem.RewardType,
+                        card,
+                        savedItem.ItemId,
+                        savedItem.Price,
+                        savedItem.IsSoldOut));
+                }
+            }
 
             if (_state.CurrentPage == BattleScenePage.Map)
             {
@@ -412,6 +437,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.RestShop;
             _state.IsRestShopContinueEnabled = false;
+
+            if (_state.ShopItems == null || _state.ShopItems.Count == 0)
+            {
+                _shopService.InitializeShop(_state, _runDefinition, _randomProvider);
+            }
+
             _state.RestShopMessage = string.Format(
                 BattleSceneConstants.RestShopStateFormat,
                 _state.PlayerHp,
@@ -619,7 +650,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 Gold = _state.Gold,
                 CurrentNodeIndex = _state.CurrentNodeIndex,
                 CurrentPage = (int)_state.CurrentPage,
-                DeckCardIds = new List<int>()
+                DeckCardIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>(),
+                IsCardRemovalSoldOut = _state.IsCardRemovalSoldOut,
+                CardRemovalCount = _state.CardRemovalCount
             };
             
             for (int i = 0; i < _state.Deck.Count; i++)
@@ -627,6 +661,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 if (_state.Deck[i] != null)
                 {
                     data.DeckCardIds.Add(_state.Deck[i].Id);
+                }
+            }
+
+            for (int i = 0; i < _state.ShopItems.Count; i++)
+            {
+                BattleShopItemState item = _state.ShopItems[i];
+                if (item != null)
+                {
+                    data.ShopItems.Add(new SaveShopItem
+                    {
+                        SlotIndex = item.SlotIndex,
+                        RewardType = (int)item.RewardType,
+                        CardId = item.Card != null ? item.Card.Id : 0,
+                        ItemId = item.ItemId,
+                        Price = item.Price,
+                        IsSoldOut = item.IsSoldOut
+                    });
                 }
             }
             
