@@ -36,7 +36,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
-            IReadOnlyList<int> availableNodeIndices = null)
+            IReadOnlyList<int> availableNodeIndices = null,
+            IReadOnlyList<BattleShopItemViewModel> shopItems = null,
+            bool isCardRemovalSoldOut = false,
+            int cardRemovalPrice = 0)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -66,6 +69,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
             AvailableNodeIndices = availableNodeIndices ?? Array.Empty<int>();
+            ShopItems = shopItems ?? Array.Empty<BattleShopItemViewModel>();
+            IsCardRemovalSoldOut = isCardRemovalSoldOut;
+            CardRemovalPrice = cardRemovalPrice;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -96,5 +102,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
         public int SelectedEnemyIndex { get; }
         public IReadOnlyList<int> AvailableNodeIndices { get; }
+        public IReadOnlyList<BattleShopItemViewModel> ShopItems { get; }
+        public bool IsCardRemovalSoldOut { get; }
+        public int CardRemovalPrice { get; }
     }
 }

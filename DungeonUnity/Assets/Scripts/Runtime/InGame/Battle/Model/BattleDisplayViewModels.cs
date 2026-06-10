@@ -113,4 +113,29 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleStatusViewModel> Statuses { get; }
         public IReadOnlyList<BattleStatusViewModel> Buffs { get; }
     }
+
+    /// <summary>
+    /// ショップ商品表示用モデル
+    /// </summary>
+    public sealed class BattleShopItemViewModel
+    {
+        public BattleShopItemViewModel(int slotIndex, RewardType rewardType, string displayName, int price, bool isSoldOut, RuntimeCard card, int itemId)
+        {
+            SlotIndex = slotIndex;
+            RewardType = rewardType;
+            DisplayName = displayName;
+            Price = price;
+            IsSoldOut = isSoldOut;
+            Card = card;
+            ItemId = itemId;
+        }
+
+        public int SlotIndex { get; }
+        public RewardType RewardType { get; }
+        public string DisplayName { get; }
+        public int Price { get; }
+        public bool IsSoldOut { get; }
+        public RuntimeCard Card { get; }
+        public int ItemId { get; }
+    }
 }

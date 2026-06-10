@@ -10,10 +10,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     public sealed class BattleSnapshotFactory : IBattleSnapshotFactory
     {
         private readonly IBattleDisplayTextService _displayTextService;
+        private readonly IBattleShopService _shopService;
 
-        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService)
+        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService, IBattleShopService shopService)
         {
             _displayTextService = displayTextService;
+            _shopService = shopService;
         }
 
         public BattleSceneSnapshot CreateSnapshot(BattleSceneState state)
@@ -51,7 +53,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildBuffViews(state.EnemyBuffs),
                 BuildEnemyViews(state),
                 state.SelectedEnemyIndex,
-                BuildAvailableNodeIndices(state));
+                BuildAvailableNodeIndices(state),
+                BuildShopItemViews(state),
+                state.IsCardRemovalSoldOut,
+                _shopService.GetCardRemovalPrice(state));
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
@@ -307,6 +312,52 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return views;
+        }
+
+        private IReadOnlyList<BattleShopItemViewModel> BuildShopItemViews(BattleSceneState state)
+        {
+            List<BattleShopItemViewModel> views = new List<BattleShopItemViewModel>();
+            if (state.ShopItems == null)
+            {
+                return views;
+            }
+
+            for (int i = 0; i < state.ShopItems.Count; i++)
+            {
+                BattleShopItemState item = state.ShopItems[i];
+                if (item == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleShopItemViewModel(
+                    item.SlotIndex,
+                    item.RewardType,
+                    BuildShopItemDisplayName(item),
+                    item.Price,
+                    item.IsSoldOut,
+                    item.Card,
+                    item.ItemId));
+            }
+
+            return views;
+        }
+
+        private string BuildShopItemDisplayName(BattleShopItemState item)
+        {
+            if (item.RewardType == RewardType.Card)
+            {
+                return item.Card != null ? item.Card.DisplayName : "Card";
+            }
+            if (item.RewardType == RewardType.Potion)
+            {
+                return $"Potion {item.ItemId}";
+            }
+            if (item.RewardType == RewardType.Relic)
+            {
+                return $"Relic {item.ItemId}";
+            }
+            return item.RewardType.ToString();
         }
     }
 }
