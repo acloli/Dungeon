@@ -13,6 +13,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
         public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
+        public List<BattleShopItemState> ShopItems { get; } = new List<BattleShopItemState>();
+        public bool IsCardRemovalSoldOut { get; set; }
+        public int CardRemovalCount { get; set; }
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();
