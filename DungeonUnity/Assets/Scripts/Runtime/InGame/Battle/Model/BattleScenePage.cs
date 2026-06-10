@@ -11,6 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         RestShop,
         Shop,
         CardSelect,
-        Result
+        Result,
+        Event
     }
 }

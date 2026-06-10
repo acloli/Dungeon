@@ -66,5 +66,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string RunFailedMessage = "Run Failed";
         public const string MissingRunProfile = "RunProfileId is invalid.";
         public const string UnknownEnemyName = "Enemy";
+        public const string EventStateFormat = "Event: HP {0}/{1}  Gold {2}";
+        public const string NoEventAvailable = "No event available.";
     }
 }

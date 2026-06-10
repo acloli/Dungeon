@@ -41,5 +41,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string BattleHintMessage { get; set; } = string.Empty;
         public string RestShopMessage { get; set; } = string.Empty;
         public string ResultMessage { get; set; } = string.Empty;
+        public RuntimeEvent CurrentEvent { get; set; }
+        public string EventMessage { get; set; } = string.Empty;
     }
 }

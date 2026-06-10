@@ -39,7 +39,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<int> availableNodeIndices = null,
             IReadOnlyList<BattleShopItemViewModel> shopItems = null,
             bool isCardRemovalSoldOut = false,
-            int cardRemovalPrice = 0)
+            int cardRemovalPrice = 0,
+            RuntimeEvent currentEvent = null,
+            string eventMessage = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -72,6 +74,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             ShopItems = shopItems ?? Array.Empty<BattleShopItemViewModel>();
             IsCardRemovalSoldOut = isCardRemovalSoldOut;
             CardRemovalPrice = cardRemovalPrice;
+            CurrentEvent = currentEvent;
+            EventMessage = eventMessage ?? string.Empty;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -105,5 +109,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleShopItemViewModel> ShopItems { get; }
         public bool IsCardRemovalSoldOut { get; }
         public int CardRemovalPrice { get; }
+        public RuntimeEvent CurrentEvent { get; }
+        public string EventMessage { get; }
     }
 }

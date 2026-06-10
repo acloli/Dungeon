@@ -129,4 +129,34 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             return new UIDialogOpenParam(payload, false);
         }
     }
+
+    /// <summary>
+    /// イベントダイアログのアクション種別
+    /// </summary>
+    public enum EventDialogActionType
+    {
+        SelectChoice,
+    }
+
+    /// <summary>
+    /// イベントダイアログの返却結果
+    /// </summary>
+    public struct EventDialogResult
+    {
+        public EventDialogActionType Action;
+        public int ChoiceId;
+    }
+
+    /// <summary>
+    /// イベントダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattleEventDialogParam
+    {
+        public BattleEventDialogParam(BattleSceneSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattleSceneSnapshot Snapshot { get; }
+    }
 }
