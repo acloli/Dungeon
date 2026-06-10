@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
@@ -18,7 +19,7 @@ namespace Dungeon.Runtime.InGame.Battle
         UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
+        UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct);
         void Dispose();
     }
 }

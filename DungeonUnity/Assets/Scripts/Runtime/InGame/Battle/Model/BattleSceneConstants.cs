@@ -61,6 +61,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string UpgradeDone = "Upgrade done (M1 mock).";
         public const string PurchaseSuccessFormat = "Purchase success. Gold {0}";
         public const string NotEnoughGold = "Not enough gold.";
+        public const string SoldOutLabel = "Sold Out";
         public const string RunFailed = "Run Failed";
         public const string RunFailedMessage = "Run Failed";
         public const string MissingRunProfile = "RunProfileId is invalid.";

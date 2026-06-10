@@ -179,7 +179,7 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
-                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, ct);
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, _flowService.GetDeckCards(), ct);
                     if (cardSelectResult.IsCanceled)
                     {
                         // 削除キャンセル時はショップに戻る

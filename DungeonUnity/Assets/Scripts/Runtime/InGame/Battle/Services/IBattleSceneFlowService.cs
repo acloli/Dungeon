@@ -1,5 +1,6 @@
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Save.Model;
+using System.Collections.Generic;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -22,6 +23,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 現在状態取得
         /// </summary>
         BattleSceneSnapshot CreateSnapshot();
+
+        /// <summary>
+        /// 現在デッキ取得
+        /// </summary>
+        IReadOnlyList<RuntimeCard> GetDeckCards();
 
         /// <summary>
         /// マップノード選択

@@ -130,6 +130,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 現在デッキ取得
+        /// </summary>
+        public IReadOnlyList<RuntimeCard> GetDeckCards()
+        {
+            return _state.Deck;
+        }
+
+        /// <summary>
         /// マップノード選択処理
         /// </summary>
         public void SelectMapNode(int index)
@@ -369,10 +377,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void LeaveShop()
         {
-            // 補給画面に戻る、あるいはそのままマップに進む
-            // RestShopに戻して ContinueFromRestShop() を呼ぶような流れになる場合は RestShop にする
             _state.CurrentPage = BattleScenePage.RestShop;
-            _state.RestShopMessage = BattleSceneConstants.PurchaseSuccessFormat; // 適当な完了メッセージ
+            _state.RestShopMessage = string.Format(
+                BattleSceneConstants.RestShopStateFormat,
+                _state.PlayerHp,
+                _state.PlayerMaxHp,
+                _state.Gold);
             _state.IsRestShopContinueEnabled = true;
         }
 

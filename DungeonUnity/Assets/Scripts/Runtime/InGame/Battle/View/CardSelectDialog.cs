@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
@@ -8,28 +11,98 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardSelectDialog : UIDialogBase<CardSelectDialogResult>
     {
         [SerializeField] private Button _cancelButton;
+        [SerializeField] private Transform _cardContainer;
+        [SerializeField] private BattleCardSelectView _cardTemplate;
 
-        // デッキカード表示用のUIなどをここに追加
+        private readonly List<BattleCardSelectView> _cardViews = new List<BattleCardSelectView>();
+        private BattleCardSelectDialogParam _param;
 
-        private void Awake()
+        protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
-            _cancelButton.onClick.AddListener(() =>
+            _param = param as BattleCardSelectDialogParam;
+            return UniTask.CompletedTask;
+        }
+
+        protected override void OnOpened()
+        {
+            WireButtons();
+            BuildCardViews();
+        }
+
+        protected override void OnClosed()
+        {
+            UnwireButtons();
+            ClearDynamicCards();
+        }
+
+        private void WireButtons()
+        {
+            UnwireButtons();
+            if (_cancelButton != null)
             {
-                CloseWithResult(new CardSelectDialogResult { IsCanceled = true });
-            });
+                _cancelButton.onClick.AddListener(OnCancelClicked);
+            }
         }
 
-        protected override Cysharp.Threading.Tasks.UniTask OnPreOpenAsync(object param, System.Threading.CancellationToken ct)
+        private void UnwireButtons()
         {
-            var p = (BattleCardSelectDialogParam)param;
-            // TODO: p.Snapshot.DeckCards を用いてカード一覧を表示する処理を実装
-            return Cysharp.Threading.Tasks.UniTask.CompletedTask;
+            if (_cancelButton != null)
+            {
+                _cancelButton.onClick.RemoveAllListeners();
+            }
         }
 
-        // TODO: カードがクリックされたときのハンドラ
-        // private void OnCardClicked(Game.MasterData.Generated.RuntimeCard card)
-        // {
-        //     CloseWithResult(new CardSelectDialogResult { IsCanceled = false, SelectedCard = card });
-        // }
+        private void BuildCardViews()
+        {
+            ClearDynamicCards();
+
+            if (_param?.Snapshot == null || _cardContainer == null || _cardTemplate == null)
+            {
+                return;
+            }
+
+            _cardTemplate.gameObject.SetActive(false);
+
+            for (int i = 0; i < _param.DeckCards.Count; i++)
+            {
+                RuntimeCard card = _param.DeckCards[i];
+                if (card == null)
+                {
+                    continue;
+                }
+
+                BattleCardSelectView cardView = Instantiate(_cardTemplate, _cardContainer);
+                cardView.gameObject.SetActive(true);
+                cardView.Bind(card, OnCardClicked);
+                _cardViews.Add(cardView);
+            }
+        }
+
+        private void ClearDynamicCards()
+        {
+            for (int i = 0; i < _cardViews.Count; i++)
+            {
+                BattleCardSelectView cardView = _cardViews[i];
+                if (cardView == null)
+                {
+                    continue;
+                }
+
+                cardView.Clear();
+                Destroy(cardView.gameObject);
+            }
+
+            _cardViews.Clear();
+        }
+
+        private void OnCancelClicked()
+        {
+            CloseWithResult(new CardSelectDialogResult { IsCanceled = true });
+        }
+
+        private void OnCardClicked(RuntimeCard card)
+        {
+            CloseWithResult(new CardSelectDialogResult { IsCanceled = false, SelectedCard = card });
+        }
     }
 }

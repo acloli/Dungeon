@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TFramework.UI;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
@@ -103,12 +104,14 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleCardSelectDialogParam
     {
-        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot)
+        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards)
         {
             Snapshot = snapshot;
+            DeckCards = deckCards ?? System.Array.Empty<RuntimeCard>();
         }
 
         public BattleSceneSnapshot Snapshot { get; }
+        public System.Collections.Generic.IReadOnlyList<RuntimeCard> DeckCards { get; }
     }
 
     /// <summary>

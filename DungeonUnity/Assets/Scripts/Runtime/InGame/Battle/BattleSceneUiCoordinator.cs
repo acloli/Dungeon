@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
@@ -133,7 +134,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// カード選択ダイアログ表示
         /// </summary>
-        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -142,7 +143,7 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
-                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot)),
+                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot, deckCards)),
                 ct);
         }
 
