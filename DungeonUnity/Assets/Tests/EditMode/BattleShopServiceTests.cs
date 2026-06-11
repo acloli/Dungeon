@@ -101,6 +101,8 @@ namespace Dungeon.Tests.EditMode
                 BasePlayerHp,
                 BasePlayerEnergy,
                 BaseStartingGold,
+                0,
+                0,
                 new[] { CreateCard(1) },
                 Array.Empty<RuntimeRewardEntry>(),
                 Array.Empty<RuntimeMapNode>(),

@@ -406,6 +406,18 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
+            public void ClaimGold()
+            {
+            }
+
+            public void ClaimPotion()
+            {
+            }
+
+            public void ClaimRelic()
+            {
+            }
+
             public void ApplyRest()
             {
                 _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
@@ -448,6 +460,11 @@ namespace Dungeon.Tests.EditMode
             public void ContinueFromRestShop()
             {
                 _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void ContinueFromReward()
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Map);
             }
 
             public void SelectEventChoice(int choiceId)
@@ -549,6 +566,7 @@ namespace Dungeon.Tests.EditMode
             public BattleSceneSnapshot LastMapSnapshot { get; private set; }
             public BattleSceneSnapshot LastShopSnapshot { get; private set; }
             public BattleSceneSnapshot LastEventSnapshot { get; private set; }
+            public BattleSceneSnapshot LastSnapshot { get; private set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
             {
@@ -569,7 +587,13 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.CompletedTask;
             }
 
-            public UniTask<RuntimeRewardEntry> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<RewardDialogResult> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                LastMapSnapshot = snapshot;
+                return UniTask.FromResult(new RewardDialogResult { Action = RewardDialogActionType.Continue });
+            }
+
+            public UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 return UniTask.FromResult<RuntimeRewardEntry>(null);
             }

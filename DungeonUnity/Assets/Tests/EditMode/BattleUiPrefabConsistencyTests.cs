@@ -67,7 +67,9 @@ namespace Dungeon.Tests.EditMode
             RewardDialog rewardDialog = prefab.GetComponent<RewardDialog>();
 
             SerializedObject serialized = new SerializedObject(rewardDialog);
-            Assert.That(serialized.FindProperty("_goldRewardIcon").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_rewardRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_rewardButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_continueButton").objectReferenceValue, Is.Not.Null);
         }
 
         [Test]

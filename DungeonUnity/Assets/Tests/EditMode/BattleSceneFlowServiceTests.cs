@@ -214,7 +214,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(150));
+            Assert.That(snapshot.Gold, Is.EqualTo(120));
+            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(30));
             Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
             Assert.That(snapshot.RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
         }
@@ -326,7 +327,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(132));
+            Assert.That(snapshot.Gold, Is.EqualTo(120));
+            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(12));
         }
 
         [Test]
@@ -410,6 +412,7 @@ namespace Dungeon.Tests.EditMode
 
             service.Initialize(5501);
             service.SelectReward(rewardEntry);
+            service.ContinueFromReward();
 
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.DeckCardIds, Does.Contain(1002));
@@ -643,6 +646,8 @@ namespace Dungeon.Tests.EditMode
                 playerMaxHp,
                 startingGold,
                 3,
+                0,
+                0,
                 starterDeck ?? new[] { CreateCard(1001, "Strike", 1, 6) },
                 rewardCards ?? new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
                 nodes ?? new[]
