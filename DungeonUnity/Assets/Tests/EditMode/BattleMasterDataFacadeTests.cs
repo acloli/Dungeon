@@ -61,7 +61,7 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new EventMaster { Id = 9001, EventName = "Fountain", LocalizationKey = "event.fountain", ImageId = "event_fountain" }
+                new EventMaster { Id = 9001, EventName = "Fountain", TitleKey = "event_fountain_title", DescriptionKey = "event_fountain_desc", ImageId = "event_fountain" }
             });
             masterDataService.SetAll(new[]
             {

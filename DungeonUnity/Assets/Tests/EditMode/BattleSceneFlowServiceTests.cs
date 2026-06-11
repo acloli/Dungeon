@@ -513,7 +513,7 @@ namespace Dungeon.Tests.EditMode
         public void SelectMapNode_EventNode_OpensEventWithEventSet()
         {
             RuntimeEvent evt = new RuntimeEvent(
-                9001, "TestEvent", "event.test", "img_test",
+                9001, "TestEvent", "event.test_title", "event.test", "img_test",
                 new[] { new RuntimeEventChoice(1, "Choice 1", EffectType.GainGold, 50) });
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
@@ -533,7 +533,7 @@ namespace Dungeon.Tests.EditMode
         public void SelectEventChoice_GainGold_AppliesEffectAndReturnsToMap()
         {
             RuntimeEvent evt = new RuntimeEvent(
-                9001, "GoldFountain", "event.fountain", "img_fountain",
+                9001, "GoldFountain", "event.fountain_title", "event.fountain", "img_fountain",
                 new[] { new RuntimeEventChoice(1, "Take Gold", EffectType.GainGold, 50) });
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 startingGold: 100,
