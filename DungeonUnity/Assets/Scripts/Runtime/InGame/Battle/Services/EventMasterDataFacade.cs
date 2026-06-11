@@ -55,8 +55,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
                 events.Add(new RuntimeEvent(
                     master.Id,
-                    ResolveLocalizedText(master.LocalizationKey + "_title", master.EventName),
-                    ResolveLocalizedText(master.LocalizationKey + "_desc", master.LocalizationKey),
+                    master.EventName,
+                    master.TitleKey,
+                    master.DescriptionKey,
                     master.ImageId,
                     choices));
             }
@@ -75,9 +76,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 return fallback;
             }
-
+            
             return _localizationService.Get(localizationKey);
         }
     }
 }
-

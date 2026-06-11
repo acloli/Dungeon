@@ -296,18 +296,20 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeEvent
     {
-        public RuntimeEvent(int id, string eventName, string localizationKey, string imageId, IReadOnlyList<RuntimeEventChoice> choices)
+        public RuntimeEvent(int id, string eventName, string titleKey, string descriptionKey, string imageId, IReadOnlyList<RuntimeEventChoice> choices)
         {
             Id = id;
             EventName = eventName;
-            LocalizationKey = localizationKey;
+            TitleKey = titleKey;
+            DescriptionKey = descriptionKey;
             ImageId = imageId;
             Choices = choices ?? Array.Empty<RuntimeEventChoice>();
         }
 
         public int Id { get; }
         public string EventName { get; }
-        public string LocalizationKey { get; }
+        public string TitleKey { get; }
+        public string DescriptionKey { get; }
         public string ImageId { get; }
         public IReadOnlyList<RuntimeEventChoice> Choices { get; }
     }

@@ -137,7 +137,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
+  _useLocalization: 1
   _localizationKey: 
   _localizationParameters: []
   _typewriterSpeed: 30
@@ -278,7 +278,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
+  _useLocalization: 1
   _localizationKey: 
   _localizationParameters: []
   _typewriterSpeed: 30
@@ -419,7 +419,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
+  _useLocalization: 1
   _localizationKey: 
   _localizationParameters: []
   _typewriterSpeed: 30

@@ -9,7 +9,8 @@ using UnityEngine.UI;
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
-    /// イベントダイアログ。事件テキストと選択肢ボタンを動的構築する
+    /// イベントダイアログ
+    /// 事件テキストと選択肢ボタンを動的構築する
     /// </summary>
     public sealed class EventDialog : UIDialogBase<EventDialogResult>
     {
@@ -42,14 +43,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
             RuntimeEvent evt = _param?.Snapshot?.CurrentEvent;
             if (evt == null)
             {
-                SetTitle(string.Empty);
-                SetBody(string.Empty);
+                SetLocalizedText(_titleText, string.Empty, string.Empty);
+                SetLocalizedText(_bodyText, string.Empty, string.Empty);
                 ClearChoiceButtons();
                 return;
             }
 
-            SetTitle(evt.EventName);
-            SetBody(evt.LocalizationKey);
+            SetLocalizedText(_titleText, evt.TitleKey, evt.EventName);
+            SetLocalizedText(_bodyText, evt.DescriptionKey, evt.DescriptionKey);
             BuildChoiceButtons(evt.Choices);
         }
 
@@ -78,7 +79,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 TFTextUGUI label = btn.GetComponentInChildren<TFTextUGUI>();
                 if (label != null)
                 {
-                    label.text = BuildChoiceLabel(choice);
+                    label.text = choice.LocalizationKey;
                 }
 
                 int capturedChoiceId = choice.ChoiceId;
@@ -104,49 +105,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _choiceButtons.Clear();
         }
 
-        private void SetTitle(string text)
+        private static void SetLocalizedText(TFTextUGUI text, string localizationKey, string fallbackText)
         {
-            if (_titleText != null)
+            if (text == null)
             {
-                _titleText.text = text;
+                return;
             }
-        }
-
-        private void SetBody(string text)
-        {
-            if (_bodyText != null)
-            {
-                _bodyText.text = text;
-            }
-        }
-
-        private static string BuildChoiceLabel(RuntimeEventChoice choice)
-        {
-            string effectDesc = BuildEffectDescription(choice);
-            if (string.IsNullOrEmpty(choice.LocalizationKey))
-            {
-                return effectDesc;
-            }
-
-            return string.IsNullOrEmpty(effectDesc)
-                ? choice.LocalizationKey
-                : $"{choice.LocalizationKey}  ({effectDesc})";
-        }
-
-        private static string BuildEffectDescription(RuntimeEventChoice choice)
-        {
-            return choice.EffectType switch
-            {
-                Game.MasterData.Generated.EffectType.LoseHp =>
-                    $"-{choice.EffectValue} HP",
-                Game.MasterData.Generated.EffectType.GainMaxHp =>
-                    $"+{choice.EffectValue} MaxHP",
-                Game.MasterData.Generated.EffectType.GainGold =>
-                    $"+{choice.EffectValue} Gold",
-                Game.MasterData.Generated.EffectType.DealDamage =>
-                    $"-{choice.EffectValue} HP",
-                _ => string.Empty
-            };
+            text.text = fallbackText;
+            text.LocalizationKey = localizationKey;
         }
 
         private void OnChoiceClicked(int choiceId)
