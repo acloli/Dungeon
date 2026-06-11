@@ -16,6 +16,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public List<BattleShopItemState> ShopItems { get; } = new List<BattleShopItemState>();
         public bool IsCardRemovalSoldOut { get; set; }
         public int CardRemovalCount { get; set; }
+        public int BattleGoldReward { get; set; }
+        public bool PotionDropped { get; set; }
+        public bool RelicDropped { get; set; }
+        public bool CardRewardPicked { get; set; }
+        public bool GoldClaimed { get; set; }
+        public bool PotionClaimed { get; set; }
+        public bool RelicClaimed { get; set; }
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();

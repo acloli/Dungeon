@@ -33,6 +33,19 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// カード選択ダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattleCardPickDialogParam
+    {
+        public BattleCardPickDialogParam(BattleSceneSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
     /// 補給ダイアログ表示パラメータクラス
     /// </summary>
     public sealed class BattleRestShopDialogParam
@@ -56,6 +69,23 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
+    /// 報酬ダイアログのアクション種別
+    /// </summary>
+    public enum RewardDialogActionType
+    {
+        PickCard,
+        ClaimGold,
+        ClaimPotion,
+        ClaimRelic,
+        Continue
+    }
+
+    public struct RewardDialogResult
+    {
+        public RewardDialogActionType Action;
     }
 
     /// <summary>

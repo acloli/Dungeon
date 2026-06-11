@@ -428,6 +428,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             int playerMaxHp,
             int startingGold,
             int cardRewardChoiceCount,
+            int potionDropChance,
+            int relicDropChance,
             IReadOnlyList<RuntimeCard> starterDeck,
             IReadOnlyList<RuntimeRewardEntry> rewardPool,
             IReadOnlyList<RuntimeMapNode> nodes,
@@ -443,6 +445,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PlayerMaxHp = playerMaxHp;
             StartingGold = startingGold;
             CardRewardChoiceCount = cardRewardChoiceCount;
+            PotionDropChance = potionDropChance;
+            RelicDropChance = relicDropChance;
             StarterDeck = starterDeck ?? Array.Empty<RuntimeCard>();
             RewardPool = rewardPool ?? Array.Empty<RuntimeRewardEntry>();
             Nodes = nodes ?? Array.Empty<RuntimeMapNode>();
@@ -460,6 +464,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int PlayerMaxHp { get; }
         public int StartingGold { get; }
         public int CardRewardChoiceCount { get; }
+        public int PotionDropChance { get; }
+        public int RelicDropChance { get; }
         public IReadOnlyList<RuntimeCard> StarterDeck { get; }
         public IReadOnlyList<RuntimeRewardEntry> RewardPool { get; }
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }

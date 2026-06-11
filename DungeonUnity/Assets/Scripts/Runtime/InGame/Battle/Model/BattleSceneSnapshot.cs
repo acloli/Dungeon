@@ -41,7 +41,14 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             bool isCardRemovalSoldOut = false,
             int cardRemovalPrice = 0,
             RuntimeEvent currentEvent = null,
-            string eventMessage = null)
+            string eventMessage = null,
+            bool goldClaimed = false,
+            bool potionClaimed = false,
+            bool relicClaimed = false,
+            int battleGoldReward = 0,
+            bool potionDropped = false,
+            bool relicDropped = false,
+            bool cardRewardPicked = false)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -75,7 +82,14 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IsCardRemovalSoldOut = isCardRemovalSoldOut;
             CardRemovalPrice = cardRemovalPrice;
             CurrentEvent = currentEvent;
+            GoldClaimed = goldClaimed;
+            PotionClaimed = potionClaimed;
+            RelicClaimed = relicClaimed;
             EventMessage = eventMessage ?? string.Empty;
+            BattleGoldReward = battleGoldReward;
+            PotionDropped = potionDropped;
+            RelicDropped = relicDropped;
+            CardRewardPicked = cardRewardPicked;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -110,6 +124,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsCardRemovalSoldOut { get; }
         public int CardRemovalPrice { get; }
         public RuntimeEvent CurrentEvent { get; }
+        public bool GoldClaimed { get; }
+        public bool PotionClaimed { get; }
+        public bool RelicClaimed { get; }
+        public int BattleGoldReward { get; }
+        public bool PotionDropped { get; }
+        public bool RelicDropped { get; }
+        public bool CardRewardPicked { get; }
         public string EventMessage { get; }
     }
 }

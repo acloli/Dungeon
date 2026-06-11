@@ -68,5 +68,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string UnknownEnemyName = "Enemy";
         public const string EventStateFormat = "Event: HP {0}/{1}  Gold {2}";
         public const string NoEventAvailable = "No event available.";
+        public const string RewardGoldFormat = "+{0} Gold";
+        public const string PotionDroppedLabel = "Potion dropped!";
+        public const string RelicDroppedLabel = "Relic dropped!";
+        public const string PickCardLabel = "Pick a Card";
+        public const string CardPickedLabel = "Card Picked";
     }
 }
