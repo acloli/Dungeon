@@ -47,3 +47,9 @@ restshop.rest_button,休憩,Rest,休息,休息,휴식
 restshop.upgrade_button,強化,Upgrade,强化,強化,강화
 restshop.shop_button,ショップ,Shop,商店,商店,상점
 restshop.continue_button,先へ進む,Continue,前进,前進,계속
+event_fountain_title,不思議な泉,Mysterious Fountain,神秘泉水,神秘泉水,신비한 샘
+event_fountain_desc,あなたは奇妙なスライムの泉を見つけた。どうする？,You found a strange slime fountain. What will you do?,你发现了一个奇怪的史莱姆泉水。你打算怎么做？,你發現了一個奇怪的史萊姆泉水。你打算怎麼做？,당신은 기묘한 슬라임 샘을 발견했다. 어떻게 할까?
+event_fountain_choice1_text,泉の水を飲む（最大HP+5）,Drink the water (Max HP +5),喝泉水（最大生命+5）,喝泉水（最大生命+5）,샘물을 마신다 (최대 체력 +5)
+event_fountain_choice2_text,泉の底を探る（10ダメージ）,Search the bottom (10 Damage),探索泉底（受到10点伤害）,探索泉底（受到10點傷害）,샘 바닥을 살핀다 (10 피해)
+event_fountain_choice3_text,泉の底を探る（100Gold獲得）,Search the bottom (Gain 100 Gold),探索泉底（获得100金币）,探索泉底（獲得100金幣）,샘 바닥을 살핀다 (100 골드 획득)
+event_fountain_choice4_text,無視して立ち去る,Ignore and leave,无视并离开,無視並離開,무시하고 떠난다

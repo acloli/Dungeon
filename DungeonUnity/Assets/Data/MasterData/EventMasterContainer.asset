@@ -15,5 +15,6 @@ MonoBehaviour:
   _data:
   - Id: 9001
     EventName: Slime Fountain
-    LocalizationKey: event_fountain_desc
+    TitleKey: event_fountain_title
+    DescriptionKey: event_fountain_desc
     ImageId: event_fountain

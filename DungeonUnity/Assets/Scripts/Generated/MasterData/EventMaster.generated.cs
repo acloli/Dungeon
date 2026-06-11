@@ -25,9 +25,14 @@ namespace Game.MasterData.Generated
         public string EventName;
 
         /// <summary>
+        /// タイトルテキストキー
+        /// </summary>
+        public string TitleKey;
+
+        /// <summary>
         /// 説明テキストキー
         /// </summary>
-        public string LocalizationKey;
+        public string DescriptionKey;
 
         /// <summary>
         /// 画像ID
