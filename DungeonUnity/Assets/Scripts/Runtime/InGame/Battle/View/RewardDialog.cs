@@ -1,71 +1,24 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
-using Game.MasterData.Generated;
 using TFramework.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     /// <summary>
     /// 報酬ダイアログクラス
     /// </summary>
-    public sealed class RewardDialog : UIDialogBase<RuntimeRewardEntry>, IRewardDialogView
+    public sealed class RewardDialog : UIDialogBase<RewardDialogResult>
     {
         [SerializeField] private Transform _rewardRoot;
         [SerializeField] private BattleOptionButtonView _rewardButtonTemplate;
-        [SerializeField] private Sprite _goldRewardIcon;
+        [SerializeField] private Button _continueButton;
 
-        private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
+        private readonly List<BattleOptionButtonView> _rows = new List<BattleOptionButtonView>();
         private BattleRewardDialogParam _param;
-
-        /// <summary>
-        /// 報酬ボタン構築
-        /// </summary>
-        public void BuildRewardButtons(IReadOnlyList<RuntimeRewardEntry> entries, Action<RuntimeRewardEntry> onClicked)
-        {
-            ClearDynamicButtons();
-
-            if (_rewardRoot == null || _rewardButtonTemplate == null || entries == null)
-            {
-                return;
-            }
-
-            _rewardButtonTemplate.gameObject.SetActive(false);
-
-            for (int i = 0; i < entries.Count; i++)
-            {
-                RuntimeRewardEntry entry = entries[i];
-                if (entry == null)
-                {
-                    continue;
-                }
-
-                BattleOptionButtonView button = Instantiate(_rewardButtonTemplate, _rewardRoot);
-                button.gameObject.SetActive(true);
-
-                string label = BuildRewardLabel(entry);
-
-                button.Configure(
-                    label,
-                    delegate
-                    {
-                        onClicked?.Invoke(entry);
-                    });
-                button.SetIcon(BuildRewardIcon(entry));
-                _buttons.Add(button);
-            }
-        }
-
-        /// <summary>
-        /// 動的報酬ボタン消去
-        /// </summary>
-        public void ClearDynamicButtons()
-        {
-            ClearButtons(_buttons);
-        }
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
@@ -75,74 +28,95 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         protected override void OnOpened()
         {
-            if (_param == null)
-            {
-                ClearDynamicButtons();
-                return;
-            }
-
-            BuildRewardButtons(_param.Snapshot.RewardChoices, entry => CloseWithResult(entry));
+            WireButtons();
+            BuildRows();
         }
 
         protected override void OnClosed()
         {
-            ClearDynamicButtons();
+            UnwireButtons();
+            ClearRows();
         }
 
-        /// <summary>
-        /// 報酬ボタンの表示文言を組み立てる
-        /// </summary>
-        private static string BuildRewardLabel(RuntimeRewardEntry entry)
+        private void BuildRows()
         {
-            if (entry.RewardType == RewardType.Card)
-            {
-                if (entry.Card != null)
-                {
-                    return string.Format(BattleSceneConstants.RewardLabelFormat, entry.Card.DisplayName, entry.Card.Cost, entry.Card.PreviewDamage);
-                }
+            ClearRows();
 
-                return RewardType.Card.ToString();
-            }
+            BattleSceneSnapshot snapshot = _param?.Snapshot;
+            if (snapshot == null || _rewardRoot == null || _rewardButtonTemplate == null) return;
 
-            if (entry.RewardType == RewardType.Gold)
-            {
-                return $"{entry.RewardValue} Gold";
-            }
+            _rewardButtonTemplate.gameObject.SetActive(false);
 
-            return entry.RewardType.ToString();
+            // Gold行 — クリックで ClaimGold を返し、Presenter 側で状態更新＋再表示
+            if (!snapshot.GoldClaimed)
+                AddRow(string.Format(BattleSceneConstants.RewardGoldFormat, snapshot.BattleGoldReward),
+                    () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimGold }),
+                    true);
+
+            // Card行 — クリックで PickCard、選択済みなら非表示
+            if (!snapshot.CardRewardPicked)
+                AddRow(BattleSceneConstants.PickCardLabel,
+                    () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.PickCard }),
+                    true);
+            else
+                AddRow(BattleSceneConstants.CardPickedLabel, null, false);
+
+            // Potion行
+            if (snapshot.PotionDropped && !snapshot.PotionClaimed)
+                AddRow(BattleSceneConstants.PotionDroppedLabel,
+                    () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimPotion }),
+                    true);
+
+            // Relic行
+            if (snapshot.RelicDropped && !snapshot.RelicClaimed)
+                AddRow(BattleSceneConstants.RelicDroppedLabel,
+                    () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimRelic }),
+                    true);
         }
 
-        /// <summary>
-        /// 報酬タイプごとのアイコンを返す
-        /// </summary>
-        private Sprite BuildRewardIcon(RuntimeRewardEntry entry)
+        private void AddRow(string label, System.Action onClicked, bool interactable = false)
         {
-            if (entry.RewardType == RewardType.Gold)
+            BattleOptionButtonView row = Instantiate(_rewardButtonTemplate, _rewardRoot);
+            row.gameObject.SetActive(true);
+            if (interactable && onClicked != null)
             {
-                return _goldRewardIcon;
+                row.Configure(label, () => onClicked.Invoke());
             }
-
-            return null;
+            else
+            {
+                row.Configure(label, null);
+            }
+            _rows.Add(row);
         }
 
-        /// <summary>
-        /// 動的ボタン一覧消去
-        /// </summary>
-        private static void ClearButtons(List<BattleOptionButtonView> buttons)
+        private void ClearRows()
         {
-            for (int i = 0; i < buttons.Count; i++)
+            for (int i = 0; i < _rows.Count; i++)
             {
-                BattleOptionButtonView button = buttons[i];
-                if (button == null)
-                {
-                    continue;
-                }
-
-                button.Clear();
-                Destroy(button.gameObject);
+                BattleOptionButtonView row = _rows[i];
+                if (row == null) continue;
+                row.Clear();
+                Destroy(row.gameObject);
             }
+            _rows.Clear();
+        }
 
-            buttons.Clear();
+        private void WireButtons()
+        {
+            UnwireButtons();
+            if (_continueButton != null)
+                _continueButton.onClick.AddListener(OnContinueClicked);
+        }
+
+        private void UnwireButtons()
+        {
+            if (_continueButton != null)
+                _continueButton.onClick.RemoveAllListeners();
+        }
+
+        private void OnContinueClicked()
+        {
+            CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.Continue });
         }
     }
 }
