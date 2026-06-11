@@ -29,3 +29,5 @@ MonoBehaviour:
     EliteEncounterGroupId: 6202
     BossEncounterGroupId: 6203
     CardRewardChoiceCount: 3
+    PotionDropChance: 40
+    RelicDropChance: 0

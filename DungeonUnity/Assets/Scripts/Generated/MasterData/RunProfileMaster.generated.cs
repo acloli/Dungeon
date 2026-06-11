@@ -94,6 +94,16 @@ namespace Game.MasterData.Generated
         /// </summary>
         public int CardRewardChoiceCount;
 
+        /// <summary>
+        /// ポーションドロップ確率(%)
+        /// </summary>
+        public int PotionDropChance;
+
+        /// <summary>
+        /// レリックドロップ確率(%)
+        /// </summary>
+        public int RelicDropChance;
+
         public int GetKey() => Id;
     }
 }

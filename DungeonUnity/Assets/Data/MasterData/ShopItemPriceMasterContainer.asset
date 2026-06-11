@@ -33,3 +33,8 @@ MonoBehaviour:
     ItemId: 2
     BasePrice: 50
     JitterPercent: 10
+  - Id: 8205
+    ItemType: 1
+    ItemId: 0
+    BasePrice: 0
+    JitterPercent: 0
