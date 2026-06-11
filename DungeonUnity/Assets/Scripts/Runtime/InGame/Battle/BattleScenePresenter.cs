@@ -158,12 +158,39 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.Reward:
                     _view.SetSaveQuitVisible(false);
-                    RuntimeRewardEntry rewardEntry = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
-                    if (rewardEntry != null)
+                    bool rewardActive = true;
+                    while (rewardActive)
                     {
-                        _flowService.SelectReward(rewardEntry);
-                        await RenderAsync(ct);
+                        RewardDialogResult rewardResult = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                        switch (rewardResult.Action)
+                        {
+                            case RewardDialogActionType.ClaimGold:
+                                _flowService.ClaimGold();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.ClaimPotion:
+                                _flowService.ClaimPotion();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.ClaimRelic:
+                                _flowService.ClaimRelic();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.PickCard:
+                                RuntimeRewardEntry cardEntry = await _uiCoordinator.ShowCardPickAsync(snapshot, ct);
+                                if (cardEntry != null)
+                                {
+                                    _flowService.SelectReward(cardEntry);
+                                    snapshot = _flowService.CreateSnapshot();
+                                }
+                                break;
+                            case RewardDialogActionType.Continue:
+                                _flowService.ContinueFromReward();
+                                rewardActive = false;
+                                break;
+                        }
                     }
+                    await RenderAsync(ct);
                     break;
                 case BattleScenePage.RestShop:
                     _view.SetSaveQuitVisible(true);

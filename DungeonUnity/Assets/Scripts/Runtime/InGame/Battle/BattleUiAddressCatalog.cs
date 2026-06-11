@@ -49,5 +49,9 @@ namespace Dungeon.Runtime.InGame.Battle
         /// イベントダイアログPrefabキー
         /// </summary>
         public const string EventDialog = "EventDialog";
+        /// <summary>
+        /// カード選択ダイアログPrefabキー
+        /// </summary>
+        public const string CardPickDialog = "CardPickDialog";
     }
 }
