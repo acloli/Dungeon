@@ -529,6 +529,7 @@ MonoBehaviour:
   _canvasGroup: {fileID: 5674276502674518031}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1
+  _persistAcrossScenes: 0
   _resultText: {fileID: 3221893772277016772}
   _backButton: {fileID: 3104227746834881007}
 --- !u!224 &3417879525382920095 stripped
