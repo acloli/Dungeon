@@ -63,6 +63,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 報酬選択
         /// </summary>
         void SelectReward(RuntimeRewardEntry rewardEntry);
+        void ClaimGold();
+        void ClaimPotion();
+        void ClaimRelic();
+        /// <summary>
+        /// 報酬画面継続
+        /// </summary>
+        void ContinueFromReward();
 
         /// <summary>
         /// 休憩適用

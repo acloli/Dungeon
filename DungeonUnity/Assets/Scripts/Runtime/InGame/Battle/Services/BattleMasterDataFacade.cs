@@ -62,6 +62,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 profile.PlayerMaxHp,
                 profile.StartingGold,
                 profile.CardRewardChoiceCount,
+                profile.PotionDropChance,
+                profile.RelicDropChance,
                 BuildStarterDeck(profile.StarterDeckGroupId, cardCatalog),
                 BuildRewardPool(profile.RewardPoolId, cardCatalog),
                 nodes,

@@ -122,9 +122,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 報酬候補選出
+        /// カード報酬候補選出
         /// </summary>
-        public IReadOnlyList<RuntimeRewardEntry> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        public IReadOnlyList<RuntimeRewardEntry> SelectCardRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
             List<RuntimeRewardEntry> rewards = new List<RuntimeRewardEntry>();
             if (state == null)
@@ -169,6 +169,24 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return rewards;
+        }
+
+        /// <summary>
+        /// ポーションドロップ抽選
+        /// </summary>
+        public bool RollPotionDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            if (runDefinition == null || runDefinition.PotionDropChance <= 0) return false;
+            return randomProvider.Range(0, 100) < runDefinition.PotionDropChance;
+        }
+
+        /// <summary>
+        /// レリックドロップ抽選
+        /// </summary>
+        public bool RollRelicDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            if (runDefinition == null || runDefinition.RelicDropChance <= 0) return false;
+            return randomProvider.Range(0, 100) < runDefinition.RelicDropChance;
         }
 
         /// <summary>
@@ -759,10 +777,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < runDefinition.RewardPool.Count; i++)
             {
                 RuntimeRewardEntry entry = runDefinition.RewardPool[i];
-                if (entry == null || entry.Card == null)
-                {
-                    continue;
-                }
+                if (entry == null || entry.Card == null) continue;
 
                 if (currentFloor < entry.MinFloor || currentFloor > entry.MaxFloor)
                 {

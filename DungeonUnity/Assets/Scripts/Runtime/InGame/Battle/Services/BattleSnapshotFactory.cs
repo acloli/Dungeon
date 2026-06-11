@@ -58,7 +58,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.IsCardRemovalSoldOut,
                 _shopService.GetCardRemovalPrice(state),
                 state.CurrentEvent,
-                state.EventMessage);
+                state.EventMessage,
+                state.GoldClaimed,
+                state.PotionClaimed,
+                state.RelicClaimed,
+                state.BattleGoldReward,
+                state.PotionDropped,
+                state.RelicDropped,
+                state.CardRewardPicked);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)

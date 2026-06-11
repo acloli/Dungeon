@@ -310,13 +310,52 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectReward(RuntimeRewardEntry rewardEntry)
         {
-            if (rewardEntry != null)
-            {
-                _rewardService.ApplyReward(_state, rewardEntry);
-            }
+            if (rewardEntry == null) return;
+            _rewardService.ApplyReward(_state, rewardEntry);
+            _state.CardRewardPicked = true;
+        }
 
+        /// <summary>
+        /// 報酬画面継続処理
+        /// </summary>
+        public void ContinueFromReward()
+        {
+            _state.Gold += _state.BattleGoldReward;
+            _state.BattleGoldReward = 0;
+            _state.GoldClaimed = false;
+            _state.PotionClaimed = false;
+            _state.RelicClaimed = false;
+            _state.PotionDropped = false;
+            _state.RelicDropped = false;
+            _state.CardRewardPicked = false;
             OpenMap();
             RequestSave();
+        }
+
+        /// <summary>
+        /// 報酬 Gold 取得
+        /// </summary>
+        public void ClaimGold()
+        {
+            _state.GoldClaimed = true;
+            _state.Gold += _state.BattleGoldReward;
+            _state.BattleGoldReward = 0;
+        }
+
+        /// <summary>
+        /// ポーション取得
+        /// </summary>
+        public void ClaimPotion()
+        {
+            _state.PotionClaimed = true;
+        }
+
+        /// <summary>
+        /// レリック取得
+        /// </summary>
+        public void ClaimRelic()
+        {
+            _state.RelicClaimed = true;
         }
 
         /// <summary>
@@ -480,7 +519,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OnBattleVictory()
         {
             _state.BattleFinished = true;
-            _state.Gold += CalculateBattleGoldReward();
+            _state.BattleGoldReward = CalculateBattleGoldReward();
+            _state.PotionDropped = _rules.RollPotionDrop(_runDefinition, _randomProvider);
+            _state.RelicDropped = _rules.RollRelicDrop(_runDefinition, _randomProvider);
+            _state.CardRewardPicked = false;
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
             {
@@ -498,7 +540,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.Reward;
             _state.RewardChoices.Clear();
-            IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectRewardChoices(_state, _runDefinition, _randomProvider);
+            IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectCardRewardChoices(_state, _runDefinition, _randomProvider);
             for (int i = 0; i < rewardChoices.Count; i++)
             {
                 _state.RewardChoices.Add(rewardChoices[i]);
