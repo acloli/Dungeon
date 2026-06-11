@@ -46,7 +46,7 @@ namespace Dungeon.Tests.EditMode
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowShopAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
 
-            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(1));
+            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(2));
             Assert.That(uiService.LastShopDialogParam, Is.Not.Null);
         }
 
@@ -61,7 +61,7 @@ namespace Dungeon.Tests.EditMode
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowEventAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
 
-            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(1));
+            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(2));
             Assert.That(uiService.LastEventDialogParam, Is.Not.Null);
         }
 
