@@ -9,6 +9,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public sealed class BattleSceneState
     {
         public List<RuntimeCard> Deck { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> DrawPile { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> DiscardPile { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> ExhaustPile { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
         public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();

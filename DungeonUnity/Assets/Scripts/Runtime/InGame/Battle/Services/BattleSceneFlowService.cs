@@ -274,7 +274,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            BattleCardResolutionResult result = _rules.PlayCard(_state, card, _randomProvider);
+            BattleCardResolutionResult result = _rules.PlayCard(_state, _state.SelectedCardIndex, _randomProvider);
             _state.BattleHintMessage = BuildCardHint(card, result);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
@@ -294,15 +294,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            _rules.DiscardHand(_state);
             BattleEnemyTurnResult result = _rules.ResolveEnemyTurn(_state, _randomProvider);
             _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTurnFormat, result.DamageDealt);
-            _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
-            _rules.DrawHand(_state, _randomProvider);
-
             if (_state.PlayerHp <= 0)
             {
                 OpenResult(false);
+                return;
             }
+
+            _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
+            _rules.DrawHand(_state, _randomProvider);
         }
 
         /// <summary>
@@ -509,6 +511,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             SyncSelectedEnemyForDisplay();
+            _rules.PrepareBattleDeck(_state, _randomProvider);
             _rules.DrawHand(_state, _randomProvider);
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }

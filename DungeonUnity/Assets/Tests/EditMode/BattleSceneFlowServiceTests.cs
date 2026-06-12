@@ -92,6 +92,104 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_BattleNode_DrawsUniqueCardsFromCombatDrawPile()
+        {
+            RuntimeCard first = CreateCard(1001, "First", 1, 6);
+            RuntimeCard second = CreateCard(1002, "Second", 1, 7);
+            RuntimeCard third = CreateCard(1003, "Third", 1, 8);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { first, second, third },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+            List<int> handCardIds = new List<int>();
+            for (int i = 0; i < snapshot.Hand.Count; i++)
+            {
+                handCardIds.Add(snapshot.Hand[i].Id);
+            }
+
+            Assert.That(snapshot.Hand.Count, Is.EqualTo(3));
+            Assert.That(handCardIds, Is.EquivalentTo(new[] { 1001, 1002, 1003 }));
+            Assert.That(service.GetDeckCards().Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_PlayedCardLeavesHand()
+        {
+            RuntimeCard first = CreateCard(1001, "First", 1, 1);
+            RuntimeCard second = CreateCard(1002, "Second", 1, 1);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { first, second },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(snapshot.Hand.Count, Is.EqualTo(1));
+            Assert.That(service.GetDeckCards().Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void EndTurn_DrawPileEmpty_ShufflesDiscardIntoNextHand()
+        {
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(snapshot.Hand.Count, Is.EqualTo(1));
+            Assert.That(snapshot.Hand[0].Id, Is.EqualTo(1001));
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_DrawCards_StopsAtHandLimit()
+        {
+            RuntimeCardEffect drawEffect = new RuntimeCardEffect(1, EffectType.DrawCards, 20, 1, StatusType.None, 0, TargetSide.Self);
+            List<RuntimeCard> deck = new List<RuntimeCard>();
+            for (int i = 0; i < 12; i++)
+            {
+                deck.Add(CreateCard(1001 + i, $"Draw {i}", 0, 0, new[] { drawEffect }));
+            }
+
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: deck,
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.Hand.Count, Is.EqualTo(10));
+        }
+
+        [Test]
         public void SelectMapNode_MultiEnemyFormation_OpensBattleWithAllEnemies()
         {
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
