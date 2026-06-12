@@ -21,6 +21,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleRewardService _rewardService;
         private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IBattleShopService _shopService;
+        private readonly IBattleCombatEventService _combatEventService;
         private readonly IBattleEventService _eventService;
         private readonly IRunSaveService _runSaveService;
 
@@ -33,6 +34,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleRewardService rewardService,
             IBattleSnapshotFactory snapshotFactory,
             IBattleShopService shopService,
+            IBattleCombatEventService combatEventService,
             IBattleEventService eventService,
             IRunSaveService runSaveService = null)
         {
@@ -42,6 +44,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rewardService = rewardService;
             _snapshotFactory = snapshotFactory;
             _shopService = shopService;
+            _combatEventService = combatEventService;
             _eventService = eventService;
             _runSaveService = runSaveService;
         }
@@ -275,6 +278,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             BattleCardResolutionResult result = _rules.PlayCard(_state, _state.SelectedCardIndex, _randomProvider);
+            _combatEventService.OnCardPlayed(_state, card, result);
             _state.BattleHintMessage = BuildCardHint(card, result);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
@@ -294,8 +298,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            _combatEventService.OnPlayerTurnEnd(_state);
             _rules.DiscardHand(_state);
             BattleEnemyTurnResult result = _rules.ResolveEnemyTurn(_state, _randomProvider);
+            if (result.DamageDealt > 0)
+            {
+                _combatEventService.OnPlayerDamaged(_state, result.DamageDealt);
+            }
+
             _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTurnFormat, result.DamageDealt);
             if (_state.PlayerHp <= 0)
             {
@@ -304,6 +314,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
+            _combatEventService.OnPlayerTurnStart(_state);
             _rules.DrawHand(_state, _randomProvider);
         }
 
@@ -511,7 +522,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             SyncSelectedEnemyForDisplay();
+            _combatEventService.OnCombatStart(_state);
             _rules.PrepareBattleDeck(_state, _randomProvider);
+            _combatEventService.OnPlayerTurnStart(_state);
             _rules.DrawHand(_state, _randomProvider);
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }

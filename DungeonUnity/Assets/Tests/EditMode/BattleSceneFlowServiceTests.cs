@@ -190,6 +190,34 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void BattleFlow_CombatEvents_FiresAtStableTiming()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 1);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { strike },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "CombatStart",
+                "PlayerTurnStart",
+                "CardPlayed:Strike:1",
+                "PlayerTurnEnd",
+                "PlayerDamaged:2",
+                "PlayerTurnStart"
+            }));
+        }
+
+        [Test]
         public void SelectMapNode_MultiEnemyFormation_OpensBattleWithAllEnemies()
         {
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
@@ -684,6 +712,23 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
+                new BattleCombatEventService(),
+                new BattleEventService());
+        }
+
+        private static BattleSceneFlowService CreateServiceWithCombatEvents(
+            RuntimeRunDefinition runDefinition,
+            IBattleCombatEventService combatEventService,
+            params int[] values)
+        {
+            return new BattleSceneFlowService(
+                new BattleSceneRules(),
+                new SequenceRandomProvider(values),
+                new FakeBattleMasterDataFacade(runDefinition),
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
+                new FakeBattleShopService(),
+                combatEventService,
                 new BattleEventService());
         }
 
@@ -699,6 +744,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
+                new BattleCombatEventService(),
                 new BattleEventService(),
                 runSaveService);
         }
@@ -715,6 +761,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
                 new FakeBattleShopService(),
+                new BattleCombatEventService(),
                 new BattleEventService());
         }
 
@@ -911,6 +958,41 @@ namespace Dungeon.Tests.EditMode
             public string GetBuffName(BuffType buffType)
             {
                 return $"表示{buffType}";
+            }
+        }
+
+        /// <summary>
+        /// テスト用戦闘イベント通知クラス
+        /// </summary>
+        private sealed class FakeBattleCombatEventService : IBattleCombatEventService
+        {
+            private readonly List<string> _events = new List<string>();
+
+            public IReadOnlyList<string> Events => _events;
+
+            public void OnCombatStart(BattleSceneState state)
+            {
+                _events.Add("CombatStart");
+            }
+
+            public void OnPlayerTurnStart(BattleSceneState state)
+            {
+                _events.Add("PlayerTurnStart");
+            }
+
+            public void OnPlayerTurnEnd(BattleSceneState state)
+            {
+                _events.Add("PlayerTurnEnd");
+            }
+
+            public void OnCardPlayed(BattleSceneState state, RuntimeCard card, BattleCardResolutionResult result)
+            {
+                _events.Add($"CardPlayed:{card.DisplayName}:{result.TotalDamage}");
+            }
+
+            public void OnPlayerDamaged(BattleSceneState state, int damage)
+            {
+                _events.Add($"PlayerDamaged:{damage}");
             }
         }
 
