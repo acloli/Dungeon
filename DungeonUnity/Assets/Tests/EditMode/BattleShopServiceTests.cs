@@ -85,6 +85,9 @@ namespace Dungeon.Tests.EditMode
                 $"card_{id}",
                 "Card",
                 string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
                 1,
                 CardType.Attack,
                 CardRarity.Common,
@@ -108,6 +111,8 @@ namespace Dungeon.Tests.EditMode
                 Array.Empty<RuntimeMapNode>(),
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
                 Array.Empty<RuntimeEvent>(),
+                new Dictionary<int, RuntimeRelic>(),
+                new Dictionary<int, RuntimePotion>(),
                 new RuntimeShopLineup(
                     1,
                     new[]
@@ -143,7 +148,7 @@ namespace Dungeon.Tests.EditMode
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
             var state = new BattleSceneState { Gold = SufficientGold };
-            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), 0, CardPurchasePrice, false));
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), null, null, 0, CardPurchasePrice, false));
 
             bool result = service.PurchaseShopItem(state, ShopSlotCard);
 
@@ -159,7 +164,7 @@ namespace Dungeon.Tests.EditMode
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
             var state = new BattleSceneState { Gold = InsufficientGold };
-            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), 0, CardPurchasePrice, false));
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotCard, RewardType.Card, CreateCard(1), null, null, 0, CardPurchasePrice, false));
 
             bool result = service.PurchaseShopItem(state, ShopSlotCard);
 
@@ -175,7 +180,7 @@ namespace Dungeon.Tests.EditMode
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
             var state = new BattleSceneState { Gold = SufficientGold };
-            state.ShopItems.Add(new BattleShopItemState(ShopSlotRelic, RewardType.Relic, null, 1, RelicPurchasePrice, false));
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotRelic, RewardType.Relic, null, null, null, 1, RelicPurchasePrice, false));
 
             bool result = service.PurchaseShopItem(state, ShopSlotRelic);
 
@@ -191,7 +196,7 @@ namespace Dungeon.Tests.EditMode
             var masterData = new FakeMasterDataService();
             var service = new BattleShopService(masterData);
             var state = new BattleSceneState { Gold = SufficientGold };
-            state.ShopItems.Add(new BattleShopItemState(ShopSlotPotion, RewardType.Potion, null, 1, PotionPurchasePrice, false));
+            state.ShopItems.Add(new BattleShopItemState(ShopSlotPotion, RewardType.Potion, null, null, null, 1, PotionPurchasePrice, false));
 
             bool result = service.PurchaseShopItem(state, ShopSlotPotion);
 

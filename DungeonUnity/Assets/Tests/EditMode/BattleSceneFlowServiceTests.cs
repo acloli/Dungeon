@@ -824,6 +824,8 @@ namespace Dungeon.Tests.EditMode
                 },
                 encounters,
                 events ?? null,
+                new Dictionary<int, RuntimeRelic>(),
+                new Dictionary<int, RuntimePotion>(),
                 null,
                 null,
                 null);
@@ -835,6 +837,9 @@ namespace Dungeon.Tests.EditMode
                 id,
                 $"card_{id}",
                 displayName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
                 string.Empty,
                 cost,
                 CardType.Attack,
@@ -912,7 +917,7 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
-            return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, weight, minFloor, maxFloor);
+            return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, null, null, weight, minFloor, maxFloor);
         }
 
         /// <summary>

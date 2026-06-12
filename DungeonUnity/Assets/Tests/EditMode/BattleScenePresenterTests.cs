@@ -115,6 +115,60 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeAsync_BattleState_RendersHandCardsAndPileCounters()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                2,
+                0,
+                100,
+                null,
+                20,
+                0,
+                false,
+                1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                handCards: new[]
+                {
+                    new BattleHandCardViewModel(
+                        CreateCard(1001, "Strike", 1),
+                        new BattleMultiIconViewModel(BattleIconKind.Card, "Strike", "Deal 6 damage.", "card_art_strike", CardRarity.Common, cost: 1, showCost: true, isSelected: false, isAffordable: true)),
+                    new BattleHandCardViewModel(
+                        CreateCard(1002, "Guard", 2),
+                        new BattleMultiIconViewModel(BattleIconKind.Card, "Guard", "Gain 8 Block.", "card_art_guard", CardRarity.Uncommon, cost: 2, showCost: true, isSelected: true, isAffordable: false))
+                },
+                drawPileCount: 12,
+                discardPileCount: 3,
+                handCount: 2,
+                maxHandCount: 10);
+
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.BattlePageView.LastHandCards.Count, Is.EqualTo(2));
+            Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsSelected, Is.True);
+            Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsAffordable, Is.False);
+            Assert.That(view.BattlePageView.LastDrawPileCount, Is.EqualTo(12));
+            Assert.That(view.BattlePageView.LastDiscardPileCount, Is.EqualTo(3));
+            Assert.That(view.BattlePageView.LastHandCount, Is.EqualTo(2));
+            Assert.That(view.BattlePageView.LastMaxHandCount, Is.EqualTo(10));
+        }
+
+        [Test]
         public void InitializeAsync_WithValidSave_InitializesFromSave()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
@@ -243,7 +297,7 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result",
-                new BattleIntentViewModel(
+                enemyIntent: new BattleIntentViewModel(
                     IntentType.AttackDefend,
                     "攻防",
                     7,
@@ -255,10 +309,10 @@ namespace Dungeon.Tests.EditMode
                     BuffType.Ritual,
                     "儀式",
                     3),
-                new[] { new BattleStatusViewModel("脆弱", 2, false) },
-                new[] { new BattleStatusViewModel("脱力", 1, false) },
-                new[] { new BattleStatusViewModel("筋力", 1, true) },
-                new[] { new BattleStatusViewModel("儀式", 3, true) });
+                playerStatuses: new[] { new BattleStatusViewModel("脆弱", 2, false) },
+                enemyStatuses: new[] { new BattleStatusViewModel("脱力", 1, false) },
+                playerBuffs: new[] { new BattleStatusViewModel("筋力", 1, true) },
+                enemyBuffs: new[] { new BattleStatusViewModel("儀式", 3, true) });
         }
 
         private static BattleSceneSnapshot CreateMultiEnemySnapshot()
@@ -284,17 +338,17 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result",
-                null,
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                new[]
+                enemyIntent: null,
+                playerStatuses: Array.Empty<BattleStatusViewModel>(),
+                enemyStatuses: Array.Empty<BattleStatusViewModel>(),
+                playerBuffs: Array.Empty<BattleStatusViewModel>(),
+                enemyBuffs: Array.Empty<BattleStatusViewModel>(),
+                enemies: new[]
                 {
                     new BattleEnemyViewModel(0, "Red Mite", 12, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>()),
                     new BattleEnemyViewModel(1, "Green Mite", 8, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>())
                 },
-                1);
+                selectedEnemyIndex: 1);
         }
 
         private static RunSaveData CreateValidSaveData()
@@ -310,6 +364,23 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.Map,
                 DeckCardIds = new List<int> { 1001 }
             };
+        }
+
+        private static RuntimeCard CreateCard(int id, string displayName, int cost)
+        {
+            return new RuntimeCard(
+                id,
+                $"card_{id}",
+                displayName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                cost,
+                CardType.Attack,
+                CardRarity.Common,
+                CharacterArchetype.CrimsonExile,
+                Array.Empty<RuntimeCardEffect>());
         }
 
         [Test]
@@ -520,6 +591,11 @@ namespace Dungeon.Tests.EditMode
             public string LastEnemyText { get; private set; }
             public string LastHintText { get; private set; }
             public BattleHudViewModel LastHud { get; private set; }
+            public IReadOnlyList<BattleHandCardViewModel> LastHandCards { get; private set; } = Array.Empty<BattleHandCardViewModel>();
+            public int LastDrawPileCount { get; private set; }
+            public int LastDiscardPileCount { get; private set; }
+            public int LastHandCount { get; private set; }
+            public int LastMaxHandCount { get; private set; }
 
             public void WireButtons(Action onEndTurnClicked)
             {
@@ -541,9 +617,18 @@ namespace Dungeon.Tests.EditMode
                 LastHud = hud;
             }
 
-            public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
+            public void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount)
+            {
+                LastDrawPileCount = drawPileCount;
+                LastDiscardPileCount = discardPileCount;
+                LastHandCount = handCount;
+                LastMaxHandCount = maxHandCount;
+            }
+
+            public void BuildHandCards(IReadOnlyList<BattleHandCardViewModel> handCards, Action<int> onClicked)
             {
                 BuildCallCount++;
+                LastHandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
             }
 
             public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)

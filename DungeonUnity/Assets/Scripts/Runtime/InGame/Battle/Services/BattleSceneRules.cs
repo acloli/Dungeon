@@ -218,7 +218,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                rewards.Add(new RuntimeRewardEntry(RewardType.Card, 1, card, 1, 1, 999));
+                rewards.Add(new RuntimeRewardEntry(RewardType.Card, 1, card, null, null, 1, 1, 999));
             }
 
             return rewards;

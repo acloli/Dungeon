@@ -11,8 +11,8 @@ using TFramework.MasterData;
 namespace Game.MasterData.Generated
 {
     [Serializable]
-    [MasterData("CardMaster")]
-    public partial class CardMaster : IMasterDataObject<int>
+    [MasterData("PotionMaster")]
+    public partial class PotionMaster : IMasterDataObject<int>
     {
         /// <summary>
         /// 行ID
@@ -45,34 +45,9 @@ namespace Game.MasterData.Generated
         public string ImageId;
 
         /// <summary>
-        /// カード種別
-        /// </summary>
-        public CardType CardType;
-
-        /// <summary>
         /// レアリティ
         /// </summary>
         public CardRarity Rarity;
-
-        /// <summary>
-        /// コスト
-        /// </summary>
-        public int Cost;
-
-        /// <summary>
-        /// 対象種別
-        /// </summary>
-        public TargetType TargetType;
-
-        /// <summary>
-        /// キャラクター系統
-        /// </summary>
-        public CharacterArchetype CharacterArchetype;
-
-        /// <summary>
-        /// 報酬出現可否
-        /// </summary>
-        public bool CanAppearInReward;
 
         public int GetKey() => Id;
     }

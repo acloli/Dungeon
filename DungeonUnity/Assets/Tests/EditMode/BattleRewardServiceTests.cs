@@ -25,7 +25,7 @@ namespace Dungeon.Tests.EditMode
         {
             BattleSceneState state = new BattleSceneState();
             RuntimeCard card = CreateCard(RewardCardId, "strike");
-            RuntimeRewardEntry entry = new RuntimeRewardEntry(RewardType.Card, card.Id, card, RewardWeight, RewardMinFloor, RewardMaxFloor);
+            RuntimeRewardEntry entry = new RuntimeRewardEntry(RewardType.Card, card.Id, card, null, null, RewardWeight, RewardMinFloor, RewardMaxFloor);
 
             new BattleRewardService().ApplyReward(state, entry);
 
@@ -40,7 +40,7 @@ namespace Dungeon.Tests.EditMode
             {
                 Gold = InitialGold
             };
-            RuntimeRewardEntry entry = new RuntimeRewardEntry(RewardType.Gold, GoldRewardValue, null, RewardWeight, RewardMinFloor, RewardMaxFloor);
+            RuntimeRewardEntry entry = new RuntimeRewardEntry(RewardType.Gold, GoldRewardValue, null, null, null, RewardWeight, RewardMinFloor, RewardMaxFloor);
 
             new BattleRewardService().ApplyReward(state, entry);
 
@@ -56,7 +56,7 @@ namespace Dungeon.Tests.EditMode
             {
                 Gold = InitialGold
             };
-            RuntimeRewardEntry entry = new RuntimeRewardEntry(rewardType, PotionOrRelicRewardValue, null, RewardWeight, RewardMinFloor, RewardMaxFloor);
+            RuntimeRewardEntry entry = new RuntimeRewardEntry(rewardType, PotionOrRelicRewardValue, null, null, null, RewardWeight, RewardMinFloor, RewardMaxFloor);
 
             new BattleRewardService().ApplyReward(state, entry);
 
@@ -71,6 +71,9 @@ namespace Dungeon.Tests.EditMode
                 key,
                 $"Card{id}",
                 $"Card{id}",
+                string.Empty,
+                $"Card{id}.desc",
+                string.Empty,
                 1,
                 CardType.Attack,
                 CardRarity.Common,

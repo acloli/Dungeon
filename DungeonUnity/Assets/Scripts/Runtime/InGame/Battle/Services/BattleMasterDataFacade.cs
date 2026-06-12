@@ -45,6 +45,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             IReadOnlyDictionary<int, RuntimeCard> cardCatalog = BuildCardCatalog();
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = BuildRelicCatalog();
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog = BuildPotionCatalog();
             Dictionary<int, RuntimeEnemy> enemyCatalog = BuildEnemyCatalog();
             IReadOnlyList<RuntimeMapNode> nodes = BuildMapNodes(profile.MapTemplateId);
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
@@ -65,10 +67,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 profile.PotionDropChance,
                 profile.RelicDropChance,
                 BuildStarterDeck(profile.StarterDeckGroupId, cardCatalog),
-                BuildRewardPool(profile.RewardPoolId, cardCatalog),
+                BuildRewardPool(profile.RewardPoolId, cardCatalog, relicCatalog, potionCatalog),
                 nodes,
                 encounters,
                 possibleEvents,
+                relicCatalog,
+                potionCatalog,
                 shopLineup,
                 cardPriceRules,
                 itemPriceRules);
@@ -107,6 +111,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     master.Key,
                     ResolveLocalizedText(master.LocalizationKey, master.Name),
                     master.LocalizationKey,
+                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                    master.DescriptionKey,
+                    master.ImageId,
                     master.Cost,
                     master.CardType,
                     master.Rarity,
@@ -115,6 +122,54 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return cards;
+        }
+
+        /// <summary>
+        /// レリック定義辞書を構築する
+        /// </summary>
+        public IReadOnlyDictionary<int, RuntimeRelic> BuildRelicCatalog()
+        {
+            Dictionary<int, RuntimeRelic> relics = new Dictionary<int, RuntimeRelic>();
+            IReadOnlyList<RelicMaster> masters = _masterDataService.GetAll<RelicMaster>();
+            for (int i = 0; i < masters.Count; i++)
+            {
+                RelicMaster master = masters[i];
+                relics[master.Id] = new RuntimeRelic(
+                    master.Id,
+                    master.Key,
+                    ResolveLocalizedText(master.LocalizationKey, master.Name),
+                    master.LocalizationKey,
+                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                    master.DescriptionKey,
+                    master.ImageId,
+                    master.Rarity);
+            }
+
+            return relics;
+        }
+
+        /// <summary>
+        /// ポーション定義辞書を構築する
+        /// </summary>
+        public IReadOnlyDictionary<int, RuntimePotion> BuildPotionCatalog()
+        {
+            Dictionary<int, RuntimePotion> potions = new Dictionary<int, RuntimePotion>();
+            IReadOnlyList<PotionMaster> masters = _masterDataService.GetAll<PotionMaster>();
+            for (int i = 0; i < masters.Count; i++)
+            {
+                PotionMaster master = masters[i];
+                potions[master.Id] = new RuntimePotion(
+                    master.Id,
+                    master.Key,
+                    ResolveLocalizedText(master.LocalizationKey, master.Name),
+                    master.LocalizationKey,
+                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                    master.DescriptionKey,
+                    master.ImageId,
+                    master.Rarity);
+            }
+
+            return potions;
         }
 
         /// <summary>
@@ -190,7 +245,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬プールを展開する
         /// </summary>
-        private IReadOnlyList<RuntimeRewardEntry> BuildRewardPool(int rewardPoolId, IReadOnlyDictionary<int, RuntimeCard> cardCatalog)
+        private IReadOnlyList<RuntimeRewardEntry> BuildRewardPool(
+            int rewardPoolId,
+            IReadOnlyDictionary<int, RuntimeCard> cardCatalog,
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog,
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog)
         {
             List<RuntimeRewardEntry> rewards = new List<RuntimeRewardEntry>();
             IReadOnlyList<RewardPoolMaster> rewardEntries = _masterDataService.GetAll<RewardPoolMaster>();
@@ -209,6 +268,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
 
                 RuntimeCard card = null;
+                RuntimeRelic relic = null;
+                RuntimePotion potion = null;
                 if (entry.RewardType == RewardType.Card)
                 {
                     if (!rewardableCardIds.Contains(entry.RewardValue))
@@ -221,8 +282,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         continue;
                     }
                 }
+                else if (entry.RewardType == RewardType.Relic)
+                {
+                    if (!relicCatalog.TryGetValue(entry.RewardValue, out relic))
+                    {
+                        continue;
+                    }
+                }
+                else if (entry.RewardType == RewardType.Potion)
+                {
+                    if (!potionCatalog.TryGetValue(entry.RewardValue, out potion))
+                    {
+                        continue;
+                    }
+                }
 
-                rewards.Add(new RuntimeRewardEntry(entry.RewardType, entry.RewardValue, card, entry.Weight, entry.MinFloor, entry.MaxFloor));
+                rewards.Add(new RuntimeRewardEntry(entry.RewardType, entry.RewardValue, card, relic, potion, entry.Weight, entry.MinFloor, entry.MaxFloor));
             }
 
             return rewards;

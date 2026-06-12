@@ -47,12 +47,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.RestShopMessage,
                 state.ResultMessage,
                 BuildEnemyIntent(state),
+                BuildHandCardViews(state),
                 BuildStatusViews(state.PlayerStatuses),
                 BuildStatusViews(state.EnemyStatuses),
                 BuildBuffViews(state.PlayerBuffs),
                 BuildBuffViews(state.EnemyBuffs),
                 BuildEnemyViews(state),
                 state.SelectedEnemyIndex,
+                state.DrawPile.Count,
+                state.DiscardPile.Count,
+                state.Hand.Count,
+                BattleSceneConstants.MaxHandSize,
                 BuildAvailableNodeIndices(state),
                 BuildShopItemViews(state),
                 state.IsCardRemovalSoldOut,
@@ -257,6 +262,34 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return indices;
         }
 
+        private IReadOnlyList<BattleHandCardViewModel> BuildHandCardViews(BattleSceneState state)
+        {
+            List<BattleHandCardViewModel> views = new List<BattleHandCardViewModel>();
+            if (state.Hand == null)
+            {
+                return views;
+            }
+
+            for (int i = 0; i < state.Hand.Count; i++)
+            {
+                RuntimeCard card = state.Hand[i];
+                if (card == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleHandCardViewModel(
+                    card,
+                    BuildCardIconViewModel(
+                        card,
+                        state.PlayerEnergy >= card.Cost,
+                        i == state.SelectedCardIndex,
+                        true)));
+            }
+
+            return views;
+        }
+
         private bool CanMoveToNode(BattleSceneState state, int index)
         {
             if (state.CurrentNodeIndex < 0)
@@ -346,7 +379,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     item.Price,
                     item.IsSoldOut,
                     item.Card,
-                    item.ItemId));
+                    item.Relic,
+                    item.Potion,
+                    item.ItemId,
+                    BuildShopItemIconViewModel(item)));
             }
 
             return views;
@@ -360,13 +396,60 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
             if (item.RewardType == RewardType.Potion)
             {
-                return $"Potion {item.ItemId}";
+                return item.Potion != null ? item.Potion.DisplayName : $"Potion {item.ItemId}";
             }
             if (item.RewardType == RewardType.Relic)
             {
-                return $"Relic {item.ItemId}";
+                return item.Relic != null ? item.Relic.DisplayName : $"Relic {item.ItemId}";
             }
             return item.RewardType.ToString();
+        }
+
+        private BattleMultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item)
+        {
+            if (item.RewardType == RewardType.Card && item.Card != null)
+            {
+                return BuildCardIconViewModel(item.Card, !item.IsSoldOut, false, !item.IsSoldOut);
+            }
+
+            if (item.RewardType == RewardType.Relic && item.Relic != null)
+            {
+                return new BattleMultiIconViewModel(
+                    BattleIconKind.Relic,
+                    item.Relic.DisplayName,
+                    item.Relic.Description,
+                    item.Relic.ImageId,
+                    item.Relic.Rarity,
+                    isInteractable: !item.IsSoldOut);
+            }
+
+            if (item.RewardType == RewardType.Potion && item.Potion != null)
+            {
+                return new BattleMultiIconViewModel(
+                    BattleIconKind.Potion,
+                    item.Potion.DisplayName,
+                    item.Potion.Description,
+                    item.Potion.ImageId,
+                    item.Potion.Rarity,
+                    isInteractable: !item.IsSoldOut);
+            }
+
+            return new BattleMultiIconViewModel(BattleIconKind.None, BuildShopItemDisplayName(item), string.Empty, string.Empty, CardRarity.Common, isInteractable: !item.IsSoldOut);
+        }
+
+        private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
+        {
+            return new BattleMultiIconViewModel(
+                BattleIconKind.Card,
+                card.DisplayName,
+                card.Description,
+                card.ImageId,
+                card.Rarity,
+                card.Cost,
+                true,
+                isInteractable,
+                isSelected,
+                isAffordable);
         }
     }
 }

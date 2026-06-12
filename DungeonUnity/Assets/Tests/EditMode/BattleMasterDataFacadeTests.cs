@@ -43,8 +43,8 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", Cost = 1, CardType = CardType.Attack, Rarity = CardRarity.Basic, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = false },
-                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", Cost = 2, CardType = CardType.Skill, Rarity = CardRarity.Common, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = true }
+                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", DescriptionKey = "card.a.desc", ImageId = "card_a", Cost = 1, CardType = CardType.Attack, Rarity = CardRarity.Basic, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = false },
+                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", DescriptionKey = "card.b.desc", ImageId = "card_b", Cost = 2, CardType = CardType.Skill, Rarity = CardRarity.Common, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = true }
             });
             masterDataService.SetAll(new[]
             {
@@ -117,6 +117,14 @@ namespace Dungeon.Tests.EditMode
             {
                 new ShopItemPriceMaster { Id = 8501, ItemType = RewardType.Potion, ItemId = 1, BasePrice = 60, JitterPercent = 5 }
             });
+            masterDataService.SetAll(new[]
+            {
+                new RelicMaster { Id = 1, Key = "relic_1", Name = "Relic1", LocalizationKey = "relic.1", DescriptionKey = "relic.1.desc", ImageId = "relic_1", Rarity = CardRarity.Uncommon }
+            });
+            masterDataService.SetAll(new[]
+            {
+                new PotionMaster { Id = 1, Key = "potion_1", Name = "Potion1", LocalizationKey = "potion.1", DescriptionKey = "potion.1.desc", ImageId = "potion_1", Rarity = CardRarity.Common }
+            });
 
             BattleMasterDataFacade facade = new BattleMasterDataFacade(
                 masterDataService,
@@ -130,8 +138,11 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.StartingGold, Is.EqualTo(99));
             Assert.That(runDefinition.StarterDeck.Count, Is.EqualTo(2));
             Assert.That(runDefinition.StarterDeck[0].DisplayName, Is.EqualTo("CardA"));
+            Assert.That(runDefinition.StarterDeck[0].DescriptionKey, Is.EqualTo("card.a.desc"));
             Assert.That(runDefinition.RewardPool.Count, Is.EqualTo(1));
             Assert.That(runDefinition.RewardPool[0].Card.DisplayName, Is.EqualTo("CardB"));
+            Assert.That(runDefinition.RelicCatalog[1].DisplayName, Is.EqualTo("Relic1"));
+            Assert.That(runDefinition.PotionCatalog[1].DisplayName, Is.EqualTo("Potion1"));
             Assert.That(runDefinition.PossibleEvents.Count, Is.EqualTo(1));
             Assert.That(runDefinition.PossibleEvents[0].Choices.Count, Is.EqualTo(2));
             Assert.That(runDefinition.ShopLineup.ShopId, Is.EqualTo(1));

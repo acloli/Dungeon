@@ -99,14 +99,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 foreach (SaveShopItem savedItem in saveData.ShopItems)
                 {
                     RuntimeCard card = null;
+                    RuntimeRelic relic = null;
+                    RuntimePotion potion = null;
                     if (savedItem.RewardType == (int)RewardType.Card && savedItem.CardId > 0)
                     {
                         cardCatalog.TryGetValue(savedItem.CardId, out card);
+                    }
+                    else if (savedItem.RewardType == (int)RewardType.Relic && savedItem.ItemId > 0)
+                    {
+                        _runDefinition.RelicCatalog.TryGetValue(savedItem.ItemId, out relic);
+                    }
+                    else if (savedItem.RewardType == (int)RewardType.Potion && savedItem.ItemId > 0)
+                    {
+                        _runDefinition.PotionCatalog.TryGetValue(savedItem.ItemId, out potion);
                     }
                     _state.ShopItems.Add(new BattleShopItemState(
                         savedItem.SlotIndex,
                         (RewardType)savedItem.RewardType,
                         card,
+                        relic,
+                        potion,
                         savedItem.ItemId,
                         savedItem.Price,
                         savedItem.IsSoldOut));

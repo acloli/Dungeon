@@ -24,6 +24,11 @@ namespace Dungeon.Tests.EditMode
         [TestCase("ResultDialog", true, "CommonDialog")]
         [TestCase("ShopDialog", true, "CommonDialog")]
         [TestCase("CardSelectDialog", true, "CommonDialog")]
+        [TestCase("MultiIcon", false, null)]
+        [TestCase("CardIcon", true, "MultiIcon")]
+        [TestCase("RelicIcon", true, "MultiIcon")]
+        [TestCase("PotionIcon", true, "MultiIcon")]
+        [TestCase("ResourceIcon", true, "MultiIcon")]
         public void Prefabs_FollowNamingAndVariantRules(string prefabName, bool shouldBeVariant, string parentPrefabName)
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
@@ -97,7 +102,7 @@ namespace Dungeon.Tests.EditMode
 
             SerializedObject serialized = new SerializedObject(shopItemView);
             Assert.That(serialized.FindProperty("_button").objectReferenceValue, Is.Not.Null);
-            Assert.That(serialized.FindProperty("_nameText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_iconView").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_priceText").objectReferenceValue, Is.Not.Null);
         }
 
@@ -111,6 +116,16 @@ namespace Dungeon.Tests.EditMode
             Assert.That(serialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void CardIconPrefabs_HaveExpectedComponents()
+        {
+            AssertPrefabContainsComponent<BattleMultiIconView>("MultiIcon");
+            AssertPrefabContainsComponent<BattleCardIconView>("CardIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("RelicIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("PotionIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("ResourceIcon");
         }
 
         [Test]
@@ -155,9 +170,16 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_playerBuffText: {fileID:", yaml);
             StringAssert.Contains("_enemyStatusText: {fileID:", yaml);
             StringAssert.Contains("_enemyBuffText: {fileID:", yaml);
+            StringAssert.Contains("_drawPileCountText: {fileID:", yaml);
+            StringAssert.Contains("_discardPileCountText: {fileID:", yaml);
+            StringAssert.Contains("_handCountText: {fileID:", yaml);
+            StringAssert.Contains("_handCardTemplate: {fileID:", yaml);
             StringAssert.Contains("m_Name: IntentPanel", yaml);
             StringAssert.Contains("m_Name: PlayerStatusPanel", yaml);
             StringAssert.Contains("m_Name: EnemyBuffPanel", yaml);
+            StringAssert.Contains("m_Name: DrawPilePanel", yaml);
+            StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
+            StringAssert.Contains("m_Name: HandCountPanel", yaml);
         }
 
         [Test]

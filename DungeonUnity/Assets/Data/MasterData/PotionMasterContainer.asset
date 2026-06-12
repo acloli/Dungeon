@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93fda599fe92741b4a66d9940e62a9fe, type: 3}
+  m_Name: PotionMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.PotionMasterContainer
+  _data:
+  - Id: 1
+    Key: potion_cinder_tonic
+    Name: Cinder Tonic
+    LocalizationKey: potion.name.cinder_tonic
+    DescriptionKey: potion.desc.cinder_tonic
+    ImageId: potion_art_cinder_tonic
+    Rarity: 1
+  - Id: 2
+    Key: potion_smoke_phial
+    Name: Smoke Phial
+    LocalizationKey: potion.name.smoke_phial
+    DescriptionKey: potion.desc.smoke_phial
+    ImageId: potion_art_smoke_phial
+    Rarity: 4

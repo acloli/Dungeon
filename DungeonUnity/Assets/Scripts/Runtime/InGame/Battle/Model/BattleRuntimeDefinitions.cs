@@ -47,6 +47,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string key,
             string displayName,
             string localizationKey,
+            string description,
+            string descriptionKey,
+            string imageId,
             int cost,
             CardType cardType,
             CardRarity rarity,
@@ -57,6 +60,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Key = key;
             DisplayName = displayName;
             LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
             Cost = cost;
             CardType = cardType;
             Rarity = rarity;
@@ -68,6 +74,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string Key { get; }
         public string DisplayName { get; }
         public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
         public int Cost { get; }
         public CardType CardType { get; }
         public CardRarity Rarity { get; }
@@ -96,6 +105,60 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 return total;
             }
         }
+    }
+
+    /// <summary>
+    /// ランタイム用レリック定義
+    /// </summary>
+    public sealed class RuntimeRelic
+    {
+        public RuntimeRelic(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity)
+        {
+            Id = id;
+            Key = key;
+            DisplayName = displayName;
+            LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
+            Rarity = rarity;
+        }
+
+        public int Id { get; }
+        public string Key { get; }
+        public string DisplayName { get; }
+        public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
+        public CardRarity Rarity { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用ポーション定義
+    /// </summary>
+    public sealed class RuntimePotion
+    {
+        public RuntimePotion(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity)
+        {
+            Id = id;
+            Key = key;
+            DisplayName = displayName;
+            LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
+            Rarity = rarity;
+        }
+
+        public int Id { get; }
+        public string Key { get; }
+        public string DisplayName { get; }
+        public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
+        public CardRarity Rarity { get; }
     }
 
     /// <summary>
@@ -254,11 +317,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeRewardEntry
     {
-        public RuntimeRewardEntry(RewardType rewardType, int rewardValue, RuntimeCard card, int weight, int minFloor, int maxFloor)
+        public RuntimeRewardEntry(RewardType rewardType, int rewardValue, RuntimeCard card, RuntimeRelic relic, RuntimePotion potion, int weight, int minFloor, int maxFloor)
         {
             RewardType = rewardType;
             RewardValue = rewardValue;
             Card = card;
+            Relic = relic;
+            Potion = potion;
             Weight = weight;
             MinFloor = minFloor;
             MaxFloor = maxFloor;
@@ -267,6 +332,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RewardType RewardType { get; }
         public int RewardValue { get; }
         public RuntimeCard Card { get; }
+        public RuntimeRelic Relic { get; }
+        public RuntimePotion Potion { get; }
         public int Weight { get; }
         public int MinFloor { get; }
         public int MaxFloor { get; }
@@ -435,6 +502,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encountersByNodeType,
             IReadOnlyList<RuntimeEvent> possibleEvents,
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog,
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog,
             RuntimeShopLineup shopLineup,
             IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules,
             IReadOnlyList<RuntimeItemPriceRule> itemPriceRules)
@@ -453,6 +522,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             EncountersByNodeType = encountersByNodeType
                 ?? new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>();
             PossibleEvents = possibleEvents ?? Array.Empty<RuntimeEvent>();
+            RelicCatalog = relicCatalog ?? new Dictionary<int, RuntimeRelic>();
+            PotionCatalog = potionCatalog ?? new Dictionary<int, RuntimePotion>();
             ShopLineup = shopLineup;
             CardPriceRules = cardPriceRules ?? new Dictionary<CardRarity, RuntimeCardPriceRule>();
             ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
@@ -471,6 +542,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> EncountersByNodeType { get; }
         public IReadOnlyList<RuntimeEvent> PossibleEvents { get; }
+        public IReadOnlyDictionary<int, RuntimeRelic> RelicCatalog { get; }
+        public IReadOnlyDictionary<int, RuntimePotion> PotionCatalog { get; }
         public RuntimeShopLineup ShopLineup { get; }
         public IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> CardPriceRules { get; }
         public IReadOnlyList<RuntimeItemPriceRule> ItemPriceRules { get; }

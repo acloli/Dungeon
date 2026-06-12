@@ -30,12 +30,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string restShopMessage,
             string resultMessage,
             BattleIntentViewModel enemyIntent = null,
+            IReadOnlyList<BattleHandCardViewModel> handCards = null,
             IReadOnlyList<BattleStatusViewModel> playerStatuses = null,
             IReadOnlyList<BattleStatusViewModel> enemyStatuses = null,
             IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
+            int drawPileCount = 0,
+            int discardPileCount = 0,
+            int handCount = 0,
+            int maxHandCount = 0,
             IReadOnlyList<int> availableNodeIndices = null,
             IReadOnlyList<BattleShopItemViewModel> shopItems = null,
             bool isCardRemovalSoldOut = false,
@@ -71,12 +76,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             RestShopMessage = restShopMessage;
             ResultMessage = resultMessage;
             EnemyIntent = enemyIntent;
+            HandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
             PlayerStatuses = playerStatuses ?? Array.Empty<BattleStatusViewModel>();
             EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
             PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
             EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
+            DrawPileCount = drawPileCount;
+            DiscardPileCount = discardPileCount;
+            HandCount = handCount;
+            MaxHandCount = maxHandCount;
             AvailableNodeIndices = availableNodeIndices ?? Array.Empty<int>();
             ShopItems = shopItems ?? Array.Empty<BattleShopItemViewModel>();
             IsCardRemovalSoldOut = isCardRemovalSoldOut;
@@ -113,12 +123,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string RestShopMessage { get; }
         public string ResultMessage { get; }
         public BattleIntentViewModel EnemyIntent { get; }
+        public IReadOnlyList<BattleHandCardViewModel> HandCards { get; }
         public IReadOnlyList<BattleStatusViewModel> PlayerStatuses { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
         public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
         public int SelectedEnemyIndex { get; }
+        public int DrawPileCount { get; }
+        public int DiscardPileCount { get; }
+        public int HandCount { get; }
+        public int MaxHandCount { get; }
         public IReadOnlyList<int> AvailableNodeIndices { get; }
         public IReadOnlyList<BattleShopItemViewModel> ShopItems { get; }
         public bool IsCardRemovalSoldOut { get; }

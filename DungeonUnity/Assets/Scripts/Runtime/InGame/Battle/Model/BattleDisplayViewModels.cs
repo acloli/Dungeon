@@ -115,11 +115,95 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// 汎用アイコン種別
+    /// </summary>
+    public enum BattleIconKind
+    {
+        None = 0,
+        Card = 1,
+        Relic = 2,
+        Potion = 3,
+        Resource = 4
+    }
+
+    /// <summary>
+    /// 汎用アイコン表示用モデル
+    /// </summary>
+    public sealed class BattleMultiIconViewModel
+    {
+        public BattleMultiIconViewModel(
+            BattleIconKind iconKind,
+            string displayName,
+            string description,
+            string imageId,
+            CardRarity rarity,
+            int cost = 0,
+            bool showCost = false,
+            bool isInteractable = true,
+            bool isSelected = false,
+            bool isAffordable = true,
+            int quantity = 0,
+            bool showQuantity = false)
+        {
+            IconKind = iconKind;
+            DisplayName = displayName ?? string.Empty;
+            Description = description ?? string.Empty;
+            ImageId = imageId ?? string.Empty;
+            Rarity = rarity;
+            Cost = cost;
+            ShowCost = showCost;
+            IsInteractable = isInteractable;
+            IsSelected = isSelected;
+            IsAffordable = isAffordable;
+            Quantity = quantity;
+            ShowQuantity = showQuantity;
+        }
+
+        public BattleIconKind IconKind { get; }
+        public string DisplayName { get; }
+        public string Description { get; }
+        public string ImageId { get; }
+        public CardRarity Rarity { get; }
+        public int Cost { get; }
+        public bool ShowCost { get; }
+        public bool IsInteractable { get; }
+        public bool IsSelected { get; }
+        public bool IsAffordable { get; }
+        public int Quantity { get; }
+        public bool ShowQuantity { get; }
+    }
+
+    /// <summary>
+    /// 戦闘手札表示用モデル
+    /// </summary>
+    public sealed class BattleHandCardViewModel
+    {
+        public BattleHandCardViewModel(RuntimeCard card, BattleMultiIconViewModel icon)
+        {
+            Card = card;
+            Icon = icon;
+        }
+
+        public RuntimeCard Card { get; }
+        public BattleMultiIconViewModel Icon { get; }
+    }
+
+    /// <summary>
     /// ショップ商品表示用モデル
     /// </summary>
     public sealed class BattleShopItemViewModel
     {
-        public BattleShopItemViewModel(int slotIndex, RewardType rewardType, string displayName, int price, bool isSoldOut, RuntimeCard card, int itemId)
+        public BattleShopItemViewModel(
+            int slotIndex,
+            RewardType rewardType,
+            string displayName,
+            int price,
+            bool isSoldOut,
+            RuntimeCard card,
+            RuntimeRelic relic,
+            RuntimePotion potion,
+            int itemId,
+            BattleMultiIconViewModel icon)
         {
             SlotIndex = slotIndex;
             RewardType = rewardType;
@@ -127,7 +211,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Price = price;
             IsSoldOut = isSoldOut;
             Card = card;
+            Relic = relic;
+            Potion = potion;
             ItemId = itemId;
+            Icon = icon;
         }
 
         public int SlotIndex { get; }
@@ -136,6 +223,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int Price { get; }
         public bool IsSoldOut { get; }
         public RuntimeCard Card { get; }
+        public RuntimeRelic Relic { get; }
+        public RuntimePotion Potion { get; }
         public int ItemId { get; }
+        public BattleMultiIconViewModel Icon { get; }
     }
 }
