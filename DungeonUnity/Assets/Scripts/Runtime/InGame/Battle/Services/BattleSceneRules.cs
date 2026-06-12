@@ -291,6 +291,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         state.PlayerBlock += effect.Value;
                         totalBlock += effect.Value;
                         break;
+                    case EffectType.GainEnergy:
+                        state.PlayerEnergy += effect.Value;
+                        break;
                     case EffectType.ApplyStatus:
                         ApplyCardStatus(state, effect);
                         break;

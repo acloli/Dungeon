@@ -53,3 +53,4 @@ event_fountain_choice1_text,泉の水を飲む（最大HP+5）,Drink the water (
 event_fountain_choice2_text,泉の底を探る（10ダメージ）,Search the bottom (10 Damage),探索泉底（受到10点伤害）,探索泉底（受到10點傷害）,샘 바닥을 살핀다 (10 피해)
 event_fountain_choice3_text,泉の底を探る（100Gold獲得）,Search the bottom (Gain 100 Gold),探索泉底（获得100金币）,探索泉底（獲得100金幣）,샘 바닥을 살핀다 (100 골드 획득)
 event_fountain_choice4_text,無視して立ち去る,Ignore and leave,无视并离开,無視並離開,무시하고 떠난다
+card.name.spark_focus,スパークフォーカス,Spark Focus,火花专注,火花專注,스파크 포커스

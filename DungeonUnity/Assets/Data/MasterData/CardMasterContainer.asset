@@ -113,3 +113,13 @@ MonoBehaviour:
     TargetType: 2
     CharacterArchetype: 0
     CanAppearInReward: 1
+  - Id: 1011
+    Key: card_spark_focus
+    Name: Spark Focus
+    LocalizationKey: card.name.spark_focus
+    CardType: 3
+    Rarity: 4
+    Cost: 0
+    TargetType: 1
+    CharacterArchetype: 0
+    CanAppearInReward: 1

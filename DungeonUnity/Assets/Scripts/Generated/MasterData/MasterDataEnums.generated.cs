@@ -56,6 +56,7 @@ namespace Game.MasterData.Generated
         DealDamage,
         DrawCards,
         GainBlock,
+        GainEnergy,
         GainGold,
         GainMaxHp,
         LoseHp,
