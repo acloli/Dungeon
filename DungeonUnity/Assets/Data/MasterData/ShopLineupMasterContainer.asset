@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b839dcf234d334be9898002510923419, type: 3}
+  m_Name: ShopLineupMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.ShopLineupMasterContainer
+  _data:
+  - Id: 8301
+    ShopId: 1
+    SlotIndex: 1
+    RewardType: 0
+    RequiredCardType: 0
+    Weight: 10
+  - Id: 8302
+    ShopId: 1
+    SlotIndex: 2
+    RewardType: 0
+    RequiredCardType: 0
+    Weight: 10
+  - Id: 8303
+    ShopId: 1
+    SlotIndex: 3
+    RewardType: 0
+    RequiredCardType: 3
+    Weight: 10
+  - Id: 8304
+    ShopId: 1
+    SlotIndex: 4
+    RewardType: 0
+    RequiredCardType: 3
+    Weight: 10
+  - Id: 8305
+    ShopId: 1
+    SlotIndex: 5
+    RewardType: 0
+    RequiredCardType: 2
+    Weight: 10
+  - Id: 8306
+    ShopId: 1
+    SlotIndex: 6
+    RewardType: 0
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8307
+    ShopId: 1
+    SlotIndex: 7
+    RewardType: 3
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8308
+    ShopId: 1
+    SlotIndex: 8
+    RewardType: 3
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8309
+    ShopId: 1
+    SlotIndex: 9
+    RewardType: 3
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8310
+    ShopId: 1
+    SlotIndex: 10
+    RewardType: 2
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8311
+    ShopId: 1
+    SlotIndex: 11
+    RewardType: 2
+    RequiredCardType: 1
+    Weight: 10
+  - Id: 8312
+    ShopId: 1
+    SlotIndex: 12
+    RewardType: 2
+    RequiredCardType: 1
+    Weight: 10

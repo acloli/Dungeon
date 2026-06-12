@@ -22,6 +22,8 @@ namespace Dungeon.Tests.EditMode
         [TestCase("RewardDialog", true, "CommonDialog")]
         [TestCase("RestShopDialog", true, "CommonDialog")]
         [TestCase("ResultDialog", true, "CommonDialog")]
+        [TestCase("ShopDialog", true, "CommonDialog")]
+        [TestCase("CardSelectDialog", true, "CommonDialog")]
         public void Prefabs_FollowNamingAndVariantRules(string prefabName, bool shouldBeVariant, string parentPrefabName)
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
@@ -49,11 +51,66 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<RewardDialog>("RewardDialog");
             AssertPrefabContainsComponent<RestShopDialog>("RestShopDialog");
             AssertPrefabContainsComponent<ResultDialog>("ResultDialog");
+            AssertPrefabContainsComponent<ShopDialog>("ShopDialog");
+            AssertPrefabContainsComponent<CardSelectDialog>("CardSelectDialog");
 
             GameObject mapPagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/MapPage.prefab");
             MapPage mapPageComponent = mapPagePrefab.GetComponent<MapPage>();
             SerializedObject serialized = new SerializedObject(mapPageComponent);
             Assert.That(serialized.FindProperty("_pageAddress").stringValue, Is.EqualTo(BattleUiAddressCatalog.MapPage));
+        }
+
+        [Test]
+        public void RewardDialog_HasGoldRewardIconReference()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/RewardDialog.prefab");
+            RewardDialog rewardDialog = prefab.GetComponent<RewardDialog>();
+
+            SerializedObject serialized = new SerializedObject(rewardDialog);
+            Assert.That(serialized.FindProperty("_rewardRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_rewardButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_continueButton").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void ShopDialog_HasSerializedViewReferences()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/ShopDialog.prefab");
+            ShopDialog shopDialog = prefab.GetComponent<ShopDialog>();
+
+            SerializedObject serialized = new SerializedObject(shopDialog);
+            Assert.That(serialized.FindProperty("_leaveButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_goldText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardRemovalButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardRemovalPriceText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_shopItemsContainer").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_shopItemTemplate").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void BattleShopItemViewPrefab_HasSerializedViewReferences()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/BattleShopItemView.prefab");
+            BattleShopItemView shopItemView = prefab.GetComponent<BattleShopItemView>();
+
+            Assert.That(shopItemView, Is.Not.Null);
+
+            SerializedObject serialized = new SerializedObject(shopItemView);
+            Assert.That(serialized.FindProperty("_button").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_nameText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_priceText").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void CardSelectDialog_HasSerializedViewReferences()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
+            CardSelectDialog cardSelectDialog = prefab.GetComponent<CardSelectDialog>();
+
+            SerializedObject serialized = new SerializedObject(cardSelectDialog);
+            Assert.That(serialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
         }
 
         [Test]
@@ -66,6 +123,8 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.RewardDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.RestShopDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ResultDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ShopDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.CardSelectDialog}", yaml);
             StringAssert.DoesNotContain("m_Address: MapPageView", yaml);
             StringAssert.DoesNotContain("m_Address: RewardDialogView", yaml);
             StringAssert.DoesNotContain("m_Address: RestShopDialogView", yaml);

@@ -15,43 +15,50 @@ MonoBehaviour:
   _data:
   - Id: 5101
     RewardPoolId: 6101
-    CardId: 1004
+    RewardType: 0
+    RewardValue: 1004
     Weight: 10
     MinFloor: 1
     MaxFloor: 99
   - Id: 5102
     RewardPoolId: 6101
-    CardId: 1005
+    RewardType: 0
+    RewardValue: 1005
     Weight: 10
     MinFloor: 1
     MaxFloor: 99
   - Id: 5103
     RewardPoolId: 6101
-    CardId: 1006
+    RewardType: 0
+    RewardValue: 1006
     Weight: 10
     MinFloor: 1
     MaxFloor: 99
   - Id: 5104
     RewardPoolId: 6101
-    CardId: 1007
+    RewardType: 0
+    RewardValue: 1007
     Weight: 10
     MinFloor: 1
     MaxFloor: 99
   - Id: 5105
     RewardPoolId: 6101
-    CardId: 1008
+    RewardType: 0
+    RewardValue: 1008
     Weight: 8
     MinFloor: 1
     MaxFloor: 99
   - Id: 5106
     RewardPoolId: 6101
-    CardId: 1009
+    RewardType: 0
+    RewardValue: 1009
     Weight: 8
     MinFloor: 1
     MaxFloor: 99
   - Id: 5107
     RewardPoolId: 6101
-    CardId: 1010
+    RewardType: 0
+    RewardValue: 1010
     Weight: 6
     MinFloor: 1
     MaxFloor: 99

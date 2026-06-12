@@ -18,7 +18,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
-        private readonly IBattleDisplayTextService _displayTextService;
+        private readonly IBattleRewardService _rewardService;
+        private readonly IBattleSnapshotFactory _snapshotFactory;
+        private readonly IBattleShopService _shopService;
+        private readonly IBattleEventService _eventService;
         private readonly IRunSaveService _runSaveService;
 
         private RuntimeRunDefinition _runDefinition;
@@ -27,13 +30,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleMasterDataFacade masterDataFacade,
-            IBattleDisplayTextService displayTextService = null,
+            IBattleRewardService rewardService,
+            IBattleSnapshotFactory snapshotFactory,
+            IBattleShopService shopService,
+            IBattleEventService eventService,
             IRunSaveService runSaveService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
-            _displayTextService = displayTextService ?? new BattleDisplayTextService();
+            _rewardService = rewardService;
+            _snapshotFactory = snapshotFactory;
+            _shopService = shopService;
+            _eventService = eventService;
             _runSaveService = runSaveService;
         }
 
@@ -79,6 +88,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
+            _state.ShopItems.Clear();
+            _state.IsCardRemovalSoldOut = saveData.IsCardRemovalSoldOut;
+            _state.CardRemovalCount = saveData.CardRemovalCount;
+            if (saveData.ShopItems != null)
+            {
+                foreach (SaveShopItem savedItem in saveData.ShopItems)
+                {
+                    RuntimeCard card = null;
+                    if (savedItem.RewardType == (int)RewardType.Card && savedItem.CardId > 0)
+                    {
+                        cardCatalog.TryGetValue(savedItem.CardId, out card);
+                    }
+                    _state.ShopItems.Add(new BattleShopItemState(
+                        savedItem.SlotIndex,
+                        (RewardType)savedItem.RewardType,
+                        card,
+                        savedItem.ItemId,
+                        savedItem.Price,
+                        savedItem.IsSoldOut));
+                }
+            }
+
             if (_state.CurrentPage == BattleScenePage.Map)
             {
                 OpenMap();
@@ -98,35 +129,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public BattleSceneSnapshot CreateSnapshot()
         {
-            return new BattleSceneSnapshot(
-                _state.CurrentPage,
-                _state.Nodes,
-                _state.Hand,
-                _state.RewardChoices,
-                _state.CurrentNodeIndex,
-                _state.PlayerMaxHp,
-                _state.PlayerHp,
-                _state.PlayerEnergy,
-                _state.PlayerBlock,
-                _state.Gold,
-                _state.CurrentEnemy,
-                _state.EnemyHp,
-                _state.EnemyBlock,
-                _state.BattleFinished,
-                _state.SelectedCardIndex,
-                _state.IsRestShopContinueEnabled,
-                _state.MapMessage,
-                _state.BattleHintMessage,
-                _state.RestShopMessage,
-                _state.ResultMessage,
-                BuildEnemyIntent(),
-                BuildStatusViews(_state.PlayerStatuses),
-                BuildStatusViews(_state.EnemyStatuses),
-                BuildBuffViews(_state.PlayerBuffs),
-                BuildBuffViews(_state.EnemyBuffs),
-                BuildEnemyViews(),
-                _state.SelectedEnemyIndex,
-                BuildAvailableNodeIndices());
+            return _snapshotFactory.CreateSnapshot(_state);
+        }
+
+        /// <summary>
+        /// 現在デッキ取得
+        /// </summary>
+        public IReadOnlyList<RuntimeCard> GetDeckCards()
+        {
+            return _state.Deck;
         }
 
         /// <summary>
@@ -151,6 +162,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 OpenRestShop();
                 RequestSave();
+                return;
+            }
+
+            if (nodeType == InGameNodeType.Event)
+            {
+                OpenEvent();
                 return;
             }
 
@@ -291,15 +308,54 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択処理
         /// </summary>
-        public void SelectReward(RuntimeCard card)
+        public void SelectReward(RuntimeRewardEntry rewardEntry)
         {
-            if (card != null)
-            {
-                _state.Deck.Add(card);
-            }
+            if (rewardEntry == null) return;
+            _rewardService.ApplyReward(_state, rewardEntry);
+            _state.CardRewardPicked = true;
+        }
 
+        /// <summary>
+        /// 報酬画面継続処理
+        /// </summary>
+        public void ContinueFromReward()
+        {
+            _state.Gold += _state.BattleGoldReward;
+            _state.BattleGoldReward = 0;
+            _state.GoldClaimed = false;
+            _state.PotionClaimed = false;
+            _state.RelicClaimed = false;
+            _state.PotionDropped = false;
+            _state.RelicDropped = false;
+            _state.CardRewardPicked = false;
             OpenMap();
             RequestSave();
+        }
+
+        /// <summary>
+        /// 報酬 Gold 取得
+        /// </summary>
+        public void ClaimGold()
+        {
+            _state.GoldClaimed = true;
+            _state.Gold += _state.BattleGoldReward;
+            _state.BattleGoldReward = 0;
+        }
+
+        /// <summary>
+        /// ポーション取得
+        /// </summary>
+        public void ClaimPotion()
+        {
+            _state.PotionClaimed = true;
+        }
+
+        /// <summary>
+        /// レリック取得
+        /// </summary>
+        public void ClaimRelic()
+        {
+            _state.RelicClaimed = true;
         }
 
         /// <summary>
@@ -325,14 +381,56 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 購入適用処理
+        /// ショップを開く
         /// </summary>
-        public void ApplyShopPurchase()
+        public void OpenShop()
         {
-            bool success = _rules.ApplyShopPurchase(_state, _randomProvider);
-            _state.RestShopMessage = success
-                ? string.Format(BattleSceneConstants.PurchaseSuccessFormat, _state.Gold)
-                : BattleSceneConstants.NotEnoughGold;
+            _state.CurrentPage = BattleScenePage.Shop;
+        }
+
+        /// <summary>
+        /// ショップアイテム購入
+        /// </summary>
+        public void PurchaseShopItem(int slotIndex)
+        {
+            if (_shopService.PurchaseShopItem(_state, slotIndex))
+            {
+                RequestSave();
+            }
+        }
+
+        /// <summary>
+        /// カード削除選択を開く
+        /// </summary>
+        public void OpenCardRemoval()
+        {
+            _state.CurrentPage = BattleScenePage.CardSelect;
+        }
+
+        /// <summary>
+        /// カード削除購入
+        /// </summary>
+        public void PurchaseCardRemoval(RuntimeCard card)
+        {
+            if (_shopService.PurchaseCardRemoval(_state, card))
+            {
+                RequestSave();
+            }
+            // 削除後ショップに戻る
+            _state.CurrentPage = BattleScenePage.Shop;
+        }
+
+        /// <summary>
+        /// ショップから退出
+        /// </summary>
+        public void LeaveShop()
+        {
+            _state.CurrentPage = BattleScenePage.RestShop;
+            _state.RestShopMessage = string.Format(
+                BattleSceneConstants.RestShopStateFormat,
+                _state.PlayerHp,
+                _state.PlayerMaxHp,
+                _state.Gold);
             _state.IsRestShopContinueEnabled = true;
         }
 
@@ -341,6 +439,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ContinueFromRestShop()
         {
+            OpenMap();
+            RequestSave();
+        }
+
+        /// <summary>
+        /// イベント選択肢決定処理
+        /// </summary>
+        public void SelectEventChoice(int choiceId)
+        {
+            if (_state.CurrentEvent != null)
+            {
+                _eventService.ApplyEventChoice(_state, _state.CurrentEvent, choiceId);
+            }
+
+            _state.CurrentEvent = null;
+            _state.EventMessage = string.Empty;
             OpenMap();
             RequestSave();
         }
@@ -405,7 +519,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OnBattleVictory()
         {
             _state.BattleFinished = true;
-            _state.Gold += CalculateBattleGoldReward();
+            _state.BattleGoldReward = CalculateBattleGoldReward();
+            _state.PotionDropped = _rules.RollPotionDrop(_runDefinition, _randomProvider);
+            _state.RelicDropped = _rules.RollRelicDrop(_runDefinition, _randomProvider);
+            _state.CardRewardPicked = false;
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
             {
@@ -423,11 +540,33 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.Reward;
             _state.RewardChoices.Clear();
-            IReadOnlyList<RuntimeCard> rewardCards = _rules.SelectRewardChoices(_state, _runDefinition, _randomProvider);
-            for (int i = 0; i < rewardCards.Count; i++)
+            IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectCardRewardChoices(_state, _runDefinition, _randomProvider);
+            for (int i = 0; i < rewardChoices.Count; i++)
             {
-                _state.RewardChoices.Add(rewardCards[i]);
+                _state.RewardChoices.Add(rewardChoices[i]);
             }
+        }
+
+        /// <summary>
+        /// イベント画面遷移
+        /// </summary>
+        private void OpenEvent()
+        {
+            if (_runDefinition == null || _runDefinition.PossibleEvents == null || _runDefinition.PossibleEvents.Count == 0)
+            {
+                TLogger.Warning(BattleSceneConstants.NoEventAvailable, "Battle");
+                OpenMap();
+                return;
+            }
+
+            int index = _randomProvider.Range(0, _runDefinition.PossibleEvents.Count);
+            _state.CurrentEvent = _runDefinition.PossibleEvents[index];
+            _state.CurrentPage = BattleScenePage.Event;
+            _state.EventMessage = string.Format(
+                BattleSceneConstants.EventStateFormat,
+                _state.PlayerHp,
+                _state.PlayerMaxHp,
+                _state.Gold);
         }
 
         /// <summary>
@@ -437,6 +576,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _state.CurrentPage = BattleScenePage.RestShop;
             _state.IsRestShopContinueEnabled = false;
+
+            if (_state.ShopItems == null || _state.ShopItems.Count == 0)
+            {
+                _shopService.InitializeShop(_state, _runDefinition, _randomProvider);
+            }
+
             _state.RestShopMessage = string.Format(
                 BattleSceneConstants.RestShopStateFormat,
                 _state.PlayerHp,
@@ -520,191 +665,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return index == _state.CurrentNodeIndex + 1;
         }
 
-        /// <summary>
-        /// 遷移可能ノード一覧構築
-        /// </summary>
-        private IReadOnlyList<int> BuildAvailableNodeIndices()
-        {
-            List<int> indices = new List<int>();
-            if (_state.CurrentPage != BattleScenePage.Map || _state.Nodes == null)
-            {
-                return indices;
-            }
-
-            for (int i = 0; i < _state.Nodes.Count; i++)
-            {
-                if (CanMoveToNode(i))
-                {
-                    indices.Add(i);
-                }
-            }
-
-            return indices;
-        }
-
-        /// <summary>
-        /// 表示用敵意図構築
-        /// </summary>
-        private BattleIntentViewModel BuildEnemyIntent()
-        {
-            BattleEnemyState enemyState = GetSelectedEnemy();
-            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return new BattleIntentViewModel(
-                action.IntentType,
-                _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
-                _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
-        }
-
-        /// <summary>
-        /// 表示用敵行動選択
-        /// </summary>
-        private RuntimeEnemyAction SelectEnemyActionPreview(BattleEnemyState enemyState)
-        {
-            if (_state.CurrentPage != BattleScenePage.Battle ||
-                enemyState == null ||
-                enemyState.Enemy == null ||
-                enemyState.Enemy.Actions == null ||
-                enemyState.Enemy.Actions.Count == 0 ||
-                enemyState.IsDefeated)
-            {
-                return null;
-            }
-
-            RuntimeEnemyAction openingAction = FindFirstAction(enemyState, RepeatRule.OpeningOnly);
-            if (enemyState.TurnCount == 0 && openingAction != null)
-            {
-                return openingAction;
-            }
-
-            RuntimeEnemyAction repeatAction = FindFirstAction(enemyState, RepeatRule.RepeatAfterOpening);
-            if (enemyState.TurnCount > 0 && repeatAction != null)
-            {
-                return repeatAction;
-            }
-
-            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(enemyState, RepeatRule.AfterOpeningRandom);
-            if (enemyState.TurnCount > 0 && afterOpeningRandomAction != null)
-            {
-                return afterOpeningRandomAction;
-            }
-
-            RuntimeEnemyAction randomAction = FindFirstAction(enemyState, RepeatRule.Random);
-            if (randomAction != null)
-            {
-                return randomAction;
-            }
-
-            RuntimeEnemyAction cycleAction = FindCycleActionPreview(enemyState);
-            return cycleAction ?? enemyState.Enemy.Actions[0];
-        }
-
-        /// <summary>
-        /// 指定反復規則の先頭行動取得
-        /// </summary>
-        private RuntimeEnemyAction FindFirstAction(BattleEnemyState enemyState, RepeatRule repeatRule)
-        {
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == repeatRule)
-                {
-                    return action;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// cycle行動の表示用取得
-        /// </summary>
-        private RuntimeEnemyAction FindCycleActionPreview(BattleEnemyState enemyState)
-        {
-            List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == RepeatRule.Cycle)
-                {
-                    cycleActions.Add(action);
-                }
-            }
-
-            if (cycleActions.Count == 0)
-            {
-                return null;
-            }
-
-            return cycleActions[enemyState.CycleIndex % cycleActions.Count];
-        }
-
-        /// <summary>
-        /// 敵表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleEnemyViewModel> BuildEnemyViews()
-        {
-            List<BattleEnemyViewModel> views = new List<BattleEnemyViewModel>();
-            for (int i = 0; i < _state.Enemies.Count; i++)
-            {
-                BattleEnemyState enemyState = _state.Enemies[i];
-                if (enemyState == null || enemyState.Enemy == null)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleEnemyViewModel(
-                    enemyState.SlotIndex,
-                    enemyState.Enemy.DisplayName,
-                    enemyState.Hp,
-                    enemyState.Block,
-                    enemyState.IsDefeated,
-                    BuildIntentView(enemyState),
-                    BuildStatusViews(enemyState.Statuses),
-                    BuildBuffViews(enemyState.Buffs)));
-            }
-
-            return views;
-        }
-
-        /// <summary>
-        /// 敵意図表示モデル構築
-        /// </summary>
-        private BattleIntentViewModel BuildIntentView(BattleEnemyState enemyState)
-        {
-            RuntimeEnemyAction action = SelectEnemyActionPreview(enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return new BattleIntentViewModel(
-                action.IntentType,
-                _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
-                _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
-        }
 
         /// <summary>
         /// 選択中敵取得
@@ -809,53 +769,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
         }
 
-        /// <summary>
-        /// 状態表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)
-        {
-            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
-            if (statuses == null)
-            {
-                return views;
-            }
-
-            foreach (KeyValuePair<StatusType, int> status in statuses)
-            {
-                if (status.Key == StatusType.None || status.Value <= 0)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleStatusViewModel(_displayTextService.GetStatusName(status.Key), status.Value, false));
-            }
-
-            return views;
-        }
-
-        /// <summary>
-        /// buff表示一覧構築
-        /// </summary>
-        private IReadOnlyList<BattleStatusViewModel> BuildBuffViews(IReadOnlyDictionary<BuffType, int> buffs)
-        {
-            List<BattleStatusViewModel> views = new List<BattleStatusViewModel>();
-            if (buffs == null)
-            {
-                return views;
-            }
-
-            foreach (KeyValuePair<BuffType, int> buff in buffs)
-            {
-                if (buff.Key == BuffType.None || buff.Value <= 0)
-                {
-                    continue;
-                }
-
-                views.Add(new BattleStatusViewModel(_displayTextService.GetBuffName(buff.Key), buff.Value, true));
-            }
-
-            return views;
-        }
 
         /// <summary>
         /// 状態をセーブする
@@ -876,7 +789,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 Gold = _state.Gold,
                 CurrentNodeIndex = _state.CurrentNodeIndex,
                 CurrentPage = (int)_state.CurrentPage,
-                DeckCardIds = new List<int>()
+                DeckCardIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>(),
+                IsCardRemovalSoldOut = _state.IsCardRemovalSoldOut,
+                CardRemovalCount = _state.CardRemovalCount
             };
             
             for (int i = 0; i < _state.Deck.Count; i++)
@@ -884,6 +800,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 if (_state.Deck[i] != null)
                 {
                     data.DeckCardIds.Add(_state.Deck[i].Id);
+                }
+            }
+
+            for (int i = 0; i < _state.ShopItems.Count; i++)
+            {
+                BattleShopItemState item = _state.ShopItems[i];
+                if (item != null)
+                {
+                    data.ShopItems.Add(new SaveShopItem
+                    {
+                        SlotIndex = item.SlotIndex,
+                        RewardType = (int)item.RewardType,
+                        CardId = item.Card != null ? item.Card.Id : 0,
+                        ItemId = item.ItemId,
+                        Price = item.Price,
+                        IsSoldOut = item.IsSoldOut
+                    });
                 }
             }
             

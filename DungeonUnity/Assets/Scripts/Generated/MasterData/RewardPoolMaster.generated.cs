@@ -25,9 +25,14 @@ namespace Game.MasterData.Generated
         public int RewardPoolId;
 
         /// <summary>
-        /// カードID
+        /// 報酬種別
         /// </summary>
-        public int CardId;
+        public RewardType RewardType;
+
+        /// <summary>
+        /// 報酬値
+        /// </summary>
+        public int RewardValue;
 
         /// <summary>
         /// 重み

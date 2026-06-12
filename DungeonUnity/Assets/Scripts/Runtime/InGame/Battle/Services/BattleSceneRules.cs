@@ -122,11 +122,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 報酬候補選出
+        /// カード報酬候補選出
         /// </summary>
-        public IReadOnlyList<RuntimeCard> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        public IReadOnlyList<RuntimeRewardEntry> SelectCardRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
-            List<RuntimeCard> rewards = new List<RuntimeCard>();
+            List<RuntimeRewardEntry> rewards = new List<RuntimeRewardEntry>();
             if (state == null)
             {
                 return rewards;
@@ -146,7 +146,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     break;
                 }
 
-                rewards.Add(selected.Card);
+                rewards.Add(selected);
                 candidates.Remove(selected);
             }
 
@@ -165,10 +165,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                rewards.Add(card);
+                rewards.Add(new RuntimeRewardEntry(RewardType.Card, 1, card, 1, 1, 999));
             }
 
             return rewards;
+        }
+
+        /// <summary>
+        /// ポーションドロップ抽選
+        /// </summary>
+        public bool RollPotionDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            if (runDefinition == null || runDefinition.PotionDropChance <= 0) return false;
+            return randomProvider.Range(0, 100) < runDefinition.PotionDropChance;
+        }
+
+        /// <summary>
+        /// レリックドロップ抽選
+        /// </summary>
+        public bool RollRelicDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            if (runDefinition == null || runDefinition.RelicDropChance <= 0) return false;
+            return randomProvider.Range(0, 100) < runDefinition.RelicDropChance;
         }
 
         /// <summary>
@@ -759,10 +777,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < runDefinition.RewardPool.Count; i++)
             {
                 RuntimeRewardEntry entry = runDefinition.RewardPool[i];
-                if (entry == null || entry.Card == null)
-                {
-                    continue;
-                }
+                if (entry == null || entry.Card == null) continue;
 
                 if (currentFloor < entry.MinFloor || currentFloor > entry.MaxFloor)
                 {

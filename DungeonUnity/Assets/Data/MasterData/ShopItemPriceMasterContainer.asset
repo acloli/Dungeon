@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1166bb7749fe4902b4cd7e7c51e3d1c, type: 3}
+  m_Name: ShopItemPriceMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.ShopItemPriceMasterContainer
+  _data:
+  - Id: 8201
+    ItemType: 3
+    ItemId: 1
+    BasePrice: 150
+    JitterPercent: 15
+  - Id: 8202
+    ItemType: 3
+    ItemId: 2
+    BasePrice: 250
+    JitterPercent: 15
+  - Id: 8203
+    ItemType: 2
+    ItemId: 1
+    BasePrice: 50
+    JitterPercent: 10
+  - Id: 8204
+    ItemType: 2
+    ItemId: 2
+    BasePrice: 50
+    JitterPercent: 10
+  - Id: 8205
+    ItemType: 1
+    ItemId: 0
+    BasePrice: 0
+    JitterPercent: 0

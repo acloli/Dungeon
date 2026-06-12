@@ -26,6 +26,16 @@ namespace Dungeon.Runtime.InGame.Battle
         public const string ResultDialog = "ResultDialog";
 
         /// <summary>
+        /// ショップダイアログPrefabキー
+        /// </summary>
+        public const string ShopDialog = "ShopDialog";
+
+        /// <summary>
+        /// カード選択ダイアログPrefabキー
+        /// </summary>
+        public const string CardSelectDialog = "CardSelectDialog";
+
+        /// <summary>
         /// 共通ページ基底Prefabキー
         /// </summary>
         public const string CommonPage = "CommonPage";
@@ -34,5 +44,14 @@ namespace Dungeon.Runtime.InGame.Battle
         /// 共通ダイアログ基底Prefabキー
         /// </summary>
         public const string CommonDialog = "CommonDialog";
+
+        /// <summary>
+        /// イベントダイアログPrefabキー
+        /// </summary>
+        public const string EventDialog = "EventDialog";
+        /// <summary>
+        /// カード選択ダイアログPrefabキー
+        /// </summary>
+        public const string CardPickDialog = "CardPickDialog";
     }
 }

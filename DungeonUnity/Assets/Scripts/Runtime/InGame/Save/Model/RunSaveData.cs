@@ -22,6 +22,10 @@ namespace Dungeon.Runtime.InGame.Save.Model
 
         public List<int> DeckCardIds = new List<int>();
 
+        public List<SaveShopItem> ShopItems = new List<SaveShopItem>();
+        public bool IsCardRemovalSoldOut;
+        public int CardRemovalCount;
+
         /// <summary>
         /// 再開できるcheckpointデータか
         /// </summary>
@@ -30,5 +34,16 @@ namespace Dungeon.Runtime.InGame.Save.Model
                                && PlayerHp > 0
                                && (CurrentPage == MapPage || CurrentPage == RestShopPage)
                                && DeckCardIds != null;
+    }
+
+    [Serializable]
+    public struct SaveShopItem
+    {
+        public int SlotIndex;
+        public int RewardType;
+        public int CardId;
+        public int ItemId;
+        public int Price;
+        public bool IsSoldOut;
     }
 }

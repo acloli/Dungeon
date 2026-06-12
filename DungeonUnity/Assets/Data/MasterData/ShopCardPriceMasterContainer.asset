@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd81363e0afc47ed8b64bc2a28e471e, type: 3}
+  m_Name: ShopCardPriceMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.ShopCardPriceMasterContainer
+  _data:
+  - Id: 8101
+    CardRarity: 1
+    BasePrice: 50
+    JitterPercent: 10
+  - Id: 8102
+    CardRarity: 4
+    BasePrice: 75
+    JitterPercent: 10
+  - Id: 8103
+    CardRarity: 2
+    BasePrice: 150
+    JitterPercent: 15
+  - Id: 8104
+    CardRarity: 3
+    BasePrice: 250
+    JitterPercent: 15

@@ -137,8 +137,8 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
-  _localizationKey: 
+  _useLocalization: 1
+  _localizationKey: restshop.shop_button
   _localizationParameters: []
   _typewriterSpeed: 30
 --- !u!1 &1417454826776605362
@@ -278,8 +278,8 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
-  _localizationKey: 
+  _useLocalization: 1
+  _localizationKey: restshop.rest_button
   _localizationParameters: []
   _typewriterSpeed: 30
 --- !u!1 &1802464163161428247
@@ -419,8 +419,8 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
-  _localizationKey: 
+  _useLocalization: 1
+  _localizationKey: restshop.title
   _localizationParameters: []
   _typewriterSpeed: 30
 --- !u!1 &2899282496213773528
@@ -544,6 +544,71 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &3154214072587956746
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8436186026948650234}
+  - component: {fileID: 1114728405773719624}
+  m_Layer: 0
+  m_Name: ChoiceArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8436186026948650234
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3154214072587956746}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4938932569804313869}
+  - {fileID: 3046723091705352007}
+  - {fileID: 320470229791110436}
+  m_Father: {fileID: 1503014545006229131}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1000, y: 400}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1114728405773719624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3154214072587956746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &3862553968973989549
 GameObject:
   m_ObjectHideFlags: 0
@@ -570,17 +635,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3862553968973989549}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7109787530014052548}
-  m_Father: {fileID: 1503014545006229131}
+  m_Father: {fileID: 8436186026948650234}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 220, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 360, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4526376007566986918
@@ -691,17 +756,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6308137194560983778}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3173716077102670085}
-  m_Father: {fileID: 1503014545006229131}
+  m_Father: {fileID: 8436186026948650234}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 360, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8439068983777734468
@@ -923,8 +988,8 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
-  _localizationKey: 
+  _useLocalization: 1
+  _localizationKey: restshop.continue_button
   _localizationParameters: []
   _typewriterSpeed: 30
 --- !u!1 &6471110848109041730
@@ -953,17 +1018,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6471110848109041730}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 676376909431979158}
-  m_Father: {fileID: 1503014545006229131}
+  m_Father: {fileID: 8436186026948650234}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -220, y: 80}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 360, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1847861415625409044
@@ -1185,8 +1250,8 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
-  _useLocalization: 0
-  _localizationKey: 
+  _useLocalization: 1
+  _localizationKey: restshop.upgrade_button
   _localizationParameters: []
   _typewriterSpeed: 30
 --- !u!1001 &3590406033479519453
@@ -1289,13 +1354,7 @@ PrefabInstance:
       addedObject: {fileID: 5925744266337042280}
     - targetCorrespondingSourceObject: {fileID: 2668497678981151318, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4938932569804313869}
-    - targetCorrespondingSourceObject: {fileID: 2668497678981151318, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3046723091705352007}
-    - targetCorrespondingSourceObject: {fileID: 2668497678981151318, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 320470229791110436}
+      addedObject: {fileID: 8436186026948650234}
     - targetCorrespondingSourceObject: {fileID: 2668497678981151318, guid: 4cd98fba8635d4c1f8f61d330822c773, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2043608177099975624}
@@ -1329,6 +1388,7 @@ MonoBehaviour:
   _canvasGroup: {fileID: 8433673066215788827}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1
+  _persistAcrossScenes: 0
   _restShopText: {fileID: 469837807793792440}
   _restButton: {fileID: 1009446744479278529}
   _upgradeButton: {fileID: 4858311218783374326}

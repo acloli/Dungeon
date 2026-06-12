@@ -9,6 +9,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         Battle,
         Reward,
         RestShop,
-        Result
+        Shop,
+        CardSelect,
+        Result,
+        Event
     }
 }

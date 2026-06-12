@@ -17,10 +17,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     {
         private readonly IMasterDataService _masterDataService;
         private readonly ILocalizationService _localizationService;
+        private readonly EventMasterDataFacade _eventMasterDataFacade;
+        private readonly ShopMasterDataFacade _shopMasterDataFacade;
 
-        public BattleMasterDataFacade(IMasterDataService masterDataService, ILocalizationService localizationService = null)
+        public BattleMasterDataFacade(
+            IMasterDataService masterDataService,
+            EventMasterDataFacade eventMasterDataFacade,
+            ShopMasterDataFacade shopMasterDataFacade,
+            ILocalizationService localizationService = null)
         {
             _masterDataService = masterDataService;
+            _eventMasterDataFacade = eventMasterDataFacade;
+            _shopMasterDataFacade = shopMasterDataFacade;
             _localizationService = localizationService;
         }
 
@@ -42,6 +50,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 BuildEncounterTable(profile, enemyCatalog);
 
+            IReadOnlyList<RuntimeEvent> possibleEvents = _eventMasterDataFacade.BuildEvents(profile.EventPoolId);
+            RuntimeShopLineup shopLineup = _shopMasterDataFacade.BuildShopLineup(profile.ShopId);
+            IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules = _shopMasterDataFacade.BuildCardPriceRules();
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = _shopMasterDataFacade.BuildItemPriceRules();
+
             return new RuntimeRunDefinition(
                 profile.Id,
                 profile.Key,
@@ -49,10 +62,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 profile.PlayerMaxHp,
                 profile.StartingGold,
                 profile.CardRewardChoiceCount,
+                profile.PotionDropChance,
+                profile.RelicDropChance,
                 BuildStarterDeck(profile.StarterDeckGroupId, cardCatalog),
                 BuildRewardPool(profile.RewardPoolId, cardCatalog),
                 nodes,
-                encounters);
+                encounters,
+                possibleEvents,
+                shopLineup,
+                cardPriceRules,
+                itemPriceRules);
         }
 
         /// <summary>
@@ -184,17 +203,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < rewardEntries.Count; i++)
             {
                 RewardPoolMaster entry = rewardEntries[i];
-                if (entry.RewardPoolId != rewardPoolId || !rewardableCardIds.Contains(entry.CardId))
+                if (entry.RewardPoolId != rewardPoolId)
                 {
                     continue;
                 }
 
-                if (!cardCatalog.TryGetValue(entry.CardId, out RuntimeCard card))
+                RuntimeCard card = null;
+                if (entry.RewardType == RewardType.Card)
                 {
-                    continue;
+                    if (!rewardableCardIds.Contains(entry.RewardValue))
+                    {
+                        continue;
+                    }
+
+                    if (!cardCatalog.TryGetValue(entry.RewardValue, out card))
+                    {
+                        continue;
+                    }
                 }
 
-                rewards.Add(new RuntimeRewardEntry(card, entry.Weight, entry.MinFloor, entry.MaxFloor));
+                rewards.Add(new RuntimeRewardEntry(entry.RewardType, entry.RewardValue, card, entry.Weight, entry.MinFloor, entry.MaxFloor));
             }
 
             return rewards;
@@ -354,6 +382,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 NodeType.EliteBattle => InGameNodeType.EliteBattle,
                 NodeType.RestShop => InGameNodeType.RestShop,
                 NodeType.Boss => InGameNodeType.Boss,
+                NodeType.Event => InGameNodeType.Event,
                 _ => InGameNodeType.Battle
             };
         }

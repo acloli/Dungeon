@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BattleScenePage currentPage,
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyList<RuntimeCard> hand,
-            IReadOnlyList<RuntimeCard> rewardChoices,
+            IReadOnlyList<RuntimeRewardEntry> rewardChoices,
             int currentNodeIndex,
             int playerMaxHp,
             int playerHp,
@@ -36,7 +36,19 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
-            IReadOnlyList<int> availableNodeIndices = null)
+            IReadOnlyList<int> availableNodeIndices = null,
+            IReadOnlyList<BattleShopItemViewModel> shopItems = null,
+            bool isCardRemovalSoldOut = false,
+            int cardRemovalPrice = 0,
+            RuntimeEvent currentEvent = null,
+            string eventMessage = null,
+            bool goldClaimed = false,
+            bool potionClaimed = false,
+            bool relicClaimed = false,
+            int battleGoldReward = 0,
+            bool potionDropped = false,
+            bool relicDropped = false,
+            bool cardRewardPicked = false)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -66,12 +78,24 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
             AvailableNodeIndices = availableNodeIndices ?? Array.Empty<int>();
+            ShopItems = shopItems ?? Array.Empty<BattleShopItemViewModel>();
+            IsCardRemovalSoldOut = isCardRemovalSoldOut;
+            CardRemovalPrice = cardRemovalPrice;
+            CurrentEvent = currentEvent;
+            GoldClaimed = goldClaimed;
+            PotionClaimed = potionClaimed;
+            RelicClaimed = relicClaimed;
+            EventMessage = eventMessage ?? string.Empty;
+            BattleGoldReward = battleGoldReward;
+            PotionDropped = potionDropped;
+            RelicDropped = relicDropped;
+            CardRewardPicked = cardRewardPicked;
         }
 
         public BattleScenePage CurrentPage { get; }
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyList<RuntimeCard> Hand { get; }
-        public IReadOnlyList<RuntimeCard> RewardChoices { get; }
+        public IReadOnlyList<RuntimeRewardEntry> RewardChoices { get; }
         public int CurrentNodeIndex { get; }
         public int PlayerMaxHp { get; }
         public int PlayerHp { get; }
@@ -96,5 +120,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
         public int SelectedEnemyIndex { get; }
         public IReadOnlyList<int> AvailableNodeIndices { get; }
+        public IReadOnlyList<BattleShopItemViewModel> ShopItems { get; }
+        public bool IsCardRemovalSoldOut { get; }
+        public int CardRemovalPrice { get; }
+        public RuntimeEvent CurrentEvent { get; }
+        public bool GoldClaimed { get; }
+        public bool PotionClaimed { get; }
+        public bool RelicClaimed { get; }
+        public int BattleGoldReward { get; }
+        public bool PotionDropped { get; }
+        public bool RelicDropped { get; }
+        public bool CardRewardPicked { get; }
+        public string EventMessage { get; }
     }
 }

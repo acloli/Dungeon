@@ -10,9 +10,19 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     {
         public List<RuntimeCard> Deck { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
-        public List<RuntimeCard> RewardChoices { get; } = new List<RuntimeCard>();
+        public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
         public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
+        public List<BattleShopItemState> ShopItems { get; } = new List<BattleShopItemState>();
+        public bool IsCardRemovalSoldOut { get; set; }
+        public int CardRemovalCount { get; set; }
+        public int BattleGoldReward { get; set; }
+        public bool PotionDropped { get; set; }
+        public bool RelicDropped { get; set; }
+        public bool CardRewardPicked { get; set; }
+        public bool GoldClaimed { get; set; }
+        public bool PotionClaimed { get; set; }
+        public bool RelicClaimed { get; set; }
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();
@@ -38,5 +48,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string BattleHintMessage { get; set; } = string.Empty;
         public string RestShopMessage { get; set; } = string.Empty;
         public string ResultMessage { get; set; } = string.Empty;
+        public RuntimeEvent CurrentEvent { get; set; }
+        public string EventMessage { get; set; } = string.Empty;
     }
 }

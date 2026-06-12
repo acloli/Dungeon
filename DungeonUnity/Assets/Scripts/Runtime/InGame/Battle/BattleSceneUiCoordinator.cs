@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
@@ -69,7 +70,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 報酬ダイアログ表示
         /// </summary>
-        public async UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RewardDialogResult> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -77,7 +78,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _hostView.SetBattleVisible(false);
             }
 
-            return await _uiService.ShowDialogAsync<RewardDialog, RuntimeCard>(
+            return await _uiService.ShowDialogAsync<RewardDialog, RewardDialogResult>(
                 BattleDialogOpenParams.Cached(new BattleRewardDialogParam(snapshot)),
                 ct);
         }
@@ -111,6 +112,64 @@ namespace Dungeon.Runtime.InGame.Battle
 
             await _uiService.ShowDialogAsync<ResultDialog>(
                 BattleDialogOpenParams.SingleUse(new BattleResultDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
+        /// ショップダイアログ表示
+        /// </summary>
+        public async UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<ShopDialog, ShopDialogResult>(
+                BattleDialogOpenParams.Cached(new BattleShopDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
+        /// カード選択ダイアログ表示
+        /// </summary>
+        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
+                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot, deckCards)),
+                ct);
+        }
+
+        /// <summary>
+        /// イベントダイアログ表示
+        /// </summary>
+        public async UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            await _uiService.ClearStackAsync(ct);
+            if (_hostView != null)
+            {
+                _hostView.SetBattleVisible(false);
+            }
+
+            return await _uiService.ShowDialogAsync<EventDialog, EventDialogResult>(
+                BattleDialogOpenParams.SingleUse(new BattleEventDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
+        /// カード選択ダイアログ表示
+        /// </summary>
+        public async UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            return await _uiService.ShowDialogAsync<CardPickDialog, RuntimeRewardEntry>(
+                BattleDialogOpenParams.SingleUse(new BattleCardPickDialogParam(snapshot)),
                 ct);
         }
 

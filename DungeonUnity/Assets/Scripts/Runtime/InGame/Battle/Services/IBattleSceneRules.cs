@@ -32,7 +32,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬候補選出
         /// </summary>
-        IReadOnlyList<RuntimeCard> SelectRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
+        IReadOnlyList<RuntimeRewardEntry> SelectCardRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
+
+        /// <summary>
+        /// ポーションドロップ抽選
+        /// </summary>
+        bool RollPotionDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
+
+        /// <summary>
+        /// レリックドロップ抽選
+        /// </summary>
+        bool RollRelicDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 使用可否判定

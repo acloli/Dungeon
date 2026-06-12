@@ -31,7 +31,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(uiCoordinator.InitializeCallCount, Is.EqualTo(1));
             Assert.That(uiCoordinator.ShowMapCallCount, Is.EqualTo(1));
-            Assert.That(uiCoordinator.LastSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(uiCoordinator.LastMapSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
             Assert.That(view.BattlePageView.BuildCallCount, Is.EqualTo(0));
         }
 
@@ -201,7 +201,7 @@ namespace Dungeon.Tests.EditMode
                 page,
                 new List<RuntimeMapNode>(),
                 new List<RuntimeCard>(),
-                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
                 -1,
                 40,
                 40,
@@ -226,7 +226,7 @@ namespace Dungeon.Tests.EditMode
                 BattleScenePage.Battle,
                 new List<RuntimeMapNode>(),
                 new List<RuntimeCard>(),
-                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
                 -1,
                 40,
                 40,
@@ -267,7 +267,7 @@ namespace Dungeon.Tests.EditMode
                 BattleScenePage.Battle,
                 new List<RuntimeMapNode>(),
                 new List<RuntimeCard>(),
-                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
                 -1,
                 40,
                 40,
@@ -312,9 +312,39 @@ namespace Dungeon.Tests.EditMode
             };
         }
 
+        [Test]
+        public void InitializeAsync_ShopState_ShowsShopThroughCoordinator()
+        {
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Shop);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.ShowShopCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastShopSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Shop));
+        }
+
+        [Test]
+        public void InitializeAsync_EventState_ShowsEventThroughCoordinator()
+        {
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Event);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.ShowEventCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastEventSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Event));
+        }
+
         private sealed class FakeBattleSceneFlowService : IBattleSceneFlowService
         {
-            private readonly BattleSceneSnapshot _snapshot;
+            private BattleSceneSnapshot _snapshot;
 
             public FakeBattleSceneFlowService(BattleSceneSnapshot snapshot)
             {
@@ -343,6 +373,11 @@ namespace Dungeon.Tests.EditMode
                 return _snapshot;
             }
 
+            public IReadOnlyList<RuntimeCard> GetDeckCards()
+            {
+                return new List<RuntimeCard>();
+            }
+
             public void SelectMapNode(int index)
             {
             }
@@ -367,24 +402,74 @@ namespace Dungeon.Tests.EditMode
                 EndTurnCallCount++;
             }
 
-            public void SelectReward(RuntimeCard card)
+            public void SelectReward(RuntimeRewardEntry rewardEntry)
+            {
+            }
+
+            public void ClaimGold()
+            {
+            }
+
+            public void ClaimPotion()
+            {
+            }
+
+            public void ClaimRelic()
             {
             }
 
             public void ApplyRest()
             {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
             }
 
             public void ApplyUpgrade()
             {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
             }
 
             public void ApplyShopPurchase()
             {
             }
 
+            public void OpenShop()
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void PurchaseShopItem(int slotIndex)
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void OpenCardRemoval()
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void PurchaseCardRemoval(RuntimeCard card)
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void LeaveShop()
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
             public void ContinueFromRestShop()
             {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void ContinueFromReward()
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Map);
+            }
+
+            public void SelectEventChoice(int choiceId)
+            {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
             }
 
             public void SelectEnemyTarget(int index)
@@ -476,6 +561,11 @@ namespace Dungeon.Tests.EditMode
             public int InitializeCallCount { get; private set; }
             public int ShowMapCallCount { get; private set; }
             public int ShowBattleCallCount { get; private set; }
+            public int ShowShopCallCount { get; private set; }
+            public int ShowEventCallCount { get; private set; }
+            public BattleSceneSnapshot LastMapSnapshot { get; private set; }
+            public BattleSceneSnapshot LastShopSnapshot { get; private set; }
+            public BattleSceneSnapshot LastEventSnapshot { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
@@ -487,7 +577,7 @@ namespace Dungeon.Tests.EditMode
             public UniTask ShowMapAsync(BattleSceneSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct)
             {
                 ShowMapCallCount++;
-                LastSnapshot = snapshot;
+                LastMapSnapshot = snapshot;
                 return UniTask.CompletedTask;
             }
 
@@ -497,21 +587,43 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.CompletedTask;
             }
 
-            public UniTask<RuntimeCard> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            public UniTask<RewardDialogResult> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
-                LastSnapshot = snapshot;
-                return UniTask.FromResult<RuntimeCard>(null);
+                LastMapSnapshot = snapshot;
+                return UniTask.FromResult(new RewardDialogResult { Action = RewardDialogActionType.Continue });
+            }
+
+            public UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                return UniTask.FromResult<RuntimeRewardEntry>(null);
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
-                LastSnapshot = snapshot;
                 return UniTask.FromResult(RestShopDialogAction.None);
+            }
+
+            public UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                ShowShopCallCount++;
+                LastShopSnapshot = snapshot;
+                return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
+            }
+
+            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
+            {
+                return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });
+            }
+
+            public UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                ShowEventCallCount++;
+                LastEventSnapshot = snapshot;
+                return UniTask.FromResult(new EventDialogResult { Action = EventDialogActionType.SelectChoice, ChoiceId = 1 });
             }
 
             public UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
-                LastSnapshot = snapshot;
                 return UniTask.CompletedTask;
             }
 

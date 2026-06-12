@@ -27,7 +27,7 @@ MonoBehaviour:
     Key: card_ash_guard
     Name: Ash Guard
     LocalizationKey: card.name.ash_guard
-    CardType: 1
+    CardType: 3
     Rarity: 0
     Cost: 1
     TargetType: 1
@@ -57,7 +57,7 @@ MonoBehaviour:
     Key: card_shell_up
     Name: Shell Up
     LocalizationKey: card.name.shell_up
-    CardType: 1
+    CardType: 3
     Rarity: 1
     Cost: 1
     TargetType: 1

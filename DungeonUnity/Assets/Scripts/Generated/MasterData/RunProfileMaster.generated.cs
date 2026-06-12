@@ -60,6 +60,16 @@ namespace Game.MasterData.Generated
         public int RewardPoolId;
 
         /// <summary>
+        /// ショップID
+        /// </summary>
+        public int ShopId;
+
+        /// <summary>
+        /// イベントプールID
+        /// </summary>
+        public int EventPoolId;
+
+        /// <summary>
         /// マップテンプレートID
         /// </summary>
         public int MapTemplateId;
@@ -83,6 +93,16 @@ namespace Game.MasterData.Generated
         /// 報酬提示枚数
         /// </summary>
         public int CardRewardChoiceCount;
+
+        /// <summary>
+        /// ポーションドロップ確率(%)
+        /// </summary>
+        public int PotionDropChance;
+
+        /// <summary>
+        /// レリックドロップ確率(%)
+        /// </summary>
+        public int RelicDropChance;
 
         public int GetKey() => Id;
     }

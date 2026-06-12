@@ -9,7 +9,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// </summary>
     public interface IRewardDialogView
     {
-        void BuildRewardButtons(IReadOnlyList<RuntimeCard> cards, Action<RuntimeCard> onClicked);
+        void BuildRewardButtons(IReadOnlyList<RuntimeRewardEntry> entries, Action<RuntimeRewardEntry> onClicked);
         void ClearDynamicButtons();
     }
 }

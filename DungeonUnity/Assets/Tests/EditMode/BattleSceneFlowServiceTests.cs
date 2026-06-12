@@ -214,9 +214,10 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(150));
+            Assert.That(snapshot.Gold, Is.EqualTo(120));
+            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(30));
             Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
-            Assert.That(snapshot.RewardChoices[0].DisplayName, Is.EqualTo("Reward"));
+            Assert.That(snapshot.RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
         }
 
         [Test]
@@ -326,7 +327,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(132));
+            Assert.That(snapshot.Gold, Is.EqualTo(120));
+            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(12));
         }
 
         [Test]
@@ -405,10 +407,12 @@ namespace Dungeon.Tests.EditMode
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
             RuntimeCard reward = CreateCard(1002, "Reward", 1, 5);
+            RuntimeRewardEntry rewardEntry = CreateRewardEntry(reward, 10, 1, 99);
             BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
 
             service.Initialize(5501);
-            service.SelectReward(reward);
+            service.SelectReward(rewardEntry);
+            service.ContinueFromReward();
 
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.DeckCardIds, Does.Contain(1002));
@@ -448,7 +452,13 @@ namespace Dungeon.Tests.EditMode
                 Gold = 177,
                 CurrentNodeIndex = 0,
                 CurrentPage = (int)BattleScenePage.Map,
-                DeckCardIds = new List<int> { 1002 }
+                DeckCardIds = new List<int> { 1002 },
+                IsCardRemovalSoldOut = true,
+                CardRemovalCount = 1,
+                ShopItems = new List<SaveShopItem>
+                {
+                    new SaveShopItem { SlotIndex = 0, RewardType = (int)RewardType.Card, CardId = 1002, ItemId = 0, Price = 50, IsSoldOut = true }
+                }
             };
 
             service.InitializeFromSave(saveData);
@@ -458,11 +468,90 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.PlayerHp, Is.EqualTo(23));
             Assert.That(snapshot.Gold, Is.EqualTo(177));
             Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(0));
+            Assert.That(snapshot.ShopItems.Count, Is.EqualTo(1));
+            Assert.That(snapshot.ShopItems[0].IsSoldOut, Is.True);
+            Assert.That(snapshot.ShopItems[0].Card.Id, Is.EqualTo(1002));
+            Assert.That(snapshot.IsCardRemovalSoldOut, Is.True);
+            Assert.That(snapshot.CardRemovalPrice, Is.EqualTo(75)); // FakeBattleShopService returns 75
 
             service.SelectMapNode(1);
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
             Assert.That(battleSnapshot.Hand.Count, Is.EqualTo(1));
             Assert.That(battleSnapshot.Hand[0].Id, Is.EqualTo(1002));
+        }
+
+        [Test]
+        public void OpenShop_TransitionsToShopPage()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Shop));
+        }
+
+        [Test]
+        public void LeaveShop_ReturnsToRestShopWithContinueEnabled()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+            service.LeaveShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
+        }
+
+        [Test]
+        public void SelectMapNode_EventNode_OpensEventWithEventSet()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "TestEvent", "event.test_title", "event.test", "img_test",
+                new[] { new RuntimeEventChoice(1, "Choice 1", EffectType.GainGold, 50) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Event));
+            Assert.That(snapshot.CurrentEvent, Is.Not.Null);
+            Assert.That(snapshot.CurrentEvent.EventName, Is.EqualTo("TestEvent"));
+        }
+
+        [Test]
+        public void SelectEventChoice_GainGold_AppliesEffectAndReturnsToMap()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "GoldFountain", "event.fountain_title", "event.fountain", "img_fountain",
+                new[] { new RuntimeEventChoice(1, "Take Gold", EffectType.GainGold, 50) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                startingGold: 100,
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectEventChoice(1);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(snapshot.Gold, Is.EqualTo(150));
+            Assert.That(snapshot.CurrentEvent, Is.Null);
         }
 
         [Test]
@@ -493,7 +582,11 @@ namespace Dungeon.Tests.EditMode
             return new BattleSceneFlowService(
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
-                new FakeBattleMasterDataFacade(runDefinition));
+                new FakeBattleMasterDataFacade(runDefinition),
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
+                new FakeBattleShopService(),
+                new BattleEventService());
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -505,7 +598,10 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
-                null,
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
+                new FakeBattleShopService(),
+                new BattleEventService(),
                 runSaveService);
         }
 
@@ -518,7 +614,10 @@ namespace Dungeon.Tests.EditMode
                 new BattleSceneRules(),
                 new SequenceRandomProvider(values),
                 new FakeBattleMasterDataFacade(runDefinition),
-                displayTextService);
+                new BattleRewardService(),
+                new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
+                new FakeBattleShopService(),
+                new BattleEventService());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
@@ -529,7 +628,8 @@ namespace Dungeon.Tests.EditMode
             IReadOnlyList<RuntimeRewardEntry> rewardCards = null,
             IReadOnlyList<RuntimeEncounterEntry> battleEncounters = null,
             IReadOnlyList<RuntimeEncounterEntry> eliteEncounters = null,
-            IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null)
+            IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null,
+            IReadOnlyList<RuntimeEvent> events = null)
         {
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
@@ -546,6 +646,8 @@ namespace Dungeon.Tests.EditMode
                 playerMaxHp,
                 startingGold,
                 3,
+                0,
+                0,
                 starterDeck ?? new[] { CreateCard(1001, "Strike", 1, 6) },
                 rewardCards ?? new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
                 nodes ?? new[]
@@ -553,7 +655,11 @@ namespace Dungeon.Tests.EditMode
                     CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }),
                     CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
                 },
-                encounters);
+                encounters,
+                events ?? null,
+                null,
+                null,
+                null);
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null)
@@ -639,7 +745,7 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
-            return new RuntimeRewardEntry(card, weight, minFloor, maxFloor);
+            return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, weight, minFloor, maxFloor);
         }
 
         /// <summary>
@@ -771,6 +877,14 @@ namespace Dungeon.Tests.EditMode
 
                 return value;
             }
+        }
+
+        private sealed class FakeBattleShopService : IBattleShopService
+        {
+            public void InitializeShop(BattleSceneState state, RuntimeRunDefinition runDef, IBattleRandomProvider random) {}
+            public bool PurchaseShopItem(BattleSceneState state, int slotIndex) => false;
+            public int GetCardRemovalPrice(BattleSceneState state) => 75;
+            public bool PurchaseCardRemoval(BattleSceneState state, RuntimeCard card) => false;
         }
     }
 }

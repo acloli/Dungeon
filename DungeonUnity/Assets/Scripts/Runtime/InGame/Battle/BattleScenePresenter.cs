@@ -158,12 +158,39 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.Reward:
                     _view.SetSaveQuitVisible(false);
-                    RuntimeCard reward = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
-                    if (reward != null)
+                    bool rewardActive = true;
+                    while (rewardActive)
                     {
-                        _flowService.SelectReward(reward);
-                        await RenderAsync(ct);
+                        RewardDialogResult rewardResult = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                        switch (rewardResult.Action)
+                        {
+                            case RewardDialogActionType.ClaimGold:
+                                _flowService.ClaimGold();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.ClaimPotion:
+                                _flowService.ClaimPotion();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.ClaimRelic:
+                                _flowService.ClaimRelic();
+                                snapshot = _flowService.CreateSnapshot();
+                                break;
+                            case RewardDialogActionType.PickCard:
+                                RuntimeRewardEntry cardEntry = await _uiCoordinator.ShowCardPickAsync(snapshot, ct);
+                                if (cardEntry != null)
+                                {
+                                    _flowService.SelectReward(cardEntry);
+                                    snapshot = _flowService.CreateSnapshot();
+                                }
+                                break;
+                            case RewardDialogActionType.Continue:
+                                _flowService.ContinueFromReward();
+                                rewardActive = false;
+                                break;
+                        }
                     }
+                    await RenderAsync(ct);
                     break;
                 case BattleScenePage.RestShop:
                     _view.SetSaveQuitVisible(true);
@@ -171,10 +198,55 @@ namespace Dungeon.Runtime.InGame.Battle
                     ApplyRestShopAction(action);
                     await RenderAsync(ct);
                     break;
+                case BattleScenePage.Shop:
+                    _view.SetSaveQuitVisible(true);
+                    ShopDialogResult shopResult = await _uiCoordinator.ShowShopAsync(snapshot, ct);
+                    ApplyShopAction(shopResult);
+                    await RenderAsync(ct);
+                    break;
+                case BattleScenePage.CardSelect:
+                    _view.SetSaveQuitVisible(true);
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, _flowService.GetDeckCards(), ct);
+                    if (cardSelectResult.IsCanceled)
+                    {
+                        // 削除キャンセル時はショップに戻る
+                        _flowService.OpenShop();
+                    }
+                    else
+                    {
+                        _flowService.PurchaseCardRemoval(cardSelectResult.SelectedCard);
+                    }
+                    await RenderAsync(ct);
+                    break;
+                case BattleScenePage.Event:
+                    _view.SetSaveQuitVisible(false);
+                    EventDialogResult eventResult = await _uiCoordinator.ShowEventAsync(snapshot, ct);
+                    _flowService.SelectEventChoice(eventResult.ChoiceId);
+                    await RenderAsync(ct);
+                    break;
                 case BattleScenePage.Result:
                     _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowResultAsync(snapshot, ct);
                     _onResultBackClicked?.Invoke();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// ショップダイアログ結果適用
+        /// </summary>
+        private void ApplyShopAction(ShopDialogResult result)
+        {
+            switch (result.Action)
+            {
+                case ShopDialogActionType.Leave:
+                    _flowService.LeaveShop();
+                    break;
+                case ShopDialogActionType.PurchaseItem:
+                    _flowService.PurchaseShopItem(result.SlotIndex);
+                    break;
+                case ShopDialogActionType.PurchaseCardRemoval:
+                    _flowService.OpenCardRemoval();
                     break;
             }
         }
@@ -193,7 +265,7 @@ namespace Dungeon.Runtime.InGame.Battle
                     _flowService.ApplyUpgrade();
                     break;
                 case RestShopDialogAction.Shop:
-                    _flowService.ApplyShopPurchase();
+                    _flowService.OpenShop();
                     break;
                 case RestShopDialogAction.Continue:
                     _flowService.ContinueFromRestShop();

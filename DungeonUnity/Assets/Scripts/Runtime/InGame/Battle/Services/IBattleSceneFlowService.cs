@@ -1,5 +1,6 @@
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Save.Model;
+using System.Collections.Generic;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -22,6 +23,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 現在状態取得
         /// </summary>
         BattleSceneSnapshot CreateSnapshot();
+
+        /// <summary>
+        /// 現在デッキ取得
+        /// </summary>
+        IReadOnlyList<RuntimeCard> GetDeckCards();
 
         /// <summary>
         /// マップノード選択
@@ -56,7 +62,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 報酬選択
         /// </summary>
-        void SelectReward(RuntimeCard card);
+        void SelectReward(RuntimeRewardEntry rewardEntry);
+        void ClaimGold();
+        void ClaimPotion();
+        void ClaimRelic();
+        /// <summary>
+        /// 報酬画面継続
+        /// </summary>
+        void ContinueFromReward();
 
         /// <summary>
         /// 休憩適用
@@ -69,13 +82,38 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void ApplyUpgrade();
 
         /// <summary>
-        /// 購入適用
+        /// ショップを開く
         /// </summary>
-        void ApplyShopPurchase();
+        void OpenShop();
+
+        /// <summary>
+        /// ショップアイテム購入
+        /// </summary>
+        void PurchaseShopItem(int slotIndex);
+
+        /// <summary>
+        /// カード削除選択を開く
+        /// </summary>
+        void OpenCardRemoval();
+
+        /// <summary>
+        /// カード削除購入
+        /// </summary>
+        void PurchaseCardRemoval(RuntimeCard card);
+
+        /// <summary>
+        /// ショップから退出
+        /// </summary>
+        void LeaveShop();
 
         /// <summary>
         /// 補給画面継続
         /// </summary>
         void ContinueFromRestShop();
+
+        /// <summary>
+        /// イベント選択肢決定
+        /// </summary>
+        void SelectEventChoice(int choiceId);
     }
 }

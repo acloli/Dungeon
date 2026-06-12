@@ -23,6 +23,9 @@ namespace Game.MasterData.Generated
     {
         Basic,
         Common,
+        Rare,
+        SR,
+        Uncommon,
     }
 
     /// <summary>
@@ -31,6 +34,8 @@ namespace Game.MasterData.Generated
     public enum CardType
     {
         Attack,
+        None,
+        Power,
         Skill,
     }
 
@@ -51,6 +56,9 @@ namespace Game.MasterData.Generated
         DealDamage,
         DrawCards,
         GainBlock,
+        GainGold,
+        GainMaxHp,
+        LoseHp,
     }
 
     /// <summary>
@@ -85,6 +93,7 @@ namespace Game.MasterData.Generated
         Battle,
         Boss,
         EliteBattle,
+        Event,
         RestShop,
     }
 
@@ -98,6 +107,17 @@ namespace Game.MasterData.Generated
         OpeningOnly,
         Random,
         RepeatAfterOpening,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: RewardType
+    /// </summary>
+    public enum RewardType
+    {
+        Card,
+        Gold,
+        Potion,
+        Relic,
     }
 
     /// <summary>
