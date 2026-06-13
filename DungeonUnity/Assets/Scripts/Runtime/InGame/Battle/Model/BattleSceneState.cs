@@ -48,8 +48,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsRestShopContinueEnabled { get; set; }
         public int EnemyTurnCount { get; set; }
         public int EnemyCycleIndex { get; set; }
+        public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public string MapMessage { get; set; } = string.Empty;
         public string BattleHintMessage { get; set; } = string.Empty;
+        public string OwnedRelicHintMessage { get; set; } = string.Empty;
         public string RestShopMessage { get; set; } = string.Empty;
         public string ResultMessage { get; set; } = string.Empty;
         public RuntimeEvent CurrentEvent { get; set; }

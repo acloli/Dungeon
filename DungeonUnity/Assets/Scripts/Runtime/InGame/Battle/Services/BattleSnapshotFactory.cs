@@ -55,6 +55,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildEnemyViews(state),
                 BuildOwnedRelicViews(state),
                 state.SelectedEnemyIndex,
+                state.SelectedOwnedRelicIndex,
                 state.DrawPile.Count,
                 state.DiscardPile.Count,
                 state.Hand.Count,
@@ -72,7 +73,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.BattleGoldReward,
                 state.PotionDropped,
                 state.PendingRelicReward != null,
-                state.CardRewardPicked);
+                state.CardRewardPicked,
+                state.OwnedRelicHintMessage);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
@@ -280,7 +282,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     relic.DisplayName,
                     relic.Description,
                     relic.ImageId,
-                    relic.Rarity));
+                    relic.Rarity,
+                    isSelected: i == state.SelectedOwnedRelicIndex));
             }
 
             return views;

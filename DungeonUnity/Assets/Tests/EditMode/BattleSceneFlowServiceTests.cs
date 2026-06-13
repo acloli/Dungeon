@@ -625,6 +625,56 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InspectOwnedRelic_TogglesSelectionAndClearsOnPageChange()
+        {
+            RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 6, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Battle", Array.Empty<int>())
+                },
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } },
+                shopLineup: new RuntimeShopLineup(
+                    1,
+                    new[]
+                    {
+                        new RuntimeShopSlot(7, RewardType.Relic, CardType.Attack, 100)
+                    }),
+                itemPriceRules: new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, relic.Id, 80, 0)
+                });
+            BattleShopService shopService = new BattleShopService(new FakeMasterDataService());
+            BattleSceneFlowService service = CreateServiceWithShop(runDefinition, shopService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+            int slotIndex = service.CreateSnapshot().ShopItems[0].SlotIndex;
+            service.PurchaseShopItem(slotIndex);
+
+            service.InspectOwnedRelic(0);
+            BattleSceneSnapshot inspectedSnapshot = service.CreateSnapshot();
+            Assert.That(inspectedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(0));
+            Assert.That(inspectedSnapshot.OwnedRelicHintMessage, Does.Contain("Burning Core"));
+
+            service.InspectOwnedRelic(0);
+            BattleSceneSnapshot clearedSnapshot = service.CreateSnapshot();
+            Assert.That(clearedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(clearedSnapshot.OwnedRelicHintMessage, Is.Empty);
+
+            service.InspectOwnedRelic(0);
+            service.LeaveShop();
+            BattleSceneSnapshot pageChangedSnapshot = service.CreateSnapshot();
+            Assert.That(pageChangedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(pageChangedSnapshot.OwnedRelicHintMessage, Is.Empty);
+        }
+
+        [Test]
         public void OwnedRelic_PlayerTurnStartGainEnergy_AppliesEachTurn()
         {
             RuntimeRelic relic = CreateRelic(2, "Ember Crown", new[]

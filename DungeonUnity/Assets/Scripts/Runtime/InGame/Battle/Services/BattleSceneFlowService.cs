@@ -60,6 +60,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
             _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            ClearOwnedRelicInspection();
             _state.OwnedRelics.Clear();
             _state.PendingRelicReward = null;
             OpenMap();
@@ -95,6 +96,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            ClearOwnedRelicInspection();
             _state.PendingRelicReward = null;
             _relicService.RestoreOwnedRelics(_state, _runDefinition, saveData.OwnedRelicIds);
 
@@ -394,6 +396,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 _state.RelicClaimed = true;
                 _state.PendingRelicReward = null;
+                ClearOwnedRelicInspection();
             }
         }
 
@@ -413,7 +416,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            _state.BattleHintMessage = string.IsNullOrEmpty(relic.Description)
+            if (_state.SelectedOwnedRelicIndex == index)
+            {
+                ClearOwnedRelicInspection();
+                return;
+            }
+
+            _state.SelectedOwnedRelicIndex = index;
+            _state.OwnedRelicHintMessage = string.IsNullOrEmpty(relic.Description)
                 ? relic.DisplayName
                 : string.Format("{0}\n{1}", relic.DisplayName, relic.Description);
         }
@@ -445,7 +455,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void OpenShop()
         {
-            _state.CurrentPage = BattleScenePage.Shop;
+            SetCurrentPage(BattleScenePage.Shop);
         }
 
         /// <summary>
@@ -456,6 +466,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             if (_shopService.PurchaseShopItem(_state, slotIndex))
             {
                 GrantPurchasedRelic(slotIndex);
+                ClearOwnedRelicInspection();
                 RequestSave();
             }
         }
@@ -465,7 +476,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void OpenCardRemoval()
         {
-            _state.CurrentPage = BattleScenePage.CardSelect;
+            SetCurrentPage(BattleScenePage.CardSelect);
         }
 
         /// <summary>
@@ -478,7 +489,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 RequestSave();
             }
             // 削除後ショップに戻る
-            _state.CurrentPage = BattleScenePage.Shop;
+            SetCurrentPage(BattleScenePage.Shop);
         }
 
         /// <summary>
@@ -486,7 +497,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void LeaveShop()
         {
-            _state.CurrentPage = BattleScenePage.RestShop;
+            SetCurrentPage(BattleScenePage.RestShop);
             _state.RestShopMessage = string.Format(
                 BattleSceneConstants.RestShopStateFormat,
                 _state.PlayerHp,
@@ -525,7 +536,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenMap()
         {
-            _state.CurrentPage = BattleScenePage.Map;
+            SetCurrentPage(BattleScenePage.Map);
             _state.BattleFinished = false;
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.RewardChoices.Clear();
@@ -544,7 +555,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenBattle(InGameNodeType nodeType)
         {
-            _state.CurrentPage = BattleScenePage.Battle;
+            SetCurrentPage(BattleScenePage.Battle);
             _state.BattleFinished = false;
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
@@ -607,7 +618,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenReward()
         {
-            _state.CurrentPage = BattleScenePage.Reward;
+            SetCurrentPage(BattleScenePage.Reward);
             _state.RewardChoices.Clear();
             IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectCardRewardChoices(_state, _runDefinition, _randomProvider);
             for (int i = 0; i < rewardChoices.Count; i++)
@@ -630,7 +641,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             int index = _randomProvider.Range(0, _runDefinition.PossibleEvents.Count);
             _state.CurrentEvent = _runDefinition.PossibleEvents[index];
-            _state.CurrentPage = BattleScenePage.Event;
+            SetCurrentPage(BattleScenePage.Event);
             _state.EventMessage = string.Format(
                 BattleSceneConstants.EventStateFormat,
                 _state.PlayerHp,
@@ -643,7 +654,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenRestShop()
         {
-            _state.CurrentPage = BattleScenePage.RestShop;
+            SetCurrentPage(BattleScenePage.RestShop);
             _state.IsRestShopContinueEnabled = false;
 
             if (_state.ShopItems == null || _state.ShopItems.Count == 0)
@@ -663,7 +674,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenResult(bool victory)
         {
-            _state.CurrentPage = BattleScenePage.Result;
+            SetCurrentPage(BattleScenePage.Result);
             _state.ResultMessage = victory
                 ? string.Format(BattleSceneConstants.ResultVictoryFormat, _state.PlayerHp, _state.PlayerMaxHp, _state.Gold)
                 : BattleSceneConstants.RunFailedMessage;
@@ -842,6 +853,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _relicService.AddOwnedRelic(_state, item.Relic);
                 return;
             }
+        }
+
+        /// <summary>
+        /// 所持レリック選択状態消去
+        /// </summary>
+        private void ClearOwnedRelicInspection()
+        {
+            _state.SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
+            _state.OwnedRelicHintMessage = string.Empty;
+        }
+
+        /// <summary>
+        /// 画面遷移共通処理
+        /// </summary>
+        private void SetCurrentPage(BattleScenePage page)
+        {
+            if (_state.CurrentPage != page)
+            {
+                ClearOwnedRelicInspection();
+            }
+
+            _state.CurrentPage = page;
         }
 
         /// <summary>

@@ -38,6 +38,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
             IReadOnlyList<BattleMultiIconViewModel> ownedRelics = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
+            int selectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex,
             int drawPileCount = 0,
             int discardPileCount = 0,
             int handCount = 0,
@@ -55,7 +56,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             int battleGoldReward = 0,
             bool potionDropped = false,
             bool relicDropped = false,
-            bool cardRewardPicked = false)
+            bool cardRewardPicked = false,
+            string ownedRelicHintMessage = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -86,6 +88,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
             OwnedRelics = ownedRelics ?? Array.Empty<BattleMultiIconViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
+            SelectedOwnedRelicIndex = selectedOwnedRelicIndex;
             DrawPileCount = drawPileCount;
             DiscardPileCount = discardPileCount;
             HandCount = handCount;
@@ -104,6 +107,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PotionDropped = potionDropped;
             RelicDropped = relicDropped;
             CardRewardPicked = cardRewardPicked;
+            OwnedRelicHintMessage = ownedRelicHintMessage ?? string.Empty;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -135,6 +139,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
         public IReadOnlyList<BattleMultiIconViewModel> OwnedRelics { get; }
         public int SelectedEnemyIndex { get; }
+        public int SelectedOwnedRelicIndex { get; }
         public int DrawPileCount { get; }
         public int DiscardPileCount { get; }
         public int HandCount { get; }
@@ -153,5 +158,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool RelicDropped { get; }
         public bool CardRewardPicked { get; }
         public string EventMessage { get; }
+        public string OwnedRelicHintMessage { get; }
     }
 }
