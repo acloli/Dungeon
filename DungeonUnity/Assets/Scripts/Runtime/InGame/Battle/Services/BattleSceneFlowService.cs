@@ -908,7 +908,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 PlayerEnergy = _state.PlayerEnergy,
                 Gold = _state.Gold,
                 CurrentNodeIndex = _state.CurrentNodeIndex,
-                CurrentPage = (int)_state.CurrentPage,
+                CurrentPage = (int)ResolveCheckpointPage(_state.CurrentPage),
                 DeckCardIds = new List<int>(),
                 OwnedRelicIds = new List<int>(),
                 ShopItems = new List<SaveShopItem>(),
@@ -953,6 +953,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
+        }
+
+        /// <summary>
+        /// checkpoint保存用ページ正規化
+        /// </summary>
+        private static BattleScenePage ResolveCheckpointPage(BattleScenePage currentPage)
+        {
+            return currentPage switch
+            {
+                BattleScenePage.Shop => BattleScenePage.RestShop,
+                BattleScenePage.CardSelect => BattleScenePage.RestShop,
+                _ => currentPage
+            };
         }
     }
 }
