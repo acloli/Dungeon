@@ -13,16 +13,18 @@ namespace Dungeon.Runtime.InGame.Battle
     {
         private IBattlePageView _view;
         private Action<int> _onHandCardClicked;
+        private Action<int> _onOwnedRelicClicked;
         private Action<int> _onEnemyTargetClicked;
         private Action _onEndTurnClicked;
 
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked)
+        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onOwnedRelicClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked)
         {
             _view = view;
             _onHandCardClicked = onHandCardClicked;
+            _onOwnedRelicClicked = onOwnedRelicClicked;
             _onEnemyTargetClicked = onEnemyTargetClicked;
             _onEndTurnClicked = onEndTurnClicked;
             _view.WireButtons(_onEndTurnClicked);
@@ -39,6 +41,7 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             _view.BuildHandCards(snapshot.HandCards, _onHandCardClicked);
+            _view.BuildOwnedRelics(snapshot.OwnedRelics, _onOwnedRelicClicked);
             _view.BuildEnemyButtons(snapshot.Enemies, snapshot.SelectedEnemyIndex, _onEnemyTargetClicked);
             _view.SetBattleStateText(
                 BuildPlayerText(snapshot),

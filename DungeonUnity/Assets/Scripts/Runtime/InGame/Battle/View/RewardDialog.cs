@@ -69,7 +69,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             // Relic行
             if (snapshot.RelicDropped && !snapshot.RelicClaimed)
-                AddRow(BattleSceneConstants.RelicDroppedLabel,
+                AddRow(snapshot.PendingRelicReward != null ? snapshot.PendingRelicReward.DisplayName : BattleSceneConstants.RelicDroppedLabel,
                     () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimRelic }),
                     true);
         }

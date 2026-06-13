@@ -14,6 +14,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void SetBattleHud(BattleHudViewModel hud);
         void SetBattleStateText(string playerText, string enemyText, string hintText);
         void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount);
+        void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked);
         void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked);
         void BuildHandCards(IReadOnlyList<BattleHandCardViewModel> handCards, Action<int> onClicked);
         void ClearDynamicButtons();

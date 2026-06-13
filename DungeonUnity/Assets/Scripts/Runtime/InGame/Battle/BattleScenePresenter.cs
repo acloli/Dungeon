@@ -45,7 +45,7 @@ namespace Dungeon.Runtime.InGame.Battle
             _onResultBackClicked = onResultBackClicked;
             _onSaveQuitClicked = onSaveQuitClicked;
 
-            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
+            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnOwnedRelicClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             _view.WireSaveQuitButton(OnSaveQuitClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
@@ -112,6 +112,15 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEnemyTargetClicked(int index)
         {
             _flowService.SelectEnemyTarget(index);
+            RenderAsync(_presenterCts.Token).Forget();
+        }
+
+        /// <summary>
+        /// 所持レリッククリック通知
+        /// </summary>
+        public void OnOwnedRelicClicked(int index)
+        {
+            _flowService.InspectOwnedRelic(index);
             RenderAsync(_presenterCts.Token).Forget();
         }
 
