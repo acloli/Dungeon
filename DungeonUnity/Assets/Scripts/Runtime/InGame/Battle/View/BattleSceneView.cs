@@ -101,6 +101,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             if (_battlePanel != null)
             {
+                if (!_battlePanel.activeSelf)
+                {
+                    _battlePanel.SetActive(true);
+                }
+
                 if (_battlePanelBackgroundImage != null)
                 {
                     _battlePanelBackgroundImage.enabled = visible;
