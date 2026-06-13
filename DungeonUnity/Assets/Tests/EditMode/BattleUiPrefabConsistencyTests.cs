@@ -2,6 +2,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.View;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
 
@@ -183,6 +184,27 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
             StringAssert.Contains("m_Name: HandCountPanel", yaml);
             StringAssert.Contains("m_Name: RelicStrip", yaml);
+        }
+
+        [Test]
+        public void BattleScene_RelicStrip_IsChildOfBattlePanel()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/BattleScene.unity", OpenSceneMode.Single);
+            Assert.That(scene.IsValid(), Is.True);
+
+            GameObject relicStrip = null;
+            foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (gameObject.scene == scene && gameObject.name == "RelicStrip")
+                {
+                    relicStrip = gameObject;
+                    break;
+                }
+            }
+
+            Assert.That(relicStrip, Is.Not.Null);
+            Assert.That(relicStrip.transform.parent, Is.Not.Null);
+            Assert.That(relicStrip.transform.parent.name, Is.EqualTo("BattlePanel"));
         }
 
         [Test]
