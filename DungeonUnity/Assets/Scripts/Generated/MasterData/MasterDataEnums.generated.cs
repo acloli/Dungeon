@@ -99,6 +99,15 @@ namespace Game.MasterData.Generated
     }
 
     /// <summary>
+    /// MasterData共有Enum: RelicTriggerType
+    /// </summary>
+    public enum RelicTriggerType
+    {
+        CombatStart,
+        PlayerTurnStart,
+    }
+
+    /// <summary>
     /// MasterData共有Enum: RepeatRule
     /// </summary>
     public enum RepeatRule
