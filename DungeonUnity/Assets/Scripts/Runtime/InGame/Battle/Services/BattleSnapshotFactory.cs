@@ -409,7 +409,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     item.Relic,
                     item.Potion,
                     item.ItemId,
-                    BuildShopItemIconViewModel(item)));
+                    BuildShopItemIconViewModel(item, state.Gold)));
             }
 
             return views;
@@ -432,11 +432,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return item.RewardType.ToString();
         }
 
-        private BattleMultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item)
+        private BattleMultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item, int currentGold)
         {
+            bool isAffordable = !item.IsSoldOut && currentGold >= item.Price;
+            bool isInteractable = !item.IsSoldOut && isAffordable;
+
             if (item.RewardType == RewardType.Card && item.Card != null)
             {
-                return BuildCardIconViewModel(item.Card, !item.IsSoldOut, false, !item.IsSoldOut);
+                return BuildCardIconViewModel(item.Card, isAffordable, false, isInteractable);
             }
 
             if (item.RewardType == RewardType.Relic && item.Relic != null)
@@ -447,7 +450,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     item.Relic.Description,
                     item.Relic.ImageId,
                     item.Relic.Rarity,
-                    isInteractable: !item.IsSoldOut);
+                    isInteractable: isInteractable,
+                    isAffordable: isAffordable);
             }
 
             if (item.RewardType == RewardType.Potion && item.Potion != null)
@@ -458,10 +462,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     item.Potion.Description,
                     item.Potion.ImageId,
                     item.Potion.Rarity,
-                    isInteractable: !item.IsSoldOut);
+                    isInteractable: isInteractable,
+                    isAffordable: isAffordable);
             }
 
-            return new BattleMultiIconViewModel(BattleIconKind.None, BuildShopItemDisplayName(item), string.Empty, string.Empty, CardRarity.Common, isInteractable: !item.IsSoldOut);
+            return new BattleMultiIconViewModel(
+                BattleIconKind.None,
+                BuildShopItemDisplayName(item),
+                string.Empty,
+                string.Empty,
+                CardRarity.Common,
+                isInteractable: isInteractable,
+                isAffordable: isAffordable);
         }
 
         private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)

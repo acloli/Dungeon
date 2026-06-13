@@ -15,6 +15,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
         public void Bind(BattleShopItemViewModel itemViewModel, Action<int> onClick)
         {
             _iconView?.Bind(itemViewModel.Icon, null);
+            bool isAffordable = itemViewModel.Icon == null || itemViewModel.Icon.IsAffordable;
+            bool canPurchase = !itemViewModel.IsSoldOut && isAffordable;
 
             if (itemViewModel.IsSoldOut)
             {
@@ -33,8 +35,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             _button.onClick.RemoveAllListeners();
-            _button.interactable = !itemViewModel.IsSoldOut;
-            _button.onClick.AddListener(() => onClick?.Invoke(itemViewModel.SlotIndex));
+            _button.interactable = canPurchase;
+            if (canPurchase)
+            {
+                _button.onClick.AddListener(() => onClick?.Invoke(itemViewModel.SlotIndex));
+            }
         }
 
         public void Clear()
