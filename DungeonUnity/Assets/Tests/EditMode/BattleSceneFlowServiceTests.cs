@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
@@ -7,6 +9,7 @@ using Dungeon.Runtime.InGame.Save.Services;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
+using TFramework.MasterData;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -749,6 +752,58 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void PurchaseShopItem_Relic_AddsOwnedRelicToSnapshotAndNextBattle()
+        {
+            RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 6, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Battle", Array.Empty<int>())
+                },
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } },
+                shopLineup: new RuntimeShopLineup(
+                    1,
+                    new[]
+                    {
+                        new RuntimeShopSlot(7, RewardType.Relic, CardType.Attack, 100)
+                    }),
+                itemPriceRules: new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, relic.Id, 80, 0)
+                });
+            BattleShopService shopService = new BattleShopService(new FakeMasterDataService());
+            BattleSceneFlowService service = CreateServiceWithShop(runDefinition, shopService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.OpenShop();
+
+            BattleSceneSnapshot shopSnapshot = service.CreateSnapshot();
+            Assert.That(shopSnapshot.ShopItems.Count, Is.EqualTo(1));
+            Assert.That(shopSnapshot.ShopItems[0].RewardType, Is.EqualTo(RewardType.Relic));
+            Assert.That(shopSnapshot.ShopItems[0].Relic, Is.Not.Null);
+
+            service.PurchaseShopItem(shopSnapshot.ShopItems[0].SlotIndex);
+
+            BattleSceneSnapshot purchasedSnapshot = service.CreateSnapshot();
+            Assert.That(purchasedSnapshot.OwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(purchasedSnapshot.OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+
+            service.LeaveShop();
+            service.ContinueFromRestShop();
+            service.SelectMapNode(1);
+
+            BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
+            Assert.That(battleSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(battleSnapshot.OwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(battleSnapshot.OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+        }
+
+        [Test]
         public void SelectMapNode_EventNode_OpensEventWithEventSet()
         {
             RuntimeEvent evt = new RuntimeEvent(
@@ -862,6 +917,23 @@ namespace Dungeon.Tests.EditMode
                 runSaveService);
         }
 
+        private static BattleSceneFlowService CreateServiceWithShop(
+            RuntimeRunDefinition runDefinition,
+            IBattleShopService shopService,
+            params int[] values)
+        {
+            return new BattleSceneFlowService(
+                new BattleSceneRules(),
+                new SequenceRandomProvider(values),
+                new FakeBattleMasterDataFacade(runDefinition),
+                new BattleRewardService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService),
+                shopService,
+                new BattleCombatEventService(new BattleRelicService()),
+                new BattleRelicService(),
+                new BattleEventService());
+        }
+
         private static BattleSceneFlowService CreateServiceWithDisplayText(
             RuntimeRunDefinition runDefinition,
             IBattleDisplayTextService displayTextService,
@@ -890,7 +962,9 @@ namespace Dungeon.Tests.EditMode
             IReadOnlyList<RuntimeEncounterEntry> eliteEncounters = null,
             IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null,
             IReadOnlyList<RuntimeEvent> events = null,
-            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = null)
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = null,
+            RuntimeShopLineup shopLineup = null,
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = null)
         {
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
@@ -920,9 +994,9 @@ namespace Dungeon.Tests.EditMode
                 events ?? null,
                 relicCatalog ?? new Dictionary<int, RuntimeRelic>(),
                 new Dictionary<int, RuntimePotion>(),
+                shopLineup,
                 null,
-                null,
-                null);
+                itemPriceRules);
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null)
@@ -1073,6 +1147,30 @@ namespace Dungeon.Tests.EditMode
                 }
                 return catalog;
             }
+        }
+
+        private sealed class FakeMasterDataService : IMasterDataService
+        {
+            public UniTask InitializeAsync(CancellationToken ct) => UniTask.CompletedTask;
+
+            public IReadOnlyList<T> GetAll<T>() where T : class, IMasterDataObject
+            {
+                return Array.Empty<T>();
+            }
+
+            public T Get<T, TKey>(TKey key) where T : class, IMasterDataObject<TKey>
+            {
+                return null;
+            }
+
+            public T GetContainer<T>() where T : class
+            {
+                return null;
+            }
+
+            public UniTask DownloadFromServerAsync(CancellationToken ct) => UniTask.CompletedTask;
+
+            public UniTask ReloadAsync(CancellationToken ct) => UniTask.CompletedTask;
         }
 
         /// <summary>
