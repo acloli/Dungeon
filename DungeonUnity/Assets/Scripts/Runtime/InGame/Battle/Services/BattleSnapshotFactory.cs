@@ -53,6 +53,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildBuffViews(state.PlayerBuffs),
                 BuildBuffViews(state.EnemyBuffs),
                 BuildEnemyViews(state),
+                BuildOwnedRelicViews(state),
                 state.SelectedEnemyIndex,
                 state.DrawPile.Count,
                 state.DiscardPile.Count,
@@ -63,13 +64,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.IsCardRemovalSoldOut,
                 _shopService.GetCardRemovalPrice(state),
                 state.CurrentEvent,
+                state.PendingRelicReward,
                 state.EventMessage,
                 state.GoldClaimed,
                 state.PotionClaimed,
                 state.RelicClaimed,
                 state.BattleGoldReward,
                 state.PotionDropped,
-                state.RelicDropped,
+                state.PendingRelicReward != null,
                 state.CardRewardPicked);
         }
 
@@ -260,6 +262,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return indices;
+        }
+
+        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedRelicViews(BattleSceneState state)
+        {
+            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            for (int i = 0; i < state.OwnedRelics.Count; i++)
+            {
+                RuntimeRelic relic = state.OwnedRelics[i];
+                if (relic == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleMultiIconViewModel(
+                    BattleIconKind.Relic,
+                    relic.DisplayName,
+                    relic.Description,
+                    relic.ImageId,
+                    relic.Rarity));
+            }
+
+            return views;
         }
 
         private IReadOnlyList<BattleHandCardViewModel> BuildHandCardViews(BattleSceneState state)

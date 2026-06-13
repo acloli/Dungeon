@@ -36,6 +36,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
+            IReadOnlyList<BattleMultiIconViewModel> ownedRelics = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
             int drawPileCount = 0,
             int discardPileCount = 0,
@@ -46,6 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             bool isCardRemovalSoldOut = false,
             int cardRemovalPrice = 0,
             RuntimeEvent currentEvent = null,
+            RuntimeRelic pendingRelicReward = null,
             string eventMessage = null,
             bool goldClaimed = false,
             bool potionClaimed = false,
@@ -82,6 +84,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
             EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
+            OwnedRelics = ownedRelics ?? Array.Empty<BattleMultiIconViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
             DrawPileCount = drawPileCount;
             DiscardPileCount = discardPileCount;
@@ -92,6 +95,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IsCardRemovalSoldOut = isCardRemovalSoldOut;
             CardRemovalPrice = cardRemovalPrice;
             CurrentEvent = currentEvent;
+            PendingRelicReward = pendingRelicReward;
             GoldClaimed = goldClaimed;
             PotionClaimed = potionClaimed;
             RelicClaimed = relicClaimed;
@@ -129,6 +133,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
+        public IReadOnlyList<BattleMultiIconViewModel> OwnedRelics { get; }
         public int SelectedEnemyIndex { get; }
         public int DrawPileCount { get; }
         public int DiscardPileCount { get; }
@@ -139,6 +144,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsCardRemovalSoldOut { get; }
         public int CardRemovalPrice { get; }
         public RuntimeEvent CurrentEvent { get; }
+        public RuntimeRelic PendingRelicReward { get; }
         public bool GoldClaimed { get; }
         public bool PotionClaimed { get; }
         public bool RelicClaimed { get; }

@@ -10,14 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeCardEffect
     {
-        public RuntimeCardEffect(
-            int order,
-            EffectType effectType,
-            int value,
-            int hitCount,
-            StatusType statusType,
-            int statusValue,
-            TargetSide targetSide)
+        public RuntimeCardEffect(int order, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
         {
             Order = order;
             EffectType = effectType;
@@ -108,11 +101,38 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ランタイム用レリック効果定義
+    /// </summary>
+    public sealed class RuntimeRelicEffect
+    {
+        public RuntimeRelicEffect(int order, RelicTriggerType triggerType, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
+        {
+            Order = order;
+            TriggerType = triggerType;
+            EffectType = effectType;
+            Value = value;
+            HitCount = hitCount;
+            StatusType = statusType;
+            StatusValue = statusValue;
+            TargetSide = targetSide;
+        }
+
+        public int Order { get; }
+        public RelicTriggerType TriggerType { get; }
+        public EffectType EffectType { get; }
+        public int Value { get; }
+        public int HitCount { get; }
+        public StatusType StatusType { get; }
+        public int StatusValue { get; }
+        public TargetSide TargetSide { get; }
+    }
+
+    /// <summary>
     /// ランタイム用レリック定義
     /// </summary>
     public sealed class RuntimeRelic
     {
-        public RuntimeRelic(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity)
+        public RuntimeRelic(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity, IReadOnlyList<RuntimeRelicEffect> effects = null)
         {
             Id = id;
             Key = key;
@@ -122,6 +142,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             DescriptionKey = descriptionKey;
             ImageId = imageId;
             Rarity = rarity;
+            Effects = effects ?? Array.Empty<RuntimeRelicEffect>();
         }
 
         public int Id { get; }
@@ -132,6 +153,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string DescriptionKey { get; }
         public string ImageId { get; }
         public CardRarity Rarity { get; }
+        public IReadOnlyList<RuntimeRelicEffect> Effects { get; }
     }
 
     /// <summary>

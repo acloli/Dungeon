@@ -22,6 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IBattleShopService _shopService;
         private readonly IBattleCombatEventService _combatEventService;
+        private readonly IBattleRelicService _relicService;
         private readonly IBattleEventService _eventService;
         private readonly IRunSaveService _runSaveService;
 
@@ -35,6 +36,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleSnapshotFactory snapshotFactory,
             IBattleShopService shopService,
             IBattleCombatEventService combatEventService,
+            IBattleRelicService relicService,
             IBattleEventService eventService,
             IRunSaveService runSaveService = null)
         {
@@ -45,6 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _snapshotFactory = snapshotFactory;
             _shopService = shopService;
             _combatEventService = combatEventService;
+            _relicService = relicService;
             _eventService = eventService;
             _runSaveService = runSaveService;
         }
@@ -57,6 +60,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
             _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            _state.OwnedRelics.Clear();
+            _state.PendingRelicReward = null;
             OpenMap();
             RequestSave();
         }
@@ -90,6 +95,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            _state.PendingRelicReward = null;
+            _relicService.RestoreOwnedRelics(_state, _runDefinition, saveData.OwnedRelicIds);
 
             _state.ShopItems.Clear();
             _state.IsCardRemovalSoldOut = saveData.IsCardRemovalSoldOut;
@@ -345,13 +352,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ContinueFromReward()
         {
-            _state.Gold += _state.BattleGoldReward;
-            _state.BattleGoldReward = 0;
             _state.GoldClaimed = false;
             _state.PotionClaimed = false;
             _state.RelicClaimed = false;
             _state.PotionDropped = false;
-            _state.RelicDropped = false;
+            _state.PendingRelicReward = null;
             _state.CardRewardPicked = false;
             OpenMap();
             RequestSave();
@@ -380,7 +385,37 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ClaimRelic()
         {
-            _state.RelicClaimed = true;
+            if (_state.PendingRelicReward == null)
+            {
+                return;
+            }
+
+            if (_relicService.AddOwnedRelic(_state, _state.PendingRelicReward))
+            {
+                _state.RelicClaimed = true;
+                _state.PendingRelicReward = null;
+            }
+        }
+
+        /// <summary>
+        /// 所持レリック説明を表示する
+        /// </summary>
+        public void InspectOwnedRelic(int index)
+        {
+            if (index < 0 || index >= _state.OwnedRelics.Count)
+            {
+                return;
+            }
+
+            RuntimeRelic relic = _state.OwnedRelics[index];
+            if (relic == null)
+            {
+                return;
+            }
+
+            _state.BattleHintMessage = string.IsNullOrEmpty(relic.Description)
+                ? relic.DisplayName
+                : string.Format("{0}\n{1}", relic.DisplayName, relic.Description);
         }
 
         /// <summary>
@@ -420,6 +455,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             if (_shopService.PurchaseShopItem(_state, slotIndex))
             {
+                GrantPurchasedRelic(slotIndex);
                 RequestSave();
             }
         }
@@ -493,6 +529,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.BattleFinished = false;
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.RewardChoices.Clear();
+            _state.PendingRelicReward = null;
             _state.MapMessage = string.Format(
                 BattleSceneConstants.MapStateFormat,
                 _state.PlayerHp,
@@ -549,7 +586,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.BattleFinished = true;
             _state.BattleGoldReward = CalculateBattleGoldReward();
             _state.PotionDropped = _rules.RollPotionDrop(_runDefinition, _randomProvider);
-            _state.RelicDropped = _rules.RollRelicDrop(_runDefinition, _randomProvider);
+            _state.PendingRelicReward = null;
+            if (_rules.RollRelicDrop(_runDefinition, _randomProvider))
+            {
+                _state.PendingRelicReward = _relicService.RollBattleRewardRelic(_state, _runDefinition, _randomProvider);
+            }
             _state.CardRewardPicked = false;
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
@@ -786,6 +827,24 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 購入済みレリックを所持へ反映する
+        /// </summary>
+        private void GrantPurchasedRelic(int slotIndex)
+        {
+            for (int i = 0; i < _state.ShopItems.Count; i++)
+            {
+                BattleShopItemState item = _state.ShopItems[i];
+                if (item == null || item.SlotIndex != slotIndex || item.RewardType != RewardType.Relic || item.Relic == null)
+                {
+                    continue;
+                }
+
+                _relicService.AddOwnedRelic(_state, item.Relic);
+                return;
+            }
+        }
+
+        /// <summary>
         /// 辞書内容コピー
         /// </summary>
         private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
@@ -818,6 +877,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 CurrentNodeIndex = _state.CurrentNodeIndex,
                 CurrentPage = (int)_state.CurrentPage,
                 DeckCardIds = new List<int>(),
+                OwnedRelicIds = new List<int>(),
                 ShopItems = new List<SaveShopItem>(),
                 IsCardRemovalSoldOut = _state.IsCardRemovalSoldOut,
                 CardRemovalCount = _state.CardRemovalCount
@@ -828,6 +888,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 if (_state.Deck[i] != null)
                 {
                     data.DeckCardIds.Add(_state.Deck[i].Id);
+                }
+            }
+
+            for (int i = 0; i < _state.OwnedRelics.Count; i++)
+            {
+                if (_state.OwnedRelics[i] != null)
+                {
+                    data.OwnedRelicIds.Add(_state.OwnedRelics[i].Id);
                 }
             }
 

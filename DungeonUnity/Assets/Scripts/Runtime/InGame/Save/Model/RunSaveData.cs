@@ -21,6 +21,7 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int CurrentPage;
 
         public List<int> DeckCardIds = new List<int>();
+        public List<int> OwnedRelicIds = new List<int>();
 
         public List<SaveShopItem> ShopItems = new List<SaveShopItem>();
         public bool IsCardRemovalSoldOut;
@@ -33,7 +34,8 @@ namespace Dungeon.Runtime.InGame.Save.Model
                                && PlayerMaxHp > 0
                                && PlayerHp > 0
                                && (CurrentPage == MapPage || CurrentPage == RestShopPage)
-                               && DeckCardIds != null;
+                               && DeckCardIds != null
+                               && OwnedRelicIds != null;
     }
 
     [Serializable]

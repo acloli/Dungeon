@@ -129,11 +129,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyDictionary<int, RuntimeRelic> BuildRelicCatalog()
         {
+            IReadOnlyList<RelicEffectMaster> effectMasters = _masterDataService.GetAll<RelicEffectMaster>();
+            Dictionary<int, List<RuntimeRelicEffect>> effectsByRelicId = effectMasters
+                .GroupBy(effect => effect.RelicId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderBy(effect => effect.Order)
+                        .Select(effect => new RuntimeRelicEffect(
+                            effect.Order,
+                            effect.TriggerType,
+                            effect.EffectType,
+                            effect.Value,
+                            effect.HitCount,
+                            effect.StatusType,
+                            effect.StatusValue,
+                            effect.TargetSide))
+                        .ToList());
+
             Dictionary<int, RuntimeRelic> relics = new Dictionary<int, RuntimeRelic>();
             IReadOnlyList<RelicMaster> masters = _masterDataService.GetAll<RelicMaster>();
             for (int i = 0; i < masters.Count; i++)
             {
                 RelicMaster master = masters[i];
+                effectsByRelicId.TryGetValue(master.Id, out List<RuntimeRelicEffect> effects);
                 relics[master.Id] = new RuntimeRelic(
                     master.Id,
                     master.Key,
@@ -142,7 +161,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     ResolveLocalizedText(master.DescriptionKey, string.Empty),
                     master.DescriptionKey,
                     master.ImageId,
-                    master.Rarity);
+                    master.Rarity,
+                    effects ?? new List<RuntimeRelicEffect>());
             }
 
             return relics;
