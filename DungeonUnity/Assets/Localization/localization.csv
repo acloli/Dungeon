@@ -68,9 +68,9 @@ card.desc.char_sweep,すべての敵に4ダメージを与え脱力1を付与す
 card.desc.grim_line,敵1体に14ダメージを与える。,Deal 14 damage to an enemy.,对1名敌人造成14点伤害。,對1名敵人造成14點傷害。,적 하나에게 피해 14를 준다.
 card.desc.spark_focus,エナジー1を得てカードを1枚引く。,Gain 1 Energy and draw 1 card.,获得1点能量并抽1张牌。,獲得1點能量並抽1張牌。,에너지 1을 얻고 카드 1장을 뽑는다.
 relic.name.burning_core,バーニングコア,Burning Core,燃烧核心,燃燒核心,버닝 코어
-relic.desc.burning_core,燃えさしが宿る核。戦闘報酬に混ざる基礎レリック。,An ember-fed core. A baseline relic for reward and shop display.,燃火之核。用于奖励与商店展示的基础遗物。,燃火之核。用於獎勵與商店展示的基礎遺物。,불씨가 깃든 핵. 보상과 상점 표시에 쓰는 기본 유물.
+relic.desc.burning_core,戦闘開始時に6ブロックを得る。,Gain 6 Block at the start of combat.,战斗开始时获得6点格挡。,戰鬥開始時獲得6點格擋。,전투 시작 시 방어도 6을 얻는다.
 relic.name.ember_crown,エンバークラウン,Ember Crown,余烬王冠,餘燼王冠,엠버 크라운
-relic.desc.ember_crown,熱を帯びた冠。高レアリティ表示用のサンプルレリック。,A heated crown. Sample relic for rare-tier display.,炽热王冠。用于高稀有度显示的示例遗物。,熾熱王冠。用於高稀有度顯示的示例遺物。,열기를 머금은 왕관. 고희귀도 표시용 샘플 유물.
+relic.desc.ember_crown,プレイヤーターン開始時にエナジー1を得る。,Gain 1 Energy at the start of each player turn.,每个玩家回合开始时获得1点能量。,每個玩家回合開始時獲得1點能量。,플레이어 턴 시작 시 에너지 1을 얻는다.
 potion.name.cinder_tonic,シンダートニック,Cinder Tonic,余烬药剂,餘燼藥劑,신더 토닉
 potion.desc.cinder_tonic,火花が沈む薬瓶。基本ポーション表示用。,A bottled cinder. Baseline potion for shared icon display.,封存火星的药剂。用于基础药水显示。,封存火星的藥劑。用於基礎藥水顯示。,불씨가 가라앉은 약병. 기본 포션 표시용.
 potion.name.smoke_phial,スモークファイアル,Smoke Phial,烟幕小瓶,煙幕小瓶,스모크 피알
