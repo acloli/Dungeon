@@ -567,6 +567,93 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ClaimRelic_AddsOwnedRelicAndSavesOwnedRelicIds()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 6, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeCard finisher = CreateCard(1001, "Finisher", 1, 99);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                relicDropChance: 100,
+                starterDeck: new[] { finisher },
+                rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.ClaimRelic();
+            service.ContinueFromReward();
+
+            Assert.That(runSaveService.LastSavedData.OwnedRelicIds, Is.EqualTo(new[] { 1 }));
+        }
+
+        [Test]
+        public void OwnedRelic_CombatStartGainBlock_AppliesAtBattleStart()
+        {
+            RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 6, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedRelicIds = new List<int> { 1 }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.PlayerBlock, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void OwnedRelic_PlayerTurnStartGainEnergy_AppliesEachTurn()
+        {
+            RuntimeRelic relic = CreateRelic(2, "Ember Crown", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.PlayerTurnStart, EffectType.GainEnergy, 1, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedRelicIds = new List<int> { 2 }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot firstTurnSnapshot = service.CreateSnapshot();
+            service.EndTurn();
+            BattleSceneSnapshot secondTurnSnapshot = service.CreateSnapshot();
+
+            Assert.That(firstTurnSnapshot.PlayerEnergy, Is.EqualTo(4));
+            Assert.That(secondTurnSnapshot.PlayerEnergy, Is.EqualTo(4));
+        }
+
+        [Test]
         public void EndTurn_WhenPlayerDies_DeletesSavedRun()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -601,6 +688,7 @@ namespace Dungeon.Tests.EditMode
                 CurrentNodeIndex = 0,
                 CurrentPage = (int)BattleScenePage.Map,
                 DeckCardIds = new List<int> { 1002 },
+                OwnedRelicIds = new List<int>(),
                 IsCardRemovalSoldOut = true,
                 CardRemovalCount = 1,
                 ShopItems = new List<SaveShopItem>
@@ -734,7 +822,8 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
-                new BattleCombatEventService(),
+                new BattleCombatEventService(new BattleRelicService()),
+                new BattleRelicService(),
                 new BattleEventService());
         }
 
@@ -751,6 +840,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
                 combatEventService,
+                new BattleRelicService(),
                 new BattleEventService());
         }
 
@@ -766,7 +856,8 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
                 new FakeBattleShopService(),
-                new BattleCombatEventService(),
+                new BattleCombatEventService(new BattleRelicService()),
+                new BattleRelicService(),
                 new BattleEventService(),
                 runSaveService);
         }
@@ -783,20 +874,23 @@ namespace Dungeon.Tests.EditMode
                 new BattleRewardService(),
                 new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
                 new FakeBattleShopService(),
-                new BattleCombatEventService(),
+                new BattleCombatEventService(new BattleRelicService()),
+                new BattleRelicService(),
                 new BattleEventService());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
             int playerMaxHp = 50,
             int startingGold = 120,
+            int relicDropChance = 0,
             IReadOnlyList<RuntimeMapNode> nodes = null,
             IReadOnlyList<RuntimeCard> starterDeck = null,
             IReadOnlyList<RuntimeRewardEntry> rewardCards = null,
             IReadOnlyList<RuntimeEncounterEntry> battleEncounters = null,
             IReadOnlyList<RuntimeEncounterEntry> eliteEncounters = null,
             IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null,
-            IReadOnlyList<RuntimeEvent> events = null)
+            IReadOnlyList<RuntimeEvent> events = null,
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = null)
         {
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
@@ -814,7 +908,7 @@ namespace Dungeon.Tests.EditMode
                 startingGold,
                 3,
                 0,
-                0,
+                relicDropChance,
                 starterDeck ?? new[] { CreateCard(1001, "Strike", 1, 6) },
                 rewardCards ?? new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
                 nodes ?? new[]
@@ -824,7 +918,7 @@ namespace Dungeon.Tests.EditMode
                 },
                 encounters,
                 events ?? null,
-                new Dictionary<int, RuntimeRelic>(),
+                relicCatalog ?? new Dictionary<int, RuntimeRelic>(),
                 new Dictionary<int, RuntimePotion>(),
                 null,
                 null,
@@ -918,6 +1012,20 @@ namespace Dungeon.Tests.EditMode
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
             return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, null, null, weight, minFloor, maxFloor);
+        }
+
+        private static RuntimeRelic CreateRelic(int id, string displayName, IReadOnlyList<RuntimeRelicEffect> effects)
+        {
+            return new RuntimeRelic(
+                id,
+                $"relic_{id}",
+                displayName,
+                string.Empty,
+                $"{displayName} description",
+                string.Empty,
+                $"relic_icon_{id}",
+                CardRarity.Uncommon,
+                effects);
         }
 
         /// <summary>

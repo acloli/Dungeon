@@ -169,6 +169,45 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void OnOwnedRelicClicked_UpdatesHintText()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedRelics: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                });
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.OnOwnedRelicClicked(0);
+
+            Assert.That(flowService.InspectOwnedRelicCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public void InitializeAsync_WithValidSave_InitializesFromSave()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
@@ -425,6 +464,7 @@ namespace Dungeon.Tests.EditMode
             public int EndTurnCallCount { get; private set; }
             public int SelectHandCardCallCount { get; private set; }
             public int TryPlaySelectedCardCallCount { get; private set; }
+            public int InspectOwnedRelicCallCount { get; private set; }
             public int InitializeCallCount { get; private set; }
             public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
@@ -487,6 +527,11 @@ namespace Dungeon.Tests.EditMode
 
             public void ClaimRelic()
             {
+            }
+
+            public void InspectOwnedRelic(int index)
+            {
+                InspectOwnedRelicCallCount++;
             }
 
             public void ApplyRest()
@@ -592,6 +637,7 @@ namespace Dungeon.Tests.EditMode
             public string LastHintText { get; private set; }
             public BattleHudViewModel LastHud { get; private set; }
             public IReadOnlyList<BattleHandCardViewModel> LastHandCards { get; private set; } = Array.Empty<BattleHandCardViewModel>();
+            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
             public int LastDrawPileCount { get; private set; }
             public int LastDiscardPileCount { get; private set; }
             public int LastHandCount { get; private set; }
@@ -629,6 +675,11 @@ namespace Dungeon.Tests.EditMode
             {
                 BuildCallCount++;
                 LastHandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
+            }
+
+            public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            {
+                LastOwnedRelics = relics ?? Array.Empty<BattleMultiIconViewModel>();
             }
 
             public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)

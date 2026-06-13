@@ -123,6 +123,10 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
+                new RelicEffectMaster { Id = 30001, RelicId = 1, Order = 1, TriggerType = RelicTriggerType.CombatStart, EffectType = EffectType.GainBlock, Value = 6, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Self }
+            });
+            masterDataService.SetAll(new[]
+            {
                 new PotionMaster { Id = 1, Key = "potion_1", Name = "Potion1", LocalizationKey = "potion.1", DescriptionKey = "potion.1.desc", ImageId = "potion_1", Rarity = CardRarity.Common }
             });
 
@@ -142,6 +146,8 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.RewardPool.Count, Is.EqualTo(1));
             Assert.That(runDefinition.RewardPool[0].Card.DisplayName, Is.EqualTo("CardB"));
             Assert.That(runDefinition.RelicCatalog[1].DisplayName, Is.EqualTo("Relic1"));
+            Assert.That(runDefinition.RelicCatalog[1].Effects.Count, Is.EqualTo(1));
+            Assert.That(runDefinition.RelicCatalog[1].Effects[0].TriggerType, Is.EqualTo(RelicTriggerType.CombatStart));
             Assert.That(runDefinition.PotionCatalog[1].DisplayName, Is.EqualTo("Potion1"));
             Assert.That(runDefinition.PossibleEvents.Count, Is.EqualTo(1));
             Assert.That(runDefinition.PossibleEvents[0].Choices.Count, Is.EqualTo(2));

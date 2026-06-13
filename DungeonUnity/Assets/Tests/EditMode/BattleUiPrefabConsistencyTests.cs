@@ -173,6 +173,8 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_drawPileCountText: {fileID:", yaml);
             StringAssert.Contains("_discardPileCountText: {fileID:", yaml);
             StringAssert.Contains("_handCountText: {fileID:", yaml);
+            StringAssert.Contains("_relicRoot: {fileID:", yaml);
+            StringAssert.Contains("_relicTemplate: {fileID:", yaml);
             StringAssert.Contains("_handCardTemplate: {fileID:", yaml);
             StringAssert.Contains("m_Name: IntentPanel", yaml);
             StringAssert.Contains("m_Name: PlayerStatusPanel", yaml);
@@ -180,6 +182,7 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: DrawPilePanel", yaml);
             StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
             StringAssert.Contains("m_Name: HandCountPanel", yaml);
+            StringAssert.Contains("m_Name: RelicStrip", yaml);
         }
 
         [Test]
