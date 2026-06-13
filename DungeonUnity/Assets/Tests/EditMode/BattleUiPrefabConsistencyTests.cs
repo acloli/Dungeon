@@ -164,6 +164,11 @@ namespace Dungeon.Tests.EditMode
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
             string yaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
 
+            StringAssert.Contains("_battlePanelBackgroundImage: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicTemplate: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicHintRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicHintText: {fileID:", yaml);
             StringAssert.Contains("_playerSummaryText: {fileID:", yaml);
             StringAssert.Contains("_enemySummaryText: {fileID:", yaml);
             StringAssert.Contains("_intentText: {fileID:", yaml);
@@ -174,8 +179,6 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_drawPileCountText: {fileID:", yaml);
             StringAssert.Contains("_discardPileCountText: {fileID:", yaml);
             StringAssert.Contains("_handCountText: {fileID:", yaml);
-            StringAssert.Contains("_relicRoot: {fileID:", yaml);
-            StringAssert.Contains("_relicTemplate: {fileID:", yaml);
             StringAssert.Contains("_handCardTemplate: {fileID:", yaml);
             StringAssert.Contains("m_Name: IntentPanel", yaml);
             StringAssert.Contains("m_Name: PlayerStatusPanel", yaml);
@@ -184,6 +187,17 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
             StringAssert.Contains("m_Name: HandCountPanel", yaml);
             StringAssert.Contains("m_Name: RelicStrip", yaml);
+            StringAssert.Contains("m_Name: OwnedRelicHintPanel", yaml);
+        }
+
+        [Test]
+        public void BattleScene_BattlePageView_DoesNotSerializeRelicStripFields()
+        {
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string yaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
+
+            StringAssert.DoesNotContain("_relicRoot: {fileID:", yaml);
+            StringAssert.DoesNotContain("_relicTemplate: {fileID:", yaml);
         }
 
         [Test]
