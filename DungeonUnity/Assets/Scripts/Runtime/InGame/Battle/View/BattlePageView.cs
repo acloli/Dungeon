@@ -25,8 +25,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _drawPileCountText;
         [SerializeField] private TFTextUGUI _discardPileCountText;
         [SerializeField] private TFTextUGUI _handCountText;
-        [SerializeField] private Transform _relicRoot;
-        [SerializeField] private BattleMultiIconView _relicTemplate;
         [SerializeField] private Transform _handCardRoot;
         [SerializeField] private BattleCardIconView _handCardTemplate;
         [SerializeField] private Transform _enemyTargetRoot;
@@ -34,7 +32,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Button _endTurnButton;
 
         private readonly List<BattleCardIconView> _handCards = new List<BattleCardIconView>();
-        private readonly List<BattleMultiIconView> _relicViews = new List<BattleMultiIconView>();
         private readonly List<Button> _enemyButtons = new List<Button>();
         private static readonly Color SelectedEnemyColor = new Color(0.88f, 0.42f, 0.22f, 1f);
         private static readonly Color ActiveEnemyColor = new Color(0.2f, 0.35f, 0.55f, 1f);
@@ -185,42 +182,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
-        /// 所持レリック構築
-        /// </summary>
-        public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
-        {
-            ClearMultiIcons(_relicViews);
-
-            if (_relicRoot == null || _relicTemplate == null || relics == null)
-            {
-                return;
-            }
-
-            _relicTemplate.gameObject.SetActive(false);
-
-            for (int i = 0; i < relics.Count; i++)
-            {
-                int relicIndex = i;
-                BattleMultiIconViewModel relic = relics[relicIndex];
-                if (relic == null)
-                {
-                    continue;
-                }
-
-                BattleMultiIconView relicView = Instantiate(_relicTemplate, _relicRoot);
-                relicView.gameObject.SetActive(true);
-                relicView.Bind(relic, () => onClicked?.Invoke(relicIndex));
-                _relicViews.Add(relicView);
-            }
-        }
-
-        /// <summary>
         /// 動的手札ボタン消去
         /// </summary>
         public void ClearDynamicButtons()
         {
             ClearCards(_handCards);
-            ClearMultiIcons(_relicViews);
             ClearEnemyButtons();
         }
 
@@ -318,26 +284,6 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             cards.Clear();
-        }
-
-        /// <summary>
-        /// 汎用アイコン一覧消去
-        /// </summary>
-        private static void ClearMultiIcons(List<BattleMultiIconView> icons)
-        {
-            for (int i = 0; i < icons.Count; i++)
-            {
-                BattleMultiIconView icon = icons[i];
-                if (icon == null)
-                {
-                    continue;
-                }
-
-                icon.Clear();
-                Destroy(icon.gameObject);
-            }
-
-            icons.Clear();
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace Dungeon.Runtime.InGame.Battle
             _onResultBackClicked = onResultBackClicked;
             _onSaveQuitClicked = onSaveQuitClicked;
 
-            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnOwnedRelicClicked, OnEnemyTargetClicked, OnEndTurnClicked);
+            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             _view.WireSaveQuitButton(OnSaveQuitClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
@@ -80,6 +80,8 @@ namespace Dungeon.Runtime.InGame.Battle
             if (_view != null)
             {
                 _view.UnwireSaveQuitButton();
+                _view.ClearOwnedRelics();
+                _view.SetOwnedRelicHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
             }
             _uiCoordinator.Dispose();
             _view = null;
@@ -153,6 +155,9 @@ namespace Dungeon.Runtime.InGame.Battle
 
             BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
             _battlePagePresenter.Clear();
+            _view.ClearOwnedRelics();
+            _view.BuildOwnedRelics(snapshot.OwnedRelics, OnOwnedRelicClicked);
+            _view.SetOwnedRelicHint(snapshot.OwnedRelicHintMessage, snapshot.SelectedOwnedRelicIndex);
 
             switch (snapshot.CurrentPage)
             {

@@ -51,6 +51,17 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        /// <summary>
+        /// コンパクト表示切り替え
+        /// </summary>
+        public void SetCompactLayout(bool isCompact)
+        {
+            SetActive(_nameText, !isCompact);
+            SetActive(_descriptionText, !isCompact);
+            SetBadgeVisible(_costText, !isCompact && _costText != null && !string.IsNullOrEmpty(_costText.text));
+            SetActive(_quantityText, !isCompact && _quantityText != null && !string.IsNullOrEmpty(_quantityText.text));
+        }
+
         protected void SetArtSprite(Sprite sprite)
         {
             if (_artImage == null)

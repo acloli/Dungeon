@@ -162,10 +162,54 @@ namespace Dungeon.Tests.EditMode
             Assert.That(view.BattlePageView.LastHandCards.Count, Is.EqualTo(2));
             Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsSelected, Is.True);
             Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsAffordable, Is.False);
+            Assert.That(view.LastOwnedRelics, Is.Empty);
             Assert.That(view.BattlePageView.LastDrawPileCount, Is.EqualTo(12));
             Assert.That(view.BattlePageView.LastDiscardPileCount, Is.EqualTo(3));
             Assert.That(view.BattlePageView.LastHandCount, Is.EqualTo(2));
             Assert.That(view.BattlePageView.LastMaxHandCount, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void InitializeAsync_MapState_RendersOwnedRelicsThroughHostView()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Map,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedRelics: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                },
+                selectedOwnedRelicIndex: 0,
+                ownedRelicHintMessage: "Burning Core\nGain 6 Block at combat start.");
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.LastOwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(view.LastOwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+            Assert.That(view.LastSelectedOwnedRelicIndex, Is.EqualTo(0));
+            Assert.That(view.LastOwnedRelicHint, Does.Contain("Gain 6 Block"));
         }
 
         [Test]
@@ -600,7 +644,26 @@ namespace Dungeon.Tests.EditMode
 
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
+            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
+            public string LastOwnedRelicHint { get; private set; } = string.Empty;
+            public int LastSelectedOwnedRelicIndex { get; private set; } = -1;
             private Action _onSaveQuitClicked;
+
+            public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            {
+                LastOwnedRelics = relics ?? Array.Empty<BattleMultiIconViewModel>();
+            }
+
+            public void SetOwnedRelicHint(string message, int selectedIndex)
+            {
+                LastOwnedRelicHint = message ?? string.Empty;
+                LastSelectedOwnedRelicIndex = selectedIndex;
+            }
+
+            public void ClearOwnedRelics()
+            {
+                LastOwnedRelics = Array.Empty<BattleMultiIconViewModel>();
+            }
 
             public void SetBattleVisible(bool visible)
             {
@@ -637,7 +700,6 @@ namespace Dungeon.Tests.EditMode
             public string LastHintText { get; private set; }
             public BattleHudViewModel LastHud { get; private set; }
             public IReadOnlyList<BattleHandCardViewModel> LastHandCards { get; private set; } = Array.Empty<BattleHandCardViewModel>();
-            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
             public int LastDrawPileCount { get; private set; }
             public int LastDiscardPileCount { get; private set; }
             public int LastHandCount { get; private set; }
@@ -675,11 +737,6 @@ namespace Dungeon.Tests.EditMode
             {
                 BuildCallCount++;
                 LastHandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
-            }
-
-            public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
-            {
-                LastOwnedRelics = relics ?? Array.Empty<BattleMultiIconViewModel>();
             }
 
             public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)

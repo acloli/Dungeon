@@ -96,6 +96,18 @@ namespace Dungeon.Tests.EditMode
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
 
+            public void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            {
+            }
+
+            public void SetOwnedRelicHint(string message, int selectedIndex)
+            {
+            }
+
+            public void ClearOwnedRelics()
+            {
+            }
+
             public void SetBattleVisible(bool visible)
             {
                 IsBattleVisible = visible;
