@@ -35,7 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             SetText(_descriptionText, icon.Description);
             SetText(_costText, icon.ShowCost ? icon.Cost.ToString() : string.Empty);
             SetText(_quantityText, icon.ShowQuantity ? icon.Quantity.ToString() : string.Empty);
-            SetActive(_costText, icon.ShowCost);
+            SetBadgeVisible(_costText, icon.ShowCost);
             SetActive(_quantityText, icon.ShowQuantity);
             SetActive(_selectionHighlight, icon.IsSelected);
             SetDisabledState(!icon.IsAffordable || !icon.IsInteractable);
@@ -84,6 +84,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
             SetText(_descriptionText, string.Empty);
             SetText(_costText, string.Empty);
             SetText(_quantityText, string.Empty);
+            SetBadgeVisible(_costText, false);
+            SetActive(_quantityText, false);
             SetActive(_selectionHighlight, false);
             SetDisabledState(false);
         }
@@ -133,6 +135,23 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 component.gameObject.SetActive(isActive);
             }
+        }
+
+        private void SetBadgeVisible(TFTextUGUI text, bool isActive)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            Transform badgeRoot = text.transform.parent;
+            if (badgeRoot != null && badgeRoot != transform)
+            {
+                badgeRoot.gameObject.SetActive(isActive);
+                return;
+            }
+
+            text.gameObject.SetActive(isActive);
         }
     }
 }
