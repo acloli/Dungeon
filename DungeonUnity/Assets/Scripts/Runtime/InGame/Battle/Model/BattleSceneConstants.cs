@@ -9,6 +9,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const int DefaultPlayerEnergy = 3;
         public const int DefaultHandSize = 5;
         public const int MaxHandSize = 10;
+        public const int MaxPotionCount = 3;
         public const int DefaultEnemyHp = 20;
         public const int DefaultNodeIndex = -1;
         public const int UnselectedCardIndex = -1;

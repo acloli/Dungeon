@@ -157,11 +157,47 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ランタイム用ポーション効果定義
+    /// </summary>
+    public sealed class RuntimePotionEffect
+    {
+        public RuntimePotionEffect(int order, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
+        {
+            Order = order;
+            EffectType = effectType;
+            Value = value;
+            HitCount = hitCount;
+            StatusType = statusType;
+            StatusValue = statusValue;
+            TargetSide = targetSide;
+        }
+
+        public int Order { get; }
+        public EffectType EffectType { get; }
+        public int Value { get; }
+        public int HitCount { get; }
+        public StatusType StatusType { get; }
+        public int StatusValue { get; }
+        public TargetSide TargetSide { get; }
+    }
+
+    /// <summary>
     /// ランタイム用ポーション定義
     /// </summary>
     public sealed class RuntimePotion
     {
-        public RuntimePotion(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity)
+        public RuntimePotion(
+            int id,
+            string key,
+            string displayName,
+            string localizationKey,
+            string description,
+            string descriptionKey,
+            string imageId,
+            CardRarity rarity,
+            PotionUseContext useContext,
+            PotionTargetMode targetMode,
+            IReadOnlyList<RuntimePotionEffect> effects)
         {
             Id = id;
             Key = key;
@@ -171,6 +207,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             DescriptionKey = descriptionKey;
             ImageId = imageId;
             Rarity = rarity;
+            UseContext = useContext;
+            TargetMode = targetMode;
+            Effects = effects ?? Array.Empty<RuntimePotionEffect>();
         }
 
         public int Id { get; }
@@ -181,6 +220,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string DescriptionKey { get; }
         public string ImageId { get; }
         public CardRarity Rarity { get; }
+        public PotionUseContext UseContext { get; }
+        public PotionTargetMode TargetMode { get; }
+        public IReadOnlyList<RuntimePotionEffect> Effects { get; }
     }
 
     /// <summary>
