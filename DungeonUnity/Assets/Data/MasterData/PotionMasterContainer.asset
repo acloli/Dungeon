@@ -14,16 +14,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.PotionMasterContainer
   _data:
   - Id: 1
-    Key: potion_cinder_tonic
-    Name: Cinder Tonic
-    LocalizationKey: potion.name.cinder_tonic
-    DescriptionKey: potion.desc.cinder_tonic
+    Key: potion_energy_potion
+    Name: Energy Potion
+    LocalizationKey: potion.name.energy_potion
+    DescriptionKey: potion.desc.energy_potion
     ImageId: potion_art_cinder_tonic
     Rarity: 1
   - Id: 2
-    Key: potion_smoke_phial
-    Name: Smoke Phial
-    LocalizationKey: potion.name.smoke_phial
-    DescriptionKey: potion.desc.smoke_phial
+    Key: potion_block_potion
+    Name: Block Potion
+    LocalizationKey: potion.name.block_potion
+    DescriptionKey: potion.desc.block_potion
+    ImageId: potion_art_smoke_phial
+    Rarity: 1
+  - Id: 3
+    Key: potion_swift_potion
+    Name: Swift Potion
+    LocalizationKey: potion.name.swift_potion
+    DescriptionKey: potion.desc.swift_potion
     ImageId: potion_art_smoke_phial
     Rarity: 4
+  - Id: 4
+    Key: potion_fruit_juice
+    Name: Fruit Juice
+    LocalizationKey: potion.name.fruit_juice
+    DescriptionKey: potion.desc.fruit_juice
+    ImageId: potion_art_cinder_tonic
+    Rarity: 2
