@@ -11,6 +11,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> relics, Action<int> onClicked);
         void SetOwnedRelicHint(string message, int selectedIndex);
         void ClearOwnedRelics();
+        void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> potions, Action<int> onClicked);
+        void SetOwnedPotionHint(string message, int selectedIndex);
+        void SetOwnedPotionUseVisible(bool visible, Action onClicked);
+        void ClearOwnedPotions();
 
         /// <summary>
         /// 戦闘基底表示切り替え
