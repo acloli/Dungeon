@@ -69,6 +69,11 @@ namespace Game.MasterData.Generated
             return self.GetContainer<MapNodeMasterContainer>();
         }
 
+        public static PotionEffectMasterContainer PotionEffectMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<PotionEffectMasterContainer>();
+        }
+
         public static PotionMasterContainer PotionMaster(this IMasterDataService self)
         {
             return self.GetContainer<PotionMasterContainer>();
