@@ -54,8 +54,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildBuffViews(state.EnemyBuffs),
                 BuildEnemyViews(state),
                 BuildOwnedRelicViews(state),
+                BuildOwnedPotionViews(state),
                 state.SelectedEnemyIndex,
                 state.SelectedOwnedRelicIndex,
+                state.SelectedOwnedPotionIndex,
                 state.DrawPile.Count,
                 state.DiscardPile.Count,
                 state.Hand.Count,
@@ -66,6 +68,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _shopService.GetCardRemovalPrice(state),
                 state.CurrentEvent,
                 state.PendingRelicReward,
+                state.PendingPotionReward,
                 state.EventMessage,
                 state.GoldClaimed,
                 state.PotionClaimed,
@@ -74,7 +77,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.PotionDropped,
                 state.PendingRelicReward != null,
                 state.CardRewardPicked,
-                state.OwnedRelicHintMessage);
+                state.OwnedRelicHintMessage,
+                state.OwnedPotionHintMessage,
+                CanUseSelectedPotion(state),
+                state.PendingPotionOffer,
+                state.PendingPotionUseRequest);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
@@ -287,6 +294,49 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return views;
+        }
+
+        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedPotionViews(BattleSceneState state)
+        {
+            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            for (int i = 0; i < state.OwnedPotions.Count; i++)
+            {
+                RuntimePotion potion = state.OwnedPotions[i];
+                if (potion == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleMultiIconViewModel(
+                    BattleIconKind.Potion,
+                    potion.DisplayName,
+                    potion.Description,
+                    potion.ImageId,
+                    potion.Rarity,
+                    isSelected: i == state.SelectedOwnedPotionIndex));
+            }
+
+            return views;
+        }
+
+        private static bool CanUseSelectedPotion(BattleSceneState state)
+        {
+            if (state == null || state.SelectedOwnedPotionIndex < 0 || state.SelectedOwnedPotionIndex >= state.OwnedPotions.Count)
+            {
+                return false;
+            }
+
+            RuntimePotion potion = state.OwnedPotions[state.SelectedOwnedPotionIndex];
+            if (potion == null)
+            {
+                return false;
+            }
+
+            return state.CurrentPage switch
+            {
+                BattleScenePage.Battle => potion.UseContext == PotionUseContext.BattleOnly || potion.UseContext == PotionUseContext.Both,
+                _ => potion.UseContext == PotionUseContext.OutOfBattleOnly || potion.UseContext == PotionUseContext.Both
+            };
         }
 
         private IReadOnlyList<BattleHandCardViewModel> BuildHandCardViews(BattleSceneState state)

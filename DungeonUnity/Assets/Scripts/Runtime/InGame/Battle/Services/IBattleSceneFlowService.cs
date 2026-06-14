@@ -67,6 +67,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void ClaimPotion();
         void ClaimRelic();
         void InspectOwnedRelic(int index);
+        void InspectOwnedPotion(int index);
+        void RequestUsePotion(int index);
+        void ConfirmUsePotion();
+        void CancelUsePotion();
+        void ReplaceOwnedPotion(int index);
+        void CancelPendingPotionReplace();
         /// <summary>
         /// 報酬画面継続
         /// </summary>
