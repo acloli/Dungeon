@@ -455,6 +455,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            ClearOwnedPotionInspection();
             _state.SelectedOwnedRelicIndex = index;
             _state.OwnedRelicHintMessage = string.IsNullOrEmpty(relic.Description)
                 ? relic.DisplayName
@@ -483,6 +484,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            ClearOwnedRelicInspection();
             _state.SelectedOwnedPotionIndex = index;
             _state.OwnedPotionHintMessage = string.IsNullOrEmpty(potion.Description)
                 ? potion.DisplayName
@@ -533,6 +535,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public void CancelUsePotion()
         {
             _state.PendingPotionUseRequest = null;
+            ClearOwnedPotionInspection();
         }
 
         /// <summary>
@@ -578,6 +581,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public void CancelPendingPotionReplace()
         {
             _state.PendingPotionOffer = null;
+            ClearOwnedPotionInspection();
+        }
+
+        /// <summary>
+        /// 所持レリック・ポーション選択状態を解除する
+        /// </summary>
+        public void ClearOwnedInspections()
+        {
+            ClearOwnedRelicInspection();
+            ClearOwnedPotionInspection();
         }
 
         /// <summary>

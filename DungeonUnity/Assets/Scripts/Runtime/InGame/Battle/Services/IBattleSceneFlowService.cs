@@ -73,6 +73,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void CancelUsePotion();
         void ReplaceOwnedPotion(int index);
         void CancelPendingPotionReplace();
+        void ClearOwnedInspections();
         /// <summary>
         /// 報酬画面継続
         /// </summary>

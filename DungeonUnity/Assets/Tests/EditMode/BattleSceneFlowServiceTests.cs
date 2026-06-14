@@ -675,6 +675,55 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void OwnedInspects_AreMutuallyExclusive_AndPotionCancelClearsSelection()
+        {
+            RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 6, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion potion = CreatePotion(2, "Fruit Juice", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainMaxHp, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                relicCatalog: new Dictionary<int, RuntimeRelic> { { relic.Id, relic } },
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedRelicIds = new List<int> { relic.Id },
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.InspectOwnedRelic(0);
+            service.InspectOwnedPotion(0);
+            BattleSceneSnapshot potionSnapshot = service.CreateSnapshot();
+            Assert.That(potionSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(potionSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(0));
+
+            service.RequestUsePotion(0);
+            service.CancelUsePotion();
+            BattleSceneSnapshot canceledUseSnapshot = service.CreateSnapshot();
+            Assert.That(canceledUseSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
+            Assert.That(canceledUseSnapshot.OwnedPotionHintMessage, Is.Empty);
+
+            service.InspectOwnedRelic(0);
+            service.InspectOwnedPotion(0);
+            service.ClearOwnedInspections();
+            BattleSceneSnapshot clearedSnapshot = service.CreateSnapshot();
+            Assert.That(clearedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(clearedSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
+        }
+
+        [Test]
         public void OwnedRelic_PlayerTurnStartGainEnergy_AppliesEachTurn()
         {
             RuntimeRelic relic = CreateRelic(2, "Ember Crown", new[]
@@ -1018,6 +1067,7 @@ namespace Dungeon.Tests.EditMode
             IReadOnlyList<RuntimeEncounterEntry> bossEncounters = null,
             IReadOnlyList<RuntimeEvent> events = null,
             IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = null,
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog = null,
             RuntimeShopLineup shopLineup = null,
             IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = null)
         {
@@ -1048,7 +1098,7 @@ namespace Dungeon.Tests.EditMode
                 encounters,
                 events ?? null,
                 relicCatalog ?? new Dictionary<int, RuntimeRelic>(),
-                new Dictionary<int, RuntimePotion>(),
+                potionCatalog ?? new Dictionary<int, RuntimePotion>(),
                 shopLineup,
                 null,
                 itemPriceRules);
@@ -1154,6 +1204,22 @@ namespace Dungeon.Tests.EditMode
                 string.Empty,
                 $"relic_icon_{id}",
                 CardRarity.Uncommon,
+                effects);
+        }
+
+        private static RuntimePotion CreatePotion(int id, string displayName, PotionUseContext useContext, PotionTargetMode targetMode, IReadOnlyList<RuntimePotionEffect> effects)
+        {
+            return new RuntimePotion(
+                id,
+                $"potion_{id}",
+                displayName,
+                string.Empty,
+                $"{displayName} description",
+                string.Empty,
+                $"potion_icon_{id}",
+                CardRarity.Uncommon,
+                useContext,
+                targetMode,
                 effects);
         }
 
