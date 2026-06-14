@@ -65,6 +65,25 @@ namespace Dungeon.Tests.EditMode
             Assert.That(uiService.LastEventDialogParam, Is.Not.Null);
         }
 
+        [Test]
+        public void ShowPotionDialogs_DispatchWithoutClearingStack()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Map);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            int clearCountAfterInit = uiService.ClearStackCallCount;
+
+            coordinator.ShowPotionUseConfirmAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowPotionReplaceAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(clearCountAfterInit));
+            Assert.That(uiService.LastPotionUseConfirmDialogParam, Is.Not.Null);
+            Assert.That(uiService.LastPotionReplaceDialogParam, Is.Not.Null);
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -108,6 +127,22 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
+            public void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> potions, Action<int> onClicked)
+            {
+            }
+
+            public void SetOwnedPotionHint(string message, int selectedIndex)
+            {
+            }
+
+            public void SetOwnedPotionUseVisible(bool visible, Action onClicked)
+            {
+            }
+
+            public void ClearOwnedPotions()
+            {
+            }
+
             public void SetBattleVisible(bool visible)
             {
                 IsBattleVisible = visible;
@@ -135,6 +170,8 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastResultDialogParam { get; private set; }
             public UIDialogOpenParam LastShopDialogParam { get; private set; }
             public UIDialogOpenParam LastEventDialogParam { get; private set; }
+            public UIDialogOpenParam LastPotionUseConfirmDialogParam { get; private set; }
+            public UIDialogOpenParam LastPotionReplaceDialogParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
             public int PageStackCount => 0;
@@ -175,6 +212,14 @@ namespace Dungeon.Tests.EditMode
                 else if (typeof(TDialog) == typeof(EventDialog))
                 {
                     LastEventDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(PotionUseConfirmDialog))
+                {
+                    LastPotionUseConfirmDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(PotionReplaceDialog))
+                {
+                    LastPotionReplaceDialogParam = param as UIDialogOpenParam;
                 }
 
                 return UniTask.FromResult(default(TResult));

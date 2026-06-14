@@ -129,6 +129,10 @@ namespace Dungeon.Tests.EditMode
             {
                 new PotionMaster { Id = 1, Key = "potion_1", Name = "Potion1", LocalizationKey = "potion.1", DescriptionKey = "potion.1.desc", ImageId = "potion_1", Rarity = CardRarity.Common }
             });
+            masterDataService.SetAll(new[]
+            {
+                new PotionEffectMaster { Id = 3201, PotionId = 1, Order = 1, EffectType = EffectType.GainMaxHp, Value = 5, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Self }
+            });
 
             BattleMasterDataFacade facade = new BattleMasterDataFacade(
                 masterDataService,
@@ -149,6 +153,9 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.RelicCatalog[1].Effects.Count, Is.EqualTo(1));
             Assert.That(runDefinition.RelicCatalog[1].Effects[0].TriggerType, Is.EqualTo(RelicTriggerType.CombatStart));
             Assert.That(runDefinition.PotionCatalog[1].DisplayName, Is.EqualTo("Potion1"));
+            Assert.That(runDefinition.PotionCatalog[1].Effects.Count, Is.EqualTo(1));
+            Assert.That(runDefinition.PotionCatalog[1].UseContext, Is.EqualTo(PotionUseContext.Both));
+            Assert.That(runDefinition.PotionCatalog[1].TargetMode, Is.EqualTo(PotionTargetMode.Self));
             Assert.That(runDefinition.PossibleEvents.Count, Is.EqualTo(1));
             Assert.That(runDefinition.PossibleEvents[0].Choices.Count, Is.EqualTo(2));
             Assert.That(runDefinition.ShopLineup.ShopId, Is.EqualTo(1));

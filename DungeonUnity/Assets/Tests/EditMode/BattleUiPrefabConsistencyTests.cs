@@ -25,6 +25,8 @@ namespace Dungeon.Tests.EditMode
         [TestCase("ResultDialog", true, "CommonDialog")]
         [TestCase("ShopDialog", true, "CommonDialog")]
         [TestCase("CardSelectDialog", true, "CommonDialog")]
+        [TestCase("PotionUseConfirmDialog", true, "CommonDialog")]
+        [TestCase("PotionReplaceDialog", true, "CommonDialog")]
         [TestCase("MultiIcon", false, null)]
         [TestCase("CardIcon", true, "MultiIcon")]
         [TestCase("RelicIcon", true, "MultiIcon")]
@@ -59,6 +61,8 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<ResultDialog>("ResultDialog");
             AssertPrefabContainsComponent<ShopDialog>("ShopDialog");
             AssertPrefabContainsComponent<CardSelectDialog>("CardSelectDialog");
+            AssertPrefabContainsComponent<PotionUseConfirmDialog>("PotionUseConfirmDialog");
+            AssertPrefabContainsComponent<PotionReplaceDialog>("PotionReplaceDialog");
 
             GameObject mapPagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/MapPage.prefab");
             MapPage mapPageComponent = mapPagePrefab.GetComponent<MapPage>();
@@ -120,6 +124,25 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void PotionDialogs_HaveSerializedViewReferences()
+        {
+            GameObject usePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/PotionUseConfirmDialog.prefab");
+            PotionUseConfirmDialog useDialog = usePrefab.GetComponent<PotionUseConfirmDialog>();
+            SerializedObject useSerialized = new SerializedObject(useDialog);
+            Assert.That(useSerialized.FindProperty("_potionIconView").objectReferenceValue, Is.Not.Null);
+            Assert.That(useSerialized.FindProperty("_confirmButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(useSerialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+
+            GameObject replacePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/PotionReplaceDialog.prefab");
+            PotionReplaceDialog replaceDialog = replacePrefab.GetComponent<PotionReplaceDialog>();
+            SerializedObject replaceSerialized = new SerializedObject(replaceDialog);
+            Assert.That(replaceSerialized.FindProperty("_ownedPotionRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_ownedPotionTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_offeredPotionView").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
         public void CardIconPrefabs_HaveExpectedComponents()
         {
             AssertPrefabContainsComponent<BattleMultiIconView>("MultiIcon");
@@ -141,6 +164,8 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ResultDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ShopDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.CardSelectDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.PotionUseConfirmDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.PotionReplaceDialog}", yaml);
             StringAssert.DoesNotContain("m_Address: MapPageView", yaml);
             StringAssert.DoesNotContain("m_Address: RewardDialogView", yaml);
             StringAssert.DoesNotContain("m_Address: RestShopDialogView", yaml);
@@ -169,6 +194,11 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_ownedRelicTemplate: {fileID:", yaml);
             StringAssert.Contains("_ownedRelicHintRoot: {fileID:", yaml);
             StringAssert.Contains("_ownedRelicHintText: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionTemplate: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionHintRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionHintText: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionUseButton: {fileID:", yaml);
             StringAssert.Contains("_playerSummaryText: {fileID:", yaml);
             StringAssert.Contains("_enemySummaryText: {fileID:", yaml);
             StringAssert.Contains("_intentText: {fileID:", yaml);
@@ -188,6 +218,9 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: HandCountPanel", yaml);
             StringAssert.Contains("m_Name: RelicStrip", yaml);
             StringAssert.Contains("m_Name: OwnedRelicHintPanel", yaml);
+            StringAssert.Contains("m_Name: PotionStrip", yaml);
+            StringAssert.Contains("m_Name: OwnedPotionHintPanel", yaml);
+            StringAssert.Contains("m_Name: UsePotionButton", yaml);
         }
 
         [Test]

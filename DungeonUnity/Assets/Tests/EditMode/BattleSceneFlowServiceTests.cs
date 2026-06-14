@@ -929,6 +929,7 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleShopService(),
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
+                new BattlePotionService(),
                 new BattleEventService());
         }
 
@@ -946,6 +947,7 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleShopService(),
                 combatEventService,
                 new BattleRelicService(),
+                new BattlePotionService(),
                 new BattleEventService());
         }
 
@@ -963,6 +965,7 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleShopService(),
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
+                new BattlePotionService(),
                 new BattleEventService(),
                 runSaveService);
         }
@@ -981,6 +984,7 @@ namespace Dungeon.Tests.EditMode
                 shopService,
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
+                new BattlePotionService(),
                 new BattleEventService());
         }
 
@@ -998,6 +1002,7 @@ namespace Dungeon.Tests.EditMode
                 new FakeBattleShopService(),
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
+                new BattlePotionService(),
                 new BattleEventService());
         }
 
