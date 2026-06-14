@@ -84,7 +84,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             DiscardHand(state);
-            DrawCards(state, randomProvider, BattleSceneConstants.DefaultHandSize);
+            DrawCardsInternal(state, randomProvider, BattleSceneConstants.DefaultHandSize);
         }
 
         /// <summary>
@@ -135,6 +135,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             state.Hand.Clear();
             state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+        }
+
+        /// <summary>
+        /// 指定枚数だけ手札へ追加する
+        /// </summary>
+        public int DrawCards(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount)
+        {
+            return DrawCardsInternal(state, randomProvider, drawCount);
         }
 
         /// <summary>
@@ -298,7 +306,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         ApplyCardStatus(state, effect);
                         break;
                     case EffectType.DrawCards:
-                        totalDraw += DrawCards(state, randomProvider, effect.Value);
+                        totalDraw += DrawCardsInternal(state, randomProvider, effect.Value);
                         break;
                 }
             }
@@ -629,7 +637,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 指定枚数だけ手札へ追加する
         /// </summary>
-        private static int DrawCards(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount)
+        private static int DrawCardsInternal(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount)
         {
             if (state == null || drawCount <= 0)
             {
