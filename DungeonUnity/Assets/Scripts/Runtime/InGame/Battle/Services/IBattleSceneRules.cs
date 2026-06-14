@@ -30,6 +30,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void DiscardHand(BattleSceneState state);
 
         /// <summary>
+        /// 指定枚数を手札へ追加する
+        /// </summary>
+        int DrawCards(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount);
+
+        /// <summary>
         /// 敵選出
         /// </summary>
         RuntimeEncounterFormation SelectEncounterFormation(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider);
