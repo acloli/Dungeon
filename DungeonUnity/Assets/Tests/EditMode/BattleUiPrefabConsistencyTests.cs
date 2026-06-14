@@ -15,6 +15,7 @@ namespace Dungeon.Tests.EditMode
     public sealed class BattleUiPrefabConsistencyTests
     {
         private const string UiFolder = "Assets/Prefabs/InGame/UI";
+        private const string CommonUiFolder = "Assets/Prefabs/Common/UI";
         private const string AddressGroupPath = "Assets/AddressableAssetsData/AssetGroups/Default Local Group.asset";
 
         [TestCase("CommonPage", false, null)]
@@ -267,6 +268,26 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: ContinueRunButton", mainSceneYaml);
             StringAssert.Contains("_saveQuitButton: {fileID:", battleSceneYaml);
             StringAssert.Contains("m_Name: SaveQuitButton", battleSceneYaml);
+        }
+
+        [Test]
+        public void SceneUiRoot_UsesLowerSortingThanFrameworkUiRoot()
+        {
+            GameObject sceneUiRootPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{CommonUiFolder}/SceneUIRoot.prefab");
+            GameObject uiRootPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{CommonUiFolder}/UIRoot.prefab");
+
+            Assert.That(sceneUiRootPrefab, Is.Not.Null);
+            Assert.That(uiRootPrefab, Is.Not.Null);
+
+            Canvas sceneCanvas = sceneUiRootPrefab.GetComponent<Canvas>();
+            Canvas uiRootCanvas = uiRootPrefab.GetComponent<Canvas>();
+
+            Assert.That(sceneCanvas, Is.Not.Null);
+            Assert.That(uiRootCanvas, Is.Not.Null);
+            Assert.That(sceneCanvas.overrideSorting, Is.True);
+            Assert.That(sceneCanvas.sortingOrder, Is.LessThan(0));
+            Assert.That(sceneCanvas.sortingOrder, Is.LessThan(uiRootCanvas.sortingOrder));
+            Assert.That(uiRootCanvas.sortingOrder, Is.EqualTo(0));
         }
 
         private static void AssertPrefabContainsComponent<T>(string prefabName) where T : Component
