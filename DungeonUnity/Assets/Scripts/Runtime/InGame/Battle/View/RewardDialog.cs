@@ -63,7 +63,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             // Potion行
             if (snapshot.PotionDropped && !snapshot.PotionClaimed)
-                AddRow(BattleSceneConstants.PotionDroppedLabel,
+                AddRow(snapshot.PendingPotionReward != null ? snapshot.PendingPotionReward.DisplayName : BattleSceneConstants.PotionDroppedLabel,
                     () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimPotion }),
                     true);
 

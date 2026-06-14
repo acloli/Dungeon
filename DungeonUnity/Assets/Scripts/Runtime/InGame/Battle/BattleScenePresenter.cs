@@ -21,6 +21,7 @@ namespace Dungeon.Runtime.InGame.Battle
         private readonly CancellationTokenSource _presenterCts = new CancellationTokenSource();
 
         private IBattleSceneHostView _view;
+        private BattleSceneSnapshot _lastSnapshot;
         private Action _onResultBackClicked;
         private Action _onSaveQuitClicked;
 
@@ -82,8 +83,12 @@ namespace Dungeon.Runtime.InGame.Battle
                 _view.UnwireSaveQuitButton();
                 _view.ClearOwnedRelics();
                 _view.SetOwnedRelicHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
+                _view.ClearOwnedPotions();
+                _view.SetOwnedPotionHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
+                _view.SetOwnedPotionUseVisible(false, null);
             }
             _uiCoordinator.Dispose();
+            _lastSnapshot = null;
             _view = null;
             _onResultBackClicked = null;
             _onSaveQuitClicked = null;
@@ -127,6 +132,29 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// 所持薬水クリック通知
+        /// </summary>
+        public void OnOwnedPotionClicked(int index)
+        {
+            _flowService.InspectOwnedPotion(index);
+            RenderAsync(_presenterCts.Token).Forget();
+        }
+
+        /// <summary>
+        /// 薬水使用通知
+        /// </summary>
+        public void OnUsePotionClicked()
+        {
+            if (_lastSnapshot == null || _lastSnapshot.SelectedOwnedPotionIndex < 0)
+            {
+                return;
+            }
+
+            _flowService.RequestUsePotion(_lastSnapshot.SelectedOwnedPotionIndex);
+            RenderAsync(_presenterCts.Token).Forget();
+        }
+
+        /// <summary>
         /// ターン終了通知
         /// </summary>
         public void OnEndTurnClicked()
@@ -154,10 +182,15 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
+            _lastSnapshot = snapshot;
             _battlePagePresenter.Clear();
-            _view.ClearOwnedRelics();
-            _view.BuildOwnedRelics(snapshot.OwnedRelics, OnOwnedRelicClicked);
-            _view.SetOwnedRelicHint(snapshot.OwnedRelicHintMessage, snapshot.SelectedOwnedRelicIndex);
+            RenderHostChrome(snapshot);
+
+            if (await TryResolvePotionDialogsAsync(snapshot, ct))
+            {
+                await RenderAsync(ct);
+                return;
+            }
 
             switch (snapshot.CurrentPage)
             {
@@ -203,6 +236,13 @@ namespace Dungeon.Runtime.InGame.Battle
                                 rewardActive = false;
                                 break;
                         }
+
+                        if (rewardActive && await TryResolvePotionDialogsAsync(snapshot, ct))
+                        {
+                            snapshot = _flowService.CreateSnapshot();
+                            _lastSnapshot = snapshot;
+                            RenderHostChrome(snapshot);
+                        }
                     }
                     await RenderAsync(ct);
                     break;
@@ -244,6 +284,53 @@ namespace Dungeon.Runtime.InGame.Battle
                     _onResultBackClicked?.Invoke();
                     break;
             }
+        }
+
+        private void RenderHostChrome(BattleSceneSnapshot snapshot)
+        {
+            _view.ClearOwnedRelics();
+            _view.BuildOwnedRelics(snapshot.OwnedRelics, OnOwnedRelicClicked);
+            _view.SetOwnedRelicHint(snapshot.OwnedRelicHintMessage, snapshot.SelectedOwnedRelicIndex);
+
+            _view.ClearOwnedPotions();
+            _view.BuildOwnedPotions(snapshot.OwnedPotions, OnOwnedPotionClicked);
+            _view.SetOwnedPotionHint(snapshot.OwnedPotionHintMessage, snapshot.SelectedOwnedPotionIndex);
+            _view.SetOwnedPotionUseVisible(snapshot.CanUseSelectedPotion, OnUsePotionClicked);
+        }
+
+        private async UniTask<bool> TryResolvePotionDialogsAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            if (snapshot.PendingPotionUseRequest != null)
+            {
+                PotionUseConfirmDialogResult result = await _uiCoordinator.ShowPotionUseConfirmAsync(snapshot, ct);
+                if (result.IsConfirmed)
+                {
+                    _flowService.ConfirmUsePotion();
+                }
+                else
+                {
+                    _flowService.CancelUsePotion();
+                }
+
+                return true;
+            }
+
+            if (snapshot.PendingPotionOffer != null)
+            {
+                PotionReplaceDialogResult result = await _uiCoordinator.ShowPotionReplaceAsync(snapshot, ct);
+                if (result.IsCanceled)
+                {
+                    _flowService.CancelPendingPotionReplace();
+                }
+                else
+                {
+                    _flowService.ReplaceOwnedPotion(result.SelectedPotionIndex);
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

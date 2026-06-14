@@ -174,6 +174,26 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// 薬水使用確認ダイアログ表示
+        /// </summary>
+        public async UniTask<PotionUseConfirmDialogResult> ShowPotionUseConfirmAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            return await _uiService.ShowDialogAsync<PotionUseConfirmDialog, PotionUseConfirmDialogResult>(
+                BattleDialogOpenParams.SingleUse(new BattlePotionUseConfirmDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
+        /// 薬水交換ダイアログ表示
+        /// </summary>
+        public async UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            return await _uiService.ShowDialogAsync<PotionReplaceDialog, PotionReplaceDialogResult>(
+                BattleDialogOpenParams.SingleUse(new BattlePotionReplaceDialogParam(snapshot)),
+                ct);
+        }
+
+        /// <summary>
         /// UI切り離し処理
         /// </summary>
         public void Dispose()

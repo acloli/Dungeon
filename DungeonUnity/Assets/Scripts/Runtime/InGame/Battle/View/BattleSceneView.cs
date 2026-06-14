@@ -19,9 +19,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private BattleMultiIconView _ownedRelicTemplate;
         [SerializeField] private GameObject _ownedRelicHintRoot;
         [SerializeField] private TFTextUGUI _ownedRelicHintText;
+        [SerializeField] private Transform _ownedPotionRoot;
+        [SerializeField] private BattleMultiIconView _ownedPotionTemplate;
+        [SerializeField] private GameObject _ownedPotionHintRoot;
+        [SerializeField] private TFTextUGUI _ownedPotionHintText;
+        [SerializeField] private Button _ownedPotionUseButton;
         [SerializeField] private Button _saveQuitButton;
 
         private readonly List<BattleMultiIconView> _ownedRelicViews = new List<BattleMultiIconView>();
+        private readonly List<BattleMultiIconView> _ownedPotionViews = new List<BattleMultiIconView>();
 
         /// <summary>
         /// 戦闘画面View取得
@@ -58,6 +64,37 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
+        public void BuildOwnedPotions(IReadOnlyList<Model.BattleMultiIconViewModel> potions, Action<int> onClicked)
+        {
+            ClearOwnedPotions();
+
+            if (_ownedPotionRoot == null || _ownedPotionTemplate == null || potions == null || potions.Count == 0)
+            {
+                SetOwnedPotionHint(string.Empty, Model.BattleSceneConstants.UnselectedCardIndex);
+                SetOwnedPotionUseVisible(false, null);
+                return;
+            }
+
+            _ownedPotionRoot.gameObject.SetActive(true);
+            _ownedPotionTemplate.gameObject.SetActive(false);
+
+            for (int i = 0; i < potions.Count; i++)
+            {
+                int potionIndex = i;
+                Model.BattleMultiIconViewModel potion = potions[potionIndex];
+                if (potion == null)
+                {
+                    continue;
+                }
+
+                BattleMultiIconView potionView = Instantiate(_ownedPotionTemplate, _ownedPotionRoot);
+                potionView.gameObject.SetActive(true);
+                potionView.Bind(potion, () => onClicked?.Invoke(potionIndex));
+                potionView.SetCompactLayout(true);
+                _ownedPotionViews.Add(potionView);
+            }
+        }
+
         public void SetOwnedRelicHint(string message, int selectedIndex)
         {
             bool visible = selectedIndex >= 0 && !string.IsNullOrEmpty(message);
@@ -69,6 +106,36 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_ownedRelicHintText != null)
             {
                 _ownedRelicHintText.text = visible ? message : string.Empty;
+            }
+        }
+
+        public void SetOwnedPotionHint(string message, int selectedIndex)
+        {
+            bool visible = selectedIndex >= 0 && !string.IsNullOrEmpty(message);
+            if (_ownedPotionHintRoot != null)
+            {
+                _ownedPotionHintRoot.SetActive(visible);
+            }
+
+            if (_ownedPotionHintText != null)
+            {
+                _ownedPotionHintText.text = visible ? message : string.Empty;
+            }
+        }
+
+        public void SetOwnedPotionUseVisible(bool visible, Action onClicked)
+        {
+            if (_ownedPotionUseButton == null)
+            {
+                return;
+            }
+
+            _ownedPotionUseButton.onClick.RemoveAllListeners();
+            _ownedPotionUseButton.gameObject.SetActive(visible);
+            _ownedPotionUseButton.interactable = visible;
+            if (visible)
+            {
+                _ownedPotionUseButton.onClick.AddListener(() => onClicked?.Invoke());
             }
         }
 
@@ -92,6 +159,30 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _ownedRelicRoot.gameObject.SetActive(false);
             }
+        }
+
+        public void ClearOwnedPotions()
+        {
+            for (int i = 0; i < _ownedPotionViews.Count; i++)
+            {
+                BattleMultiIconView potionView = _ownedPotionViews[i];
+                if (potionView == null)
+                {
+                    continue;
+                }
+
+                potionView.Clear();
+                Destroy(potionView.gameObject);
+            }
+
+            _ownedPotionViews.Clear();
+
+            if (_ownedPotionRoot != null)
+            {
+                _ownedPotionRoot.gameObject.SetActive(false);
+            }
+
+            SetOwnedPotionUseVisible(false, null);
         }
 
         /// <summary>
@@ -120,7 +211,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     }
 
                     if ((_ownedRelicRoot != null && child == _ownedRelicRoot) ||
-                        (_ownedRelicHintRoot != null && child.gameObject == _ownedRelicHintRoot))
+                        (_ownedRelicHintRoot != null && child.gameObject == _ownedRelicHintRoot) ||
+                        (_ownedPotionRoot != null && child == _ownedPotionRoot) ||
+                        (_ownedPotionHintRoot != null && child.gameObject == _ownedPotionHintRoot) ||
+                        (_ownedPotionUseButton != null && child.gameObject == _ownedPotionUseButton.gameObject))
                     {
                         continue;
                     }
