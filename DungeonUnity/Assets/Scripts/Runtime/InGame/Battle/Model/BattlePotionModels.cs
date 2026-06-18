@@ -48,29 +48,4 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int ShopSlotIndex { get; }
     }
 
-    /// <summary>
-    /// 使用確認待ちポーション情報
-    /// </summary>
-    public sealed class PendingPotionUseRequest
-    {
-        public PendingPotionUseRequest(
-            RuntimePotion potion,
-            int potionIndex,
-            PotionUseContext useContext,
-            PotionTargetMode targetMode,
-            bool requiresConfirmation)
-        {
-            Potion = potion;
-            PotionIndex = potionIndex;
-            UseContext = useContext;
-            TargetMode = targetMode;
-            RequiresConfirmation = requiresConfirmation;
-        }
-
-        public RuntimePotion Potion { get; }
-        public int PotionIndex { get; }
-        public PotionUseContext UseContext { get; }
-        public PotionTargetMode TargetMode { get; }
-        public bool RequiresConfirmation { get; }
-    }
 }

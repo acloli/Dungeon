@@ -80,8 +80,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.OwnedRelicHintMessage,
                 state.OwnedPotionHintMessage,
                 CanUseSelectedPotion(state),
-                state.PendingPotionOffer,
-                state.PendingPotionUseRequest);
+                state.PendingPotionOffer);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)

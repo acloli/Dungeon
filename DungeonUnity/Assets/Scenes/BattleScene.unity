@@ -412,6 +412,7 @@ GameObject:
   - component: {fileID: 210000101}
   - component: {fileID: 210000103}
   - component: {fileID: 210000102}
+  - component: {fileID: 210000108}
   m_Layer: 0
   m_Name: OwnedRelicHintPanel
   m_TagString: Untagged
@@ -618,6 +619,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210000104}
   m_CullTransparentMesh: 1
+--- !u!225 &210000108
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210000100}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &304988877
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,6 +642,7 @@ GameObject:
   - component: {fileID: 304988878}
   - component: {fileID: 304988880}
   - component: {fileID: 304988879}
+  - component: {fileID: 304988881}
   m_Layer: 0
   m_Name: OwnedPotionHintPanel
   m_TagString: Untagged
@@ -694,6 +708,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 304988877}
   m_CullTransparentMesh: 1
+--- !u!225 &304988881
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 304988877}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &318307257
 GameObject:
   m_ObjectHideFlags: 0
@@ -1689,6 +1715,7 @@ GameObject:
   - component: {fileID: 774932449}
   - component: {fileID: 774932448}
   - component: {fileID: 774932447}
+  - component: {fileID: 774932450}
   m_Layer: 0
   m_Name: UsePotionButton
   m_TagString: Untagged
@@ -1798,6 +1825,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 774932445}
   m_CullTransparentMesh: 1
+--- !u!225 &774932450
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 774932445}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &833024013
 GameObject:
   m_ObjectHideFlags: 0
@@ -2257,6 +2296,7 @@ GameObject:
   m_Component:
   - component: {fileID: 957070707}
   - component: {fileID: 957070708}
+  - component: {fileID: 957070709}
   m_Layer: 0
   m_Name: PotionStrip
   m_TagString: Untagged
@@ -2310,6 +2350,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
+--- !u!225 &957070709
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957070706}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &1010868272
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2449,11 +2501,17 @@ MonoBehaviour:
   _ownedRelicTemplate: {fileID: 927127723}
   _ownedRelicHintRoot: {fileID: 210000100}
   _ownedRelicHintText: {fileID: 210000106}
+  _ownedRelicCanvasGroup: {fileID: 2095895621}
+  _ownedRelicHintCanvasGroup: {fileID: 210000108}
   _ownedPotionRoot: {fileID: 957070707}
   _ownedPotionTemplate: {fileID: 1454310618}
   _ownedPotionHintRoot: {fileID: 304988877}
   _ownedPotionHintText: {fileID: 1015711810}
   _ownedPotionUseButton: {fileID: 774932447}
+  _ownedPotionCanvasGroup: {fileID: 957070709}
+  _ownedPotionHintCanvasGroup: {fileID: 304988881}
+  _ownedPotionUseCanvasGroup: {fileID: 774932450}
+  _hostBackgroundButton: {fileID: 2061707969}
   _saveQuitButton: {fileID: 833024015}
 --- !u!114 &1010868279
 MonoBehaviour:
@@ -5260,6 +5318,7 @@ GameObject:
   - component: {fileID: 2061707966}
   - component: {fileID: 2061707968}
   - component: {fileID: 2061707967}
+  - component: {fileID: 2061707969}
   m_Layer: 0
   m_Name: BattlePanel
   m_TagString: Untagged
@@ -5343,6 +5402,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061707965}
   m_CullTransparentMesh: 1
+--- !u!114 &2061707969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061707965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 2061707967}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2081246046
 GameObject:
   m_ObjectHideFlags: 0
@@ -5494,6 +5597,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2095895619}
   - component: {fileID: 2095895620}
+  - component: {fileID: 2095895621}
   m_Layer: 0
   m_Name: RelicStrip
   m_TagString: Untagged
@@ -5547,6 +5651,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
+--- !u!225 &2095895621
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095895618}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

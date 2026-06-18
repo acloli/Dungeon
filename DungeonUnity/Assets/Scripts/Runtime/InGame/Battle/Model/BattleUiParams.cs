@@ -145,19 +145,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
-    /// 薬水使用確認ダイアログ表示パラメータクラス
-    /// </summary>
-    public sealed class BattlePotionUseConfirmDialogParam
-    {
-        public BattlePotionUseConfirmDialogParam(BattleSceneSnapshot snapshot)
-        {
-            Snapshot = snapshot;
-        }
-
-        public BattleSceneSnapshot Snapshot { get; }
-    }
-
-    /// <summary>
     /// 薬水交換ダイアログの返却結果
     /// </summary>
     public struct PotionReplaceDialogResult
@@ -177,14 +164,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         public BattleSceneSnapshot Snapshot { get; }
-    }
-
-    /// <summary>
-    /// 薬水使用確認ダイアログの返却結果
-    /// </summary>
-    public struct PotionUseConfirmDialogResult
-    {
-        public bool IsConfirmed;
     }
 
     /// <summary>

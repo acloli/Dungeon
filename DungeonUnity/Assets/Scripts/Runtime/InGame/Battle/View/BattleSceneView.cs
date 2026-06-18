@@ -19,11 +19,17 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private BattleMultiIconView _ownedRelicTemplate;
         [SerializeField] private GameObject _ownedRelicHintRoot;
         [SerializeField] private TFTextUGUI _ownedRelicHintText;
+        [SerializeField] private CanvasGroup _ownedRelicCanvasGroup;
+        [SerializeField] private CanvasGroup _ownedRelicHintCanvasGroup;
         [SerializeField] private Transform _ownedPotionRoot;
         [SerializeField] private BattleMultiIconView _ownedPotionTemplate;
         [SerializeField] private GameObject _ownedPotionHintRoot;
         [SerializeField] private TFTextUGUI _ownedPotionHintText;
         [SerializeField] private Button _ownedPotionUseButton;
+        [SerializeField] private CanvasGroup _ownedPotionCanvasGroup;
+        [SerializeField] private CanvasGroup _ownedPotionHintCanvasGroup;
+        [SerializeField] private CanvasGroup _ownedPotionUseCanvasGroup;
+        [SerializeField] private Button _hostBackgroundButton;
         [SerializeField] private Button _saveQuitButton;
 
         private readonly List<BattleMultiIconView> _ownedRelicViews = new List<BattleMultiIconView>();
@@ -185,6 +191,37 @@ namespace Dungeon.Runtime.InGame.Battle.View
             SetOwnedPotionUseVisible(false, null);
         }
 
+        public void SetHostChromeInteractable(bool interactable)
+        {
+            ApplyCanvasGroupState(_ownedRelicCanvasGroup, interactable);
+            ApplyCanvasGroupState(_ownedRelicHintCanvasGroup, interactable);
+            ApplyCanvasGroupState(_ownedPotionCanvasGroup, interactable);
+            ApplyCanvasGroupState(_ownedPotionHintCanvasGroup, interactable);
+            ApplyCanvasGroupState(_ownedPotionUseCanvasGroup, interactable);
+
+            if (_hostBackgroundButton != null)
+            {
+                _hostBackgroundButton.interactable = interactable;
+            }
+        }
+
+        public void WireHostBackgroundClick(Action onClicked)
+        {
+            UnwireHostBackgroundClick();
+            if (_hostBackgroundButton != null)
+            {
+                _hostBackgroundButton.onClick.AddListener(() => onClicked?.Invoke());
+            }
+        }
+
+        public void UnwireHostBackgroundClick()
+        {
+            if (_hostBackgroundButton != null)
+            {
+                _hostBackgroundButton.onClick.RemoveAllListeners();
+            }
+        }
+
         /// <summary>
         /// 戦闘基底表示切り替え
         /// </summary>
@@ -214,7 +251,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
                         (_ownedRelicHintRoot != null && child.gameObject == _ownedRelicHintRoot) ||
                         (_ownedPotionRoot != null && child == _ownedPotionRoot) ||
                         (_ownedPotionHintRoot != null && child.gameObject == _ownedPotionHintRoot) ||
-                        (_ownedPotionUseButton != null && child.gameObject == _ownedPotionUseButton.gameObject))
+                        (_ownedPotionUseButton != null && child.gameObject == _ownedPotionUseButton.gameObject) ||
+                        (_hostBackgroundButton != null && child.gameObject == _hostBackgroundButton.gameObject))
                     {
                         continue;
                     }
@@ -256,6 +294,17 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _saveQuitButton.onClick.RemoveAllListeners();
             }
+        }
+
+        private static void ApplyCanvasGroupState(CanvasGroup canvasGroup, bool interactable)
+        {
+            if (canvasGroup == null)
+            {
+                return;
+            }
+
+            canvasGroup.interactable = interactable;
+            canvasGroup.blocksRaycasts = interactable;
         }
     }
 }

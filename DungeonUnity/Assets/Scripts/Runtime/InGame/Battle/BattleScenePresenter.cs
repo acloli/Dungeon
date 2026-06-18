@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
+using UnityEngine;
 
 namespace Dungeon.Runtime.InGame.Battle
 {
@@ -24,6 +25,8 @@ namespace Dungeon.Runtime.InGame.Battle
         private BattleSceneSnapshot _lastSnapshot;
         private Action _onResultBackClicked;
         private Action _onSaveQuitClicked;
+        private bool _isRendering;
+        private bool _renderRequested;
 
         public BattleScenePresenter(
             IBattleSceneFlowService flowService,
@@ -48,6 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle
 
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             _view.WireSaveQuitButton(OnSaveQuitClicked);
+            _view.WireHostBackgroundClick(OnHostBackgroundClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
             if (_runSaveService != null && _runSaveService.HasSavedRun())
@@ -86,6 +90,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 _view.ClearOwnedPotions();
                 _view.SetOwnedPotionHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
                 _view.SetOwnedPotionUseVisible(false, null);
+                _view.UnwireHostBackgroundClick();
             }
             _uiCoordinator.Dispose();
             _lastSnapshot = null;
@@ -100,7 +105,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnMapNodeClicked(int index)
         {
             _flowService.SelectMapNode(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -110,7 +115,7 @@ namespace Dungeon.Runtime.InGame.Battle
         {
             _flowService.SelectHandCard(index);
             _flowService.TryPlaySelectedCard();
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -119,7 +124,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEnemyTargetClicked(int index)
         {
             _flowService.SelectEnemyTarget(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -128,7 +133,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnOwnedRelicClicked(int index)
         {
             _flowService.InspectOwnedRelic(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -137,7 +142,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnOwnedPotionClicked(int index)
         {
             _flowService.InspectOwnedPotion(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -150,8 +155,8 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            _flowService.RequestUsePotion(_lastSnapshot.SelectedOwnedPotionIndex);
-            RenderAsync(_presenterCts.Token).Forget();
+            _flowService.UsePotion(_lastSnapshot.SelectedOwnedPotionIndex);
+            RequestRender();
         }
 
         /// <summary>
@@ -160,7 +165,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEndTurnClicked()
         {
             _flowService.EndTurn();
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -169,6 +174,47 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnSaveQuitClicked()
         {
             _onSaveQuitClicked?.Invoke();
+        }
+
+        /// <summary>
+        /// Host空き領域クリック通知
+        /// </summary>
+        public void OnHostBackgroundClicked()
+        {
+            _flowService.ClearOwnedInspections();
+            RequestRender();
+        }
+
+        private void RequestRender()
+        {
+            _renderRequested = true;
+            if (_isRendering)
+            {
+                return;
+            }
+
+            RunRenderLoopAsync(_presenterCts.Token).Forget(Debug.LogException);
+        }
+
+        private async UniTask RunRenderLoopAsync(CancellationToken ct)
+        {
+            while (_renderRequested && !ct.IsCancellationRequested)
+            {
+                _renderRequested = false;
+                _isRendering = true;
+                try
+                {
+                    await RenderAsync(ct);
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    break;
+                }
+                finally
+                {
+                    _isRendering = false;
+                }
+            }
         }
 
         /// <summary>
@@ -186,7 +232,7 @@ namespace Dungeon.Runtime.InGame.Battle
             _battlePagePresenter.Clear();
             RenderHostChrome(snapshot);
 
-            if (await TryResolvePotionDialogsAsync(snapshot, ct))
+            if (await TryResolvePotionOfferAsync(snapshot, ct))
             {
                 await RenderAsync(ct);
                 return;
@@ -237,7 +283,7 @@ namespace Dungeon.Runtime.InGame.Battle
                                 break;
                         }
 
-                        if (rewardActive && await TryResolvePotionDialogsAsync(snapshot, ct))
+                        if (rewardActive && await TryResolvePotionOfferAsync(snapshot, ct))
                         {
                             snapshot = _flowService.CreateSnapshot();
                             _lastSnapshot = snapshot;
@@ -298,23 +344,8 @@ namespace Dungeon.Runtime.InGame.Battle
             _view.SetOwnedPotionUseVisible(snapshot.CanUseSelectedPotion, OnUsePotionClicked);
         }
 
-        private async UniTask<bool> TryResolvePotionDialogsAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        private async UniTask<bool> TryResolvePotionOfferAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
-            if (snapshot.PendingPotionUseRequest != null)
-            {
-                PotionUseConfirmDialogResult result = await _uiCoordinator.ShowPotionUseConfirmAsync(snapshot, ct);
-                if (result.IsConfirmed)
-                {
-                    _flowService.ConfirmUsePotion();
-                }
-                else
-                {
-                    _flowService.CancelUsePotion();
-                }
-
-                return true;
-            }
-
             if (snapshot.PendingPotionOffer != null)
             {
                 PotionReplaceDialogResult result = await _uiCoordinator.ShowPotionReplaceAsync(snapshot, ct);

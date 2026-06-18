@@ -87,7 +87,5 @@ potion.desc.swift_potion,カードを3枚引く。,Draw 3 cards.,抽3张牌。,�
 potion.name.fruit_juice,フルーツジュース,Fruit Juice,果汁药剂,果汁藥劑,과일 주스
 potion.desc.fruit_juice,最大HPを5増やす。,Gain 5 Max HP.,增加5点最大生命。,增加5點最大生命。,최대 체력 5를 얻는다.
 battle.potion.use,使用,Use,使用,使用,사용
-battle.potion.use_confirm_title,ポーション使用,Use Potion,使用药水,使用藥水,포션 사용
-battle.potion.use_confirm_message,{0}を使用しますか？,Use {0}?,要使用{0}吗？,要使用{0}嗎？,{0}을(를) 사용하시겠습니까?
 battle.potion.replace_title,ポーション入れ替え,Potion Replace,药水替换,藥水替換,포션 교체
 battle.potion.replace_message,所持上限です。入れ替えるポーションを選んでください。,Potion slots are full. Choose a potion to replace.,药水槽已满。请选择要替换的药水。,藥水槽已滿。請選擇要替換的藥水。,포션 슬롯이 가득 찼습니다. 교체할 포션을 선택하세요.

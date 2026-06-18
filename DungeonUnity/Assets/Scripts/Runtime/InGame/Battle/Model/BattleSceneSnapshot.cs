@@ -63,8 +63,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string ownedRelicHintMessage = null,
             string ownedPotionHintMessage = null,
             bool canUseSelectedPotion = false,
-            PendingPotionOffer pendingPotionOffer = null,
-            PendingPotionUseRequest pendingPotionUseRequest = null)
+            PendingPotionOffer pendingPotionOffer = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -121,7 +120,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             OwnedPotionHintMessage = ownedPotionHintMessage ?? string.Empty;
             CanUseSelectedPotion = canUseSelectedPotion;
             PendingPotionOffer = pendingPotionOffer;
-            PendingPotionUseRequest = pendingPotionUseRequest;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -179,6 +177,5 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string OwnedPotionHintMessage { get; }
         public bool CanUseSelectedPotion { get; }
         public PendingPotionOffer PendingPotionOffer { get; }
-        public PendingPotionUseRequest PendingPotionUseRequest { get; }
     }
 }

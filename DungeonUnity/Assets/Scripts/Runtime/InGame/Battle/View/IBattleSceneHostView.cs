@@ -15,6 +15,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void SetOwnedPotionHint(string message, int selectedIndex);
         void SetOwnedPotionUseVisible(bool visible, Action onClicked);
         void ClearOwnedPotions();
+        void SetHostChromeInteractable(bool interactable);
+        void WireHostBackgroundClick(Action onClicked);
+        void UnwireHostBackgroundClick();
 
         /// <summary>
         /// 戦闘基底表示切り替え

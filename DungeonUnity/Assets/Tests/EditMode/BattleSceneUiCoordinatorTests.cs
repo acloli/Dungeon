@@ -66,7 +66,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void ShowPotionDialogs_DispatchWithoutClearingStack()
+        public void HostChromeModalDialogs_ToggleHostInteractable()
         {
             FakeUIService uiService = new FakeUIService();
             BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
@@ -74,14 +74,11 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Map);
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            int clearCountAfterInit = uiService.ClearStackCallCount;
-
-            coordinator.ShowPotionUseConfirmAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardPickAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowPotionReplaceAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
 
-            Assert.That(uiService.ClearStackCallCount, Is.EqualTo(clearCountAfterInit));
-            Assert.That(uiService.LastPotionUseConfirmDialogParam, Is.Not.Null);
-            Assert.That(uiService.LastPotionReplaceDialogParam, Is.Not.Null);
+            Assert.That(hostView.SetHostChromeInteractableCallCount, Is.EqualTo(5));
+            Assert.That(hostView.LastHostChromeInteractable, Is.True);
         }
 
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
@@ -114,6 +111,8 @@ namespace Dungeon.Tests.EditMode
             public IBattlePageView BattlePageView => null;
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
+            public bool LastHostChromeInteractable { get; private set; } = true;
+            public int SetHostChromeInteractableCallCount { get; private set; }
 
             public void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
             {
@@ -140,6 +139,20 @@ namespace Dungeon.Tests.EditMode
             }
 
             public void ClearOwnedPotions()
+            {
+            }
+
+            public void SetHostChromeInteractable(bool interactable)
+            {
+                LastHostChromeInteractable = interactable;
+                SetHostChromeInteractableCallCount++;
+            }
+
+            public void WireHostBackgroundClick(Action onClicked)
+            {
+            }
+
+            public void UnwireHostBackgroundClick()
             {
             }
 
@@ -170,7 +183,6 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastResultDialogParam { get; private set; }
             public UIDialogOpenParam LastShopDialogParam { get; private set; }
             public UIDialogOpenParam LastEventDialogParam { get; private set; }
-            public UIDialogOpenParam LastPotionUseConfirmDialogParam { get; private set; }
             public UIDialogOpenParam LastPotionReplaceDialogParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
@@ -212,10 +224,6 @@ namespace Dungeon.Tests.EditMode
                 else if (typeof(TDialog) == typeof(EventDialog))
                 {
                     LastEventDialogParam = param as UIDialogOpenParam;
-                }
-                else if (typeof(TDialog) == typeof(PotionUseConfirmDialog))
-                {
-                    LastPotionUseConfirmDialogParam = param as UIDialogOpenParam;
                 }
                 else if (typeof(TDialog) == typeof(PotionReplaceDialog))
                 {

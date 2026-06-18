@@ -55,11 +55,6 @@ namespace Dungeon.Runtime.InGame.Battle
         public const string CardPickDialog = "CardPickDialog";
 
         /// <summary>
-        /// 薬水使用確認ダイアログPrefabキー
-        /// </summary>
-        public const string PotionUseConfirmDialog = "PotionUseConfirmDialog";
-
-        /// <summary>
         /// 薬水交換ダイアログPrefabキー
         /// </summary>
         public const string PotionReplaceDialog = "PotionReplaceDialog";

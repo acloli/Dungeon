@@ -70,7 +70,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.PendingRelicReward = null;
             _state.PendingPotionReward = null;
             _state.PendingPotionOffer = null;
-            _state.PendingPotionUseRequest = null;
             OpenMap();
             RequestSave();
         }
@@ -109,7 +108,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.PendingRelicReward = null;
             _state.PendingPotionReward = null;
             _state.PendingPotionOffer = null;
-            _state.PendingPotionUseRequest = null;
             _relicService.RestoreOwnedRelics(_state, _runDefinition, saveData.OwnedRelicIds);
             _potionService.RestoreOwnedPotions(_state, _runDefinition, saveData.OwnedPotionIds);
 
@@ -374,7 +372,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.PendingRelicReward = null;
             _state.PendingPotionReward = null;
             _state.PendingPotionOffer = null;
-            _state.PendingPotionUseRequest = null;
             _state.CardRewardPicked = false;
             OpenMap();
             RequestSave();
@@ -492,28 +489,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// ポーション使用確認を要求する
+        /// ポーションを使用する
         /// </summary>
-        public void RequestUsePotion(int index)
+        public void UsePotion(int index)
         {
-            InspectOwnedPotion(index);
-            _state.PendingPotionUseRequest = _potionService.BuildUseRequest(_state, index);
-        }
-
-        /// <summary>
-        /// ポーション使用を確定する
-        /// </summary>
-        public void ConfirmUsePotion()
-        {
-            PendingPotionUseRequest request = _state.PendingPotionUseRequest;
-            if (request == null)
+            if (index < 0 || index >= _state.OwnedPotions.Count)
             {
                 return;
             }
 
-            if (_potionService.ConsumePotion(_state, request, _rules, _randomProvider))
+            RuntimePotion potion = _state.OwnedPotions[index];
+            if (_potionService.UsePotion(_state, index, _rules, _randomProvider))
             {
-                RuntimePotion potion = request.Potion;
                 if (potion != null)
                 {
                     _state.BattleHintMessage = string.Format(BattleSceneConstants.CardResolvedFormat, potion.DisplayName);
@@ -525,16 +512,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
             }
 
-            _state.PendingPotionUseRequest = null;
-            ClearOwnedPotionInspection();
-        }
-
-        /// <summary>
-        /// ポーション使用確認を取り消す
-        /// </summary>
-        public void CancelUsePotion()
-        {
-            _state.PendingPotionUseRequest = null;
             ClearOwnedPotionInspection();
         }
 
@@ -1081,7 +1058,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 ClearOwnedRelicInspection();
                 ClearOwnedPotionInspection();
-                _state.PendingPotionUseRequest = null;
             }
 
             _state.CurrentPage = page;

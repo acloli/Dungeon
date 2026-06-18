@@ -88,47 +88,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return ResolveUseContext(state.CurrentPage, potion.UseContext);
         }
 
-        public PendingPotionUseRequest BuildUseRequest(BattleSceneState state, int potionIndex)
+        public bool UsePotion(BattleSceneState state, int potionIndex, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
         {
             if (state == null || potionIndex < 0 || potionIndex >= state.OwnedPotions.Count)
             {
-                return null;
+                return false;
             }
 
             RuntimePotion potion = state.OwnedPotions[potionIndex];
             if (!CanUsePotionInCurrentPage(state, potion))
             {
-                return null;
-            }
-
-            return new PendingPotionUseRequest(
-                potion,
-                potionIndex,
-                potion.UseContext,
-                potion.TargetMode,
-                true);
-        }
-
-        public bool ConsumePotion(BattleSceneState state, PendingPotionUseRequest request, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
-        {
-            if (state == null || request == null)
-            {
-                return false;
-            }
-
-            if (request.PotionIndex < 0 || request.PotionIndex >= state.OwnedPotions.Count)
-            {
-                return false;
-            }
-
-            RuntimePotion potion = state.OwnedPotions[request.PotionIndex];
-            if (potion == null || potion.Id != request.Potion.Id)
-            {
                 return false;
             }
 
             ApplyEffects(state, potion, rules, randomProvider);
-            state.OwnedPotions.RemoveAt(request.PotionIndex);
+            state.OwnedPotions.RemoveAt(potionIndex);
             return true;
         }
 

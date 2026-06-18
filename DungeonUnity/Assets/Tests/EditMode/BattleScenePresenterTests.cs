@@ -297,9 +297,9 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void OnUsePotionClicked_PendingUseRequest_ShowsConfirmDialog()
+        public void OnUsePotionClicked_UsesPotionImmediately()
         {
-            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+            BattleSceneSnapshot readySnapshot = new BattleSceneSnapshot(
                 BattleScenePage.Map,
                 new List<RuntimeMapNode>(),
                 new List<RuntimeCard>(),
@@ -327,56 +327,20 @@ namespace Dungeon.Tests.EditMode
                 selectedOwnedPotionIndex: 0,
                 ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
                 canUseSelectedPotion: true);
-            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot)
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(readySnapshot)
             {
-                SnapshotAfterRequestUsePotion = new BattleSceneSnapshot(
-                    BattleScenePage.Map,
-                    new List<RuntimeMapNode>(),
-                    new List<RuntimeCard>(),
-                    new List<RuntimeRewardEntry>(),
-                    -1,
-                    40,
-                    40,
-                    3,
-                    0,
-                    100,
-                    null,
-                    0,
-                    0,
-                    false,
-                    -1,
-                    false,
-                    "map",
-                    "battle",
-                    "rest",
-                    "result",
-                    ownedPotions: new[]
-                    {
-                        new BattleMultiIconViewModel(BattleIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
-                    },
-                    selectedOwnedPotionIndex: 0,
-                    ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
-                    canUseSelectedPotion: true,
-                    pendingPotionUseRequest: new PendingPotionUseRequest(
-                        new RuntimePotion(1, "potion_1", "Fruit Juice", "potion.fruit_juice", "Gain 5 Max HP.", "potion.desc.fruit_juice", "potion_fruit_juice", CardRarity.Uncommon, PotionUseContext.Both, PotionTargetMode.Self, Array.Empty<RuntimePotionEffect>()),
-                        0,
-                        PotionUseContext.Both,
-                        PotionTargetMode.Self,
-                        true))
+                SnapshotAfterUsePotion = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Map)
             };
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
-            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator
-            {
-                PotionUseConfirmResult = new PotionUseConfirmDialogResult { IsConfirmed = false }
-            };
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnUsePotionClicked();
+            presenter.OnUsePotionClicked();
 
-            Assert.That(flowService.RequestUsePotionCallCount, Is.EqualTo(1));
-            Assert.That(uiCoordinator.ShowPotionUseConfirmCallCount, Is.EqualTo(1));
-            Assert.That(flowService.CancelUsePotionCallCount, Is.EqualTo(1));
+            Assert.That(flowService.UsePotionCallCount, Is.EqualTo(1));
+            Assert.That(view.IsOwnedPotionUseVisible, Is.False);
         }
 
         [Test]
@@ -638,17 +602,14 @@ namespace Dungeon.Tests.EditMode
             public int TryPlaySelectedCardCallCount { get; private set; }
             public int InspectOwnedRelicCallCount { get; private set; }
             public int InspectOwnedPotionCallCount { get; private set; }
-            public int RequestUsePotionCallCount { get; private set; }
-            public int ConfirmUsePotionCallCount { get; private set; }
-            public int CancelUsePotionCallCount { get; private set; }
+            public int UsePotionCallCount { get; private set; }
             public int ReplaceOwnedPotionCallCount { get; private set; }
             public int CancelPendingPotionReplaceCallCount { get; private set; }
+            public int ClearOwnedInspectionsCallCount { get; private set; }
             public int InitializeCallCount { get; private set; }
             public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
-            public BattleSceneSnapshot SnapshotAfterRequestUsePotion { get; set; }
-            public BattleSceneSnapshot SnapshotAfterConfirmUsePotion { get; set; }
-            public BattleSceneSnapshot SnapshotAfterCancelUsePotion { get; set; }
+            public BattleSceneSnapshot SnapshotAfterUsePotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterReplaceOwnedPotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterCancelPendingPotionReplace { get; set; }
 
@@ -722,25 +683,13 @@ namespace Dungeon.Tests.EditMode
                 InspectOwnedPotionCallCount++;
             }
 
-            public void RequestUsePotion(int index)
+            public void UsePotion(int index)
             {
-                RequestUsePotionCallCount++;
-                if (SnapshotAfterRequestUsePotion != null)
+                UsePotionCallCount++;
+                if (SnapshotAfterUsePotion != null)
                 {
-                    _snapshot = SnapshotAfterRequestUsePotion;
+                    _snapshot = SnapshotAfterUsePotion;
                 }
-            }
-
-            public void ConfirmUsePotion()
-            {
-                ConfirmUsePotionCallCount++;
-                _snapshot = SnapshotAfterConfirmUsePotion ?? BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
-            }
-
-            public void CancelUsePotion()
-            {
-                CancelUsePotionCallCount++;
-                _snapshot = SnapshotAfterCancelUsePotion ?? BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
             }
 
             public void ReplaceOwnedPotion(int index)
@@ -753,6 +702,12 @@ namespace Dungeon.Tests.EditMode
             {
                 CancelPendingPotionReplaceCallCount++;
                 _snapshot = SnapshotAfterCancelPendingPotionReplace ?? BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
+            }
+
+            public void ClearOwnedInspections()
+            {
+                ClearOwnedInspectionsCallCount++;
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
             }
 
             public void ApplyRest()
@@ -828,8 +783,11 @@ namespace Dungeon.Tests.EditMode
             public string LastOwnedPotionHint { get; private set; } = string.Empty;
             public int LastSelectedOwnedPotionIndex { get; private set; } = -1;
             public bool IsOwnedPotionUseVisible { get; private set; }
+            public bool LastHostChromeInteractable { get; private set; } = true;
+            public int HostBackgroundWireCallCount { get; private set; }
             private Action _onSaveQuitClicked;
             private Action _onUsePotionClicked;
+            private Action _onHostBackgroundClicked;
 
             public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
             {
@@ -871,6 +829,22 @@ namespace Dungeon.Tests.EditMode
                 _onUsePotionClicked = null;
             }
 
+            public void SetHostChromeInteractable(bool interactable)
+            {
+                LastHostChromeInteractable = interactable;
+            }
+
+            public void WireHostBackgroundClick(Action onClicked)
+            {
+                HostBackgroundWireCallCount++;
+                _onHostBackgroundClicked = onClicked;
+            }
+
+            public void UnwireHostBackgroundClick()
+            {
+                _onHostBackgroundClicked = null;
+            }
+
             public void SetBattleVisible(bool visible)
             {
                 IsBattleVisible = visible;
@@ -899,6 +873,11 @@ namespace Dungeon.Tests.EditMode
             public void InvokeUsePotion()
             {
                 _onUsePotionClicked?.Invoke();
+            }
+
+            public void InvokeHostBackground()
+            {
+                _onHostBackgroundClicked?.Invoke();
             }
         }
 
@@ -967,13 +946,11 @@ namespace Dungeon.Tests.EditMode
             public int ShowBattleCallCount { get; private set; }
             public int ShowShopCallCount { get; private set; }
             public int ShowEventCallCount { get; private set; }
-            public int ShowPotionUseConfirmCallCount { get; private set; }
             public int ShowPotionReplaceCallCount { get; private set; }
             public BattleSceneSnapshot LastMapSnapshot { get; private set; }
             public BattleSceneSnapshot LastShopSnapshot { get; private set; }
             public BattleSceneSnapshot LastEventSnapshot { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
-            public PotionUseConfirmDialogResult PotionUseConfirmResult { get; set; }
             public PotionReplaceDialogResult PotionReplaceResult { get; set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
@@ -1004,12 +981,6 @@ namespace Dungeon.Tests.EditMode
             public UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 return UniTask.FromResult<RuntimeRewardEntry>(null);
-            }
-
-            public UniTask<PotionUseConfirmDialogResult> ShowPotionUseConfirmAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
-            {
-                ShowPotionUseConfirmCallCount++;
-                return UniTask.FromResult(PotionUseConfirmResult);
             }
 
             public UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

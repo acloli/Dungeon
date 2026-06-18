@@ -61,7 +61,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimeRelic PendingRelicReward { get; set; }
         public RuntimePotion PendingPotionReward { get; set; }
         public PendingPotionOffer PendingPotionOffer { get; set; }
-        public PendingPotionUseRequest PendingPotionUseRequest { get; set; }
         public string EventMessage { get; set; } = string.Empty;
     }
 }

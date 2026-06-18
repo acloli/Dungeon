@@ -675,7 +675,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void OwnedInspects_AreMutuallyExclusive_AndPotionCancelClearsSelection()
+        public void OwnedInspects_AreMutuallyExclusive_AndPotionUseClearsSelection()
         {
             RuntimeRelic relic = CreateRelic(1, "Burning Core", new[]
             {
@@ -709,11 +709,10 @@ namespace Dungeon.Tests.EditMode
             Assert.That(potionSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
             Assert.That(potionSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(0));
 
-            service.RequestUsePotion(0);
-            service.CancelUsePotion();
-            BattleSceneSnapshot canceledUseSnapshot = service.CreateSnapshot();
-            Assert.That(canceledUseSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
-            Assert.That(canceledUseSnapshot.OwnedPotionHintMessage, Is.Empty);
+            service.UsePotion(0);
+            BattleSceneSnapshot usedPotionSnapshot = service.CreateSnapshot();
+            Assert.That(usedPotionSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
+            Assert.That(usedPotionSnapshot.OwnedPotionHintMessage, Is.Empty);
 
             service.InspectOwnedRelic(0);
             service.InspectOwnedPotion(0);
