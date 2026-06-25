@@ -47,7 +47,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             CardType cardType,
             CardRarity rarity,
             CharacterArchetype characterArchetype,
-            IReadOnlyList<RuntimeCardEffect> effects)
+            IReadOnlyList<RuntimeCardEffect> effects,
+            int upgradeCardId = 0,
+            bool isUpgraded = false)
         {
             Id = id;
             Key = key;
@@ -61,6 +63,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Rarity = rarity;
             CharacterArchetype = characterArchetype;
             Effects = effects ?? Array.Empty<RuntimeCardEffect>();
+            UpgradeCardId = upgradeCardId;
+            IsUpgraded = isUpgraded;
         }
 
         public int Id { get; }
@@ -75,6 +79,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public CardRarity Rarity { get; }
         public CharacterArchetype CharacterArchetype { get; }
         public IReadOnlyList<RuntimeCardEffect> Effects { get; }
+        public int UpgradeCardId { get; }
+        public bool IsUpgraded { get; }
 
         /// <summary>
         /// 表示用の概算ダメージ値
@@ -562,6 +568,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             int potionDropChance,
             int relicDropChance,
             IReadOnlyList<RuntimeCard> starterDeck,
+            IReadOnlyDictionary<int, RuntimeCard> cardCatalog,
             IReadOnlyList<RuntimeRewardEntry> rewardPool,
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encountersByNodeType,
@@ -581,6 +588,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PotionDropChance = potionDropChance;
             RelicDropChance = relicDropChance;
             StarterDeck = starterDeck ?? Array.Empty<RuntimeCard>();
+            CardCatalog = cardCatalog ?? new Dictionary<int, RuntimeCard>();
             RewardPool = rewardPool ?? Array.Empty<RuntimeRewardEntry>();
             Nodes = nodes ?? Array.Empty<RuntimeMapNode>();
             EncountersByNodeType = encountersByNodeType
@@ -602,6 +610,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int PotionDropChance { get; }
         public int RelicDropChance { get; }
         public IReadOnlyList<RuntimeCard> StarterDeck { get; }
+        public IReadOnlyDictionary<int, RuntimeCard> CardCatalog { get; }
         public IReadOnlyList<RuntimeRewardEntry> RewardPool { get; }
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> EncountersByNodeType { get; }

@@ -107,6 +107,7 @@ namespace Dungeon.Tests.EditMode
                 0,
                 0,
                 new[] { CreateCard(1) },
+                new Dictionary<int, RuntimeCard> { { 1, CreateCard(1) } },
                 Array.Empty<RuntimeRewardEntry>(),
                 Array.Empty<RuntimeMapNode>(),
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
