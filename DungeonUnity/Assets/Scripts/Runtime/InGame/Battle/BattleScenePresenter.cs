@@ -306,15 +306,18 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
-                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, _flowService.GetDeckCards(), ct);
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(
+                        snapshot,
+                        _flowService.GetCardSelectCards(),
+                        _flowService.GetCardSelectMode(),
+                        ct);
                     if (cardSelectResult.IsCanceled)
                     {
-                        // 削除キャンセル時はショップに戻る
-                        _flowService.OpenShop();
+                        _flowService.CancelCardSelect();
                     }
                     else
                     {
-                        _flowService.PurchaseCardRemoval(cardSelectResult.SelectedCard);
+                        _flowService.ConfirmCardSelect(cardSelectResult.SelectedCard);
                     }
                     await RenderAsync(ct);
                     break;

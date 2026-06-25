@@ -66,7 +66,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < _param.DeckCards.Count; i++)
             {
                 RuntimeCard card = _param.DeckCards[i];
-                if (card == null)
+                if (!CanDisplayCard(card))
                 {
                     continue;
                 }
@@ -76,6 +76,21 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 cardView.Bind(card, true, false, OnCardClicked);
                 _cardViews.Add(cardView);
             }
+        }
+
+        private bool CanDisplayCard(RuntimeCard card)
+        {
+            if (card == null)
+            {
+                return false;
+            }
+
+            if (_param.Mode != CardSelectMode.Upgrade)
+            {
+                return true;
+            }
+
+            return card.UpgradeCardId > 0;
         }
 
         private void ClearDynamicCards()

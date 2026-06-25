@@ -213,6 +213,33 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeAsync_CardSelectState_ConfirmRoutesThroughGenericCardSelectFlow()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.CardSelect))
+            {
+                CardSelectMode = CardSelectMode.Upgrade,
+                CardSelectCards = new[] { strike }
+            };
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator
+            {
+                CardSelectResult = new CardSelectDialogResult
+                {
+                    IsCanceled = false,
+                    SelectedCard = strike
+                }
+            };
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(flowService.ConfirmCardSelectCallCount, Is.EqualTo(1));
+            Assert.That(flowService.CancelCardSelectCallCount, Is.EqualTo(0));
+            Assert.That(uiCoordinator.LastCardSelectMode, Is.EqualTo(CardSelectMode.Upgrade));
+        }
+
+        [Test]
         public void OnOwnedRelicClicked_UpdatesHintText()
         {
             BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
@@ -606,12 +633,16 @@ namespace Dungeon.Tests.EditMode
             public int ReplaceOwnedPotionCallCount { get; private set; }
             public int CancelPendingPotionReplaceCallCount { get; private set; }
             public int ClearOwnedInspectionsCallCount { get; private set; }
+            public int ConfirmCardSelectCallCount { get; private set; }
+            public int CancelCardSelectCallCount { get; private set; }
             public int InitializeCallCount { get; private set; }
             public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
             public BattleSceneSnapshot SnapshotAfterUsePotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterReplaceOwnedPotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterCancelPendingPotionReplace { get; set; }
+            public IReadOnlyList<RuntimeCard> CardSelectCards { get; set; } = Array.Empty<RuntimeCard>();
+            public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
 
             public void Initialize(int runProfileId)
             {
@@ -631,6 +662,16 @@ namespace Dungeon.Tests.EditMode
             public IReadOnlyList<RuntimeCard> GetDeckCards()
             {
                 return new List<RuntimeCard>();
+            }
+
+            public IReadOnlyList<RuntimeCard> GetCardSelectCards()
+            {
+                return CardSelectCards;
+            }
+
+            public CardSelectMode GetCardSelectMode()
+            {
+                return CardSelectMode;
             }
 
             public void SelectMapNode(int index)
@@ -741,6 +782,18 @@ namespace Dungeon.Tests.EditMode
 
             public void PurchaseCardRemoval(RuntimeCard card)
             {
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void CancelCardSelect()
+            {
+                CancelCardSelectCallCount++;
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void ConfirmCardSelect(RuntimeCard card)
+            {
+                ConfirmCardSelectCallCount++;
                 _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
             }
 
@@ -952,6 +1005,8 @@ namespace Dungeon.Tests.EditMode
             public BattleSceneSnapshot LastEventSnapshot { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
             public PotionReplaceDialogResult PotionReplaceResult { get; set; }
+            public CardSelectDialogResult CardSelectResult { get; set; }
+            public CardSelectMode LastCardSelectMode { get; private set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
             {
@@ -1001,9 +1056,10 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
             }
 
-            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
+            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CardSelectMode mode, CancellationToken ct)
             {
-                return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });
+                LastCardSelectMode = mode;
+                return UniTask.FromResult(CardSelectResult);
             }
 
             public UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

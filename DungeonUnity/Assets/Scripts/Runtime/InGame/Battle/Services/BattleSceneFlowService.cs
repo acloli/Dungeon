@@ -176,6 +176,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 現在のカード選択候補取得
+        /// </summary>
+        public IReadOnlyList<RuntimeCard> GetCardSelectCards()
+        {
+            return _state.Deck;
+        }
+
+        /// <summary>
+        /// 現在のカード選択用途取得
+        /// </summary>
+        public CardSelectMode GetCardSelectMode()
+        {
+            return _state.CardSelectMode;
+        }
+
+        /// <summary>
         /// マップノード選択処理
         /// </summary>
         public void SelectMapNode(int index)
@@ -588,7 +604,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ApplyUpgrade()
         {
-            _state.RestShopMessage = BattleSceneConstants.UpgradeDone;
+            _state.RestShopMessage = "Upgrade done (M1 mock).";
             _state.IsRestShopContinueEnabled = true;
         }
 
@@ -597,6 +613,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void OpenShop()
         {
+            _state.CardSelectMode = CardSelectMode.CardRemoval;
             SetCurrentPage(BattleScenePage.Shop);
         }
 
@@ -647,6 +664,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void OpenCardRemoval()
         {
+            _state.CardSelectMode = CardSelectMode.CardRemoval;
             SetCurrentPage(BattleScenePage.CardSelect);
         }
 
@@ -661,6 +679,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
             // 削除後ショップに戻る
             SetCurrentPage(BattleScenePage.Shop);
+        }
+
+        /// <summary>
+        /// カード選択キャンセル
+        /// </summary>
+        public void CancelCardSelect()
+        {
+            OpenShop();
+        }
+
+        /// <summary>
+        /// カード選択確定
+        /// </summary>
+        public void ConfirmCardSelect(RuntimeCard card)
+        {
+            PurchaseCardRemoval(card);
         }
 
         /// <summary>
@@ -832,6 +866,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             SetCurrentPage(BattleScenePage.RestShop);
             _state.IsRestShopContinueEnabled = false;
+            _state.CardSelectMode = CardSelectMode.CardRemoval;
 
             if (_state.ShopItems == null || _state.ShopItems.Count == 0)
             {

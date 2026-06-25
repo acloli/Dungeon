@@ -62,5 +62,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimePotion PendingPotionReward { get; set; }
         public PendingPotionOffer PendingPotionOffer { get; set; }
         public string EventMessage { get; set; } = string.Empty;
+        public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
     }
 }

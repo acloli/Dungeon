@@ -130,18 +130,29 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// カード選択ダイアログの用途種別
+    /// </summary>
+    public enum CardSelectMode
+    {
+        CardRemoval,
+        Upgrade
+    }
+
+    /// <summary>
     /// カード選択ダイアログ表示パラメータクラス
     /// </summary>
     public sealed class BattleCardSelectDialogParam
     {
-        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards)
+        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CardSelectMode mode)
         {
             Snapshot = snapshot;
             DeckCards = deckCards ?? System.Array.Empty<RuntimeCard>();
+            Mode = mode;
         }
 
         public BattleSceneSnapshot Snapshot { get; }
         public System.Collections.Generic.IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public CardSelectMode Mode { get; }
     }
 
     /// <summary>
