@@ -175,3 +175,165 @@ MonoBehaviour:
     StatusType: 0
     StatusValue: 0
     TargetSide: 2
+  - Id: 2101
+    CardId: 1101
+    Order: 1
+    EffectType: 1
+    Value: 9
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2102
+    CardId: 1102
+    Order: 1
+    EffectType: 3
+    Value: 8
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2103
+    CardId: 1103
+    Order: 1
+    EffectType: 1
+    Value: 10
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2104
+    CardId: 1103
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 2
+    StatusValue: 2
+    TargetSide: 1
+  - Id: 2105
+    CardId: 1104
+    Order: 1
+    EffectType: 1
+    Value: 12
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2106
+    CardId: 1104
+    Order: 2
+    EffectType: 2
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2107
+    CardId: 1105
+    Order: 1
+    EffectType: 3
+    Value: 11
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2108
+    CardId: 1105
+    Order: 2
+    EffectType: 2
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2109
+    CardId: 1106
+    Order: 1
+    EffectType: 1
+    Value: 6
+    HitCount: 2
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2110
+    CardId: 1107
+    Order: 1
+    EffectType: 1
+    Value: 7
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2111
+    CardId: 1107
+    Order: 2
+    EffectType: 3
+    Value: 7
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2112
+    CardId: 1108
+    Order: 1
+    EffectType: 1
+    Value: 6
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 0
+  - Id: 2113
+    CardId: 1108
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 2
+    StatusValue: 1
+    TargetSide: 0
+  - Id: 2114
+    CardId: 1109
+    Order: 1
+    EffectType: 1
+    Value: 10
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 0
+  - Id: 2115
+    CardId: 1110
+    Order: 1
+    EffectType: 1
+    Value: 16
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 2116
+    CardId: 1110
+    Order: 2
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 3
+    StatusValue: 2
+    TargetSide: 1
+  - Id: 2117
+    CardId: 1111
+    Order: 1
+    EffectType: 4
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2118
+    CardId: 1111
+    Order: 2
+    EffectType: 2
+    Value: 2
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2

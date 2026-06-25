@@ -74,6 +74,11 @@ namespace Game.MasterData.Generated
         /// </summary>
         public bool CanAppearInReward;
 
+        /// <summary>
+        /// 強化先カードID
+        /// </summary>
+        public int UpgradeCardId;
+
         public int GetKey() => Id;
     }
 }

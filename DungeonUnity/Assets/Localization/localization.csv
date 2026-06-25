@@ -15,6 +15,17 @@ card.name.iron_tide,アイアンタイド,Iron Tide,铁潮拍击,鐵潮拍擊,�
 card.name.storm_clap,ストームクラップ,Storm Clap,风暴震击,風暴震擊,스톰 클랩
 card.name.char_sweep,チャースイープ,Char Sweep,焦炭横扫,焦炭橫掃,숯먼지 휩쓸기
 card.name.grim_line,グリムライン,Grim Line,沉重打击,沉重打擊,그림 라인
+card.name.cinder_slash_plus,シンダースラッシュ+,Cinder Slash+,余烬斩+,餘燼斬+,신더 슬래시+
+card.name.ash_guard_plus,アッシュガード+,Ash Guard+,灰烬壁垒+,灰燼壁壘+,애시 가드+
+card.name.crystal_bash_plus,クリスタルバッシュ+,Crystal Bash+,晶簇猛击+,晶簇猛擊+,크리스탈 배시+
+card.name.ember_knuckle_plus,エンバーナックル+,Ember Knuckle+,余火重拳+,餘火重拳+,엠버 너클+
+card.name.shell_up_plus,シェルアップ+,Shell Up+,甲壳架势+,甲殼架勢+,셸 업+
+card.name.dual_fang_plus,デュアルファング+,Dual Fang+,双牙连击+,雙牙連擊+,듀얼 팽+
+card.name.iron_tide_plus,アイアンタイド+,Iron Tide+,铁潮拍击+,鐵潮拍擊+,아이언 타이드+
+card.name.storm_clap_plus,ストームクラップ+,Storm Clap+,风暴震击+,風暴震擊+,스톰 클랩+
+card.name.char_sweep_plus,チャースイープ+,Char Sweep+,焦炭横扫+,焦炭橫掃+,숯먼지 휩쓸기+
+card.name.grim_line_plus,グリムライン+,Grim Line+,沉重打击+,沉重打擊+,그림 라인+
+card.name.spark_focus_plus,スパークフォーカス+,Spark Focus+,火花专注+,火花專注+,스파크 포커스+
 enemy.name.ash_cultist,アッシュカルティスト,Ash Cultist,灰烬邪教徒,灰燼邪教徒,애시 컬티스트
 enemy.name.gnaw_beast,噛みつき獣,Gnaw Beast,噬咬兽,噬咬獸,물어뜯는 야수
 enemy.name.red_mite,赤ダニ,Red Mite,赤螨,赤蟎,붉은 진드기
@@ -67,6 +78,17 @@ card.desc.storm_clap,すべての敵に5ダメージを与える。,Deal 5 damag
 card.desc.char_sweep,すべての敵に4ダメージを与え脱力1を付与する。,Deal 4 damage and apply 1 Weak to all enemies.,对所有敌人造成4点伤害并施加1层虚弱。,對所有敵人造成4點傷害並施加1層虛弱。,모든 적에게 피해 4를 주고 약화 1을 건다.
 card.desc.grim_line,敵1体に14ダメージを与える。,Deal 14 damage to an enemy.,对1名敌人造成14点伤害。,對1名敵人造成14點傷害。,적 하나에게 피해 14를 준다.
 card.desc.spark_focus,エナジー1を得てカードを1枚引く。,Gain 1 Energy and draw 1 card.,获得1点能量并抽1张牌。,獲得1點能量並抽1張牌。,에너지 1을 얻고 카드 1장을 뽑는다.
+card.desc.cinder_slash_plus,敵1体に9ダメージを与える。,Deal 9 damage to an enemy.,对1名敌人造成9点伤害。,對1名敵人造成9點傷害。,적 하나에게 피해 9를 준다.
+card.desc.ash_guard_plus,8ブロックを得る。,Gain 8 Block.,获得8点格挡。,獲得8點格擋。,방어도 8을 얻는다.
+card.desc.crystal_bash_plus,敵1体に10ダメージを与え脆弱2を付与する。,Deal 10 damage and apply 2 Vulnerable to an enemy.,对1名敌人造成10点伤害并施加2层易伤。,對1名敵人造成10點傷害並施加2層易傷。,적 하나에게 피해 10을 주고 취약 2를 건다.
+card.desc.ember_knuckle_plus,敵1体に12ダメージを与えカードを1枚引く。,Deal 12 damage and draw 1 card.,对1名敌人造成12点伤害并抽1张牌。,對1名敵人造成12點傷害並抽1張牌。,적 하나에게 피해 12를 주고 카드 1장을 뽑는다.
+card.desc.shell_up_plus,11ブロックを得てカードを1枚引く。,Gain 11 Block and draw 1 card.,获得11点格挡并抽1张牌。,獲得11點格擋並抽1張牌。,방어도 11을 얻고 카드 1장을 뽑는다.
+card.desc.dual_fang_plus,敵1体に6ダメージを2回与える。,Deal 6 damage twice to an enemy.,对1名敌人造成2次6点伤害。,對1名敵人造成2次6點傷害。,적 하나에게 피해 6을 2회 준다.
+card.desc.iron_tide_plus,敵1体に7ダメージを与え7ブロックを得る。,Deal 7 damage and gain 7 Block.,对1名敌人造成7点伤害并获得7点格挡。,對1名敵人造成7點傷害並獲得7點格擋。,적 하나에게 피해 7을 주고 방어도 7을 얻는다.
+card.desc.storm_clap_plus,すべての敵に6ダメージを与え脆弱1を付与する。,Deal 6 damage and apply 1 Vulnerable to all enemies.,对所有敌人造成6点伤害并施加1层易伤。,對所有敵人造成6點傷害並施加1層易傷。,모든 적에게 피해 6을 주고 취약 1을 건다.
+card.desc.char_sweep_plus,すべての敵に10ダメージを与える。,Deal 10 damage to all enemies.,对所有敌人造成10点伤害。,對所有敵人造成10點傷害。,모든 적에게 피해 10을 준다.
+card.desc.grim_line_plus,敵1体に16ダメージを与え脱力2を付与する。,Deal 16 damage and apply 2 Weak to an enemy.,对1名敌人造成16点伤害并施加2层虚弱。,對1名敵人造成16點傷害並施加2層虛弱。,적 하나에게 피해 16을 주고 약화 2를 건다.
+card.desc.spark_focus_plus,エナジー1を得てカードを2枚引く。,Gain 1 Energy and draw 2 cards.,获得1点能量并抽2张牌。,獲得1點能量並抽2張牌。,에너지 1을 얻고 카드 2장을 뽑는다.
 relic.name.burning_core,バーニングコア,Burning Core,燃烧核心,燃燒核心,버닝 코어
 relic.desc.burning_core,戦闘開始時に6ブロックを得る。,Gain 6 Block at the start of combat.,战斗开始时获得6点格挡。,戰鬥開始時獲得6點格擋。,전투 시작 시 방어도 6을 얻는다.
 relic.name.ember_crown,エンバークラウン,Ember Crown,余烬王冠,餘燼王冠,엠버 크라운
