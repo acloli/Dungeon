@@ -157,3 +157,21 @@ MonoBehaviour:
     StatusType: 3
     StatusValue: 2
     TargetSide: 1
+  - Id: 2017
+    CardId: 1011
+    Order: 1
+    EffectType: 4
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+  - Id: 2018
+    CardId: 1011
+    Order: 2
+    EffectType: 2
+    Value: 1
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2

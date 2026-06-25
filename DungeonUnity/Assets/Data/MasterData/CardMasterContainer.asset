@@ -17,6 +17,8 @@ MonoBehaviour:
     Key: card_cinder_slash
     Name: Cinder Slash
     LocalizationKey: card.name.cinder_slash
+    DescriptionKey: card.desc.cinder_slash
+    ImageId: card_art_cinder_slash
     CardType: 0
     Rarity: 0
     Cost: 1
@@ -27,6 +29,8 @@ MonoBehaviour:
     Key: card_ash_guard
     Name: Ash Guard
     LocalizationKey: card.name.ash_guard
+    DescriptionKey: card.desc.ash_guard
+    ImageId: card_art_ash_guard
     CardType: 3
     Rarity: 0
     Cost: 1
@@ -37,6 +41,8 @@ MonoBehaviour:
     Key: card_crystal_bash
     Name: Crystal Bash
     LocalizationKey: card.name.crystal_bash
+    DescriptionKey: card.desc.crystal_bash
+    ImageId: card_art_crystal_bash
     CardType: 0
     Rarity: 0
     Cost: 2
@@ -47,6 +53,8 @@ MonoBehaviour:
     Key: card_ember_knuckle
     Name: Ember Knuckle
     LocalizationKey: card.name.ember_knuckle
+    DescriptionKey: card.desc.ember_knuckle
+    ImageId: card_art_ember_knuckle
     CardType: 0
     Rarity: 1
     Cost: 1
@@ -57,6 +65,8 @@ MonoBehaviour:
     Key: card_shell_up
     Name: Shell Up
     LocalizationKey: card.name.shell_up
+    DescriptionKey: card.desc.shell_up
+    ImageId: card_art_shell_up
     CardType: 3
     Rarity: 1
     Cost: 1
@@ -67,6 +77,8 @@ MonoBehaviour:
     Key: card_dual_fang
     Name: Dual Fang
     LocalizationKey: card.name.dual_fang
+    DescriptionKey: card.desc.dual_fang
+    ImageId: card_art_dual_fang
     CardType: 0
     Rarity: 1
     Cost: 1
@@ -77,6 +89,8 @@ MonoBehaviour:
     Key: card_iron_tide
     Name: Iron Tide
     LocalizationKey: card.name.iron_tide
+    DescriptionKey: card.desc.iron_tide
+    ImageId: card_art_iron_tide
     CardType: 0
     Rarity: 1
     Cost: 1
@@ -87,6 +101,8 @@ MonoBehaviour:
     Key: card_storm_clap
     Name: Storm Clap
     LocalizationKey: card.name.storm_clap
+    DescriptionKey: card.desc.storm_clap
+    ImageId: card_art_storm_clap
     CardType: 0
     Rarity: 1
     Cost: 1
@@ -97,6 +113,8 @@ MonoBehaviour:
     Key: card_char_sweep
     Name: Char Sweep
     LocalizationKey: card.name.char_sweep
+    DescriptionKey: card.desc.char_sweep
+    ImageId: card_art_char_sweep
     CardType: 0
     Rarity: 1
     Cost: 1
@@ -107,9 +125,23 @@ MonoBehaviour:
     Key: card_grim_line
     Name: Grim Line
     LocalizationKey: card.name.grim_line
+    DescriptionKey: card.desc.grim_line
+    ImageId: card_art_grim_line
     CardType: 0
     Rarity: 1
     Cost: 2
     TargetType: 2
+    CharacterArchetype: 0
+    CanAppearInReward: 1
+  - Id: 1011
+    Key: card_spark_focus
+    Name: Spark Focus
+    LocalizationKey: card.name.spark_focus
+    DescriptionKey: card.desc.spark_focus
+    ImageId: card_art_spark_focus
+    CardType: 3
+    Rarity: 4
+    Cost: 0
+    TargetType: 1
     CharacterArchetype: 0
     CanAppearInReward: 1

@@ -17,19 +17,19 @@ MonoBehaviour:
     EventId: 9001
     ChoiceId: 1
     LocalizationKey: event_fountain_choice1_text
-    EffectType: 5
+    EffectType: 6
     EffectValue: 5
   - Id: 9102
     EventId: 9001
     ChoiceId: 2
     LocalizationKey: event_fountain_choice2_text
-    EffectType: 6
+    EffectType: 7
     EffectValue: 10
   - Id: 9103
     EventId: 9001
     ChoiceId: 2
     LocalizationKey: event_fountain_choice3_text
-    EffectType: 4
+    EffectType: 5
     EffectValue: 100
   - Id: 9104
     EventId: 9001

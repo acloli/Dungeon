@@ -30,17 +30,28 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string restShopMessage,
             string resultMessage,
             BattleIntentViewModel enemyIntent = null,
+            IReadOnlyList<BattleHandCardViewModel> handCards = null,
             IReadOnlyList<BattleStatusViewModel> playerStatuses = null,
             IReadOnlyList<BattleStatusViewModel> enemyStatuses = null,
             IReadOnlyList<BattleStatusViewModel> playerBuffs = null,
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             IReadOnlyList<BattleEnemyViewModel> enemies = null,
+            IReadOnlyList<BattleMultiIconViewModel> ownedRelics = null,
+            IReadOnlyList<BattleMultiIconViewModel> ownedPotions = null,
             int selectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex,
+            int selectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex,
+            int selectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex,
+            int drawPileCount = 0,
+            int discardPileCount = 0,
+            int handCount = 0,
+            int maxHandCount = 0,
             IReadOnlyList<int> availableNodeIndices = null,
             IReadOnlyList<BattleShopItemViewModel> shopItems = null,
             bool isCardRemovalSoldOut = false,
             int cardRemovalPrice = 0,
             RuntimeEvent currentEvent = null,
+            RuntimeRelic pendingRelicReward = null,
+            RuntimePotion pendingPotionReward = null,
             string eventMessage = null,
             bool goldClaimed = false,
             bool potionClaimed = false,
@@ -48,7 +59,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             int battleGoldReward = 0,
             bool potionDropped = false,
             bool relicDropped = false,
-            bool cardRewardPicked = false)
+            bool cardRewardPicked = false,
+            string ownedRelicHintMessage = null,
+            string ownedPotionHintMessage = null,
+            bool canUseSelectedPotion = false,
+            PendingPotionOffer pendingPotionOffer = null)
         {
             CurrentPage = currentPage;
             Nodes = nodes;
@@ -71,17 +86,28 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             RestShopMessage = restShopMessage;
             ResultMessage = resultMessage;
             EnemyIntent = enemyIntent;
+            HandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
             PlayerStatuses = playerStatuses ?? Array.Empty<BattleStatusViewModel>();
             EnemyStatuses = enemyStatuses ?? Array.Empty<BattleStatusViewModel>();
             PlayerBuffs = playerBuffs ?? Array.Empty<BattleStatusViewModel>();
             EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
             Enemies = enemies ?? Array.Empty<BattleEnemyViewModel>();
+            OwnedRelics = ownedRelics ?? Array.Empty<BattleMultiIconViewModel>();
+            OwnedPotions = ownedPotions ?? Array.Empty<BattleMultiIconViewModel>();
             SelectedEnemyIndex = selectedEnemyIndex;
+            SelectedOwnedRelicIndex = selectedOwnedRelicIndex;
+            SelectedOwnedPotionIndex = selectedOwnedPotionIndex;
+            DrawPileCount = drawPileCount;
+            DiscardPileCount = discardPileCount;
+            HandCount = handCount;
+            MaxHandCount = maxHandCount;
             AvailableNodeIndices = availableNodeIndices ?? Array.Empty<int>();
             ShopItems = shopItems ?? Array.Empty<BattleShopItemViewModel>();
             IsCardRemovalSoldOut = isCardRemovalSoldOut;
             CardRemovalPrice = cardRemovalPrice;
             CurrentEvent = currentEvent;
+            PendingRelicReward = pendingRelicReward;
+            PendingPotionReward = pendingPotionReward;
             GoldClaimed = goldClaimed;
             PotionClaimed = potionClaimed;
             RelicClaimed = relicClaimed;
@@ -90,6 +116,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             PotionDropped = potionDropped;
             RelicDropped = relicDropped;
             CardRewardPicked = cardRewardPicked;
+            OwnedRelicHintMessage = ownedRelicHintMessage ?? string.Empty;
+            OwnedPotionHintMessage = ownedPotionHintMessage ?? string.Empty;
+            CanUseSelectedPotion = canUseSelectedPotion;
+            PendingPotionOffer = pendingPotionOffer;
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -113,17 +143,28 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string RestShopMessage { get; }
         public string ResultMessage { get; }
         public BattleIntentViewModel EnemyIntent { get; }
+        public IReadOnlyList<BattleHandCardViewModel> HandCards { get; }
         public IReadOnlyList<BattleStatusViewModel> PlayerStatuses { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyStatuses { get; }
         public IReadOnlyList<BattleStatusViewModel> PlayerBuffs { get; }
         public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
         public IReadOnlyList<BattleEnemyViewModel> Enemies { get; }
+        public IReadOnlyList<BattleMultiIconViewModel> OwnedRelics { get; }
+        public IReadOnlyList<BattleMultiIconViewModel> OwnedPotions { get; }
         public int SelectedEnemyIndex { get; }
+        public int SelectedOwnedRelicIndex { get; }
+        public int SelectedOwnedPotionIndex { get; }
+        public int DrawPileCount { get; }
+        public int DiscardPileCount { get; }
+        public int HandCount { get; }
+        public int MaxHandCount { get; }
         public IReadOnlyList<int> AvailableNodeIndices { get; }
         public IReadOnlyList<BattleShopItemViewModel> ShopItems { get; }
         public bool IsCardRemovalSoldOut { get; }
         public int CardRemovalPrice { get; }
         public RuntimeEvent CurrentEvent { get; }
+        public RuntimeRelic PendingRelicReward { get; }
+        public RuntimePotion PendingPotionReward { get; }
         public bool GoldClaimed { get; }
         public bool PotionClaimed { get; }
         public bool RelicClaimed { get; }
@@ -132,5 +173,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool RelicDropped { get; }
         public bool CardRewardPicked { get; }
         public string EventMessage { get; }
+        public string OwnedRelicHintMessage { get; }
+        public string OwnedPotionHintMessage { get; }
+        public bool CanUseSelectedPotion { get; }
+        public PendingPotionOffer PendingPotionOffer { get; }
     }
 }

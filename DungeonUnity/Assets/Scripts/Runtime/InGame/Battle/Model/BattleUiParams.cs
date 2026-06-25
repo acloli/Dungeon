@@ -145,6 +145,28 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// 薬水交換ダイアログの返却結果
+    /// </summary>
+    public struct PotionReplaceDialogResult
+    {
+        public bool IsCanceled;
+        public int SelectedPotionIndex;
+    }
+
+    /// <summary>
+    /// 薬水交換ダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattlePotionReplaceDialogParam
+    {
+        public BattlePotionReplaceDialogParam(BattleSceneSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattleSceneSnapshot Snapshot { get; }
+    }
+
+    /// <summary>
     /// ダイアログ表示要求生成クラス
     /// </summary>
     public static class BattleDialogOpenParams

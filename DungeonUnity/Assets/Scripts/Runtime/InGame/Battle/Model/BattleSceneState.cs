@@ -9,7 +9,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public sealed class BattleSceneState
     {
         public List<RuntimeCard> Deck { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> DrawPile { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> DiscardPile { get; } = new List<RuntimeCard>();
+        public List<RuntimeCard> ExhaustPile { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
+        public List<RuntimeRelic> OwnedRelics { get; } = new List<RuntimeRelic>();
+        public List<RuntimePotion> OwnedPotions { get; } = new List<RuntimePotion>();
         public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
         public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
@@ -44,11 +49,18 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsRestShopContinueEnabled { get; set; }
         public int EnemyTurnCount { get; set; }
         public int EnemyCycleIndex { get; set; }
+        public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public int SelectedOwnedPotionIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public string MapMessage { get; set; } = string.Empty;
         public string BattleHintMessage { get; set; } = string.Empty;
+        public string OwnedRelicHintMessage { get; set; } = string.Empty;
+        public string OwnedPotionHintMessage { get; set; } = string.Empty;
         public string RestShopMessage { get; set; } = string.Empty;
         public string ResultMessage { get; set; } = string.Empty;
         public RuntimeEvent CurrentEvent { get; set; }
+        public RuntimeRelic PendingRelicReward { get; set; }
+        public RuntimePotion PendingPotionReward { get; set; }
+        public PendingPotionOffer PendingPotionOffer { get; set; }
         public string EventMessage { get; set; } = string.Empty;
     }
 }

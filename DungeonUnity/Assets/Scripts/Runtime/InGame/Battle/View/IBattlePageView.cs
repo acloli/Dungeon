@@ -13,8 +13,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void UnwireButtons();
         void SetBattleHud(BattleHudViewModel hud);
         void SetBattleStateText(string playerText, string enemyText, string hintText);
+        void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount);
         void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked);
-        void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked);
+        void BuildHandCards(IReadOnlyList<BattleHandCardViewModel> handCards, Action<int> onClicked);
         void ClearDynamicButtons();
     }
 }

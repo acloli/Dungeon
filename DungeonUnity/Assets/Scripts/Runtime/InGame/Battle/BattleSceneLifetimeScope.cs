@@ -20,6 +20,9 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.BattleMasterDataFacade>(Lifetime.Singleton).As<Services.IBattleMasterDataFacade>();
             builder.Register<Services.BattleDisplayTextService>(Lifetime.Singleton).As<Services.IBattleDisplayTextService>();
             builder.Register<Services.BattleRewardService>(Lifetime.Singleton).As<Services.IBattleRewardService>();
+            builder.Register<Services.BattleRelicService>(Lifetime.Singleton).As<Services.IBattleRelicService>();
+            builder.Register<Services.BattlePotionService>(Lifetime.Singleton).As<Services.IBattlePotionService>();
+            builder.Register<Services.BattleCombatEventService>(Lifetime.Singleton).As<Services.IBattleCombatEventService>();
             builder.Register<Services.BattleEventService>(Lifetime.Singleton).As<Services.IBattleEventService>();
             builder.Register<Services.BattleShopService>(Lifetime.Singleton).As<Services.IBattleShopService>();
             builder.Register<Services.BattleSnapshotFactory>(Lifetime.Singleton).As<Services.IBattleSnapshotFactory>();

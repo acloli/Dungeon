@@ -20,6 +20,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         void DrawHand(BattleSceneState state, IBattleRandomProvider randomProvider);
 
         /// <summary>
+        /// 戦闘用山札準備
+        /// </summary>
+        void PrepareBattleDeck(BattleSceneState state, IBattleRandomProvider randomProvider);
+
+        /// <summary>
+        /// 手札破棄
+        /// </summary>
+        void DiscardHand(BattleSceneState state);
+
+        /// <summary>
+        /// 指定枚数を手札へ追加する
+        /// </summary>
+        int DrawCards(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount);
+
+        /// <summary>
         /// 敵選出
         /// </summary>
         RuntimeEncounterFormation SelectEncounterFormation(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider);
@@ -52,7 +67,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// カード適用
         /// </summary>
-        BattleCardResolutionResult PlayCard(BattleSceneState state, RuntimeCard card, IBattleRandomProvider randomProvider);
+        BattleCardResolutionResult PlayCard(BattleSceneState state, int handIndex, IBattleRandomProvider randomProvider);
 
         /// <summary>
         /// 敵ターン解決

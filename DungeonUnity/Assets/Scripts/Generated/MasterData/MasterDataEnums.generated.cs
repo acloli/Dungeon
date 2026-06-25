@@ -56,6 +56,7 @@ namespace Game.MasterData.Generated
         DealDamage,
         DrawCards,
         GainBlock,
+        GainEnergy,
         GainGold,
         GainMaxHp,
         LoseHp,
@@ -95,6 +96,15 @@ namespace Game.MasterData.Generated
         EliteBattle,
         Event,
         RestShop,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: RelicTriggerType
+    /// </summary>
+    public enum RelicTriggerType
+    {
+        CombatStart,
+        PlayerTurnStart,
     }
 
     /// <summary>

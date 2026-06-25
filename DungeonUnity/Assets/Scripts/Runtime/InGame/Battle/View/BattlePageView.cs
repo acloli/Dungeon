@@ -22,13 +22,16 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _playerBuffText;
         [SerializeField] private TFTextUGUI _enemyStatusText;
         [SerializeField] private TFTextUGUI _enemyBuffText;
+        [SerializeField] private TFTextUGUI _drawPileCountText;
+        [SerializeField] private TFTextUGUI _discardPileCountText;
+        [SerializeField] private TFTextUGUI _handCountText;
         [SerializeField] private Transform _handCardRoot;
-        [SerializeField] private BattleOptionButtonView _handCardButtonTemplate;
+        [SerializeField] private BattleCardIconView _handCardTemplate;
         [SerializeField] private Transform _enemyTargetRoot;
         [SerializeField] private Button _enemyTargetButton;
         [SerializeField] private Button _endTurnButton;
 
-        private readonly List<BattleOptionButtonView> _handButtons = new List<BattleOptionButtonView>();
+        private readonly List<BattleCardIconView> _handCards = new List<BattleCardIconView>();
         private readonly List<Button> _enemyButtons = new List<Button>();
         private static readonly Color SelectedEnemyColor = new Color(0.88f, 0.42f, 0.22f, 1f);
         private static readonly Color ActiveEnemyColor = new Color(0.2f, 0.35f, 0.55f, 1f);
@@ -139,32 +142,42 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
-        /// 手札ボタン構築
+        /// 山札・捨て札・手札枚数反映
         /// </summary>
-        public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
+        public void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount)
         {
-            ClearButtons(_handButtons);
+            SetText(_drawPileCountText, drawPileCount.ToString());
+            SetText(_discardPileCountText, discardPileCount.ToString());
+            SetText(_handCountText, $"{handCount}/{maxHandCount}");
+        }
 
-            if (_handCardRoot == null || _handCardButtonTemplate == null || hand == null)
+        /// <summary>
+        /// 手札カード構築
+        /// </summary>
+        public void BuildHandCards(IReadOnlyList<BattleHandCardViewModel> handCards, Action<int> onClicked)
+        {
+            ClearCards(_handCards);
+
+            if (_handCardRoot == null || _handCardTemplate == null || handCards == null)
             {
                 return;
             }
 
-            _handCardButtonTemplate.gameObject.SetActive(false);
+            _handCardTemplate.gameObject.SetActive(false);
 
-            for (int i = 0; i < hand.Count; i++)
+            for (int i = 0; i < handCards.Count; i++)
             {
                 int handIndex = i;
-                RuntimeCard card = hand[handIndex];
-                BattleOptionButtonView button = Instantiate(_handCardButtonTemplate, _handCardRoot);
-                button.gameObject.SetActive(true);
-                button.Configure(
-                    string.Format(BattleSceneConstants.CardLabelFormat, card.DisplayName, card.Cost, card.PreviewDamage),
-                    delegate
-                    {
-                        onClicked?.Invoke(handIndex);
-                    });
-                _handButtons.Add(button);
+                BattleHandCardViewModel handCard = handCards[handIndex];
+                if (handCard?.Icon == null)
+                {
+                    continue;
+                }
+
+                BattleCardIconView cardView = Instantiate(_handCardTemplate, _handCardRoot);
+                cardView.gameObject.SetActive(true);
+                cardView.Bind(handCard.Icon, () => onClicked?.Invoke(handIndex));
+                _handCards.Add(cardView);
             }
         }
 
@@ -173,7 +186,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// </summary>
         public void ClearDynamicButtons()
         {
-            ClearButtons(_handButtons);
+            ClearCards(_handCards);
             ClearEnemyButtons();
         }
 
@@ -256,21 +269,21 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 動的ボタン一覧消去
         /// </summary>
-        private static void ClearButtons(List<BattleOptionButtonView> buttons)
+        private static void ClearCards(List<BattleCardIconView> cards)
         {
-            for (int i = 0; i < buttons.Count; i++)
+            for (int i = 0; i < cards.Count; i++)
             {
-                BattleOptionButtonView button = buttons[i];
-                if (button == null)
+                BattleCardIconView card = cards[i];
+                if (card == null)
                 {
                     continue;
                 }
 
-                button.Clear();
-                Destroy(button.gameObject);
+                card.Clear();
+                Destroy(card.gameObject);
             }
 
-            buttons.Clear();
+            cards.Clear();
         }
 
         /// <summary>

@@ -48,7 +48,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         if (card != null)
                         {
                             int price = CalculateCardPrice(runDef, card, random);
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Card, card, 0, price));
+                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Card, card, null, null, 0, price));
                         }
                         break;
 
@@ -57,12 +57,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         if (relicRule != null)
                         {
                             int price = CalculateItemPrice(relicRule, random);
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, relicRule.ItemId, price));
+                            runDef.RelicCatalog.TryGetValue(relicRule.ItemId, out RuntimeRelic relic);
+                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, relic, null, relicRule.ItemId, price));
                         }
                         else
                         {
                             // Fallback default relic
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, 1, 150));
+                            runDef.RelicCatalog.TryGetValue(1, out RuntimeRelic relic);
+                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, relic, null, 1, 150));
                         }
                         break;
 
@@ -71,12 +73,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         if (potionRule != null)
                         {
                             int price = CalculateItemPrice(potionRule, random);
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Potion, null, potionRule.ItemId, price));
+                            runDef.PotionCatalog.TryGetValue(potionRule.ItemId, out RuntimePotion potion);
+                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Potion, null, null, potion, potionRule.ItemId, price));
                         }
                         else
                         {
                             // Fallback default potion
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Potion, null, 1, 50));
+                            runDef.PotionCatalog.TryGetValue(1, out RuntimePotion potion);
+                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Potion, null, null, potion, 1, 50));
                         }
                         break;
                 }

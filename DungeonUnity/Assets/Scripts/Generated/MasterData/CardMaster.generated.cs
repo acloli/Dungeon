@@ -35,6 +35,16 @@ namespace Game.MasterData.Generated
         public string LocalizationKey;
 
         /// <summary>
+        /// 説明文キー
+        /// </summary>
+        public string DescriptionKey;
+
+        /// <summary>
+        /// 画像ID
+        /// </summary>
+        public string ImageId;
+
+        /// <summary>
         /// カード種別
         /// </summary>
         public CardType CardType;

@@ -63,13 +63,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             // Potion行
             if (snapshot.PotionDropped && !snapshot.PotionClaimed)
-                AddRow(BattleSceneConstants.PotionDroppedLabel,
+                AddRow(snapshot.PendingPotionReward != null ? snapshot.PendingPotionReward.DisplayName : BattleSceneConstants.PotionDroppedLabel,
                     () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimPotion }),
                     true);
 
             // Relic行
             if (snapshot.RelicDropped && !snapshot.RelicClaimed)
-                AddRow(BattleSceneConstants.RelicDroppedLabel,
+                AddRow(snapshot.PendingRelicReward != null ? snapshot.PendingRelicReward.DisplayName : BattleSceneConstants.RelicDroppedLabel,
                     () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimRelic }),
                     true);
         }

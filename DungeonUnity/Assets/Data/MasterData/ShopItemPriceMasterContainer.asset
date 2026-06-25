@@ -31,9 +31,19 @@ MonoBehaviour:
   - Id: 8204
     ItemType: 2
     ItemId: 2
-    BasePrice: 50
+    BasePrice: 55
     JitterPercent: 10
   - Id: 8205
+    ItemType: 2
+    ItemId: 3
+    BasePrice: 60
+    JitterPercent: 10
+  - Id: 8206
+    ItemType: 2
+    ItemId: 4
+    BasePrice: 70
+    JitterPercent: 10
+  - Id: 8207
     ItemType: 1
     ItemId: 0
     BasePrice: 0

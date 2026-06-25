@@ -10,14 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeCardEffect
     {
-        public RuntimeCardEffect(
-            int order,
-            EffectType effectType,
-            int value,
-            int hitCount,
-            StatusType statusType,
-            int statusValue,
-            TargetSide targetSide)
+        public RuntimeCardEffect(int order, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
         {
             Order = order;
             EffectType = effectType;
@@ -47,6 +40,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string key,
             string displayName,
             string localizationKey,
+            string description,
+            string descriptionKey,
+            string imageId,
             int cost,
             CardType cardType,
             CardRarity rarity,
@@ -57,6 +53,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Key = key;
             DisplayName = displayName;
             LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
             Cost = cost;
             CardType = cardType;
             Rarity = rarity;
@@ -68,6 +67,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string Key { get; }
         public string DisplayName { get; }
         public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
         public int Cost { get; }
         public CardType CardType { get; }
         public CardRarity Rarity { get; }
@@ -96,6 +98,131 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 return total;
             }
         }
+    }
+
+    /// <summary>
+    /// ランタイム用レリック効果定義
+    /// </summary>
+    public sealed class RuntimeRelicEffect
+    {
+        public RuntimeRelicEffect(int order, RelicTriggerType triggerType, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
+        {
+            Order = order;
+            TriggerType = triggerType;
+            EffectType = effectType;
+            Value = value;
+            HitCount = hitCount;
+            StatusType = statusType;
+            StatusValue = statusValue;
+            TargetSide = targetSide;
+        }
+
+        public int Order { get; }
+        public RelicTriggerType TriggerType { get; }
+        public EffectType EffectType { get; }
+        public int Value { get; }
+        public int HitCount { get; }
+        public StatusType StatusType { get; }
+        public int StatusValue { get; }
+        public TargetSide TargetSide { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用レリック定義
+    /// </summary>
+    public sealed class RuntimeRelic
+    {
+        public RuntimeRelic(int id, string key, string displayName, string localizationKey, string description, string descriptionKey, string imageId, CardRarity rarity, IReadOnlyList<RuntimeRelicEffect> effects = null)
+        {
+            Id = id;
+            Key = key;
+            DisplayName = displayName;
+            LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
+            Rarity = rarity;
+            Effects = effects ?? Array.Empty<RuntimeRelicEffect>();
+        }
+
+        public int Id { get; }
+        public string Key { get; }
+        public string DisplayName { get; }
+        public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
+        public CardRarity Rarity { get; }
+        public IReadOnlyList<RuntimeRelicEffect> Effects { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用ポーション効果定義
+    /// </summary>
+    public sealed class RuntimePotionEffect
+    {
+        public RuntimePotionEffect(int order, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
+        {
+            Order = order;
+            EffectType = effectType;
+            Value = value;
+            HitCount = hitCount;
+            StatusType = statusType;
+            StatusValue = statusValue;
+            TargetSide = targetSide;
+        }
+
+        public int Order { get; }
+        public EffectType EffectType { get; }
+        public int Value { get; }
+        public int HitCount { get; }
+        public StatusType StatusType { get; }
+        public int StatusValue { get; }
+        public TargetSide TargetSide { get; }
+    }
+
+    /// <summary>
+    /// ランタイム用ポーション定義
+    /// </summary>
+    public sealed class RuntimePotion
+    {
+        public RuntimePotion(
+            int id,
+            string key,
+            string displayName,
+            string localizationKey,
+            string description,
+            string descriptionKey,
+            string imageId,
+            CardRarity rarity,
+            PotionUseContext useContext,
+            PotionTargetMode targetMode,
+            IReadOnlyList<RuntimePotionEffect> effects)
+        {
+            Id = id;
+            Key = key;
+            DisplayName = displayName;
+            LocalizationKey = localizationKey;
+            Description = description;
+            DescriptionKey = descriptionKey;
+            ImageId = imageId;
+            Rarity = rarity;
+            UseContext = useContext;
+            TargetMode = targetMode;
+            Effects = effects ?? Array.Empty<RuntimePotionEffect>();
+        }
+
+        public int Id { get; }
+        public string Key { get; }
+        public string DisplayName { get; }
+        public string LocalizationKey { get; }
+        public string Description { get; }
+        public string DescriptionKey { get; }
+        public string ImageId { get; }
+        public CardRarity Rarity { get; }
+        public PotionUseContext UseContext { get; }
+        public PotionTargetMode TargetMode { get; }
+        public IReadOnlyList<RuntimePotionEffect> Effects { get; }
     }
 
     /// <summary>
@@ -254,11 +381,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeRewardEntry
     {
-        public RuntimeRewardEntry(RewardType rewardType, int rewardValue, RuntimeCard card, int weight, int minFloor, int maxFloor)
+        public RuntimeRewardEntry(RewardType rewardType, int rewardValue, RuntimeCard card, RuntimeRelic relic, RuntimePotion potion, int weight, int minFloor, int maxFloor)
         {
             RewardType = rewardType;
             RewardValue = rewardValue;
             Card = card;
+            Relic = relic;
+            Potion = potion;
             Weight = weight;
             MinFloor = minFloor;
             MaxFloor = maxFloor;
@@ -267,6 +396,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RewardType RewardType { get; }
         public int RewardValue { get; }
         public RuntimeCard Card { get; }
+        public RuntimeRelic Relic { get; }
+        public RuntimePotion Potion { get; }
         public int Weight { get; }
         public int MinFloor { get; }
         public int MaxFloor { get; }
@@ -435,6 +566,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encountersByNodeType,
             IReadOnlyList<RuntimeEvent> possibleEvents,
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog,
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog,
             RuntimeShopLineup shopLineup,
             IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules,
             IReadOnlyList<RuntimeItemPriceRule> itemPriceRules)
@@ -453,6 +586,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             EncountersByNodeType = encountersByNodeType
                 ?? new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>();
             PossibleEvents = possibleEvents ?? Array.Empty<RuntimeEvent>();
+            RelicCatalog = relicCatalog ?? new Dictionary<int, RuntimeRelic>();
+            PotionCatalog = potionCatalog ?? new Dictionary<int, RuntimePotion>();
             ShopLineup = shopLineup;
             CardPriceRules = cardPriceRules ?? new Dictionary<CardRarity, RuntimeCardPriceRule>();
             ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
@@ -471,6 +606,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyDictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> EncountersByNodeType { get; }
         public IReadOnlyList<RuntimeEvent> PossibleEvents { get; }
+        public IReadOnlyDictionary<int, RuntimeRelic> RelicCatalog { get; }
+        public IReadOnlyDictionary<int, RuntimePotion> PotionCatalog { get; }
         public RuntimeShopLineup ShopLineup { get; }
         public IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> CardPriceRules { get; }
         public IReadOnlyList<RuntimeItemPriceRule> ItemPriceRules { get; }

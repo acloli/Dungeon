@@ -9,15 +9,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class BattleShopItemView : MonoBehaviour
     {
         [SerializeField] private Button _button;
-        [SerializeField] private TFTextUGUI _nameText;
+        [SerializeField] private BattleMultiIconView _iconView;
         [SerializeField] private TFTextUGUI _priceText;
 
         public void Bind(BattleShopItemViewModel itemViewModel, Action<int> onClick)
         {
-            if (_nameText != null)
-            {
-                _nameText.text = itemViewModel.DisplayName;
-            }
+            _iconView?.Bind(itemViewModel.Icon, null);
+            bool isAffordable = itemViewModel.Icon == null || itemViewModel.Icon.IsAffordable;
+            bool canPurchase = !itemViewModel.IsSoldOut && isAffordable;
 
             if (itemViewModel.IsSoldOut)
             {
@@ -36,7 +35,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             _button.onClick.RemoveAllListeners();
-            _button.onClick.AddListener(() => onClick?.Invoke(itemViewModel.SlotIndex));
+            _button.interactable = canPurchase;
+            if (canPurchase)
+            {
+                _button.onClick.AddListener(() => onClick?.Invoke(itemViewModel.SlotIndex));
+            }
         }
 
         public void Clear()
@@ -45,6 +48,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _button.onClick.RemoveAllListeners();
             }
+
+            _iconView?.Clear();
         }
 
         private void SetPriceText(string label)

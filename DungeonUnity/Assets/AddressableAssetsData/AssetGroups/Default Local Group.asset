@@ -75,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eae45f49a30354e00b23951e7d25fd31
+    m_Address: PotionReplaceDialog
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fac8baafa220b418dbc42ee83243aaf5
     m_Address: MainScene
     m_ReadOnly: 0

@@ -42,14 +42,50 @@ battle.status.slimed,粘液,Slimed,黏液,黏液,점액
 battle.buff.strength,筋力,Strength,力量,力量,힘
 battle.buff.ritual,儀式,Ritual,仪式,儀式,의식
 battle.buff.enrage,激昂,Enrage,激怒,激怒,격노
-restshop.title,補給所,Rest Site,补给站,補給站,보급소
-restshop.rest_button,休憩,Rest,休息,休息,휴식
-restshop.upgrade_button,強化,Upgrade,强化,強化,강화
-restshop.shop_button,ショップ,Shop,商店,商店,상점
-restshop.continue_button,先へ進む,Continue,前进,前進,계속
+run.profile.crimson_exile_standard,紅蓮追放者 標準ラン,Crimson Exile Standard,红莲追放者 标准运行,紅蓮追放者 標準ラン,크림슨 엑자일 표준 런
 event_fountain_title,不思議な泉,Mysterious Fountain,神秘泉水,神秘泉水,신비한 샘
 event_fountain_desc,あなたは奇妙なスライムの泉を見つけた。どうする？,You found a strange slime fountain. What will you do?,你发现了一个奇怪的史莱姆泉水。你打算怎么做？,你發現了一個奇怪的史萊姆泉水。你打算怎麼做？,당신은 기묘한 슬라임 샘을 발견했다. 어떻게 할까?
 event_fountain_choice1_text,泉の水を飲む（最大HP+5）,Drink the water (Max HP +5),喝泉水（最大生命+5）,喝泉水（最大生命+5）,샘물을 마신다 (최대 체력 +5)
 event_fountain_choice2_text,泉の底を探る（10ダメージ）,Search the bottom (10 Damage),探索泉底（受到10点伤害）,探索泉底（受到10點傷害）,샘 바닥을 살핀다 (10 피해)
 event_fountain_choice3_text,泉の底を探る（100Gold獲得）,Search the bottom (Gain 100 Gold),探索泉底（获得100金币）,探索泉底（獲得100金幣）,샘 바닥을 살핀다 (100 골드 획득)
 event_fountain_choice4_text,無視して立ち去る,Ignore and leave,无视并离开,無視並離開,무시하고 떠난다
+map.node.event_dummy,イベント,Event,事件,事件,이벤트
+restshop.title,補給所,Rest Site,补给站,補給站,보급소
+restshop.rest_button,休憩,Rest,休息,休息,휴식
+restshop.upgrade_button,強化,Upgrade,强化,強化,강화
+restshop.shop_button,ショップ,Shop,商店,商店,상점
+restshop.continue_button,先へ進む,Continue,前进,前進,계속
+card.name.spark_focus,スパークフォーカス,Spark Focus,火花专注,火花專注,스파크 포커스
+card.desc.cinder_slash,敵1体に6ダメージを与える。,Deal 6 damage to an enemy.,对1名敌人造成6点伤害。,對1名敵人造成6點傷害。,적 하나에게 피해 6을 준다.
+card.desc.ash_guard,5ブロックを得る。,Gain 5 Block.,获得5点格挡。,獲得5點格擋。,방어도 5를 얻는다.
+card.desc.crystal_bash,敵1体に10ダメージを与える。,Deal 10 damage to an enemy.,对1名敌人造成10点伤害。,對1名敵人造成10點傷害。,적 하나에게 피해 10을 준다.
+card.desc.ember_knuckle,敵1体に8ダメージを与える。,Deal 8 damage to an enemy.,对1名敌人造成8点伤害。,對1名敵人造成8點傷害。,적 하나에게 피해 8을 준다.
+card.desc.shell_up,8ブロックを得る。,Gain 8 Block.,获得8点格挡。,獲得8點格擋。,방어도 8을 얻는다.
+card.desc.dual_fang,敵1体に4ダメージを2回与える。,Deal 4 damage twice to an enemy.,对1名敌人造成2次4点伤害。,對1名敵人造成2次4點傷害。,적 하나에게 피해 4를 2회 준다.
+card.desc.iron_tide,敵1体に7ダメージを与え5ブロックを得る。,Deal 7 damage and gain 5 Block.,对1名敌人造成7点伤害并获得5点格挡。,對1名敵人造成7點傷害並獲得5點格擋。,적 하나에게 피해 7을 주고 방어도 5를 얻는다.
+card.desc.storm_clap,すべての敵に5ダメージを与える。,Deal 5 damage to all enemies.,对所有敌人造成5点伤害。,對所有敵人造成5點傷害。,모든 적에게 피해 5를 준다.
+card.desc.char_sweep,すべての敵に4ダメージを与え脱力1を付与する。,Deal 4 damage and apply 1 Weak to all enemies.,对所有敌人造成4点伤害并施加1层虚弱。,對所有敵人造成4點傷害並施加1層虛弱。,모든 적에게 피해 4를 주고 약화 1을 건다.
+card.desc.grim_line,敵1体に14ダメージを与える。,Deal 14 damage to an enemy.,对1名敌人造成14点伤害。,對1名敵人造成14點傷害。,적 하나에게 피해 14를 준다.
+card.desc.spark_focus,エナジー1を得てカードを1枚引く。,Gain 1 Energy and draw 1 card.,获得1点能量并抽1张牌。,獲得1點能量並抽1張牌。,에너지 1을 얻고 카드 1장을 뽑는다.
+relic.name.burning_core,バーニングコア,Burning Core,燃烧核心,燃燒核心,버닝 코어
+relic.desc.burning_core,戦闘開始時に6ブロックを得る。,Gain 6 Block at the start of combat.,战斗开始时获得6点格挡。,戰鬥開始時獲得6點格擋。,전투 시작 시 방어도 6을 얻는다.
+relic.name.ember_crown,エンバークラウン,Ember Crown,余烬王冠,餘燼王冠,엠버 크라운
+relic.desc.ember_crown,プレイヤーターン開始時にエナジー1を得る。,Gain 1 Energy at the start of each player turn.,每个玩家回合开始时获得1点能量。,每個玩家回合開始時獲得1點能量。,플레이어 턴 시작 시 에너지 1을 얻는다.
+potion.name.cinder_tonic,シンダートニック,Cinder Tonic,余烬药剂,餘燼藥劑,신더 토닉
+potion.desc.cinder_tonic,火花が沈む薬瓶。基本ポーション表示用。,A bottled cinder. Baseline potion for shared icon display.,封存火星的药剂。用于基础药水显示。,封存火星的藥劑。用於基礎藥水顯示。,불씨가 가라앉은 약병. 기본 포션 표시용.
+potion.name.smoke_phial,スモークファイアル,Smoke Phial,烟幕小瓶,煙幕小瓶,스모크 피알
+potion.desc.smoke_phial,薄煙を閉じ込めた小瓶。上位ポーション表示用。,A phial of smoke. Sample potion for upgraded display.,封存烟雾的小瓶。用于进阶药水显示。,封存煙霧的小瓶。用於進階藥水顯示。,옅은 연기를 담은 작은 병. 상위 포션 표시용.
+battle.pile.draw,山札,Draw,抽牌堆,抽牌堆,드로우
+battle.pile.discard,捨て札,Discard,弃牌堆,棄牌堆,버림
+battle.hand.count,手札,Hand,手牌,手牌,패
+potion.name.energy_potion,エナジーポーション,Energy Potion,能量药水,能量藥水,에너지 포션
+potion.desc.energy_potion,エナジーを1得る。,Gain 1 Energy.,获得1点能量。,獲得1點能量。,에너지 1을 얻는다.
+potion.name.block_potion,ブロックポーション,Block Potion,格挡药水,格擋藥水,방어 포션
+potion.desc.block_potion,12ブロックを得る。,Gain 12 Block.,获得12点格挡。,獲得12點格擋。,방어도 12를 얻는다.
+potion.name.swift_potion,スイフトポーション,Swift Potion,迅捷药水,迅捷藥水,신속 포션
+potion.desc.swift_potion,カードを3枚引く。,Draw 3 cards.,抽3张牌。,抽3張牌。,카드 3장을 뽑는다.
+potion.name.fruit_juice,フルーツジュース,Fruit Juice,果汁药剂,果汁藥劑,과일 주스
+potion.desc.fruit_juice,最大HPを5増やす。,Gain 5 Max HP.,增加5点最大生命。,增加5點最大生命。,최대 체력 5를 얻는다.
+battle.potion.use,使用,Use,使用,使用,사용
+battle.potion.replace_title,ポーション入れ替え,Potion Replace,药水替换,藥水替換,포션 교체
+battle.potion.replace_message,所持上限です。入れ替えるポーションを選んでください。,Potion slots are full. Choose a potion to replace.,药水槽已满。请选择要替换的药水。,藥水槽已滿。請選擇要替換的藥水。,포션 슬롯이 가득 찼습니다. 교체할 포션을 선택하세요.

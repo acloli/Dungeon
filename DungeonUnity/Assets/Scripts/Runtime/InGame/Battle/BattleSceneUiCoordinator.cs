@@ -28,6 +28,7 @@ namespace Dungeon.Runtime.InGame.Battle
         {
             _hostView = hostView;
             _hostView.SetBattleVisible(false);
+            _hostView.SetHostChromeInteractable(true);
             await _uiService.ClearStackAsync(ct);
         }
 
@@ -168,9 +169,21 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         public async UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
-            return await _uiService.ShowDialogAsync<CardPickDialog, RuntimeRewardEntry>(
-                BattleDialogOpenParams.SingleUse(new BattleCardPickDialogParam(snapshot)),
-                ct);
+            return await ShowHostChromeModalAsync(
+                () => _uiService.ShowDialogAsync<CardPickDialog, RuntimeRewardEntry>(
+                    BattleDialogOpenParams.SingleUse(new BattleCardPickDialogParam(snapshot)),
+                    ct));
+        }
+
+        /// <summary>
+        /// 薬水交換ダイアログ表示
+        /// </summary>
+        public async UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            return await ShowHostChromeModalAsync(
+                () => _uiService.ShowDialogAsync<PotionReplaceDialog, PotionReplaceDialogResult>(
+                    BattleDialogOpenParams.SingleUse(new BattlePotionReplaceDialogParam(snapshot)),
+                    ct));
         }
 
         /// <summary>
@@ -181,9 +194,30 @@ namespace Dungeon.Runtime.InGame.Battle
             if (_hostView != null)
             {
                 _hostView.SetBattleVisible(false);
+                _hostView.SetHostChromeInteractable(true);
             }
 
             _hostView = null;
+        }
+
+        private async UniTask<TResult> ShowHostChromeModalAsync<TResult>(Func<UniTask<TResult>> showDialogAsync)
+        {
+            if (_hostView != null)
+            {
+                _hostView.SetHostChromeInteractable(false);
+            }
+
+            try
+            {
+                return await showDialogAsync();
+            }
+            finally
+            {
+                if (_hostView != null)
+                {
+                    _hostView.SetHostChromeInteractable(true);
+                }
+            }
         }
     }
 }

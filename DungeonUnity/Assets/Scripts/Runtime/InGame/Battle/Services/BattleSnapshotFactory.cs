@@ -47,25 +47,40 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.RestShopMessage,
                 state.ResultMessage,
                 BuildEnemyIntent(state),
+                BuildHandCardViews(state),
                 BuildStatusViews(state.PlayerStatuses),
                 BuildStatusViews(state.EnemyStatuses),
                 BuildBuffViews(state.PlayerBuffs),
                 BuildBuffViews(state.EnemyBuffs),
                 BuildEnemyViews(state),
+                BuildOwnedRelicViews(state),
+                BuildOwnedPotionViews(state),
                 state.SelectedEnemyIndex,
+                state.SelectedOwnedRelicIndex,
+                state.SelectedOwnedPotionIndex,
+                state.DrawPile.Count,
+                state.DiscardPile.Count,
+                state.Hand.Count,
+                BattleSceneConstants.MaxHandSize,
                 BuildAvailableNodeIndices(state),
                 BuildShopItemViews(state),
                 state.IsCardRemovalSoldOut,
                 _shopService.GetCardRemovalPrice(state),
                 state.CurrentEvent,
+                state.PendingRelicReward,
+                state.PendingPotionReward,
                 state.EventMessage,
                 state.GoldClaimed,
                 state.PotionClaimed,
                 state.RelicClaimed,
                 state.BattleGoldReward,
                 state.PotionDropped,
-                state.RelicDropped,
-                state.CardRewardPicked);
+                state.PendingRelicReward != null,
+                state.CardRewardPicked,
+                state.OwnedRelicHintMessage,
+                state.OwnedPotionHintMessage,
+                CanUseSelectedPotion(state),
+                state.PendingPotionOffer);
         }
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
@@ -257,6 +272,100 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return indices;
         }
 
+        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedRelicViews(BattleSceneState state)
+        {
+            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            for (int i = 0; i < state.OwnedRelics.Count; i++)
+            {
+                RuntimeRelic relic = state.OwnedRelics[i];
+                if (relic == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleMultiIconViewModel(
+                    BattleIconKind.Relic,
+                    relic.DisplayName,
+                    relic.Description,
+                    relic.ImageId,
+                    relic.Rarity,
+                    isSelected: i == state.SelectedOwnedRelicIndex));
+            }
+
+            return views;
+        }
+
+        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedPotionViews(BattleSceneState state)
+        {
+            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            for (int i = 0; i < state.OwnedPotions.Count; i++)
+            {
+                RuntimePotion potion = state.OwnedPotions[i];
+                if (potion == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleMultiIconViewModel(
+                    BattleIconKind.Potion,
+                    potion.DisplayName,
+                    potion.Description,
+                    potion.ImageId,
+                    potion.Rarity,
+                    isSelected: i == state.SelectedOwnedPotionIndex));
+            }
+
+            return views;
+        }
+
+        private static bool CanUseSelectedPotion(BattleSceneState state)
+        {
+            if (state == null || state.SelectedOwnedPotionIndex < 0 || state.SelectedOwnedPotionIndex >= state.OwnedPotions.Count)
+            {
+                return false;
+            }
+
+            RuntimePotion potion = state.OwnedPotions[state.SelectedOwnedPotionIndex];
+            if (potion == null)
+            {
+                return false;
+            }
+
+            return state.CurrentPage switch
+            {
+                BattleScenePage.Battle => potion.UseContext == PotionUseContext.BattleOnly || potion.UseContext == PotionUseContext.Both,
+                _ => potion.UseContext == PotionUseContext.OutOfBattleOnly || potion.UseContext == PotionUseContext.Both
+            };
+        }
+
+        private IReadOnlyList<BattleHandCardViewModel> BuildHandCardViews(BattleSceneState state)
+        {
+            List<BattleHandCardViewModel> views = new List<BattleHandCardViewModel>();
+            if (state.Hand == null)
+            {
+                return views;
+            }
+
+            for (int i = 0; i < state.Hand.Count; i++)
+            {
+                RuntimeCard card = state.Hand[i];
+                if (card == null)
+                {
+                    continue;
+                }
+
+                views.Add(new BattleHandCardViewModel(
+                    card,
+                    BuildCardIconViewModel(
+                        card,
+                        state.PlayerEnergy >= card.Cost,
+                        i == state.SelectedCardIndex,
+                        true)));
+            }
+
+            return views;
+        }
+
         private bool CanMoveToNode(BattleSceneState state, int index)
         {
             if (state.CurrentNodeIndex < 0)
@@ -346,7 +455,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     item.Price,
                     item.IsSoldOut,
                     item.Card,
-                    item.ItemId));
+                    item.Relic,
+                    item.Potion,
+                    item.ItemId,
+                    BuildShopItemIconViewModel(item, state.Gold)));
             }
 
             return views;
@@ -360,13 +472,72 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
             if (item.RewardType == RewardType.Potion)
             {
-                return $"Potion {item.ItemId}";
+                return item.Potion != null ? item.Potion.DisplayName : $"Potion {item.ItemId}";
             }
             if (item.RewardType == RewardType.Relic)
             {
-                return $"Relic {item.ItemId}";
+                return item.Relic != null ? item.Relic.DisplayName : $"Relic {item.ItemId}";
             }
             return item.RewardType.ToString();
+        }
+
+        private BattleMultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item, int currentGold)
+        {
+            bool isAffordable = !item.IsSoldOut && currentGold >= item.Price;
+            bool isInteractable = !item.IsSoldOut && isAffordable;
+
+            if (item.RewardType == RewardType.Card && item.Card != null)
+            {
+                return BuildCardIconViewModel(item.Card, isAffordable, false, isInteractable);
+            }
+
+            if (item.RewardType == RewardType.Relic && item.Relic != null)
+            {
+                return new BattleMultiIconViewModel(
+                    BattleIconKind.Relic,
+                    item.Relic.DisplayName,
+                    item.Relic.Description,
+                    item.Relic.ImageId,
+                    item.Relic.Rarity,
+                    isInteractable: isInteractable,
+                    isAffordable: isAffordable);
+            }
+
+            if (item.RewardType == RewardType.Potion && item.Potion != null)
+            {
+                return new BattleMultiIconViewModel(
+                    BattleIconKind.Potion,
+                    item.Potion.DisplayName,
+                    item.Potion.Description,
+                    item.Potion.ImageId,
+                    item.Potion.Rarity,
+                    isInteractable: isInteractable,
+                    isAffordable: isAffordable);
+            }
+
+            return new BattleMultiIconViewModel(
+                BattleIconKind.None,
+                BuildShopItemDisplayName(item),
+                string.Empty,
+                string.Empty,
+                CardRarity.Common,
+                isInteractable: isInteractable,
+                isAffordable: isAffordable);
+        }
+
+        private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
+        {
+            return new BattleMultiIconViewModel(
+                BattleIconKind.Card,
+                card.DisplayName,
+                card.Description,
+                card.ImageId,
+                card.Rarity,
+                card.Cost,
+                true,
+                isInteractable,
+                isSelected,
+                isAffordable);
         }
     }
 }

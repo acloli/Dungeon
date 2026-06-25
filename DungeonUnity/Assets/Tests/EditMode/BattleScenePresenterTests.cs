@@ -115,6 +115,235 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeAsync_BattleState_RendersHandCardsAndPileCounters()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                2,
+                0,
+                100,
+                null,
+                20,
+                0,
+                false,
+                1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                handCards: new[]
+                {
+                    new BattleHandCardViewModel(
+                        CreateCard(1001, "Strike", 1),
+                        new BattleMultiIconViewModel(BattleIconKind.Card, "Strike", "Deal 6 damage.", "card_art_strike", CardRarity.Common, cost: 1, showCost: true, isSelected: false, isAffordable: true)),
+                    new BattleHandCardViewModel(
+                        CreateCard(1002, "Guard", 2),
+                        new BattleMultiIconViewModel(BattleIconKind.Card, "Guard", "Gain 8 Block.", "card_art_guard", CardRarity.Uncommon, cost: 2, showCost: true, isSelected: true, isAffordable: false))
+                },
+                drawPileCount: 12,
+                discardPileCount: 3,
+                handCount: 2,
+                maxHandCount: 10);
+
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.BattlePageView.LastHandCards.Count, Is.EqualTo(2));
+            Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsSelected, Is.True);
+            Assert.That(view.BattlePageView.LastHandCards[1].Icon.IsAffordable, Is.False);
+            Assert.That(view.LastOwnedRelics, Is.Empty);
+            Assert.That(view.BattlePageView.LastDrawPileCount, Is.EqualTo(12));
+            Assert.That(view.BattlePageView.LastDiscardPileCount, Is.EqualTo(3));
+            Assert.That(view.BattlePageView.LastHandCount, Is.EqualTo(2));
+            Assert.That(view.BattlePageView.LastMaxHandCount, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void InitializeAsync_MapState_RendersOwnedRelicsThroughHostView()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Map,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedRelics: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                },
+                selectedOwnedRelicIndex: 0,
+                ownedRelicHintMessage: "Burning Core\nGain 6 Block at combat start.");
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.LastOwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(view.LastOwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+            Assert.That(view.LastSelectedOwnedRelicIndex, Is.EqualTo(0));
+            Assert.That(view.LastOwnedRelicHint, Does.Contain("Gain 6 Block"));
+        }
+
+        [Test]
+        public void OnOwnedRelicClicked_UpdatesHintText()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Battle,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedRelics: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                });
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.OnOwnedRelicClicked(0);
+
+            Assert.That(flowService.InspectOwnedRelicCallCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InitializeAsync_MapState_RendersOwnedPotionsThroughHostView()
+        {
+            BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
+                BattleScenePage.Map,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedPotions: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
+                },
+                selectedOwnedPotionIndex: 0,
+                ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
+                canUseSelectedPotion: true);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(view.LastOwnedPotions.Count, Is.EqualTo(1));
+            Assert.That(view.LastOwnedPotions[0].DisplayName, Is.EqualTo("Fruit Juice"));
+            Assert.That(view.LastSelectedOwnedPotionIndex, Is.EqualTo(0));
+            Assert.That(view.LastOwnedPotionHint, Does.Contain("Gain 5 Max HP"));
+            Assert.That(view.IsOwnedPotionUseVisible, Is.True);
+        }
+
+        [Test]
+        public void OnUsePotionClicked_UsesPotionImmediately()
+        {
+            BattleSceneSnapshot readySnapshot = new BattleSceneSnapshot(
+                BattleScenePage.Map,
+                new List<RuntimeMapNode>(),
+                new List<RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result",
+                ownedPotions: new[]
+                {
+                    new BattleMultiIconViewModel(BattleIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
+                },
+                selectedOwnedPotionIndex: 0,
+                ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
+                canUseSelectedPotion: true);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(readySnapshot)
+            {
+                SnapshotAfterUsePotion = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Map)
+            };
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            presenter.OnUsePotionClicked();
+            presenter.OnUsePotionClicked();
+
+            Assert.That(flowService.UsePotionCallCount, Is.EqualTo(1));
+            Assert.That(view.IsOwnedPotionUseVisible, Is.False);
+        }
+
+        [Test]
         public void InitializeAsync_WithValidSave_InitializesFromSave()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
@@ -243,7 +472,7 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result",
-                new BattleIntentViewModel(
+                enemyIntent: new BattleIntentViewModel(
                     IntentType.AttackDefend,
                     "攻防",
                     7,
@@ -255,10 +484,10 @@ namespace Dungeon.Tests.EditMode
                     BuffType.Ritual,
                     "儀式",
                     3),
-                new[] { new BattleStatusViewModel("脆弱", 2, false) },
-                new[] { new BattleStatusViewModel("脱力", 1, false) },
-                new[] { new BattleStatusViewModel("筋力", 1, true) },
-                new[] { new BattleStatusViewModel("儀式", 3, true) });
+                playerStatuses: new[] { new BattleStatusViewModel("脆弱", 2, false) },
+                enemyStatuses: new[] { new BattleStatusViewModel("脱力", 1, false) },
+                playerBuffs: new[] { new BattleStatusViewModel("筋力", 1, true) },
+                enemyBuffs: new[] { new BattleStatusViewModel("儀式", 3, true) });
         }
 
         private static BattleSceneSnapshot CreateMultiEnemySnapshot()
@@ -284,17 +513,17 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result",
-                null,
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                Array.Empty<BattleStatusViewModel>(),
-                new[]
+                enemyIntent: null,
+                playerStatuses: Array.Empty<BattleStatusViewModel>(),
+                enemyStatuses: Array.Empty<BattleStatusViewModel>(),
+                playerBuffs: Array.Empty<BattleStatusViewModel>(),
+                enemyBuffs: Array.Empty<BattleStatusViewModel>(),
+                enemies: new[]
                 {
                     new BattleEnemyViewModel(0, "Red Mite", 12, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>()),
                     new BattleEnemyViewModel(1, "Green Mite", 8, 0, false, null, Array.Empty<BattleStatusViewModel>(), Array.Empty<BattleStatusViewModel>())
                 },
-                1);
+                selectedEnemyIndex: 1);
         }
 
         private static RunSaveData CreateValidSaveData()
@@ -310,6 +539,23 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.Map,
                 DeckCardIds = new List<int> { 1001 }
             };
+        }
+
+        private static RuntimeCard CreateCard(int id, string displayName, int cost)
+        {
+            return new RuntimeCard(
+                id,
+                $"card_{id}",
+                displayName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                cost,
+                CardType.Attack,
+                CardRarity.Common,
+                CharacterArchetype.CrimsonExile,
+                Array.Empty<RuntimeCardEffect>());
         }
 
         [Test]
@@ -354,9 +600,18 @@ namespace Dungeon.Tests.EditMode
             public int EndTurnCallCount { get; private set; }
             public int SelectHandCardCallCount { get; private set; }
             public int TryPlaySelectedCardCallCount { get; private set; }
+            public int InspectOwnedRelicCallCount { get; private set; }
+            public int InspectOwnedPotionCallCount { get; private set; }
+            public int UsePotionCallCount { get; private set; }
+            public int ReplaceOwnedPotionCallCount { get; private set; }
+            public int CancelPendingPotionReplaceCallCount { get; private set; }
+            public int ClearOwnedInspectionsCallCount { get; private set; }
             public int InitializeCallCount { get; private set; }
             public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
+            public BattleSceneSnapshot SnapshotAfterUsePotion { get; set; }
+            public BattleSceneSnapshot SnapshotAfterReplaceOwnedPotion { get; set; }
+            public BattleSceneSnapshot SnapshotAfterCancelPendingPotionReplace { get; set; }
 
             public void Initialize(int runProfileId)
             {
@@ -416,6 +671,43 @@ namespace Dungeon.Tests.EditMode
 
             public void ClaimRelic()
             {
+            }
+
+            public void InspectOwnedRelic(int index)
+            {
+                InspectOwnedRelicCallCount++;
+            }
+
+            public void InspectOwnedPotion(int index)
+            {
+                InspectOwnedPotionCallCount++;
+            }
+
+            public void UsePotion(int index)
+            {
+                UsePotionCallCount++;
+                if (SnapshotAfterUsePotion != null)
+                {
+                    _snapshot = SnapshotAfterUsePotion;
+                }
+            }
+
+            public void ReplaceOwnedPotion(int index)
+            {
+                ReplaceOwnedPotionCallCount++;
+                _snapshot = SnapshotAfterReplaceOwnedPotion ?? BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
+            }
+
+            public void CancelPendingPotionReplace()
+            {
+                CancelPendingPotionReplaceCallCount++;
+                _snapshot = SnapshotAfterCancelPendingPotionReplace ?? BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
+            }
+
+            public void ClearOwnedInspections()
+            {
+                ClearOwnedInspectionsCallCount++;
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(_snapshot.CurrentPage);
             }
 
             public void ApplyRest()
@@ -484,7 +776,74 @@ namespace Dungeon.Tests.EditMode
 
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
+            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
+            public string LastOwnedRelicHint { get; private set; } = string.Empty;
+            public int LastSelectedOwnedRelicIndex { get; private set; } = -1;
+            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedPotions { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
+            public string LastOwnedPotionHint { get; private set; } = string.Empty;
+            public int LastSelectedOwnedPotionIndex { get; private set; } = -1;
+            public bool IsOwnedPotionUseVisible { get; private set; }
+            public bool LastHostChromeInteractable { get; private set; } = true;
+            public int HostBackgroundWireCallCount { get; private set; }
             private Action _onSaveQuitClicked;
+            private Action _onUsePotionClicked;
+            private Action _onHostBackgroundClicked;
+
+            public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            {
+                LastOwnedRelics = relics ?? Array.Empty<BattleMultiIconViewModel>();
+            }
+
+            public void SetOwnedRelicHint(string message, int selectedIndex)
+            {
+                LastOwnedRelicHint = message ?? string.Empty;
+                LastSelectedOwnedRelicIndex = selectedIndex;
+            }
+
+            public void ClearOwnedRelics()
+            {
+                LastOwnedRelics = Array.Empty<BattleMultiIconViewModel>();
+            }
+
+            public void BuildOwnedPotions(IReadOnlyList<BattleMultiIconViewModel> potions, Action<int> onClicked)
+            {
+                LastOwnedPotions = potions ?? Array.Empty<BattleMultiIconViewModel>();
+            }
+
+            public void SetOwnedPotionHint(string message, int selectedIndex)
+            {
+                LastOwnedPotionHint = message ?? string.Empty;
+                LastSelectedOwnedPotionIndex = selectedIndex;
+            }
+
+            public void SetOwnedPotionUseVisible(bool visible, Action onClicked)
+            {
+                IsOwnedPotionUseVisible = visible;
+                _onUsePotionClicked = visible ? onClicked : null;
+            }
+
+            public void ClearOwnedPotions()
+            {
+                LastOwnedPotions = Array.Empty<BattleMultiIconViewModel>();
+                IsOwnedPotionUseVisible = false;
+                _onUsePotionClicked = null;
+            }
+
+            public void SetHostChromeInteractable(bool interactable)
+            {
+                LastHostChromeInteractable = interactable;
+            }
+
+            public void WireHostBackgroundClick(Action onClicked)
+            {
+                HostBackgroundWireCallCount++;
+                _onHostBackgroundClicked = onClicked;
+            }
+
+            public void UnwireHostBackgroundClick()
+            {
+                _onHostBackgroundClicked = null;
+            }
 
             public void SetBattleVisible(bool visible)
             {
@@ -510,6 +869,16 @@ namespace Dungeon.Tests.EditMode
             {
                 _onSaveQuitClicked?.Invoke();
             }
+
+            public void InvokeUsePotion()
+            {
+                _onUsePotionClicked?.Invoke();
+            }
+
+            public void InvokeHostBackground()
+            {
+                _onHostBackgroundClicked?.Invoke();
+            }
         }
 
         private sealed class FakeBattlePageView : IBattlePageView
@@ -520,6 +889,11 @@ namespace Dungeon.Tests.EditMode
             public string LastEnemyText { get; private set; }
             public string LastHintText { get; private set; }
             public BattleHudViewModel LastHud { get; private set; }
+            public IReadOnlyList<BattleHandCardViewModel> LastHandCards { get; private set; } = Array.Empty<BattleHandCardViewModel>();
+            public int LastDrawPileCount { get; private set; }
+            public int LastDiscardPileCount { get; private set; }
+            public int LastHandCount { get; private set; }
+            public int LastMaxHandCount { get; private set; }
 
             public void WireButtons(Action onEndTurnClicked)
             {
@@ -541,9 +915,18 @@ namespace Dungeon.Tests.EditMode
                 LastHud = hud;
             }
 
-            public void BuildHandButtons(IReadOnlyList<RuntimeCard> hand, Action<int> onClicked)
+            public void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount)
+            {
+                LastDrawPileCount = drawPileCount;
+                LastDiscardPileCount = discardPileCount;
+                LastHandCount = handCount;
+                LastMaxHandCount = maxHandCount;
+            }
+
+            public void BuildHandCards(IReadOnlyList<BattleHandCardViewModel> handCards, Action<int> onClicked)
             {
                 BuildCallCount++;
+                LastHandCards = handCards ?? Array.Empty<BattleHandCardViewModel>();
             }
 
             public void BuildEnemyButtons(IReadOnlyList<BattleEnemyViewModel> enemies, int selectedEnemyIndex, Action<int> onClicked)
@@ -563,10 +946,12 @@ namespace Dungeon.Tests.EditMode
             public int ShowBattleCallCount { get; private set; }
             public int ShowShopCallCount { get; private set; }
             public int ShowEventCallCount { get; private set; }
+            public int ShowPotionReplaceCallCount { get; private set; }
             public BattleSceneSnapshot LastMapSnapshot { get; private set; }
             public BattleSceneSnapshot LastShopSnapshot { get; private set; }
             public BattleSceneSnapshot LastEventSnapshot { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
+            public PotionReplaceDialogResult PotionReplaceResult { get; set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
             {
@@ -596,6 +981,12 @@ namespace Dungeon.Tests.EditMode
             public UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
             {
                 return UniTask.FromResult<RuntimeRewardEntry>(null);
+            }
+
+            public UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+            {
+                ShowPotionReplaceCallCount++;
+                return UniTask.FromResult(PotionReplaceResult);
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

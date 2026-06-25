@@ -2,6 +2,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.View;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.IO;
 
@@ -14,6 +15,7 @@ namespace Dungeon.Tests.EditMode
     public sealed class BattleUiPrefabConsistencyTests
     {
         private const string UiFolder = "Assets/Prefabs/InGame/UI";
+        private const string CommonUiFolder = "Assets/Prefabs/Common/UI";
         private const string AddressGroupPath = "Assets/AddressableAssetsData/AssetGroups/Default Local Group.asset";
 
         [TestCase("CommonPage", false, null)]
@@ -24,6 +26,12 @@ namespace Dungeon.Tests.EditMode
         [TestCase("ResultDialog", true, "CommonDialog")]
         [TestCase("ShopDialog", true, "CommonDialog")]
         [TestCase("CardSelectDialog", true, "CommonDialog")]
+        [TestCase("PotionReplaceDialog", true, "CommonDialog")]
+        [TestCase("MultiIcon", false, null)]
+        [TestCase("CardIcon", true, "MultiIcon")]
+        [TestCase("RelicIcon", true, "MultiIcon")]
+        [TestCase("PotionIcon", true, "MultiIcon")]
+        [TestCase("ResourceIcon", true, "MultiIcon")]
         public void Prefabs_FollowNamingAndVariantRules(string prefabName, bool shouldBeVariant, string parentPrefabName)
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
@@ -53,6 +61,7 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<ResultDialog>("ResultDialog");
             AssertPrefabContainsComponent<ShopDialog>("ShopDialog");
             AssertPrefabContainsComponent<CardSelectDialog>("CardSelectDialog");
+            AssertPrefabContainsComponent<PotionReplaceDialog>("PotionReplaceDialog");
 
             GameObject mapPagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/MapPage.prefab");
             MapPage mapPageComponent = mapPagePrefab.GetComponent<MapPage>();
@@ -97,7 +106,7 @@ namespace Dungeon.Tests.EditMode
 
             SerializedObject serialized = new SerializedObject(shopItemView);
             Assert.That(serialized.FindProperty("_button").objectReferenceValue, Is.Not.Null);
-            Assert.That(serialized.FindProperty("_nameText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_iconView").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_priceText").objectReferenceValue, Is.Not.Null);
         }
 
@@ -114,6 +123,28 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void PotionReplaceDialog_HasSerializedViewReferences()
+        {
+            GameObject replacePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/PotionReplaceDialog.prefab");
+            PotionReplaceDialog replaceDialog = replacePrefab.GetComponent<PotionReplaceDialog>();
+            SerializedObject replaceSerialized = new SerializedObject(replaceDialog);
+            Assert.That(replaceSerialized.FindProperty("_ownedPotionRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_ownedPotionTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_offeredPotionView").objectReferenceValue, Is.Not.Null);
+            Assert.That(replaceSerialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void CardIconPrefabs_HaveExpectedComponents()
+        {
+            AssertPrefabContainsComponent<BattleMultiIconView>("MultiIcon");
+            AssertPrefabContainsComponent<BattleCardIconView>("CardIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("RelicIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("PotionIcon");
+            AssertPrefabContainsComponent<BattleMultiIconView>("ResourceIcon");
+        }
+
+        [Test]
         public void AddressableGroup_UsesPrefabNamesAsKeys()
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
@@ -125,6 +156,7 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ResultDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ShopDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.CardSelectDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.PotionReplaceDialog}", yaml);
             StringAssert.DoesNotContain("m_Address: MapPageView", yaml);
             StringAssert.DoesNotContain("m_Address: RewardDialogView", yaml);
             StringAssert.DoesNotContain("m_Address: RestShopDialogView", yaml);
@@ -148,6 +180,22 @@ namespace Dungeon.Tests.EditMode
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
             string yaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
 
+            StringAssert.Contains("_battlePanelBackgroundImage: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicTemplate: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicHintRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicHintText: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicCanvasGroup: {fileID:", yaml);
+            StringAssert.Contains("_ownedRelicHintCanvasGroup: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionTemplate: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionHintRoot: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionHintText: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionUseButton: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionCanvasGroup: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionHintCanvasGroup: {fileID:", yaml);
+            StringAssert.Contains("_ownedPotionUseCanvasGroup: {fileID:", yaml);
+            StringAssert.Contains("_hostBackgroundButton: {fileID:", yaml);
             StringAssert.Contains("_playerSummaryText: {fileID:", yaml);
             StringAssert.Contains("_enemySummaryText: {fileID:", yaml);
             StringAssert.Contains("_intentText: {fileID:", yaml);
@@ -155,9 +203,52 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_playerBuffText: {fileID:", yaml);
             StringAssert.Contains("_enemyStatusText: {fileID:", yaml);
             StringAssert.Contains("_enemyBuffText: {fileID:", yaml);
+            StringAssert.Contains("_drawPileCountText: {fileID:", yaml);
+            StringAssert.Contains("_discardPileCountText: {fileID:", yaml);
+            StringAssert.Contains("_handCountText: {fileID:", yaml);
+            StringAssert.Contains("_handCardTemplate: {fileID:", yaml);
             StringAssert.Contains("m_Name: IntentPanel", yaml);
             StringAssert.Contains("m_Name: PlayerStatusPanel", yaml);
             StringAssert.Contains("m_Name: EnemyBuffPanel", yaml);
+            StringAssert.Contains("m_Name: DrawPilePanel", yaml);
+            StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
+            StringAssert.Contains("m_Name: HandCountPanel", yaml);
+            StringAssert.Contains("m_Name: RelicStrip", yaml);
+            StringAssert.Contains("m_Name: OwnedRelicHintPanel", yaml);
+            StringAssert.Contains("m_Name: PotionStrip", yaml);
+            StringAssert.Contains("m_Name: OwnedPotionHintPanel", yaml);
+            StringAssert.Contains("m_Name: UsePotionButton", yaml);
+        }
+
+        [Test]
+        public void BattleScene_BattlePageView_DoesNotSerializeRelicStripFields()
+        {
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string yaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
+
+            StringAssert.DoesNotContain("_relicRoot: {fileID:", yaml);
+            StringAssert.DoesNotContain("_relicTemplate: {fileID:", yaml);
+        }
+
+        [Test]
+        public void BattleScene_RelicStrip_IsChildOfBattlePanel()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/BattleScene.unity", OpenSceneMode.Single);
+            Assert.That(scene.IsValid(), Is.True);
+
+            GameObject relicStrip = null;
+            foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (gameObject.scene == scene && gameObject.name == "RelicStrip")
+                {
+                    relicStrip = gameObject;
+                    break;
+                }
+            }
+
+            Assert.That(relicStrip, Is.Not.Null);
+            Assert.That(relicStrip.transform.parent, Is.Not.Null);
+            Assert.That(relicStrip.transform.parent.name, Is.EqualTo("BattlePanel"));
         }
 
         [Test]
@@ -173,6 +264,26 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("m_Name: ContinueRunButton", mainSceneYaml);
             StringAssert.Contains("_saveQuitButton: {fileID:", battleSceneYaml);
             StringAssert.Contains("m_Name: SaveQuitButton", battleSceneYaml);
+        }
+
+        [Test]
+        public void SceneUiRoot_UsesLowerSortingThanFrameworkUiRoot()
+        {
+            GameObject sceneUiRootPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{CommonUiFolder}/SceneUIRoot.prefab");
+            GameObject uiRootPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{CommonUiFolder}/UIRoot.prefab");
+
+            Assert.That(sceneUiRootPrefab, Is.Not.Null);
+            Assert.That(uiRootPrefab, Is.Not.Null);
+
+            Canvas sceneCanvas = sceneUiRootPrefab.GetComponent<Canvas>();
+            Canvas uiRootCanvas = uiRootPrefab.GetComponent<Canvas>();
+
+            Assert.That(sceneCanvas, Is.Not.Null);
+            Assert.That(uiRootCanvas, Is.Not.Null);
+            Assert.That(sceneCanvas.overrideSorting, Is.True);
+            Assert.That(sceneCanvas.sortingOrder, Is.LessThan(0));
+            Assert.That(sceneCanvas.sortingOrder, Is.LessThan(uiRootCanvas.sortingOrder));
+            Assert.That(uiRootCanvas.sortingOrder, Is.EqualTo(0));
         }
 
         private static void AssertPrefabContainsComponent<T>(string prefabName) where T : Component

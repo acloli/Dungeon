@@ -38,12 +38,13 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            _view.BuildHandButtons(snapshot.Hand, _onHandCardClicked);
+            _view.BuildHandCards(snapshot.HandCards, _onHandCardClicked);
             _view.BuildEnemyButtons(snapshot.Enemies, snapshot.SelectedEnemyIndex, _onEnemyTargetClicked);
             _view.SetBattleStateText(
                 BuildPlayerText(snapshot),
                 BuildEnemyText(snapshot),
                 snapshot.BattleHintMessage);
+            _view.SetPileCounters(snapshot.DrawPileCount, snapshot.DiscardPileCount, snapshot.HandCount, snapshot.MaxHandCount);
             _view.SetBattleHud(BuildBattleHud(snapshot));
         }
 

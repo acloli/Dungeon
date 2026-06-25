@@ -8,6 +8,16 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public interface IBattleSceneHostView
     {
         IBattlePageView BattlePageView { get; }
+        void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> relics, Action<int> onClicked);
+        void SetOwnedRelicHint(string message, int selectedIndex);
+        void ClearOwnedRelics();
+        void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> potions, Action<int> onClicked);
+        void SetOwnedPotionHint(string message, int selectedIndex);
+        void SetOwnedPotionUseVisible(bool visible, Action onClicked);
+        void ClearOwnedPotions();
+        void SetHostChromeInteractable(bool interactable);
+        void WireHostBackgroundClick(Action onClicked);
+        void UnwireHostBackgroundClick();
 
         /// <summary>
         /// 戦闘基底表示切り替え

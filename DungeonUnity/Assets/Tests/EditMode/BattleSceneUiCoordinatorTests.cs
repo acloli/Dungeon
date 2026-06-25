@@ -65,6 +65,22 @@ namespace Dungeon.Tests.EditMode
             Assert.That(uiService.LastEventDialogParam, Is.Not.Null);
         }
 
+        [Test]
+        public void HostChromeModalDialogs_ToggleHostInteractable()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Map);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardPickAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowPotionReplaceAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(hostView.SetHostChromeInteractableCallCount, Is.EqualTo(5));
+            Assert.That(hostView.LastHostChromeInteractable, Is.True);
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             return new BattleSceneSnapshot(
@@ -95,6 +111,50 @@ namespace Dungeon.Tests.EditMode
             public IBattlePageView BattlePageView => null;
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
+            public bool LastHostChromeInteractable { get; private set; } = true;
+            public int SetHostChromeInteractableCallCount { get; private set; }
+
+            public void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            {
+            }
+
+            public void SetOwnedRelicHint(string message, int selectedIndex)
+            {
+            }
+
+            public void ClearOwnedRelics()
+            {
+            }
+
+            public void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> potions, Action<int> onClicked)
+            {
+            }
+
+            public void SetOwnedPotionHint(string message, int selectedIndex)
+            {
+            }
+
+            public void SetOwnedPotionUseVisible(bool visible, Action onClicked)
+            {
+            }
+
+            public void ClearOwnedPotions()
+            {
+            }
+
+            public void SetHostChromeInteractable(bool interactable)
+            {
+                LastHostChromeInteractable = interactable;
+                SetHostChromeInteractableCallCount++;
+            }
+
+            public void WireHostBackgroundClick(Action onClicked)
+            {
+            }
+
+            public void UnwireHostBackgroundClick()
+            {
+            }
 
             public void SetBattleVisible(bool visible)
             {
@@ -123,6 +183,7 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastResultDialogParam { get; private set; }
             public UIDialogOpenParam LastShopDialogParam { get; private set; }
             public UIDialogOpenParam LastEventDialogParam { get; private set; }
+            public UIDialogOpenParam LastPotionReplaceDialogParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
             public int PageStackCount => 0;
@@ -163,6 +224,10 @@ namespace Dungeon.Tests.EditMode
                 else if (typeof(TDialog) == typeof(EventDialog))
                 {
                     LastEventDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(PotionReplaceDialog))
+                {
+                    LastPotionReplaceDialogParam = param as UIDialogOpenParam;
                 }
 
                 return UniTask.FromResult(default(TResult));

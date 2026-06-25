@@ -14,10 +14,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardPickDialog : UIDialogBase<RuntimeRewardEntry>
     {
         [SerializeField] private Transform _cardContainer;
-        [SerializeField] private BattleOptionButtonView _cardButtonTemplate;
+        [SerializeField] private BattleCardIconView _cardTemplate;
         [SerializeField] private Button _backButton;
 
-        private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
+        private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
         private BattleCardPickDialogParam _param;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
@@ -35,7 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         protected override void OnClosed()
         {
             UnwireBackButton();
-            ClearDynamicButtons();
+            ClearDynamicCards();
         }
 
         private void WireBackButton()
@@ -57,15 +57,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void BuildCardButtons()
         {
-            ClearDynamicButtons();
+            ClearDynamicCards();
 
             IReadOnlyList<RuntimeRewardEntry> entries = _param?.Snapshot?.RewardChoices;
-            if (_cardContainer == null || _cardButtonTemplate == null || entries == null)
+            if (_cardContainer == null || _cardTemplate == null || entries == null)
             {
                 return;
             }
 
-            _cardButtonTemplate.gameObject.SetActive(false);
+            _cardTemplate.gameObject.SetActive(false);
 
             for (int i = 0; i < entries.Count; i++)
             {
@@ -75,31 +75,24 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     continue;
                 }
 
-                BattleOptionButtonView button = Instantiate(_cardButtonTemplate, _cardContainer);
-                button.gameObject.SetActive(true);
-
-                string label = string.Format(
-                    BattleSceneConstants.RewardLabelFormat,
-                    entry.Card.DisplayName,
-                    entry.Card.Cost,
-                    entry.Card.PreviewDamage);
-
+                BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
+                cardView.gameObject.SetActive(true);
                 RuntimeRewardEntry captured = entry;
-                button.Configure(label, () => CloseWithResult(captured));
-                _buttons.Add(button);
+                cardView.Bind(entry.Card, true, false, _ => CloseWithResult(captured));
+                _cardViews.Add(cardView);
             }
         }
 
-        private void ClearDynamicButtons()
+        private void ClearDynamicCards()
         {
-            for (int i = 0; i < _buttons.Count; i++)
+            for (int i = 0; i < _cardViews.Count; i++)
             {
-                BattleOptionButtonView btn = _buttons[i];
-                if (btn == null) continue;
-                btn.Clear();
-                Destroy(btn.gameObject);
+                BattleCardIconView cardView = _cardViews[i];
+                if (cardView == null) continue;
+                cardView.Clear();
+                Destroy(cardView.gameObject);
             }
-            _buttons.Clear();
+            _cardViews.Clear();
         }
     }
 }

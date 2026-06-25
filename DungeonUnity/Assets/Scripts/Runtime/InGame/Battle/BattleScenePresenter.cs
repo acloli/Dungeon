@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
+using UnityEngine;
 
 namespace Dungeon.Runtime.InGame.Battle
 {
@@ -21,8 +22,11 @@ namespace Dungeon.Runtime.InGame.Battle
         private readonly CancellationTokenSource _presenterCts = new CancellationTokenSource();
 
         private IBattleSceneHostView _view;
+        private BattleSceneSnapshot _lastSnapshot;
         private Action _onResultBackClicked;
         private Action _onSaveQuitClicked;
+        private bool _isRendering;
+        private bool _renderRequested;
 
         public BattleScenePresenter(
             IBattleSceneFlowService flowService,
@@ -47,6 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle
 
             _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
             _view.WireSaveQuitButton(OnSaveQuitClicked);
+            _view.WireHostBackgroundClick(OnHostBackgroundClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
             if (_runSaveService != null && _runSaveService.HasSavedRun())
@@ -80,8 +85,15 @@ namespace Dungeon.Runtime.InGame.Battle
             if (_view != null)
             {
                 _view.UnwireSaveQuitButton();
+                _view.ClearOwnedRelics();
+                _view.SetOwnedRelicHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
+                _view.ClearOwnedPotions();
+                _view.SetOwnedPotionHint(string.Empty, BattleSceneConstants.UnselectedCardIndex);
+                _view.SetOwnedPotionUseVisible(false, null);
+                _view.UnwireHostBackgroundClick();
             }
             _uiCoordinator.Dispose();
+            _lastSnapshot = null;
             _view = null;
             _onResultBackClicked = null;
             _onSaveQuitClicked = null;
@@ -93,7 +105,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnMapNodeClicked(int index)
         {
             _flowService.SelectMapNode(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -103,7 +115,7 @@ namespace Dungeon.Runtime.InGame.Battle
         {
             _flowService.SelectHandCard(index);
             _flowService.TryPlaySelectedCard();
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -112,7 +124,39 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEnemyTargetClicked(int index)
         {
             _flowService.SelectEnemyTarget(index);
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
+        }
+
+        /// <summary>
+        /// 所持レリッククリック通知
+        /// </summary>
+        public void OnOwnedRelicClicked(int index)
+        {
+            _flowService.InspectOwnedRelic(index);
+            RequestRender();
+        }
+
+        /// <summary>
+        /// 所持薬水クリック通知
+        /// </summary>
+        public void OnOwnedPotionClicked(int index)
+        {
+            _flowService.InspectOwnedPotion(index);
+            RequestRender();
+        }
+
+        /// <summary>
+        /// 薬水使用通知
+        /// </summary>
+        public void OnUsePotionClicked()
+        {
+            if (_lastSnapshot == null || _lastSnapshot.SelectedOwnedPotionIndex < 0)
+            {
+                return;
+            }
+
+            _flowService.UsePotion(_lastSnapshot.SelectedOwnedPotionIndex);
+            RequestRender();
         }
 
         /// <summary>
@@ -121,7 +165,7 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnEndTurnClicked()
         {
             _flowService.EndTurn();
-            RenderAsync(_presenterCts.Token).Forget();
+            RequestRender();
         }
 
         /// <summary>
@@ -130,6 +174,47 @@ namespace Dungeon.Runtime.InGame.Battle
         public void OnSaveQuitClicked()
         {
             _onSaveQuitClicked?.Invoke();
+        }
+
+        /// <summary>
+        /// Host空き領域クリック通知
+        /// </summary>
+        public void OnHostBackgroundClicked()
+        {
+            _flowService.ClearOwnedInspections();
+            RequestRender();
+        }
+
+        private void RequestRender()
+        {
+            _renderRequested = true;
+            if (_isRendering)
+            {
+                return;
+            }
+
+            RunRenderLoopAsync(_presenterCts.Token).Forget(Debug.LogException);
+        }
+
+        private async UniTask RunRenderLoopAsync(CancellationToken ct)
+        {
+            while (_renderRequested && !ct.IsCancellationRequested)
+            {
+                _renderRequested = false;
+                _isRendering = true;
+                try
+                {
+                    await RenderAsync(ct);
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    break;
+                }
+                finally
+                {
+                    _isRendering = false;
+                }
+            }
         }
 
         /// <summary>
@@ -143,7 +228,15 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
+            _lastSnapshot = snapshot;
             _battlePagePresenter.Clear();
+            RenderHostChrome(snapshot);
+
+            if (await TryResolvePotionOfferAsync(snapshot, ct))
+            {
+                await RenderAsync(ct);
+                return;
+            }
 
             switch (snapshot.CurrentPage)
             {
@@ -189,6 +282,13 @@ namespace Dungeon.Runtime.InGame.Battle
                                 rewardActive = false;
                                 break;
                         }
+
+                        if (rewardActive && await TryResolvePotionOfferAsync(snapshot, ct))
+                        {
+                            snapshot = _flowService.CreateSnapshot();
+                            _lastSnapshot = snapshot;
+                            RenderHostChrome(snapshot);
+                        }
                     }
                     await RenderAsync(ct);
                     break;
@@ -230,6 +330,38 @@ namespace Dungeon.Runtime.InGame.Battle
                     _onResultBackClicked?.Invoke();
                     break;
             }
+        }
+
+        private void RenderHostChrome(BattleSceneSnapshot snapshot)
+        {
+            _view.ClearOwnedRelics();
+            _view.BuildOwnedRelics(snapshot.OwnedRelics, OnOwnedRelicClicked);
+            _view.SetOwnedRelicHint(snapshot.OwnedRelicHintMessage, snapshot.SelectedOwnedRelicIndex);
+
+            _view.ClearOwnedPotions();
+            _view.BuildOwnedPotions(snapshot.OwnedPotions, OnOwnedPotionClicked);
+            _view.SetOwnedPotionHint(snapshot.OwnedPotionHintMessage, snapshot.SelectedOwnedPotionIndex);
+            _view.SetOwnedPotionUseVisible(snapshot.CanUseSelectedPotion, OnUsePotionClicked);
+        }
+
+        private async UniTask<bool> TryResolvePotionOfferAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        {
+            if (snapshot.PendingPotionOffer != null)
+            {
+                PotionReplaceDialogResult result = await _uiCoordinator.ShowPotionReplaceAsync(snapshot, ct);
+                if (result.IsCanceled)
+                {
+                    _flowService.CancelPendingPotionReplace();
+                }
+                else
+                {
+                    _flowService.ReplaceOwnedPotion(result.SelectedPotionIndex);
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

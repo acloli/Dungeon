@@ -12,9 +12,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         [SerializeField] private Button _cancelButton;
         [SerializeField] private Transform _cardContainer;
-        [SerializeField] private BattleCardSelectView _cardTemplate;
+        [SerializeField] private BattleCardIconView _cardTemplate;
 
-        private readonly List<BattleCardSelectView> _cardViews = new List<BattleCardSelectView>();
+        private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
         private BattleCardSelectDialogParam _param;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
@@ -71,9 +71,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     continue;
                 }
 
-                BattleCardSelectView cardView = Instantiate(_cardTemplate, _cardContainer);
+                BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
-                cardView.Bind(card, OnCardClicked);
+                cardView.Bind(card, true, false, OnCardClicked);
                 _cardViews.Add(cardView);
             }
         }
@@ -82,7 +82,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _cardViews.Count; i++)
             {
-                BattleCardSelectView cardView = _cardViews[i];
+                BattleCardIconView cardView = _cardViews[i];
                 if (cardView == null)
                 {
                     continue;
