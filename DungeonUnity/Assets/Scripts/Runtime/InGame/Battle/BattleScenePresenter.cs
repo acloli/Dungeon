@@ -306,10 +306,13 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
+                    CardSelectMode cardSelectMode = _flowService.GetCardSelectMode();
                     CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(
                         snapshot,
                         _flowService.GetCardSelectCards(),
-                        _flowService.GetCardSelectMode(),
+                        cardSelectMode,
+                        cardSelectMode == CardSelectMode.Upgrade,
+                        _flowService.GetCardSelectPrices(),
                         ct);
                     if (cardSelectResult.IsCanceled)
                     {

@@ -199,6 +199,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 現在のカード選択価格取得
+        /// </summary>
+        public IReadOnlyDictionary<int, int> GetCardSelectPrices()
+        {
+            Dictionary<int, int> prices = new Dictionary<int, int>();
+            if (_state.CardSelectMode != CardSelectMode.Upgrade)
+            {
+                return prices;
+            }
+
+            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards();
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RuntimeCard card = cards[i];
+                if (card != null)
+                {
+                    prices[card.Id] = _shopService.GetCardUpgradePrice(_runDefinition, card);
+                }
+            }
+
+            return prices;
+        }
+
+        /// <summary>
         /// 現在のカード選択用途取得
         /// </summary>
         public CardSelectMode GetCardSelectMode()

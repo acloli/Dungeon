@@ -560,6 +560,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(service.GetCardSelectMode(), Is.EqualTo(CardSelectMode.Upgrade));
             Assert.That(service.GetCardSelectCards(), Has.Count.EqualTo(1));
             Assert.That(service.GetCardSelectCards()[0].Id, Is.EqualTo(1001));
+            Assert.That(service.GetCardSelectPrices()[1001], Is.EqualTo(25));
         }
 
         [Test]

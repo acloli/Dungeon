@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle;
@@ -72,14 +73,46 @@ namespace Dungeon.Tests.EditMode
             BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
             FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.CardSelect);
+            Dictionary<int, int> cardPrices = new Dictionary<int, int> { { 1001, 25 } };
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowCardSelectAsync(snapshot, Array.Empty<RuntimeCard>(), CardSelectMode.Upgrade, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardSelectAsync(
+                snapshot,
+                Array.Empty<RuntimeCard>(),
+                CardSelectMode.Upgrade,
+                true,
+                cardPrices,
+                CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.LastCardSelectDialogParam, Is.Not.Null);
             BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
             Assert.That(payload, Is.Not.Null);
             Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.Upgrade));
+            Assert.That(payload.ShowPrice, Is.True);
+            Assert.That(payload.CardPrices[1001], Is.EqualTo(25));
+        }
+
+        [Test]
+        public void ShowCardSelectAsync_PassesHiddenPriceForCardRemoval()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.CardSelect);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardSelectAsync(
+                snapshot,
+                Array.Empty<RuntimeCard>(),
+                CardSelectMode.CardRemoval,
+                false,
+                new Dictionary<int, int>(),
+                CancellationToken.None).GetAwaiter().GetResult();
+
+            BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
+            Assert.That(payload, Is.Not.Null);
+            Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.CardRemoval));
+            Assert.That(payload.ShowPrice, Is.False);
         }
 
         [Test]

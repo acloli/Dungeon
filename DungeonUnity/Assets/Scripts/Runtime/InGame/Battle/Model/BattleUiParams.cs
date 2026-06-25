@@ -143,16 +143,25 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleCardSelectDialogParam
     {
-        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CardSelectMode mode)
+        public BattleCardSelectDialogParam(
+            BattleSceneSnapshot snapshot,
+            IReadOnlyList<RuntimeCard> deckCards,
+            CardSelectMode mode,
+            bool showPrice,
+            IReadOnlyDictionary<int, int> cardPrices)
         {
             Snapshot = snapshot;
             DeckCards = deckCards ?? System.Array.Empty<RuntimeCard>();
             Mode = mode;
+            ShowPrice = showPrice;
+            CardPrices = cardPrices ?? new Dictionary<int, int>();
         }
 
         public BattleSceneSnapshot Snapshot { get; }
-        public System.Collections.Generic.IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public IReadOnlyList<RuntimeCard> DeckCards { get; }
         public CardSelectMode Mode { get; }
+        public bool ShowPrice { get; }
+        public IReadOnlyDictionary<int, int> CardPrices { get; }
     }
 
     /// <summary>
