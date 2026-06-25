@@ -73,9 +73,26 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
                 BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
-                cardView.Bind(card, true, false, OnCardClicked);
+                int cardPrice = ResolveCardPrice(card);
+                cardView.Bind(
+                    card,
+                    true,
+                    false,
+                    _param.ShowPrice && cardPrice > 0,
+                    cardPrice,
+                    OnCardClicked);
                 _cardViews.Add(cardView);
             }
+        }
+
+        private int ResolveCardPrice(RuntimeCard card)
+        {
+            if (card == null || !_param.CardPrices.TryGetValue(card.Id, out int price))
+            {
+                return 0;
+            }
+
+            return price;
         }
 
         private bool CanDisplayCard(RuntimeCard card)

@@ -1,5 +1,7 @@
 using Dungeon.Runtime.InGame.Battle;
+using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
+using Game.MasterData.Generated;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -142,6 +144,50 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<BattleMultiIconView>("RelicIcon");
             AssertPrefabContainsComponent<BattleMultiIconView>("PotionIcon");
             AssertPrefabContainsComponent<BattleMultiIconView>("ResourceIcon");
+        }
+
+        [Test]
+        public void CardIcon_PriceFooter_RespondsToVisibilityFlag()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardIcon.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                BattleCardIconView cardIcon = instance.GetComponent<BattleCardIconView>();
+                SerializedObject serialized = new SerializedObject(cardIcon);
+                Component footerText = serialized.FindProperty("_quantityText").objectReferenceValue as Component;
+                RuntimeCard card = new RuntimeCard(
+                    1001,
+                    "strike",
+                    "Strike",
+                    string.Empty,
+                    "Deal damage.",
+                    string.Empty,
+                    string.Empty,
+                    1,
+                    CardType.Attack,
+                    CardRarity.Common,
+                    CharacterArchetype.CrimsonExile,
+                    System.Array.Empty<RuntimeCardEffect>());
+
+                Assert.That(footerText, Is.Not.Null);
+
+                cardIcon.Bind(card, true, false, true, 25, null);
+                SerializedObject footerSerialized = new SerializedObject(footerText);
+                footerSerialized.Update();
+                Assert.That(footerText.gameObject.activeSelf, Is.True);
+                Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.EqualTo("25"));
+
+                cardIcon.Bind(card, true, false, false, 0, null);
+                footerSerialized.Update();
+                Assert.That(footerText.gameObject.activeSelf, Is.False);
+                Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.Empty);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
         }
 
         [Test]

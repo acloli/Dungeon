@@ -52,6 +52,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
+        /// アイコン下部の補助ラベルを設定する
+        /// </summary>
+        protected void SetFooterLabel(string value, bool isVisible)
+        {
+            SetText(_quantityText, isVisible ? value : string.Empty);
+            SetActive(_quantityText, isVisible);
+        }
+
+        /// <summary>
         /// コンパクト表示切り替え
         /// </summary>
         public void SetCompactLayout(bool isCompact)

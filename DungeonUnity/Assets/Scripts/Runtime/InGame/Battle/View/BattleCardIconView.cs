@@ -10,9 +10,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         public void Bind(RuntimeCard card, bool isAffordable, bool isSelected, Action<RuntimeCard> onClick)
         {
+            Bind(card, isAffordable, isSelected, false, 0, onClick);
+        }
+
+        public void Bind(RuntimeCard card, bool isAffordable, bool isSelected, bool showPrice, int price, Action<RuntimeCard> onClick)
+        {
             if (card == null)
             {
                 base.Bind(null, null);
+                SetFooterLabel(string.Empty, false);
                 return;
             }
 
@@ -29,6 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     isSelected,
                     isAffordable),
                 () => onClick?.Invoke(card));
+            SetFooterLabel(price.ToString(), showPrice);
         }
     }
 }
