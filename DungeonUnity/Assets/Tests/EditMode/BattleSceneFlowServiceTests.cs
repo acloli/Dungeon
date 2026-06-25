@@ -563,6 +563,28 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ApplyUpgrade_WithInsufficientGold_StaysInRestShop()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
+            RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                startingGold: 20,
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike },
+                additionalCards: new[] { strikePlus });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(snapshot.RestShopMessage, Is.EqualTo("Not enough gold."));
+            Assert.That(snapshot.Gold, Is.EqualTo(20));
+        }
+
+        [Test]
         public void ConfirmCardSelect_UpgradeMode_ReplacesDeckCardAndSaves()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -583,8 +605,36 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
             Assert.That(snapshot.RestShopMessage, Does.Contain("Strike"));
             Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
+            Assert.That(snapshot.Gold, Is.EqualTo(95));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1002));
             Assert.That(runSaveService.LastSavedData.DeckCardIds[0], Is.EqualTo(1002));
+            Assert.That(runSaveService.LastSavedData.Gold, Is.EqualTo(95));
+        }
+
+        [Test]
+        public void ConfirmCardSelect_UpgradeMode_ChargesEachUpgrade()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1101);
+            RuntimeCard guard = CreateCard(1002, "Guard", 1, 0, upgradeCardId: 1102);
+            RuntimeCard strikePlus = CreateCard(1101, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeCard guardPlus = CreateCard(1102, "Guard+", 1, 0, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike, guard },
+                additionalCards: new[] { strikePlus, guardPlus });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(strike);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(guard);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.Gold, Is.EqualTo(70));
+            Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1101));
+            Assert.That(service.GetDeckCards()[1].Id, Is.EqualTo(1102));
         }
 
         [Test]
@@ -1544,6 +1594,7 @@ namespace Dungeon.Tests.EditMode
             public bool PurchaseShopItem(BattleSceneState state, int slotIndex) => false;
             public int GetCardRemovalPrice(BattleSceneState state) => 75;
             public bool PurchaseCardRemoval(BattleSceneState state, RuntimeCard card) => false;
+            public int GetCardUpgradePrice(RuntimeRunDefinition runDefinition, RuntimeCard card) => 25;
         }
     }
 }

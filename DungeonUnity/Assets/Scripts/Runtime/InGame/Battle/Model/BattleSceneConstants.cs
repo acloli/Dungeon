@@ -60,7 +60,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string NotEnoughEnergy = "Not enough energy.";
         public const string NextNodeOnly = "You can only go to the next node.";
         public const string RestDoneFormat = "Rest done. HP {0}/{1}";
-        public const string UpgradeDoneFormat = "Upgrade done. {0} -> {1}";
+        public const string UpgradeDoneFormat = "Upgrade done. {0} -> {1} (-{2} Gold). Gold {3}";
         public const string NoUpgradeableCards = "No cards can be upgraded.";
         public const string PurchaseSuccessFormat = "Purchase success. Gold {0}";
         public const string NotEnoughGold = "Not enough gold.";

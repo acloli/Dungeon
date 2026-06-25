@@ -189,7 +189,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < _state.Deck.Count; i++)
             {
                 RuntimeCard card = _state.Deck[i];
-                if (CanUpgradeCard(card))
+                if (CanUpgradeCard(card) && CanAffordCardUpgrade(card))
                 {
                     upgradeableCards.Add(card);
                 }
@@ -625,6 +625,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            if (!HasAffordableUpgradeableCards())
+            {
+                _state.RestShopMessage = BattleSceneConstants.NotEnoughGold;
+                return;
+            }
+
             _state.CardSelectMode = CardSelectMode.Upgrade;
             SetCurrentPage(BattleScenePage.CardSelect);
         }
@@ -930,6 +936,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 購入可能な強化対象があるか
+        /// </summary>
+        private bool HasAffordableUpgradeableCards()
+        {
+            for (int i = 0; i < _state.Deck.Count; i++)
+            {
+                RuntimeCard card = _state.Deck[i];
+                if (CanUpgradeCard(card) && CanAffordCardUpgrade(card))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// カードが強化可能か
         /// </summary>
         private bool CanUpgradeCard(RuntimeCard card)
@@ -938,6 +961,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                    && card.UpgradeCardId > 0
                    && _runDefinition != null
                    && _runDefinition.CardCatalog.ContainsKey(card.UpgradeCardId);
+        }
+
+        /// <summary>
+        /// カード強化価格を支払えるか
+        /// </summary>
+        private bool CanAffordCardUpgrade(RuntimeCard card)
+        {
+            return _state.Gold >= _shopService.GetCardUpgradePrice(_runDefinition, card);
         }
 
         /// <summary>
@@ -960,9 +991,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            int upgradePrice = _shopService.GetCardUpgradePrice(_runDefinition, card);
+            if (_state.Gold < upgradePrice)
+            {
+                OpenRestShop();
+                _state.RestShopMessage = BattleSceneConstants.NotEnoughGold;
+                return;
+            }
+
             _state.Deck[deckIndex] = upgradedCard;
+            _state.Gold -= upgradePrice;
             OpenRestShop();
-            _state.RestShopMessage = string.Format(BattleSceneConstants.UpgradeDoneFormat, card.DisplayName, upgradedCard.DisplayName);
+            _state.RestShopMessage = string.Format(
+                BattleSceneConstants.UpgradeDoneFormat,
+                card.DisplayName,
+                upgradedCard.DisplayName,
+                upgradePrice,
+                _state.Gold);
             _state.IsRestShopContinueEnabled = true;
             RequestSave();
         }

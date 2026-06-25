@@ -238,5 +238,43 @@ namespace Dungeon.Tests.EditMode
             Assert.IsTrue(state.IsCardRemovalSoldOut);
             Assert.AreEqual(0, state.Deck.Count);
         }
+
+        [Test]
+        public void GetCardUpgradePrice_ReturnsHalfBasePriceRoundedUp()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeCard card = CreateCard(1);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                new RuntimeCardPriceRule(CardRarity.Common, 51, 10));
+
+            int price = service.GetCardUpgradePrice(runDefinition, card);
+
+            Assert.AreEqual(26, price);
+        }
+
+        private static RuntimeRunDefinition CreateRunDefinition(RuntimeCardPriceRule cardPriceRule)
+        {
+            RuntimeCard card = CreateCard(1);
+            return new RuntimeRunDefinition(
+                RunProfileId,
+                "profile_1",
+                CharacterArchetype.CrimsonExile,
+                BasePlayerHp,
+                BasePlayerEnergy,
+                BaseStartingGold,
+                0,
+                0,
+                new[] { card },
+                new Dictionary<int, RuntimeCard> { { card.Id, card } },
+                Array.Empty<RuntimeRewardEntry>(),
+                Array.Empty<RuntimeMapNode>(),
+                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
+                Array.Empty<RuntimeEvent>(),
+                new Dictionary<int, RuntimeRelic>(),
+                new Dictionary<int, RuntimePotion>(),
+                null,
+                new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, cardPriceRule } },
+                Array.Empty<RuntimeItemPriceRule>());
+        }
     }
 }
