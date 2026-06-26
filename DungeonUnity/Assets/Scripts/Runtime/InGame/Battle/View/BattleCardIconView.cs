@@ -8,39 +8,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
     /// </summary>
     public sealed class BattleCardIconView : BattleMultiIconView
     {
-        public void Bind(RuntimeCard card, bool isAffordable, bool isSelected, Action<RuntimeCard> onClick)
+        public override void Bind(BattleMultiIconViewModel icon, Action onClick)
         {
-            Bind(card, isAffordable, true, isSelected, false, 0, onClick);
-        }
-
-        public void Bind(RuntimeCard card, bool isAffordable, bool isSelected, bool showPrice, int price, Action<RuntimeCard> onClick)
-        {
-            Bind(card, isAffordable, true, isSelected, showPrice, price, onClick);
-        }
-
-        public void Bind(RuntimeCard card, bool isAffordable, bool isInteractable, bool isSelected, bool showPrice, int price, Action<RuntimeCard> onClick)
-        {
-            if (card == null)
-            {
-                base.Bind(null, null);
-                SetFooterLabel(string.Empty, false);
-                return;
-            }
-
-            base.Bind(
-                new BattleMultiIconViewModel(
-                    BattleIconKind.Card,
-                    card.DisplayName,
-                    card.Description,
-                    card.ImageId,
-                    card.Rarity,
-                    card.Cost,
-                    true,
-                    isInteractable,
-                    isSelected,
-                    isAffordable),
-                () => onClick?.Invoke(card));
-            SetFooterLabel(price.ToString(), showPrice);
+            base.Bind(icon, onClick);
+            SetFooterLabel(icon?.FooterLabel ?? string.Empty, icon?.ShowFooterLabel == true);
         }
     }
 }
