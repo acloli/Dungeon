@@ -1,6 +1,7 @@
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 using TFramework.UI;
@@ -179,13 +180,17 @@ namespace Dungeon.Tests.EditMode
 
                 Assert.That(footerText, Is.Not.Null);
 
-                cardIcon.Bind(card, true, false, true, 25, null);
+                cardIcon.Bind(
+                    BattleMultiIconViewModel.CreateCard(card, true, true, false, 25, true),
+                    null);
                 SerializedObject footerSerialized = new SerializedObject(footerText);
                 footerSerialized.Update();
                 Assert.That(footerText.gameObject.activeSelf, Is.True);
                 Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.EqualTo("25"));
 
-                cardIcon.Bind(card, true, false, false, 0, null);
+                cardIcon.Bind(
+                    BattleMultiIconViewModel.CreateCard(card, true, true, false, 0, false),
+                    null);
                 footerSerialized.Update();
                 Assert.That(footerText.gameObject.activeSelf, Is.False);
                 Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.Empty);
@@ -211,7 +216,7 @@ namespace Dungeon.Tests.EditMode
                 CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
                 int confirmCount = 0;
                 BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
-                    CreateSnapshot(BattleScenePage.CardSelect),
+                    100,
                     new[] { strike, guard },
                     CardSelectMode.Upgrade,
                     true,
@@ -290,7 +295,7 @@ namespace Dungeon.Tests.EditMode
                 RuntimeCard guardPlus = CreateCard(1004, "Guard+", 1);
                 CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
                 BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
-                    CreateSnapshot(BattleScenePage.CardSelect),
+                    100,
                     new[] { firstStrike, secondStrike, guard },
                     CardSelectMode.Upgrade,
                     true,
@@ -341,7 +346,7 @@ namespace Dungeon.Tests.EditMode
                 RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1);
                 CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
                 BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
-                    CreateSnapshot(BattleScenePage.CardSelect),
+                    100,
                     new[] { strike },
                     CardSelectMode.Upgrade,
                     true,
@@ -398,7 +403,7 @@ namespace Dungeon.Tests.EditMode
                 CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
                 int confirmCount = 0;
                 BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
-                    CreateSnapshot(BattleScenePage.CardSelect, gold: 20),
+                    20,
                     new[] { strike },
                     CardSelectMode.Upgrade,
                     true,
@@ -591,45 +596,26 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int upgradeCardId = 0)
         {
-            return new RuntimeCard(
-                id,
-                $"card_{id}",
-                displayName,
-                string.Empty,
-                "Deal damage.",
-                string.Empty,
-                string.Empty,
-                cost,
-                CardType.Attack,
-                CardRarity.Common,
-                CharacterArchetype.CrimsonExile,
-                System.Array.Empty<RuntimeCardEffect>(),
-                upgradeCardId);
+            RuntimeCardBuilder builder = BattleTestData.Card(id);
+            builder.DisplayName = displayName;
+            builder.Description = "Deal damage.";
+            builder.Cost = cost;
+            builder.UpgradeCardId = upgradeCardId;
+            return builder.Build();
         }
 
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page, int gold = 100)
         {
-            return new BattleSceneSnapshot(
-                page,
-                System.Array.Empty<RuntimeMapNode>(),
-                System.Array.Empty<RuntimeCard>(),
-                System.Array.Empty<RuntimeRewardEntry>(),
-                -1,
-                40,
-                40,
-                3,
-                0,
-                gold,
-                null,
-                0,
-                0,
-                false,
-                -1,
-                false,
-                "map",
-                "battle",
-                "rest",
-                "result");
+            BattleSceneSnapshotBuilder builder = BattleTestData.Snapshot(page);
+            builder.Combat = new BattleCombatSnapshot(
+                playerMaxHp: 40,
+                playerHp: 40,
+                playerEnergy: 3,
+                playerBlock: 0,
+                gold: gold,
+                battleHintMessage: "battle");
+            builder.Shop = new BattleShopSnapshot(gold: gold);
+            return builder.Build();
         }
 
         private static System.Collections.IList GetCardViews(CardSelectDialog dialog)

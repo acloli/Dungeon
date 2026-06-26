@@ -48,7 +48,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 return;
             }
 
-            BattleSceneSnapshot snapshot = _param.Snapshot;
+            BattleShopSnapshot snapshot = _param.Snapshot;
             SetGoldText(snapshot.Gold.ToString());
             BuildCardRemovalView(snapshot);
             BuildShopItems(snapshot.ShopItems);
@@ -82,7 +82,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
-        private void BuildCardRemovalView(BattleSceneSnapshot snapshot)
+        private void BuildCardRemovalView(BattleShopSnapshot snapshot)
         {
             if (snapshot.IsCardRemovalSoldOut)
             {

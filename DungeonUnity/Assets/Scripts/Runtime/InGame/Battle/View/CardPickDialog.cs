@@ -78,7 +78,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
                 RuntimeRewardEntry captured = entry;
-                cardView.Bind(entry.Card, true, false, _ => CloseWithResult(captured));
+                cardView.Bind(BattleMultiIconViewModel.CreateCard(entry.Card), () => CloseWithResult(captured));
                 _cardViews.Add(cardView);
             }
         }

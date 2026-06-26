@@ -43,7 +43,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _upgradedCards = _param?.UpgradedCards ?? new Dictionary<int, RuntimeCard>();
             _selectedCard = null;
             _selectedCardIndex = -1;
-            _gold = _param?.Snapshot?.Gold ?? 0;
+            _gold = _param?.Gold ?? 0;
             _isPreviewOpen = false;
             SetMessage(_param?.Message);
             SetPreviewVisible(false);
@@ -97,7 +97,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             ClearDynamicCards();
 
-            if (_param?.Snapshot == null || _cardContainer == null || _cardTemplate == null)
+            if (_param == null || _cardContainer == null || _cardTemplate == null)
             {
                 return;
             }
@@ -117,13 +117,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 int cardIndex = i;
                 int cardPrice = ResolveCardPrice(card);
                 cardView.Bind(
-                    card,
-                    true,
-                    !_isPreviewOpen,
-                    IsSelectedCard(cardIndex),
-                    _param.ShowPrice && cardPrice > 0,
-                    cardPrice,
-                    _ => OnCardClicked(card, cardIndex));
+                    BattleMultiIconViewModel.CreateCard(
+                        card,
+                        isInteractable: !_isPreviewOpen,
+                        isSelected: IsSelectedCard(cardIndex),
+                        price: cardPrice,
+                        showPrice: _param.ShowPrice && cardPrice > 0),
+                    () => OnCardClicked(card, cardIndex));
                 _cardViews.Add(cardView);
             }
         }
@@ -291,7 +291,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 rectTransform.sizeDelta = new Vector2(220f, 320f);
             }
 
-            cardView.Bind(card, true, false, null);
+            cardView.Bind(BattleMultiIconViewModel.CreateCard(card), null);
             _previewCardViews.Add(cardView);
         }
 

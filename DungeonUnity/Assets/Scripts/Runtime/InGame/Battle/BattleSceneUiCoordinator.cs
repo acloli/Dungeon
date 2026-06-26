@@ -35,7 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// マップページ表示
         /// </summary>
-        public async UniTask ShowMapAsync(BattleSceneSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct)
+        public async UniTask ShowMapAsync(BattleMapSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct)
         {
             if (_hostView == null)
             {
@@ -71,7 +71,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 報酬ダイアログ表示
         /// </summary>
-        public async UniTask<RewardDialogResult> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RewardDialogResult> ShowRewardAsync(BattleRewardSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -87,7 +87,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 補給ダイアログ表示
         /// </summary>
-        public async UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RestShopDialogAction> ShowRestShopAsync(BattleRestShopSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -103,7 +103,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 結果ダイアログ表示
         /// </summary>
-        public async UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask ShowResultAsync(BattleResultSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -119,7 +119,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// ショップダイアログ表示
         /// </summary>
-        public async UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<ShopDialogResult> ShowShopAsync(BattleShopSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -135,16 +135,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// カード選択ダイアログ表示
         /// </summary>
-        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(
-            BattleSceneSnapshot snapshot,
-            IReadOnlyList<RuntimeCard> deckCards,
-            CardSelectMode mode,
-            bool showPrice,
-            IReadOnlyDictionary<int, int> cardPrices,
-            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
-            string message,
-            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
-            CancellationToken ct)
+        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleCardSelectDialogParam param, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -153,22 +144,14 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
-                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(
-                    snapshot,
-                    deckCards,
-                    mode,
-                    showPrice,
-                    cardPrices,
-                    upgradedCards,
-                    message,
-                    onCardConfirmed)),
+                BattleDialogOpenParams.Cached(param),
                 ct);
         }
 
         /// <summary>
         /// イベントダイアログ表示
         /// </summary>
-        public async UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<EventDialogResult> ShowEventAsync(BattleEventSnapshot snapshot, CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -184,7 +167,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// カード選択ダイアログ表示
         /// </summary>
-        public async UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleRewardSnapshot snapshot, CancellationToken ct)
         {
             return await ShowHostChromeModalAsync(
                 () => _uiService.ShowDialogAsync<CardPickDialog, RuntimeRewardEntry>(
@@ -195,7 +178,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 薬水交換ダイアログ表示
         /// </summary>
-        public async UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
+        public async UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattlePotionReplaceSnapshot snapshot, CancellationToken ct)
         {
             return await ShowHostChromeModalAsync(
                 () => _uiService.ShowDialogAsync<PotionReplaceDialog, PotionReplaceDialogResult>(

@@ -24,6 +24,27 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BuffValue = buffValue;
         }
 
+        public static BattleIntentViewModel FromAction(RuntimeEnemyAction action, string intentName, string statusName, string buffName)
+        {
+            if (action == null)
+            {
+                return null;
+            }
+
+            return new BattleIntentViewModel(
+                action.IntentType,
+                intentName,
+                action.Damage,
+                action.HitCount,
+                action.Block,
+                action.StatusType,
+                statusName,
+                action.StatusValue,
+                action.BuffType,
+                buffName,
+                action.BuffValue);
+        }
+
         public IntentType IntentType { get; }
         public string IntentName { get; }
         public int Damage { get; }
@@ -143,7 +164,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             bool isSelected = false,
             bool isAffordable = true,
             int quantity = 0,
-            bool showQuantity = false)
+            bool showQuantity = false,
+            string footerLabel = "",
+            bool showFooterLabel = false)
         {
             IconKind = iconKind;
             DisplayName = displayName ?? string.Empty;
@@ -157,6 +180,89 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IsAffordable = isAffordable;
             Quantity = quantity;
             ShowQuantity = showQuantity;
+            FooterLabel = footerLabel ?? string.Empty;
+            ShowFooterLabel = showFooterLabel;
+        }
+
+        public static BattleMultiIconViewModel CreateCard(
+            RuntimeCard card,
+            bool isAffordable = true,
+            bool isInteractable = true,
+            bool isSelected = false,
+            int price = 0,
+            bool showPrice = false)
+        {
+            if (card == null)
+            {
+                return null;
+            }
+
+            return new BattleMultiIconViewModel(
+                BattleIconKind.Card,
+                card.DisplayName,
+                card.Description,
+                card.ImageId,
+                card.Rarity,
+                cost: card.Cost,
+                showCost: true,
+                isInteractable: isInteractable,
+                isSelected: isSelected,
+                isAffordable: isAffordable,
+                footerLabel: showPrice ? price.ToString() : string.Empty,
+                showFooterLabel: showPrice);
+        }
+
+        public static BattleMultiIconViewModel CreateRelic(RuntimeRelic relic, bool isInteractable = true, bool isSelected = false, bool isAffordable = true)
+        {
+            if (relic == null)
+            {
+                return null;
+            }
+
+            return new BattleMultiIconViewModel(
+                BattleIconKind.Relic,
+                relic.DisplayName,
+                relic.Description,
+                relic.ImageId,
+                relic.Rarity,
+                isInteractable: isInteractable,
+                isSelected: isSelected,
+                isAffordable: isAffordable);
+        }
+
+        public static BattleMultiIconViewModel CreatePotion(RuntimePotion potion, bool isInteractable = true, bool isSelected = false, bool isAffordable = true)
+        {
+            if (potion == null)
+            {
+                return null;
+            }
+
+            return new BattleMultiIconViewModel(
+                BattleIconKind.Potion,
+                potion.DisplayName,
+                potion.Description,
+                potion.ImageId,
+                potion.Rarity,
+                isInteractable: isInteractable,
+                isSelected: isSelected,
+                isAffordable: isAffordable);
+        }
+
+        public static BattleMultiIconViewModel CreatePlaceholder(
+            BattleIconKind iconKind,
+            string displayName,
+            CardRarity rarity,
+            bool isInteractable = true,
+            bool isAffordable = true)
+        {
+            return new BattleMultiIconViewModel(
+                iconKind,
+                displayName,
+                string.Empty,
+                string.Empty,
+                rarity,
+                isInteractable: isInteractable,
+                isAffordable: isAffordable);
         }
 
         public BattleIconKind IconKind { get; }
@@ -171,6 +277,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsAffordable { get; }
         public int Quantity { get; }
         public bool ShowQuantity { get; }
+        public string FooterLabel { get; }
+        public bool ShowFooterLabel { get; }
     }
 
     /// <summary>

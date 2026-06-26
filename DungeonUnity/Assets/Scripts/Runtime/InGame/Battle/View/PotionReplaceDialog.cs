@@ -75,12 +75,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             BattleMultiIconViewModel offeredPotion = _param?.Snapshot?.PendingPotionOffer?.Potion == null
                 ? null
-                : new BattleMultiIconViewModel(
-                    BattleIconKind.Potion,
-                    _param.Snapshot.PendingPotionOffer.Potion.DisplayName,
-                    _param.Snapshot.PendingPotionOffer.Potion.Description,
-                    _param.Snapshot.PendingPotionOffer.Potion.ImageId,
-                    _param.Snapshot.PendingPotionOffer.Potion.Rarity);
+                : BattleMultiIconViewModel.CreatePotion(_param.Snapshot.PendingPotionOffer.Potion);
             _offeredPotionView?.Bind(offeredPotion, null);
         }
 

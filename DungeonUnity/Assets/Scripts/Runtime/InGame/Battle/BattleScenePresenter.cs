@@ -150,12 +150,12 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         public void OnUsePotionClicked()
         {
-            if (_lastSnapshot == null || _lastSnapshot.SelectedOwnedPotionIndex < 0)
+            if (_lastSnapshot == null || _lastSnapshot.HostChrome.SelectedOwnedPotionIndex < 0)
             {
                 return;
             }
 
-            _flowService.UsePotion(_lastSnapshot.SelectedOwnedPotionIndex);
+            _flowService.UsePotion(_lastSnapshot.HostChrome.SelectedOwnedPotionIndex);
             RequestRender();
         }
 
@@ -242,19 +242,19 @@ namespace Dungeon.Runtime.InGame.Battle
             {
                 case BattleScenePage.Map:
                     _view.SetSaveQuitVisible(true);
-                    await _uiCoordinator.ShowMapAsync(snapshot, OnMapNodeClicked, ct);
+                    await _uiCoordinator.ShowMapAsync(snapshot.Map, OnMapNodeClicked, ct);
                     break;
                 case BattleScenePage.Battle:
                     _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowBattleAsync(ct);
-                    _battlePagePresenter.Render(snapshot);
+                    _battlePagePresenter.Render(snapshot.Combat);
                     break;
                 case BattleScenePage.Reward:
                     _view.SetSaveQuitVisible(false);
                     bool rewardActive = true;
                     while (rewardActive)
                     {
-                        RewardDialogResult rewardResult = await _uiCoordinator.ShowRewardAsync(snapshot, ct);
+                        RewardDialogResult rewardResult = await _uiCoordinator.ShowRewardAsync(snapshot.Reward, ct);
                         switch (rewardResult.Action)
                         {
                             case RewardDialogActionType.ClaimGold:
@@ -270,7 +270,7 @@ namespace Dungeon.Runtime.InGame.Battle
                                 snapshot = _flowService.CreateSnapshot();
                                 break;
                             case RewardDialogActionType.PickCard:
-                                RuntimeRewardEntry cardEntry = await _uiCoordinator.ShowCardPickAsync(snapshot, ct);
+                                RuntimeRewardEntry cardEntry = await _uiCoordinator.ShowCardPickAsync(snapshot.Reward, ct);
                                 if (cardEntry != null)
                                 {
                                     _flowService.SelectReward(cardEntry);
@@ -294,29 +294,21 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.RestShop:
                     _view.SetSaveQuitVisible(true);
-                    RestShopDialogAction action = await _uiCoordinator.ShowRestShopAsync(snapshot, ct);
+                    RestShopDialogAction action = await _uiCoordinator.ShowRestShopAsync(snapshot.RestShop, ct);
                     ApplyRestShopAction(action);
                     await RenderAsync(ct);
                     break;
                 case BattleScenePage.Shop:
                     _view.SetSaveQuitVisible(true);
-                    ShopDialogResult shopResult = await _uiCoordinator.ShowShopAsync(snapshot, ct);
+                    ShopDialogResult shopResult = await _uiCoordinator.ShowShopAsync(snapshot.Shop, ct);
                     ApplyShopAction(shopResult);
                     await RenderAsync(ct);
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
                     CardSelectMode cardSelectMode = _flowService.GetCardSelectMode();
-                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(
-                        snapshot,
-                        _flowService.GetCardSelectCards(),
-                        cardSelectMode,
-                        cardSelectMode == CardSelectMode.Upgrade,
-                        _flowService.GetCardSelectPrices(),
-                        _flowService.GetCardSelectUpgradedCards(),
-                        _flowService.GetCardSelectMessage(),
-                        cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardConfirmed : null,
-                        ct);
+                    BattleCardSelectDialogParam cardSelectParam = CreateCardSelectDialogParam(snapshot, cardSelectMode);
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(cardSelectParam, ct);
                     if (cardSelectResult.IsCanceled)
                     {
                         _flowService.CancelCardSelect();
@@ -329,13 +321,13 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.Event:
                     _view.SetSaveQuitVisible(false);
-                    EventDialogResult eventResult = await _uiCoordinator.ShowEventAsync(snapshot, ct);
+                    EventDialogResult eventResult = await _uiCoordinator.ShowEventAsync(snapshot.Event, ct);
                     _flowService.SelectEventChoice(eventResult.ChoiceId);
                     await RenderAsync(ct);
                     break;
                 case BattleScenePage.Result:
                     _view.SetSaveQuitVisible(false);
-                    await _uiCoordinator.ShowResultAsync(snapshot, ct);
+                    await _uiCoordinator.ShowResultAsync(snapshot.Result, ct);
                     _onResultBackClicked?.Invoke();
                     break;
             }
@@ -349,27 +341,41 @@ namespace Dungeon.Runtime.InGame.Battle
                 _flowService.GetCardSelectCards(),
                 _flowService.GetCardSelectPrices(),
                 _flowService.GetCardSelectUpgradedCards(),
-                snapshot.Gold,
+                snapshot.Shop.Gold,
                 _flowService.GetCardSelectMessage());
+        }
+
+        private BattleCardSelectDialogParam CreateCardSelectDialogParam(BattleSceneSnapshot snapshot, CardSelectMode cardSelectMode)
+        {
+            return new BattleCardSelectDialogParam(
+                snapshot.Shop.Gold,
+                _flowService.GetCardSelectCards(),
+                cardSelectMode,
+                cardSelectMode == CardSelectMode.Upgrade,
+                _flowService.GetCardSelectPrices(),
+                _flowService.GetCardSelectUpgradedCards(),
+                _flowService.GetCardSelectMessage(),
+                cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardConfirmed : null);
         }
 
         private void RenderHostChrome(BattleSceneSnapshot snapshot)
         {
+            BattleHostChromeSnapshot hostChrome = snapshot.HostChrome;
             _view.ClearOwnedRelics();
-            _view.BuildOwnedRelics(snapshot.OwnedRelics, OnOwnedRelicClicked);
-            _view.SetOwnedRelicHint(snapshot.OwnedRelicHintMessage, snapshot.SelectedOwnedRelicIndex);
+            _view.BuildOwnedRelics(hostChrome.OwnedRelics, OnOwnedRelicClicked);
+            _view.SetOwnedRelicHint(hostChrome.OwnedRelicHintMessage, hostChrome.SelectedOwnedRelicIndex);
 
             _view.ClearOwnedPotions();
-            _view.BuildOwnedPotions(snapshot.OwnedPotions, OnOwnedPotionClicked);
-            _view.SetOwnedPotionHint(snapshot.OwnedPotionHintMessage, snapshot.SelectedOwnedPotionIndex);
-            _view.SetOwnedPotionUseVisible(snapshot.CanUseSelectedPotion, OnUsePotionClicked);
+            _view.BuildOwnedPotions(hostChrome.OwnedPotions, OnOwnedPotionClicked);
+            _view.SetOwnedPotionHint(hostChrome.OwnedPotionHintMessage, hostChrome.SelectedOwnedPotionIndex);
+            _view.SetOwnedPotionUseVisible(hostChrome.CanUseSelectedPotion, OnUsePotionClicked);
         }
 
         private async UniTask<bool> TryResolvePotionOfferAsync(BattleSceneSnapshot snapshot, CancellationToken ct)
         {
-            if (snapshot.PendingPotionOffer != null)
+            if (snapshot.PotionReplace.PendingPotionOffer != null)
             {
-                PotionReplaceDialogResult result = await _uiCoordinator.ShowPotionReplaceAsync(snapshot, ct);
+                PotionReplaceDialogResult result = await _uiCoordinator.ShowPotionReplaceAsync(snapshot.PotionReplace, ct);
                 if (result.IsCanceled)
                 {
                     _flowService.CancelPendingPotionReplace();

@@ -25,61 +25,111 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            return new BattleSceneSnapshot(
-                state.CurrentPage,
+            return new BattleSceneSnapshotBuilder(state.CurrentPage)
+            {
+                HostChrome = BuildHostChromeSnapshot(state),
+                Map = BuildMapSnapshot(state),
+                Combat = BuildCombatSnapshot(state),
+                Reward = BuildRewardSnapshot(state),
+                RestShop = BuildRestShopSnapshot(state),
+                Shop = BuildShopSnapshot(state),
+                Event = BuildEventSnapshot(state),
+                Result = BuildResultSnapshot(state),
+                PotionReplace = BuildPotionReplaceSnapshot(state)
+            }.Build();
+        }
+
+        private BattleHostChromeSnapshot BuildHostChromeSnapshot(BattleSceneState state)
+        {
+            return new BattleHostChromeSnapshot(
+                BuildOwnedRelicViews(state),
+                BuildOwnedPotionViews(state),
+                state.SelectedOwnedRelicIndex,
+                state.SelectedOwnedPotionIndex,
+                state.OwnedRelicHintMessage,
+                state.OwnedPotionHintMessage,
+                CanUseSelectedPotion(state));
+        }
+
+        private BattleMapSnapshot BuildMapSnapshot(BattleSceneState state)
+        {
+            return new BattleMapSnapshot(
                 state.Nodes,
-                state.Hand,
-                state.RewardChoices,
-                state.CurrentNodeIndex,
+                BuildAvailableNodeIndices(state),
+                state.MapMessage);
+        }
+
+        private BattleCombatSnapshot BuildCombatSnapshot(BattleSceneState state)
+        {
+            return new BattleCombatSnapshot(
                 state.PlayerMaxHp,
                 state.PlayerHp,
                 state.PlayerEnergy,
                 state.PlayerBlock,
                 state.Gold,
-                state.CurrentEnemy,
-                state.EnemyHp,
-                state.EnemyBlock,
-                state.BattleFinished,
-                state.SelectedCardIndex,
-                state.IsRestShopContinueEnabled,
-                state.MapMessage,
                 state.BattleHintMessage,
-                state.RestShopMessage,
-                state.ResultMessage,
-                BuildEnemyIntent(state),
                 BuildHandCardViews(state),
+                BuildEnemyViews(state),
+                state.SelectedEnemyIndex,
+                BuildEnemyIntent(state),
                 BuildStatusViews(state.PlayerStatuses),
                 BuildStatusViews(state.EnemyStatuses),
                 BuildBuffViews(state.PlayerBuffs),
                 BuildBuffViews(state.EnemyBuffs),
-                BuildEnemyViews(state),
-                BuildOwnedRelicViews(state),
-                BuildOwnedPotionViews(state),
-                state.SelectedEnemyIndex,
-                state.SelectedOwnedRelicIndex,
-                state.SelectedOwnedPotionIndex,
                 state.DrawPile.Count,
                 state.DiscardPile.Count,
                 state.Hand.Count,
                 BattleSceneConstants.MaxHandSize,
-                BuildAvailableNodeIndices(state),
-                BuildShopItemViews(state),
-                state.IsCardRemovalSoldOut,
-                _shopService.GetCardRemovalPrice(state),
-                state.CurrentEvent,
-                state.PendingRelicReward,
-                state.PendingPotionReward,
-                state.EventMessage,
+                state.CurrentEnemy,
+                state.EnemyHp,
+                state.EnemyBlock);
+        }
+
+        private BattleRewardSnapshot BuildRewardSnapshot(BattleSceneState state)
+        {
+            return new BattleRewardSnapshot(
+                state.RewardChoices,
                 state.GoldClaimed,
                 state.PotionClaimed,
                 state.RelicClaimed,
+                state.CardRewardPicked,
                 state.BattleGoldReward,
                 state.PotionDropped,
                 state.PendingRelicReward != null,
-                state.CardRewardPicked,
-                state.OwnedRelicHintMessage,
-                state.OwnedPotionHintMessage,
-                CanUseSelectedPotion(state),
+                state.PendingPotionReward,
+                state.PendingRelicReward);
+        }
+
+        private BattleRestShopSnapshot BuildRestShopSnapshot(BattleSceneState state)
+        {
+            return new BattleRestShopSnapshot(
+                state.RestShopMessage,
+                state.IsRestShopContinueEnabled);
+        }
+
+        private BattleShopSnapshot BuildShopSnapshot(BattleSceneState state)
+        {
+            return new BattleShopSnapshot(
+                state.Gold,
+                BuildShopItemViews(state),
+                state.IsCardRemovalSoldOut,
+                _shopService.GetCardRemovalPrice(state));
+        }
+
+        private static BattleEventSnapshot BuildEventSnapshot(BattleSceneState state)
+        {
+            return new BattleEventSnapshot(state.CurrentEvent);
+        }
+
+        private static BattleResultSnapshot BuildResultSnapshot(BattleSceneState state)
+        {
+            return new BattleResultSnapshot(state.ResultMessage);
+        }
+
+        private BattlePotionReplaceSnapshot BuildPotionReplaceSnapshot(BattleSceneState state)
+        {
+            return new BattlePotionReplaceSnapshot(
+                BuildOwnedPotionViews(state),
                 state.PendingPotionOffer);
         }
 
@@ -92,18 +142,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            return new BattleIntentViewModel(
-                action.IntentType,
+            return BattleIntentViewModel.FromAction(
+                action,
                 _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
                 _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
+                _displayTextService.GetBuffName(action.BuffType));
         }
 
         private RuntimeEnemyAction SelectEnemyActionPreview(BattleSceneState state, BattleEnemyState enemyState)
@@ -215,18 +258,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return null;
             }
 
-            return new BattleIntentViewModel(
-                action.IntentType,
+            return BattleIntentViewModel.FromAction(
+                action,
                 _displayTextService.GetIntentName(action.IntentType),
-                action.Damage,
-                action.HitCount,
-                action.Block,
-                action.StatusType,
                 _displayTextService.GetStatusName(action.StatusType),
-                action.StatusValue,
-                action.BuffType,
-                _displayTextService.GetBuffName(action.BuffType),
-                action.BuffValue);
+                _displayTextService.GetBuffName(action.BuffType));
         }
 
         private BattleEnemyState GetSelectedEnemy(BattleSceneState state)
@@ -283,12 +319,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(new BattleMultiIconViewModel(
-                    BattleIconKind.Relic,
-                    relic.DisplayName,
-                    relic.Description,
-                    relic.ImageId,
-                    relic.Rarity,
+                views.Add(BattleMultiIconViewModel.CreateRelic(
+                    relic,
                     isSelected: i == state.SelectedOwnedRelicIndex));
             }
 
@@ -306,12 +338,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(new BattleMultiIconViewModel(
-                    BattleIconKind.Potion,
-                    potion.DisplayName,
-                    potion.Description,
-                    potion.ImageId,
-                    potion.Rarity,
+                views.Add(BattleMultiIconViewModel.CreatePotion(
+                    potion,
                     isSelected: i == state.SelectedOwnedPotionIndex));
             }
 
@@ -493,51 +521,31 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             if (item.RewardType == RewardType.Relic && item.Relic != null)
             {
-                return new BattleMultiIconViewModel(
-                    BattleIconKind.Relic,
-                    item.Relic.DisplayName,
-                    item.Relic.Description,
-                    item.Relic.ImageId,
-                    item.Relic.Rarity,
+                return BattleMultiIconViewModel.CreateRelic(
+                    item.Relic,
                     isInteractable: isInteractable,
                     isAffordable: isAffordable);
             }
 
             if (item.RewardType == RewardType.Potion && item.Potion != null)
             {
-                return new BattleMultiIconViewModel(
-                    BattleIconKind.Potion,
-                    item.Potion.DisplayName,
-                    item.Potion.Description,
-                    item.Potion.ImageId,
-                    item.Potion.Rarity,
+                return BattleMultiIconViewModel.CreatePotion(
+                    item.Potion,
                     isInteractable: isInteractable,
                     isAffordable: isAffordable);
             }
 
-            return new BattleMultiIconViewModel(
+            return BattleMultiIconViewModel.CreatePlaceholder(
                 BattleIconKind.None,
                 BuildShopItemDisplayName(item),
-                string.Empty,
-                string.Empty,
                 CardRarity.Common,
-                isInteractable: isInteractable,
-                isAffordable: isAffordable);
+                isInteractable,
+                isAffordable);
         }
 
         private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
         {
-            return new BattleMultiIconViewModel(
-                BattleIconKind.Card,
-                card.DisplayName,
-                card.Description,
-                card.ImageId,
-                card.Rarity,
-                card.Cost,
-                true,
-                isInteractable,
-                isSelected,
-                isAffordable);
+            return BattleMultiIconViewModel.CreateCard(card, isAffordable, isInteractable, isSelected);
         }
     }
 }
