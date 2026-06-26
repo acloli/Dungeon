@@ -3,6 +3,7 @@ using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
 using Game.MasterData.Generated;
 using NUnit.Framework;
+using TFramework.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -120,6 +121,7 @@ namespace Dungeon.Tests.EditMode
 
             SerializedObject serialized = new SerializedObject(cardSelectDialog);
             Assert.That(serialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_messageText").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
         }
@@ -183,6 +185,53 @@ namespace Dungeon.Tests.EditMode
                 footerSerialized.Update();
                 Assert.That(footerText.gameObject.activeSelf, Is.False);
                 Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.Empty);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void CardSelectDialog_UpgradeSelectionRefreshesCardsAndMessageInPlace()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RuntimeCard strike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard guard = CreateCard(1003, "Guard", 1, 1004);
+                CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
+                BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
+                    CreateSnapshot(BattleScenePage.CardSelect),
+                    new[] { strike, guard },
+                    CardSelectMode.Upgrade,
+                    true,
+                    new System.Collections.Generic.Dictionary<int, int> { { strike.Id, 25 }, { guard.Id, 25 } },
+                    string.Empty,
+                    _ => new BattleCardSelectDialogRefreshData(
+                        new[] { guard },
+                        new System.Collections.Generic.Dictionary<int, int> { { guard.Id, 25 } },
+                        "Upgrade done. Strike -> Strike+ (-25 Gold). Gold 75"));
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(param, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                System.Collections.IList beforeViews = GetCardViews(dialog);
+                Assert.That(beforeViews.Count, Is.EqualTo(2));
+
+                InvokeButton((Component)beforeViews[0]);
+
+                System.Collections.IList afterViews = GetCardViews(dialog);
+                SerializedObject serialized = new SerializedObject(dialog);
+                Component messageText = serialized.FindProperty("_messageText").objectReferenceValue as Component;
+                SerializedObject messageSerialized = new SerializedObject(messageText);
+                messageSerialized.Update();
+
+                Assert.That(afterViews.Count, Is.EqualTo(1));
+                Assert.That(messageSerialized.FindProperty("m_text").stringValue, Does.Contain("Strike -> Strike+"));
             }
             finally
             {
@@ -336,6 +385,76 @@ namespace Dungeon.Tests.EditMode
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
             Assert.That(prefab.GetComponent<T>(), Is.Not.Null, $"{prefabName}.prefab is missing {typeof(T).Name}.");
+        }
+
+        private static RuntimeCard CreateCard(int id, string displayName, int cost, int upgradeCardId = 0)
+        {
+            return new RuntimeCard(
+                id,
+                $"card_{id}",
+                displayName,
+                string.Empty,
+                "Deal damage.",
+                string.Empty,
+                string.Empty,
+                cost,
+                CardType.Attack,
+                CardRarity.Common,
+                CharacterArchetype.CrimsonExile,
+                System.Array.Empty<RuntimeCardEffect>(),
+                upgradeCardId);
+        }
+
+        private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
+        {
+            return new BattleSceneSnapshot(
+                page,
+                System.Array.Empty<RuntimeMapNode>(),
+                System.Array.Empty<RuntimeCard>(),
+                System.Array.Empty<RuntimeRewardEntry>(),
+                -1,
+                40,
+                40,
+                3,
+                0,
+                100,
+                null,
+                0,
+                0,
+                false,
+                -1,
+                false,
+                "map",
+                "battle",
+                "rest",
+                "result");
+        }
+
+        private static System.Collections.IList GetCardViews(CardSelectDialog dialog)
+        {
+            System.Reflection.FieldInfo field = typeof(CardSelectDialog).GetField(
+                "_cardViews",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            return field?.GetValue(dialog) as System.Collections.IList;
+        }
+
+        private static void InvokeButton(Component component)
+        {
+            Component[] components = component.GetComponentsInChildren<Component>(true);
+            for (int i = 0; i < components.Length; i++)
+            {
+                Component candidate = components[i];
+                if (candidate == null || candidate.GetType().FullName != "UnityEngine.UI.Button")
+                {
+                    continue;
+                }
+
+                object onClick = candidate.GetType().GetProperty("onClick")?.GetValue(candidate);
+                onClick?.GetType().GetMethod("Invoke")?.Invoke(onClick, null);
+                return;
+            }
+
+            Assert.Fail("Card view button is missing.");
         }
     }
 }

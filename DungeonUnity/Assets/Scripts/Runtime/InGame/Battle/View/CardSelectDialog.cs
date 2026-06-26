@@ -11,11 +11,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardSelectDialog : UIDialogBase<CardSelectDialogResult>
     {
         [SerializeField] private Button _cancelButton;
+        [SerializeField] private TFTextUGUI _messageText;
         [SerializeField] private Transform _cardContainer;
         [SerializeField] private BattleCardIconView _cardTemplate;
 
         private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
         private BattleCardSelectDialogParam _param;
+        private IReadOnlyList<RuntimeCard> _deckCards;
+        private IReadOnlyDictionary<int, int> _cardPrices;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
@@ -26,6 +29,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
         protected override void OnOpened()
         {
             WireButtons();
+            _deckCards = _param?.DeckCards ?? System.Array.Empty<RuntimeCard>();
+            _cardPrices = _param?.CardPrices ?? new Dictionary<int, int>();
+            SetMessage(_param?.Message);
             BuildCardViews();
         }
 
@@ -63,9 +69,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             _cardTemplate.gameObject.SetActive(false);
 
-            for (int i = 0; i < _param.DeckCards.Count; i++)
+            for (int i = 0; i < _deckCards.Count; i++)
             {
-                RuntimeCard card = _param.DeckCards[i];
+                RuntimeCard card = _deckCards[i];
                 if (!CanDisplayCard(card))
                 {
                     continue;
@@ -87,7 +93,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private int ResolveCardPrice(RuntimeCard card)
         {
-            if (card == null || !_param.CardPrices.TryGetValue(card.Id, out int price))
+            if (card == null || !_cardPrices.TryGetValue(card.Id, out int price))
             {
                 return 0;
             }
@@ -121,7 +127,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 }
 
                 cardView.Clear();
-                Destroy(cardView.gameObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(cardView.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(cardView.gameObject);
+                }
             }
 
             _cardViews.Clear();
@@ -134,7 +147,29 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void OnCardClicked(RuntimeCard card)
         {
+            if (_param?.OnCardSelected != null)
+            {
+                BattleCardSelectDialogRefreshData refreshData = _param.OnCardSelected.Invoke(card);
+                if (refreshData != null)
+                {
+                    _deckCards = refreshData.DeckCards;
+                    _cardPrices = refreshData.CardPrices;
+                    SetMessage(refreshData.Message);
+                    BuildCardViews();
+                }
+
+                return;
+            }
+
             CloseWithResult(new CardSelectDialogResult { IsCanceled = false, SelectedCard = card });
+        }
+
+        private void SetMessage(string message)
+        {
+            if (_messageText != null)
+            {
+                _messageText.text = message ?? string.Empty;
+            }
         }
     }
 }
