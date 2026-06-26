@@ -130,18 +130,73 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// カード選択ダイアログの用途種別
+    /// </summary>
+    public enum CardSelectMode
+    {
+        CardRemoval,
+        Upgrade
+    }
+
+    /// <summary>
+    /// カード選択ダイアログ更新データクラス
+    /// </summary>
+    public sealed class BattleCardSelectDialogRefreshData
+    {
+        public BattleCardSelectDialogRefreshData(
+            IReadOnlyList<RuntimeCard> deckCards,
+            IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
+            int gold,
+            string message)
+        {
+            DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
+            CardPrices = cardPrices ?? new Dictionary<int, int>();
+            UpgradedCards = upgradedCards ?? new Dictionary<int, RuntimeCard>();
+            Gold = gold;
+            Message = message ?? string.Empty;
+        }
+
+        public IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public IReadOnlyDictionary<int, RuntimeCard> UpgradedCards { get; }
+        public int Gold { get; }
+        public string Message { get; }
+    }
+
+    /// <summary>
     /// カード選択ダイアログ表示パラメータクラス
     /// </summary>
     public sealed class BattleCardSelectDialogParam
     {
-        public BattleCardSelectDialogParam(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards)
+        public BattleCardSelectDialogParam(
+            BattleSceneSnapshot snapshot,
+            IReadOnlyList<RuntimeCard> deckCards,
+            CardSelectMode mode,
+            bool showPrice,
+            IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
+            string message,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed)
         {
             Snapshot = snapshot;
-            DeckCards = deckCards ?? System.Array.Empty<RuntimeCard>();
+            DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
+            Mode = mode;
+            ShowPrice = showPrice;
+            CardPrices = cardPrices ?? new Dictionary<int, int>();
+            UpgradedCards = upgradedCards ?? new Dictionary<int, RuntimeCard>();
+            Message = message ?? string.Empty;
+            OnCardConfirmed = onCardConfirmed;
         }
 
         public BattleSceneSnapshot Snapshot { get; }
-        public System.Collections.Generic.IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public CardSelectMode Mode { get; }
+        public bool ShowPrice { get; }
+        public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public IReadOnlyDictionary<int, RuntimeCard> UpgradedCards { get; }
+        public string Message { get; }
+        public Func<RuntimeCard, BattleCardSelectDialogRefreshData> OnCardConfirmed { get; }
     }
 
     /// <summary>

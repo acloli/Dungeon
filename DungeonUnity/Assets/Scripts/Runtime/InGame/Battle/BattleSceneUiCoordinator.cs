@@ -135,7 +135,16 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// カード選択ダイアログ表示
         /// </summary>
-        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
+        public async UniTask<CardSelectDialogResult> ShowCardSelectAsync(
+            BattleSceneSnapshot snapshot,
+            IReadOnlyList<RuntimeCard> deckCards,
+            CardSelectMode mode,
+            bool showPrice,
+            IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
+            string message,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
+            CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
             if (_hostView != null)
@@ -144,7 +153,15 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
-                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot, deckCards)),
+                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(
+                    snapshot,
+                    deckCards,
+                    mode,
+                    showPrice,
+                    cardPrices,
+                    upgradedCards,
+                    message,
+                    onCardConfirmed)),
                 ct);
         }
 

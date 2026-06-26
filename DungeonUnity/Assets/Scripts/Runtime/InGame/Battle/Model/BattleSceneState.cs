@@ -56,11 +56,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public string OwnedRelicHintMessage { get; set; } = string.Empty;
         public string OwnedPotionHintMessage { get; set; } = string.Empty;
         public string RestShopMessage { get; set; } = string.Empty;
+        public string CardSelectMessage { get; set; } = string.Empty;
         public string ResultMessage { get; set; } = string.Empty;
         public RuntimeEvent CurrentEvent { get; set; }
         public RuntimeRelic PendingRelicReward { get; set; }
         public RuntimePotion PendingPotionReward { get; set; }
         public PendingPotionOffer PendingPotionOffer { get; set; }
         public string EventMessage { get; set; } = string.Empty;
+        public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
     }
 }

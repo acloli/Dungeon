@@ -80,6 +80,7 @@ namespace Dungeon.Tests.EditMode
                 0,
                 100,
                 new List<RuntimeCard>(),
+                new Dictionary<int, RuntimeCard>(),
                 new List<RuntimeRewardEntry>(),
                 new List<RuntimeMapNode>(),
                 new Dictionary<Dungeon.Runtime.InGame.Domain.InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),

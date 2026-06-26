@@ -306,15 +306,24 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
-                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(snapshot, _flowService.GetDeckCards(), ct);
+                    CardSelectMode cardSelectMode = _flowService.GetCardSelectMode();
+                    CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(
+                        snapshot,
+                        _flowService.GetCardSelectCards(),
+                        cardSelectMode,
+                        cardSelectMode == CardSelectMode.Upgrade,
+                        _flowService.GetCardSelectPrices(),
+                        _flowService.GetCardSelectUpgradedCards(),
+                        _flowService.GetCardSelectMessage(),
+                        cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardConfirmed : null,
+                        ct);
                     if (cardSelectResult.IsCanceled)
                     {
-                        // 削除キャンセル時はショップに戻る
-                        _flowService.OpenShop();
+                        _flowService.CancelCardSelect();
                     }
                     else
                     {
-                        _flowService.PurchaseCardRemoval(cardSelectResult.SelectedCard);
+                        _flowService.ConfirmCardSelect(cardSelectResult.SelectedCard);
                     }
                     await RenderAsync(ct);
                     break;
@@ -330,6 +339,18 @@ namespace Dungeon.Runtime.InGame.Battle
                     _onResultBackClicked?.Invoke();
                     break;
             }
+        }
+
+        private BattleCardSelectDialogRefreshData OnUpgradeCardConfirmed(RuntimeCard card)
+        {
+            _flowService.ConfirmCardSelect(card);
+            BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
+            return new BattleCardSelectDialogRefreshData(
+                _flowService.GetCardSelectCards(),
+                _flowService.GetCardSelectPrices(),
+                _flowService.GetCardSelectUpgradedCards(),
+                snapshot.Gold,
+                _flowService.GetCardSelectMessage());
         }
 
         private void RenderHostChrome(BattleSceneSnapshot snapshot)

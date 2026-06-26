@@ -26,5 +26,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// カード削除を実行する
         /// </summary>
         bool PurchaseCardRemoval(BattleSceneState state, RuntimeCard card);
+
+        /// <summary>
+        /// カード強化価格を取得する
+        /// </summary>
+        int GetCardUpgradePrice(RuntimeRunDefinition runDefinition, RuntimeCard card);
     }
 }

@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
+using Game.MasterData.Generated;
 using NUnit.Framework;
 using TFramework.UI;
 
@@ -66,6 +68,73 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ShowCardSelectAsync_PassesUpgradeModePayload()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.CardSelect);
+            Dictionary<int, int> cardPrices = new Dictionary<int, int> { { 1001, 25 } };
+            Dictionary<int, RuntimeCard> upgradedCards = new Dictionary<int, RuntimeCard> { { 1001, CreateCard(1002, "Strike+", 1) } };
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed =
+                _ => new BattleCardSelectDialogRefreshData(
+                    Array.Empty<RuntimeCard>(),
+                    new Dictionary<int, int>(),
+                    new Dictionary<int, RuntimeCard>(),
+                    75,
+                    "Upgraded.");
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardSelectAsync(
+                snapshot,
+                Array.Empty<RuntimeCard>(),
+                CardSelectMode.Upgrade,
+                true,
+                cardPrices,
+                upgradedCards,
+                "Select a card.",
+                onCardConfirmed,
+                CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiService.LastCardSelectDialogParam, Is.Not.Null);
+            BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
+            Assert.That(payload, Is.Not.Null);
+            Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.Upgrade));
+            Assert.That(payload.ShowPrice, Is.True);
+            Assert.That(payload.CardPrices[1001], Is.EqualTo(25));
+            Assert.That(payload.UpgradedCards[1001].Id, Is.EqualTo(1002));
+            Assert.That(payload.Message, Is.EqualTo("Select a card."));
+            Assert.That(payload.OnCardConfirmed, Is.SameAs(onCardConfirmed));
+        }
+
+        [Test]
+        public void ShowCardSelectAsync_PassesHiddenPriceForCardRemoval()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.CardSelect);
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardSelectAsync(
+                snapshot,
+                Array.Empty<RuntimeCard>(),
+                CardSelectMode.CardRemoval,
+                false,
+                new Dictionary<int, int>(),
+                new Dictionary<int, RuntimeCard>(),
+                string.Empty,
+                null,
+                CancellationToken.None).GetAwaiter().GetResult();
+
+            BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
+            Assert.That(payload, Is.Not.Null);
+            Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.CardRemoval));
+            Assert.That(payload.ShowPrice, Is.False);
+            Assert.That(payload.OnCardConfirmed, Is.Null);
+        }
+
+        [Test]
         public void HostChromeModalDialogs_ToggleHostInteractable()
         {
             FakeUIService uiService = new FakeUIService();
@@ -104,6 +173,44 @@ namespace Dungeon.Tests.EditMode
                 "battle",
                 "rest",
                 "result");
+        }
+
+        private static RuntimeCard CreateCard(int id, string displayName, int cost)
+        {
+            return new RuntimeCard(
+                id,
+                $"card_{id}",
+                displayName,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                cost,
+                CardType.Attack,
+                CardRarity.Common,
+                CharacterArchetype.CrimsonExile,
+                Array.Empty<RuntimeCardEffect>());
+        }
+
+        private static T ExtractPayload<T>(UIDialogOpenParam param) where T : class
+        {
+            if (param == null)
+            {
+                return null;
+            }
+
+            System.Reflection.PropertyInfo property =
+                typeof(UIDialogOpenParam).GetProperty("Payload")
+                ?? typeof(UIDialogOpenParam).GetProperty("Param");
+            if (property != null)
+            {
+                return property.GetValue(param) as T;
+            }
+
+            System.Reflection.FieldInfo field =
+                typeof(UIDialogOpenParam).GetField("Payload")
+                ?? typeof(UIDialogOpenParam).GetField("Param");
+            return field?.GetValue(param) as T;
         }
 
         private sealed class FakeBattleSceneHostView : IBattleSceneHostView
@@ -184,6 +291,7 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastShopDialogParam { get; private set; }
             public UIDialogOpenParam LastEventDialogParam { get; private set; }
             public UIDialogOpenParam LastPotionReplaceDialogParam { get; private set; }
+            public UIDialogOpenParam LastCardSelectDialogParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
             public int PageStackCount => 0;
@@ -224,6 +332,10 @@ namespace Dungeon.Tests.EditMode
                 else if (typeof(TDialog) == typeof(EventDialog))
                 {
                     LastEventDialogParam = param as UIDialogOpenParam;
+                }
+                else if (typeof(TDialog) == typeof(CardSelectDialog))
+                {
+                    LastCardSelectDialogParam = param as UIDialogOpenParam;
                 }
                 else if (typeof(TDialog) == typeof(PotionReplaceDialog))
                 {

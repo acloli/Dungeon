@@ -30,6 +30,31 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         IReadOnlyList<RuntimeCard> GetDeckCards();
 
         /// <summary>
+        /// 現在のカード選択候補取得
+        /// </summary>
+        IReadOnlyList<RuntimeCard> GetCardSelectCards();
+
+        /// <summary>
+        /// 現在のカード選択価格取得
+        /// </summary>
+        IReadOnlyDictionary<int, int> GetCardSelectPrices();
+
+        /// <summary>
+        /// 現在のカード選択強化後カード取得
+        /// </summary>
+        IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards();
+
+        /// <summary>
+        /// 現在のカード選択メッセージ取得
+        /// </summary>
+        string GetCardSelectMessage();
+
+        /// <summary>
+        /// 現在のカード選択用途取得
+        /// </summary>
+        CardSelectMode GetCardSelectMode();
+
+        /// <summary>
         /// マップノード選択
         /// </summary>
         void SelectMapNode(int index);
@@ -106,6 +131,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// カード削除購入
         /// </summary>
         void PurchaseCardRemoval(RuntimeCard card);
+
+        /// <summary>
+        /// カード選択キャンセル
+        /// </summary>
+        void CancelCardSelect();
+
+        /// <summary>
+        /// カード選択確定
+        /// </summary>
+        void ConfirmCardSelect(RuntimeCard card);
 
         /// <summary>
         /// ショップから退出

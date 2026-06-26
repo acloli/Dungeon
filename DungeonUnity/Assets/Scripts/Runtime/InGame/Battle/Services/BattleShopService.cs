@@ -151,6 +151,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return true;
         }
 
+        public int GetCardUpgradePrice(RuntimeRunDefinition runDefinition, RuntimeCard card)
+        {
+            int basePrice = 50;
+            if (runDefinition?.CardPriceRules != null
+                && card != null
+                && runDefinition.CardPriceRules.TryGetValue(card.Rarity, out RuntimeCardPriceRule rule))
+            {
+                basePrice = rule.BasePrice;
+            }
+
+            return Math.Max(1, (basePrice + 1) / 2);
+        }
+
         private static RuntimeCard PickCardForSlot(RuntimeRunDefinition runDef, CardType requiredType, IBattleRandomProvider random)
         {
             List<RuntimeCard> candidates = new List<RuntimeCard>();

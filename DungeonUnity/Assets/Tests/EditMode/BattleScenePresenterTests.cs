@@ -213,6 +213,59 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeAsync_CardSelectState_ConfirmRoutesThroughGenericCardSelectFlow()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.CardSelect))
+            {
+                CardSelectMode = CardSelectMode.Upgrade,
+                CardSelectCards = new[] { strike },
+                CardSelectPrices = new Dictionary<int, int> { { strike.Id, 25 } },
+                CardSelectMessage = string.Empty
+            };
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator
+            {
+                CardToSelectBeforeResult = strike,
+                CardSelectResult = new CardSelectDialogResult { IsCanceled = true }
+            };
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(flowService.ConfirmCardSelectCallCount, Is.EqualTo(1));
+            Assert.That(flowService.CancelCardSelectCallCount, Is.EqualTo(1));
+            Assert.That(uiCoordinator.LastCardSelectMode, Is.EqualTo(CardSelectMode.Upgrade));
+            Assert.That(uiCoordinator.LastCardSelectShowPrice, Is.True);
+            Assert.That(uiCoordinator.LastCardSelectPrices[strike.Id], Is.EqualTo(25));
+            Assert.That(uiCoordinator.LastCardSelectCallback, Is.Not.Null);
+            Assert.That(uiCoordinator.LastCardSelectRefreshData.Message, Is.EqualTo("Upgraded Strike."));
+        }
+
+        [Test]
+        public void InitializeAsync_CardRemovalState_HidesCardPrices()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.CardSelect))
+            {
+                CardSelectMode = CardSelectMode.CardRemoval,
+                CardSelectCards = new[] { strike },
+                CardSelectPrices = new Dictionary<int, int> { { strike.Id, 75 } }
+            };
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator
+            {
+                CardSelectResult = new CardSelectDialogResult { IsCanceled = true }
+            };
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.LastCardSelectMode, Is.EqualTo(CardSelectMode.CardRemoval));
+            Assert.That(uiCoordinator.LastCardSelectShowPrice, Is.False);
+        }
+
+        [Test]
         public void OnOwnedRelicClicked_UpdatesHintText()
         {
             BattleSceneSnapshot snapshot = new BattleSceneSnapshot(
@@ -606,12 +659,19 @@ namespace Dungeon.Tests.EditMode
             public int ReplaceOwnedPotionCallCount { get; private set; }
             public int CancelPendingPotionReplaceCallCount { get; private set; }
             public int ClearOwnedInspectionsCallCount { get; private set; }
+            public int ConfirmCardSelectCallCount { get; private set; }
+            public int CancelCardSelectCallCount { get; private set; }
             public int InitializeCallCount { get; private set; }
             public int InitializeFromSaveCallCount { get; private set; }
             public bool DoesSelectedCardRequireEnemyTargetResult { get; set; } = true;
             public BattleSceneSnapshot SnapshotAfterUsePotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterReplaceOwnedPotion { get; set; }
             public BattleSceneSnapshot SnapshotAfterCancelPendingPotionReplace { get; set; }
+            public IReadOnlyList<RuntimeCard> CardSelectCards { get; set; } = Array.Empty<RuntimeCard>();
+            public IReadOnlyDictionary<int, int> CardSelectPrices { get; set; } = new Dictionary<int, int>();
+            public IReadOnlyDictionary<int, RuntimeCard> CardSelectUpgradedCards { get; set; } = new Dictionary<int, RuntimeCard>();
+            public string CardSelectMessage { get; set; } = string.Empty;
+            public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
 
             public void Initialize(int runProfileId)
             {
@@ -631,6 +691,31 @@ namespace Dungeon.Tests.EditMode
             public IReadOnlyList<RuntimeCard> GetDeckCards()
             {
                 return new List<RuntimeCard>();
+            }
+
+            public IReadOnlyList<RuntimeCard> GetCardSelectCards()
+            {
+                return CardSelectCards;
+            }
+
+            public IReadOnlyDictionary<int, int> GetCardSelectPrices()
+            {
+                return CardSelectPrices;
+            }
+
+            public IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards()
+            {
+                return CardSelectUpgradedCards;
+            }
+
+            public string GetCardSelectMessage()
+            {
+                return CardSelectMessage;
+            }
+
+            public CardSelectMode GetCardSelectMode()
+            {
+                return CardSelectMode;
             }
 
             public void SelectMapNode(int index)
@@ -742,6 +827,21 @@ namespace Dungeon.Tests.EditMode
             public void PurchaseCardRemoval(RuntimeCard card)
             {
                 _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void CancelCardSelect()
+            {
+                CancelCardSelectCallCount++;
+                _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
+            }
+
+            public void ConfirmCardSelect(RuntimeCard card)
+            {
+                ConfirmCardSelectCallCount++;
+                CardSelectCards = Array.Empty<RuntimeCard>();
+                CardSelectPrices = new Dictionary<int, int>();
+                CardSelectUpgradedCards = new Dictionary<int, RuntimeCard>();
+                CardSelectMessage = $"Upgraded {card.DisplayName}.";
             }
 
             public void LeaveShop()
@@ -952,6 +1052,15 @@ namespace Dungeon.Tests.EditMode
             public BattleSceneSnapshot LastEventSnapshot { get; private set; }
             public BattleSceneSnapshot LastSnapshot { get; private set; }
             public PotionReplaceDialogResult PotionReplaceResult { get; set; }
+            public CardSelectDialogResult CardSelectResult { get; set; }
+            public RuntimeCard CardToSelectBeforeResult { get; set; }
+            public CardSelectMode LastCardSelectMode { get; private set; }
+            public bool LastCardSelectShowPrice { get; private set; }
+            public IReadOnlyDictionary<int, int> LastCardSelectPrices { get; private set; } = new Dictionary<int, int>();
+            public IReadOnlyDictionary<int, RuntimeCard> LastCardSelectUpgradedCards { get; private set; } = new Dictionary<int, RuntimeCard>();
+            public string LastCardSelectMessage { get; private set; }
+            public Func<RuntimeCard, BattleCardSelectDialogRefreshData> LastCardSelectCallback { get; private set; }
+            public BattleCardSelectDialogRefreshData LastCardSelectRefreshData { get; private set; }
 
             public UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct)
             {
@@ -1001,9 +1110,29 @@ namespace Dungeon.Tests.EditMode
                 return UniTask.FromResult(new ShopDialogResult { Action = ShopDialogActionType.Leave });
             }
 
-            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleSceneSnapshot snapshot, IReadOnlyList<RuntimeCard> deckCards, CancellationToken ct)
+            public UniTask<CardSelectDialogResult> ShowCardSelectAsync(
+                BattleSceneSnapshot snapshot,
+                IReadOnlyList<RuntimeCard> deckCards,
+                CardSelectMode mode,
+                bool showPrice,
+                IReadOnlyDictionary<int, int> cardPrices,
+                IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
+                string message,
+                Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
+                CancellationToken ct)
             {
-                return UniTask.FromResult(new CardSelectDialogResult { IsCanceled = true });
+                LastCardSelectMode = mode;
+                LastCardSelectShowPrice = showPrice;
+                LastCardSelectPrices = cardPrices;
+                LastCardSelectUpgradedCards = upgradedCards;
+                LastCardSelectMessage = message;
+                LastCardSelectCallback = onCardConfirmed;
+                if (CardToSelectBeforeResult != null)
+                {
+                    LastCardSelectRefreshData = onCardConfirmed?.Invoke(CardToSelectBeforeResult);
+                }
+
+                return UniTask.FromResult(CardSelectResult);
             }
 
             public UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct)

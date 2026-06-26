@@ -67,6 +67,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 profile.PotionDropChance,
                 profile.RelicDropChance,
                 BuildStarterDeck(profile.StarterDeckGroupId, cardCatalog),
+                cardCatalog,
                 BuildRewardPool(profile.RewardPoolId, cardCatalog, relicCatalog, potionCatalog),
                 nodes,
                 encounters,
@@ -84,6 +85,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public IReadOnlyDictionary<int, RuntimeCard> BuildCardCatalog()
         {
             IReadOnlyList<CardEffectMaster> effectMasters = _masterDataService.GetAll<CardEffectMaster>();
+            IReadOnlyList<CardMaster> cardMasters = _masterDataService.GetAll<CardMaster>();
             Dictionary<int, List<RuntimeCardEffect>> effectsByCardId = effectMasters
                 .GroupBy(effect => effect.CardId)
                 .ToDictionary(
@@ -100,8 +102,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                             effect.TargetSide))
                         .ToList());
 
+            HashSet<int> upgradedCardIds = new HashSet<int>();
+            for (int i = 0; i < cardMasters.Count; i++)
+            {
+                int upgradeCardId = cardMasters[i].UpgradeCardId;
+                if (upgradeCardId > 0)
+                {
+                    upgradedCardIds.Add(upgradeCardId);
+                }
+            }
+
             Dictionary<int, RuntimeCard> cards = new Dictionary<int, RuntimeCard>();
-            IReadOnlyList<CardMaster> cardMasters = _masterDataService.GetAll<CardMaster>();
             for (int i = 0; i < cardMasters.Count; i++)
             {
                 CardMaster master = cardMasters[i];
@@ -118,7 +129,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     master.CardType,
                     master.Rarity,
                     master.CharacterArchetype,
-                    effects ?? new List<RuntimeCardEffect>());
+                    effects ?? new List<RuntimeCardEffect>(),
+                    master.UpgradeCardId,
+                    upgradedCardIds.Contains(master.Id));
             }
 
             return cards;
