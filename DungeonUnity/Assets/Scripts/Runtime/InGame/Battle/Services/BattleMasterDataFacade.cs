@@ -117,20 +117,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 CardMaster master = cardMasters[i];
                 effectsByCardId.TryGetValue(master.Id, out List<RuntimeCardEffect> effects);
-                cards[master.Id] = new RuntimeCard(
-                    master.Id,
-                    master.Key,
-                    ResolveLocalizedText(master.LocalizationKey, master.Name),
-                    master.LocalizationKey,
-                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
-                    master.DescriptionKey,
-                    master.ImageId,
-                    master.Cost,
-                    master.CardType,
-                    master.Rarity,
-                    master.CharacterArchetype,
+                cards[master.Id] = CreateRuntimeCard(
+                    master,
                     effects ?? new List<RuntimeCardEffect>(),
-                    master.UpgradeCardId,
                     upgradedCardIds.Contains(master.Id));
             }
 
@@ -166,16 +155,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 RelicMaster master = masters[i];
                 effectsByRelicId.TryGetValue(master.Id, out List<RuntimeRelicEffect> effects);
-                relics[master.Id] = new RuntimeRelic(
-                    master.Id,
-                    master.Key,
-                    ResolveLocalizedText(master.LocalizationKey, master.Name),
-                    master.LocalizationKey,
-                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
-                    master.DescriptionKey,
-                    master.ImageId,
-                    master.Rarity,
-                    effects ?? new List<RuntimeRelicEffect>());
+                relics[master.Id] = CreateRuntimeRelic(master, effects ?? new List<RuntimeRelicEffect>());
             }
 
             return relics;
@@ -209,18 +189,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 PotionMaster master = masters[i];
                 effectsByPotionId.TryGetValue(master.Id, out List<RuntimePotionEffect> effects);
-                potions[master.Id] = new RuntimePotion(
-                    master.Id,
-                    master.Key,
-                    ResolveLocalizedText(master.LocalizationKey, master.Name),
-                    master.LocalizationKey,
-                    ResolveLocalizedText(master.DescriptionKey, string.Empty),
-                    master.DescriptionKey,
-                    master.ImageId,
-                    master.Rarity,
-                    ResolvePotionUseContext(effects),
-                    ResolvePotionTargetMode(effects),
-                    effects ?? new List<RuntimePotionEffect>());
+                potions[master.Id] = CreateRuntimePotion(master, effects ?? new List<RuntimePotionEffect>());
             }
 
             return potions;
@@ -238,17 +207,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     group => group.Key,
                     group => group
                         .OrderBy(action => action.Order)
-                        .Select(action => new RuntimeEnemyAction(
-                            action.Order,
-                            action.IntentType,
-                            action.Damage,
-                            action.HitCount,
-                            action.Block,
-                            action.StatusType,
-                            action.StatusValue,
-                            action.BuffType,
-                            action.BuffValue,
-                            action.RepeatRule))
+                        .Select(CreateRuntimeEnemyAction)
                         .ToList());
 
             Dictionary<int, RuntimeEnemy> enemies = new Dictionary<int, RuntimeEnemy>();
@@ -257,16 +216,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 EnemyMaster master = enemyMasters[i];
                 actionsByEnemyId.TryGetValue(master.Id, out List<RuntimeEnemyAction> actions);
-                enemies[master.Id] = new RuntimeEnemy(
-                    master.Id,
-                    master.Key,
-                    ResolveLocalizedText(master.LocalizationKey, master.Name),
-                    master.LocalizationKey,
-                    master.EnemyTier,
-                    master.HpMin,
-                    master.HpMax,
-                    master.GoldReward,
-                    actions ?? new List<RuntimeEnemyAction>());
+                enemies[master.Id] = CreateRuntimeEnemy(master, actions ?? new List<RuntimeEnemyAction>());
             }
 
             return enemies;
@@ -351,7 +301,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     }
                 }
 
-                rewards.Add(new RuntimeRewardEntry(entry.RewardType, entry.RewardValue, card, relic, potion, entry.Weight, entry.MinFloor, entry.MaxFloor));
+                rewards.Add(CreateRuntimeRewardEntry(entry, card, relic, potion));
             }
 
             return rewards;
@@ -481,6 +431,101 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return formations;
+        }
+
+        private RuntimeCard CreateRuntimeCard(CardMaster master, IReadOnlyList<RuntimeCardEffect> effects, bool isUpgraded)
+        {
+            return new RuntimeCard(
+                master.Id,
+                master.Key,
+                ResolveLocalizedText(master.LocalizationKey, master.Name),
+                master.LocalizationKey,
+                ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                master.DescriptionKey,
+                master.ImageId,
+                master.Cost,
+                master.CardType,
+                master.Rarity,
+                master.CharacterArchetype,
+                effects,
+                master.UpgradeCardId,
+                isUpgraded);
+        }
+
+        private RuntimeRelic CreateRuntimeRelic(RelicMaster master, IReadOnlyList<RuntimeRelicEffect> effects)
+        {
+            return new RuntimeRelic(
+                master.Id,
+                master.Key,
+                ResolveLocalizedText(master.LocalizationKey, master.Name),
+                master.LocalizationKey,
+                ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                master.DescriptionKey,
+                master.ImageId,
+                master.Rarity,
+                effects);
+        }
+
+        private RuntimePotion CreateRuntimePotion(PotionMaster master, IReadOnlyList<RuntimePotionEffect> effects)
+        {
+            return new RuntimePotion(
+                master.Id,
+                master.Key,
+                ResolveLocalizedText(master.LocalizationKey, master.Name),
+                master.LocalizationKey,
+                ResolveLocalizedText(master.DescriptionKey, string.Empty),
+                master.DescriptionKey,
+                master.ImageId,
+                master.Rarity,
+                ResolvePotionUseContext(effects),
+                ResolvePotionTargetMode(effects),
+                effects);
+        }
+
+        private static RuntimeEnemyAction CreateRuntimeEnemyAction(EnemyActionMaster action)
+        {
+            return new RuntimeEnemyAction(
+                action.Order,
+                action.IntentType,
+                action.Damage,
+                action.HitCount,
+                action.Block,
+                action.StatusType,
+                action.StatusValue,
+                action.BuffType,
+                action.BuffValue,
+                action.RepeatRule);
+        }
+
+        private RuntimeEnemy CreateRuntimeEnemy(EnemyMaster master, IReadOnlyList<RuntimeEnemyAction> actions)
+        {
+            return new RuntimeEnemy(
+                master.Id,
+                master.Key,
+                ResolveLocalizedText(master.LocalizationKey, master.Name),
+                master.LocalizationKey,
+                master.EnemyTier,
+                master.HpMin,
+                master.HpMax,
+                master.GoldReward,
+                actions);
+        }
+
+        private static RuntimeRewardEntry CreateRuntimeRewardEntry(
+            RewardPoolMaster entry,
+            RuntimeCard card,
+            RuntimeRelic relic,
+            RuntimePotion potion)
+        {
+            return new RuntimeRewardEntry(
+                entry.RewardType,
+                entry.RewardValue,
+                card,
+                relic,
+                potion,
+                entry.Weight,
+                entry.MinFloor,
+                entry.MaxFloor);
         }
 
         /// <summary>
