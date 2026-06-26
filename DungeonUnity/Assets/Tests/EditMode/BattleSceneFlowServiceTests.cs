@@ -564,7 +564,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void ApplyUpgrade_WithInsufficientGold_StaysInRestShop()
+        public void ApplyUpgrade_WithInsufficientGold_OpensCardSelectWithCards()
         {
             RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
             RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
@@ -580,9 +580,36 @@ namespace Dungeon.Tests.EditMode
             service.ApplyUpgrade();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(snapshot.RestShopMessage, Is.EqualTo("Not enough gold."));
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
+            Assert.That(service.GetCardSelectCards(), Has.Count.EqualTo(1));
+            Assert.That(service.GetCardSelectCards()[0].Id, Is.EqualTo(1001));
+            Assert.That(service.GetCardSelectPrices()[1001], Is.EqualTo(25));
+            Assert.That(service.GetCardSelectUpgradedCards()[1001].Id, Is.EqualTo(1002));
             Assert.That(snapshot.Gold, Is.EqualTo(20));
+        }
+
+        [Test]
+        public void ConfirmCardSelect_UpgradeMode_WithInsufficientGold_DoesNotUpgrade()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
+            RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                startingGold: 20,
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike },
+                additionalCards: new[] { strikePlus });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(strike);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
+            Assert.That(snapshot.Gold, Is.EqualTo(20));
+            Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1001));
+            Assert.That(service.GetCardSelectMessage(), Is.EqualTo("Not enough gold."));
         }
 
         [Test]

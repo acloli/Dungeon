@@ -189,7 +189,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < _state.Deck.Count; i++)
             {
                 RuntimeCard card = _state.Deck[i];
-                if (CanUpgradeCard(card) && CanAffordCardUpgrade(card))
+                if (CanUpgradeCard(card))
                 {
                     upgradeableCards.Add(card);
                 }
@@ -220,6 +220,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return prices;
+        }
+
+        /// <summary>
+        /// 現在のカード選択強化後カード取得
+        /// </summary>
+        public IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards()
+        {
+            Dictionary<int, RuntimeCard> upgradedCards = new Dictionary<int, RuntimeCard>();
+            if (_state.CardSelectMode != CardSelectMode.Upgrade)
+            {
+                return upgradedCards;
+            }
+
+            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards();
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RuntimeCard card = cards[i];
+                if (card != null && _runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
+                {
+                    upgradedCards[card.Id] = upgradedCard;
+                }
+            }
+
+            return upgradedCards;
         }
 
         /// <summary>
@@ -657,12 +681,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            if (!HasAffordableUpgradeableCards())
-            {
-                _state.RestShopMessage = BattleSceneConstants.NotEnoughGold;
-                return;
-            }
-
             _state.CardSelectMode = CardSelectMode.Upgrade;
             _state.CardSelectMessage = string.Empty;
             SetCurrentPage(BattleScenePage.CardSelect);
@@ -979,23 +997,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 購入可能な強化対象があるか
-        /// </summary>
-        private bool HasAffordableUpgradeableCards()
-        {
-            for (int i = 0; i < _state.Deck.Count; i++)
-            {
-                RuntimeCard card = _state.Deck[i];
-                if (CanUpgradeCard(card) && CanAffordCardUpgrade(card))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// カードが強化可能か
         /// </summary>
         private bool CanUpgradeCard(RuntimeCard card)
@@ -1004,14 +1005,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                    && card.UpgradeCardId > 0
                    && _runDefinition != null
                    && _runDefinition.CardCatalog.ContainsKey(card.UpgradeCardId);
-        }
-
-        /// <summary>
-        /// カード強化価格を支払えるか
-        /// </summary>
-        private bool CanAffordCardUpgrade(RuntimeCard card)
-        {
-            return _state.Gold >= _shopService.GetCardUpgradePrice(_runDefinition, card);
         }
 
         /// <summary>
