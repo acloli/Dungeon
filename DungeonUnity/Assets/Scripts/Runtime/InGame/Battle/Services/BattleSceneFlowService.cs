@@ -223,6 +223,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 現在のカード選択メッセージ取得
+        /// </summary>
+        public string GetCardSelectMessage()
+        {
+            return _state.CardSelectMessage;
+        }
+
+        /// <summary>
         /// 現在のカード選択用途取得
         /// </summary>
         public CardSelectMode GetCardSelectMode()
@@ -656,6 +664,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.CardSelectMode = CardSelectMode.Upgrade;
+            _state.CardSelectMessage = string.Empty;
             SetCurrentPage(BattleScenePage.CardSelect);
         }
 
@@ -716,6 +725,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public void OpenCardRemoval()
         {
             _state.CardSelectMode = CardSelectMode.CardRemoval;
+            _state.CardSelectMessage = string.Empty;
             SetCurrentPage(BattleScenePage.CardSelect);
         }
 
@@ -739,7 +749,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             if (_state.CardSelectMode == CardSelectMode.Upgrade)
             {
+                bool canContinue = _state.IsRestShopContinueEnabled;
+                string cardSelectMessage = _state.CardSelectMessage;
                 OpenRestShop();
+                if (canContinue)
+                {
+                    _state.RestShopMessage = string.IsNullOrEmpty(cardSelectMessage)
+                        ? _state.RestShopMessage
+                        : cardSelectMessage;
+                    _state.IsRestShopContinueEnabled = true;
+                }
                 return;
             }
 
@@ -1002,31 +1021,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             if (!CanUpgradeCard(card))
             {
-                OpenRestShop();
-                _state.RestShopMessage = BattleSceneConstants.NoUpgradeableCards;
+                _state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
                 return;
             }
 
             int deckIndex = FindDeckCardIndex(card);
             if (deckIndex < 0 || !_runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
             {
-                OpenRestShop();
-                _state.RestShopMessage = BattleSceneConstants.NoUpgradeableCards;
+                _state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
                 return;
             }
 
             int upgradePrice = _shopService.GetCardUpgradePrice(_runDefinition, card);
             if (_state.Gold < upgradePrice)
             {
-                OpenRestShop();
-                _state.RestShopMessage = BattleSceneConstants.NotEnoughGold;
+                _state.CardSelectMessage = BattleSceneConstants.NotEnoughGold;
                 return;
             }
 
             _state.Deck[deckIndex] = upgradedCard;
             _state.Gold -= upgradePrice;
-            OpenRestShop();
-            _state.RestShopMessage = string.Format(
+            _state.CardSelectMessage = string.Format(
                 BattleSceneConstants.UpgradeDoneFormat,
                 card.DisplayName,
                 upgradedCard.DisplayName,

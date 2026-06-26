@@ -40,6 +40,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         IReadOnlyDictionary<int, int> GetCardSelectPrices();
 
         /// <summary>
+        /// 現在のカード選択メッセージ取得
+        /// </summary>
+        string GetCardSelectMessage();
+
+        /// <summary>
         /// 現在のカード選択用途取得
         /// </summary>
         CardSelectMode GetCardSelectMode();

@@ -74,6 +74,8 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.CardSelect);
             Dictionary<int, int> cardPrices = new Dictionary<int, int> { { 1001, 25 } };
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected =
+                _ => new BattleCardSelectDialogRefreshData(Array.Empty<RuntimeCard>(), new Dictionary<int, int>(), "Upgraded.");
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowCardSelectAsync(
@@ -82,6 +84,8 @@ namespace Dungeon.Tests.EditMode
                 CardSelectMode.Upgrade,
                 true,
                 cardPrices,
+                "Select a card.",
+                onCardSelected,
                 CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.LastCardSelectDialogParam, Is.Not.Null);
@@ -90,6 +94,8 @@ namespace Dungeon.Tests.EditMode
             Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.Upgrade));
             Assert.That(payload.ShowPrice, Is.True);
             Assert.That(payload.CardPrices[1001], Is.EqualTo(25));
+            Assert.That(payload.Message, Is.EqualTo("Select a card."));
+            Assert.That(payload.OnCardSelected, Is.SameAs(onCardSelected));
         }
 
         [Test]
@@ -107,12 +113,15 @@ namespace Dungeon.Tests.EditMode
                 CardSelectMode.CardRemoval,
                 false,
                 new Dictionary<int, int>(),
+                string.Empty,
+                null,
                 CancellationToken.None).GetAwaiter().GetResult();
 
             BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
             Assert.That(payload, Is.Not.Null);
             Assert.That(payload.Mode, Is.EqualTo(CardSelectMode.CardRemoval));
             Assert.That(payload.ShowPrice, Is.False);
+            Assert.That(payload.OnCardSelected, Is.Null);
         }
 
         [Test]

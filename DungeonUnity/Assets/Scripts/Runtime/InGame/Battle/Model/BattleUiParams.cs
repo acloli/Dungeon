@@ -139,6 +139,26 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// カード選択ダイアログ更新データクラス
+    /// </summary>
+    public sealed class BattleCardSelectDialogRefreshData
+    {
+        public BattleCardSelectDialogRefreshData(
+            IReadOnlyList<RuntimeCard> deckCards,
+            IReadOnlyDictionary<int, int> cardPrices,
+            string message)
+        {
+            DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
+            CardPrices = cardPrices ?? new Dictionary<int, int>();
+            Message = message ?? string.Empty;
+        }
+
+        public IReadOnlyList<RuntimeCard> DeckCards { get; }
+        public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public string Message { get; }
+    }
+
+    /// <summary>
     /// カード選択ダイアログ表示パラメータクラス
     /// </summary>
     public sealed class BattleCardSelectDialogParam
@@ -148,13 +168,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<RuntimeCard> deckCards,
             CardSelectMode mode,
             bool showPrice,
-            IReadOnlyDictionary<int, int> cardPrices)
+            IReadOnlyDictionary<int, int> cardPrices,
+            string message,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected)
         {
             Snapshot = snapshot;
-            DeckCards = deckCards ?? System.Array.Empty<RuntimeCard>();
+            DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
             Mode = mode;
             ShowPrice = showPrice;
             CardPrices = cardPrices ?? new Dictionary<int, int>();
+            Message = message ?? string.Empty;
+            OnCardSelected = onCardSelected;
         }
 
         public BattleSceneSnapshot Snapshot { get; }
@@ -162,6 +186,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public CardSelectMode Mode { get; }
         public bool ShowPrice { get; }
         public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public string Message { get; }
+        public Func<RuntimeCard, BattleCardSelectDialogRefreshData> OnCardSelected { get; }
     }
 
     /// <summary>

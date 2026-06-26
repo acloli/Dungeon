@@ -141,6 +141,8 @@ namespace Dungeon.Runtime.InGame.Battle
             CardSelectMode mode,
             bool showPrice,
             IReadOnlyDictionary<int, int> cardPrices,
+            string message,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected,
             CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
@@ -150,7 +152,14 @@ namespace Dungeon.Runtime.InGame.Battle
             }
 
             return await _uiService.ShowDialogAsync<CardSelectDialog, CardSelectDialogResult>(
-                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(snapshot, deckCards, mode, showPrice, cardPrices)),
+                BattleDialogOpenParams.Cached(new BattleCardSelectDialogParam(
+                    snapshot,
+                    deckCards,
+                    mode,
+                    showPrice,
+                    cardPrices,
+                    message,
+                    onCardSelected)),
                 ct);
         }
 

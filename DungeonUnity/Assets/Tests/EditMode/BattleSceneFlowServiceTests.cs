@@ -586,15 +586,17 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void ConfirmCardSelect_UpgradeMode_ReplacesDeckCardAndSaves()
+        public void ConfirmCardSelect_UpgradeMode_StaysOpenAndHidesUpgradedCard()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
             RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
             RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeCard guard = CreateCard(1003, "Guard", 1, 0, upgradeCardId: 1004);
+            RuntimeCard guardPlus = CreateCard(1004, "Guard+", 1, 0, isUpgraded: true);
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
-                starterDeck: new[] { strike, CreateCard(1003, "Guard", 1, 0) },
-                additionalCards: new[] { strikePlus });
+                starterDeck: new[] { strike, guard },
+                additionalCards: new[] { strikePlus, guardPlus });
             BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
 
             service.Initialize(5501);
@@ -603,8 +605,10 @@ namespace Dungeon.Tests.EditMode
             service.ConfirmCardSelect(strike);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(snapshot.RestShopMessage, Does.Contain("Strike"));
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
+            Assert.That(service.GetCardSelectMessage(), Does.Contain("Strike"));
+            Assert.That(service.GetCardSelectCards(), Has.Count.EqualTo(1));
+            Assert.That(service.GetCardSelectCards()[0].Id, Is.EqualTo(1003));
             Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
             Assert.That(snapshot.Gold, Is.EqualTo(95));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1002));
@@ -629,13 +633,37 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(0);
             service.ApplyUpgrade();
             service.ConfirmCardSelect(strike);
-            service.ApplyUpgrade();
             service.ConfirmCardSelect(guard);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
+            Assert.That(service.GetCardSelectCards(), Is.Empty);
             Assert.That(snapshot.Gold, Is.EqualTo(70));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1101));
             Assert.That(service.GetDeckCards()[1].Id, Is.EqualTo(1102));
+        }
+
+        [Test]
+        public void CancelCardSelect_AfterUpgrade_ReturnsToRestShopWithContinueEnabled()
+        {
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
+            RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike },
+                additionalCards: new[] { strikePlus });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(strike);
+            service.CancelCardSelect();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(snapshot.RestShopMessage, Does.Contain("Strike -> Strike+"));
+            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
         }
 
         [Test]

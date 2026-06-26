@@ -25,6 +25,8 @@ namespace Dungeon.Runtime.InGame.Battle
             CardSelectMode mode,
             bool showPrice,
             IReadOnlyDictionary<int, int> cardPrices,
+            string message,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected,
             CancellationToken ct);
         UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
         UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
