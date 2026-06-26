@@ -11,14 +11,20 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardSelectDialog : UIDialogBase<CardSelectDialogResult>
     {
         [SerializeField] private Button _cancelButton;
+        [SerializeField] private Button _confirmButton;
         [SerializeField] private TFTextUGUI _messageText;
         [SerializeField] private Transform _cardContainer;
+        [SerializeField] private Transform _previewContainer;
         [SerializeField] private BattleCardIconView _cardTemplate;
 
         private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
+        private readonly List<BattleCardIconView> _previewCardViews = new List<BattleCardIconView>();
         private BattleCardSelectDialogParam _param;
         private IReadOnlyList<RuntimeCard> _deckCards;
         private IReadOnlyDictionary<int, int> _cardPrices;
+        private IReadOnlyDictionary<int, RuntimeCard> _upgradedCards;
+        private RuntimeCard _selectedCard;
+        private int _gold;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
@@ -31,7 +37,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
             WireButtons();
             _deckCards = _param?.DeckCards ?? System.Array.Empty<RuntimeCard>();
             _cardPrices = _param?.CardPrices ?? new Dictionary<int, int>();
+            _upgradedCards = _param?.UpgradedCards ?? new Dictionary<int, RuntimeCard>();
+            _selectedCard = null;
+            _gold = _param?.Snapshot?.Gold ?? 0;
             SetMessage(_param?.Message);
+            SetPreviewVisible(false);
+            SetConfirmVisible(_param?.Mode == CardSelectMode.Upgrade);
+            SetConfirmInteractable(false);
             BuildCardViews();
         }
 
@@ -39,6 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             UnwireButtons();
             ClearDynamicCards();
+            ClearPreviewCards();
         }
 
         private void WireButtons()
@@ -48,6 +61,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _cancelButton.onClick.AddListener(OnCancelClicked);
             }
+            if (_confirmButton != null)
+            {
+                _confirmButton.onClick.AddListener(OnConfirmClicked);
+            }
         }
 
         private void UnwireButtons()
@@ -55,6 +72,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_cancelButton != null)
             {
                 _cancelButton.onClick.RemoveAllListeners();
+            }
+            if (_confirmButton != null)
+            {
+                _confirmButton.onClick.RemoveAllListeners();
             }
         }
 
@@ -83,7 +104,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 cardView.Bind(
                     card,
                     true,
-                    false,
+                    IsSelectedCard(card),
                     _param.ShowPrice && cardPrice > 0,
                     cardPrice,
                     OnCardClicked);
@@ -120,24 +141,20 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _cardViews.Count; i++)
             {
-                BattleCardIconView cardView = _cardViews[i];
-                if (cardView == null)
-                {
-                    continue;
-                }
-
-                cardView.Clear();
-                if (Application.isPlaying)
-                {
-                    Destroy(cardView.gameObject);
-                }
-                else
-                {
-                    DestroyImmediate(cardView.gameObject);
-                }
+                DestroyCardView(_cardViews[i]);
             }
 
             _cardViews.Clear();
+        }
+
+        private void ClearPreviewCards()
+        {
+            for (int i = 0; i < _previewCardViews.Count; i++)
+            {
+                DestroyCardView(_previewCardViews[i]);
+            }
+
+            _previewCardViews.Clear();
         }
 
         private void OnCancelClicked()
@@ -147,21 +164,129 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void OnCardClicked(RuntimeCard card)
         {
-            if (_param?.OnCardSelected != null)
+            if (_param?.Mode == CardSelectMode.Upgrade && _param.OnCardConfirmed != null)
             {
-                BattleCardSelectDialogRefreshData refreshData = _param.OnCardSelected.Invoke(card);
-                if (refreshData != null)
-                {
-                    _deckCards = refreshData.DeckCards;
-                    _cardPrices = refreshData.CardPrices;
-                    SetMessage(refreshData.Message);
-                    BuildCardViews();
-                }
-
+                SelectUpgradePreview(card);
                 return;
             }
 
             CloseWithResult(new CardSelectDialogResult { IsCanceled = false, SelectedCard = card });
+        }
+
+        private void OnConfirmClicked()
+        {
+            if (_selectedCard == null || _param?.OnCardConfirmed == null)
+            {
+                return;
+            }
+
+            if (!CanConfirmCard(_selectedCard))
+            {
+                SetConfirmInteractable(false);
+                SetMessage(BattleSceneConstants.NotEnoughGold);
+                return;
+            }
+
+            BattleCardSelectDialogRefreshData refreshData = _param.OnCardConfirmed.Invoke(_selectedCard);
+            _selectedCard = null;
+            if (refreshData != null)
+            {
+                _deckCards = refreshData.DeckCards;
+                _cardPrices = refreshData.CardPrices;
+                _upgradedCards = refreshData.UpgradedCards;
+                _gold = refreshData.Gold;
+                SetMessage(refreshData.Message);
+            }
+
+            ClearPreviewCards();
+            SetPreviewVisible(false);
+            SetConfirmInteractable(false);
+            BuildCardViews();
+        }
+
+        private void SelectUpgradePreview(RuntimeCard card)
+        {
+            _selectedCard = card;
+            BuildCardViews();
+            BuildPreviewCards(card);
+
+            bool canConfirm = CanConfirmCard(card);
+            SetConfirmInteractable(canConfirm);
+            if (!canConfirm)
+            {
+                SetMessage(BattleSceneConstants.NotEnoughGold);
+                return;
+            }
+
+            SetMessage(_param?.Message);
+        }
+
+        private void BuildPreviewCards(RuntimeCard sourceCard)
+        {
+            ClearPreviewCards();
+            if (_previewContainer == null || sourceCard == null || !_upgradedCards.TryGetValue(sourceCard.Id, out RuntimeCard upgradedCard))
+            {
+                SetPreviewVisible(false);
+                return;
+            }
+
+            SetPreviewVisible(true);
+            CreatePreviewCard(sourceCard, new Vector2(-140f, 0f));
+            CreatePreviewCard(upgradedCard, new Vector2(140f, 0f));
+        }
+
+        private void CreatePreviewCard(RuntimeCard card, Vector2 anchoredPosition)
+        {
+            BattleCardIconView cardView = Instantiate(_cardTemplate, _previewContainer);
+            cardView.gameObject.SetActive(true);
+            if (cardView.transform is RectTransform rectTransform)
+            {
+                rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchoredPosition = anchoredPosition;
+                rectTransform.sizeDelta = new Vector2(220f, 320f);
+            }
+
+            cardView.Bind(card, true, false, null);
+            _previewCardViews.Add(cardView);
+        }
+
+        private bool IsSelectedCard(RuntimeCard card)
+        {
+            return _selectedCard != null && card != null && _selectedCard.Id == card.Id;
+        }
+
+        private bool CanConfirmCard(RuntimeCard card)
+        {
+            return card != null
+                   && _upgradedCards.ContainsKey(card.Id)
+                   && _cardPrices.TryGetValue(card.Id, out int price)
+                   && _gold >= price;
+        }
+
+        private void SetPreviewVisible(bool isVisible)
+        {
+            if (_previewContainer != null)
+            {
+                _previewContainer.gameObject.SetActive(isVisible);
+            }
+        }
+
+        private void SetConfirmVisible(bool isVisible)
+        {
+            if (_confirmButton != null)
+            {
+                _confirmButton.gameObject.SetActive(isVisible);
+            }
+        }
+
+        private void SetConfirmInteractable(bool isInteractable)
+        {
+            if (_confirmButton != null)
+            {
+                _confirmButton.interactable = isInteractable;
+            }
         }
 
         private void SetMessage(string message)
@@ -169,6 +294,24 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_messageText != null)
             {
                 _messageText.text = message ?? string.Empty;
+            }
+        }
+
+        private static void DestroyCardView(BattleCardIconView cardView)
+        {
+            if (cardView == null)
+            {
+                return;
+            }
+
+            cardView.Clear();
+            if (Application.isPlaying)
+            {
+                Destroy(cardView.gameObject);
+            }
+            else
+            {
+                DestroyImmediate(cardView.gameObject);
             }
         }
     }

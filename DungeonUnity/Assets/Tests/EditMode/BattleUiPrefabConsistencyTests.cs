@@ -7,6 +7,7 @@ using TFramework.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 
 namespace Dungeon.Tests.EditMode
@@ -121,8 +122,10 @@ namespace Dungeon.Tests.EditMode
 
             SerializedObject serialized = new SerializedObject(cardSelectDialog);
             Assert.That(serialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_confirmButton").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_messageText").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_previewContainer").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
         }
 
@@ -193,7 +196,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void CardSelectDialog_UpgradeSelectionRefreshesCardsAndMessageInPlace()
+        public void CardSelectDialog_UpgradeSelectionPreviewsBeforeConfirming()
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
             GameObject instance = Object.Instantiate(prefab);
@@ -201,37 +204,110 @@ namespace Dungeon.Tests.EditMode
             try
             {
                 RuntimeCard strike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1);
                 RuntimeCard guard = CreateCard(1003, "Guard", 1, 1004);
+                RuntimeCard guardPlus = CreateCard(1004, "Guard+", 1);
                 CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
+                int confirmCount = 0;
                 BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
                     CreateSnapshot(BattleScenePage.CardSelect),
                     new[] { strike, guard },
                     CardSelectMode.Upgrade,
                     true,
                     new System.Collections.Generic.Dictionary<int, int> { { strike.Id, 25 }, { guard.Id, 25 } },
+                    new System.Collections.Generic.Dictionary<int, RuntimeCard> { { strike.Id, strikePlus }, { guard.Id, guardPlus } },
                     string.Empty,
-                    _ => new BattleCardSelectDialogRefreshData(
-                        new[] { guard },
-                        new System.Collections.Generic.Dictionary<int, int> { { guard.Id, 25 } },
-                        "Upgrade done. Strike -> Strike+ (-25 Gold). Gold 75"));
+                    card =>
+                    {
+                        confirmCount++;
+                        Assert.That(card.Id, Is.EqualTo(strike.Id));
+                        return new BattleCardSelectDialogRefreshData(
+                            new[] { guard },
+                            new System.Collections.Generic.Dictionary<int, int> { { guard.Id, 25 } },
+                            new System.Collections.Generic.Dictionary<int, RuntimeCard> { { guard.Id, guardPlus } },
+                            75,
+                            "Upgrade done. Strike -> Strike+ (-25 Gold). Gold 75");
+                    });
 
                 IUIDialog lifecycle = dialog;
                 lifecycle.OnPreOpenAsync(param, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
                 lifecycle.OnOpened();
 
                 System.Collections.IList beforeViews = GetCardViews(dialog);
+                Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
                 Assert.That(beforeViews.Count, Is.EqualTo(2));
+                Assert.That(confirmButton.interactable, Is.False);
 
                 InvokeButton((Component)beforeViews[0]);
 
-                System.Collections.IList afterViews = GetCardViews(dialog);
-                SerializedObject serialized = new SerializedObject(dialog);
-                Component messageText = serialized.FindProperty("_messageText").objectReferenceValue as Component;
-                SerializedObject messageSerialized = new SerializedObject(messageText);
-                messageSerialized.Update();
+                Assert.That(confirmCount, Is.EqualTo(0));
+                Assert.That(GetCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(confirmButton.interactable, Is.True);
 
+                InvokeButton(confirmButton);
+
+                System.Collections.IList afterViews = GetCardViews(dialog);
+                Component messageText = GetSerializedReference<Component>(dialog, "_messageText");
+
+                Assert.That(confirmCount, Is.EqualTo(1));
                 Assert.That(afterViews.Count, Is.EqualTo(1));
-                Assert.That(messageSerialized.FindProperty("m_text").stringValue, Does.Contain("Strike -> Strike+"));
+                Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(0));
+                Assert.That(confirmButton.interactable, Is.False);
+                Assert.That(ReadText(messageText), Does.Contain("Strike -> Strike+"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void CardSelectDialog_InsufficientGoldShowsPreviewButDisablesConfirm()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RuntimeCard strike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1);
+                CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
+                int confirmCount = 0;
+                BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
+                    CreateSnapshot(BattleScenePage.CardSelect, gold: 20),
+                    new[] { strike },
+                    CardSelectMode.Upgrade,
+                    true,
+                    new System.Collections.Generic.Dictionary<int, int> { { strike.Id, 25 } },
+                    new System.Collections.Generic.Dictionary<int, RuntimeCard> { { strike.Id, strikePlus } },
+                    "Select a card to upgrade.",
+                    _ =>
+                    {
+                        confirmCount++;
+                        return null;
+                    });
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(param, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                System.Collections.IList beforeViews = GetCardViews(dialog);
+                Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
+                Component messageText = GetSerializedReference<Component>(dialog, "_messageText");
+                Assert.That(beforeViews.Count, Is.EqualTo(1));
+
+                InvokeButton((Component)beforeViews[0]);
+
+                Assert.That(GetCardViews(dialog).Count, Is.EqualTo(1));
+                Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(confirmButton.interactable, Is.False);
+                Assert.That(ReadText(messageText), Is.EqualTo("Not enough gold."));
+
+                InvokeButton(confirmButton);
+
+                Assert.That(confirmCount, Is.EqualTo(0));
+                Assert.That(GetCardViews(dialog).Count, Is.EqualTo(1));
             }
             finally
             {
@@ -405,7 +481,7 @@ namespace Dungeon.Tests.EditMode
                 upgradeCardId);
         }
 
-        private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
+        private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page, int gold = 100)
         {
             return new BattleSceneSnapshot(
                 page,
@@ -417,7 +493,7 @@ namespace Dungeon.Tests.EditMode
                 40,
                 3,
                 0,
-                100,
+                gold,
                 null,
                 0,
                 0,
@@ -436,6 +512,27 @@ namespace Dungeon.Tests.EditMode
                 "_cardViews",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             return field?.GetValue(dialog) as System.Collections.IList;
+        }
+
+        private static System.Collections.IList GetPreviewCardViews(CardSelectDialog dialog)
+        {
+            System.Reflection.FieldInfo field = typeof(CardSelectDialog).GetField(
+                "_previewCardViews",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            return field?.GetValue(dialog) as System.Collections.IList;
+        }
+
+        private static T GetSerializedReference<T>(UnityEngine.Object target, string propertyName) where T : UnityEngine.Object
+        {
+            SerializedObject serialized = new SerializedObject(target);
+            return serialized.FindProperty(propertyName).objectReferenceValue as T;
+        }
+
+        private static string ReadText(Component textComponent)
+        {
+            SerializedObject serialized = new SerializedObject(textComponent);
+            serialized.Update();
+            return serialized.FindProperty("m_text").stringValue;
         }
 
         private static void InvokeButton(Component component)
