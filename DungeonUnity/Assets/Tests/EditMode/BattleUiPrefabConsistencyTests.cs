@@ -122,6 +122,7 @@ namespace Dungeon.Tests.EditMode
 
             SerializedObject serialized = new SerializedObject(cardSelectDialog);
             Assert.That(serialized.FindProperty("_cancelButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_previewCancelButton").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_confirmButton").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_messageText").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
@@ -234,15 +235,24 @@ namespace Dungeon.Tests.EditMode
                 lifecycle.OnOpened();
 
                 System.Collections.IList beforeViews = GetCardViews(dialog);
+                Button cancelButton = GetSerializedReference<Button>(dialog, "_cancelButton");
+                Button previewCancelButton = GetSerializedReference<Button>(dialog, "_previewCancelButton");
                 Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
                 Assert.That(beforeViews.Count, Is.EqualTo(2));
                 Assert.That(confirmButton.interactable, Is.False);
+                Assert.That(confirmButton.gameObject.activeSelf, Is.False);
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.False);
+                Assert.That(cancelButton.interactable, Is.True);
 
                 InvokeButton((Component)beforeViews[0]);
 
                 Assert.That(confirmCount, Is.EqualTo(0));
                 Assert.That(GetCardViews(dialog).Count, Is.EqualTo(2));
                 Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(cancelButton.interactable, Is.False);
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.True);
+                Assert.That(previewCancelButton.interactable, Is.True);
+                Assert.That(confirmButton.gameObject.activeSelf, Is.True);
                 Assert.That(confirmButton.interactable, Is.True);
 
                 InvokeButton(confirmButton);
@@ -253,6 +263,9 @@ namespace Dungeon.Tests.EditMode
                 Assert.That(confirmCount, Is.EqualTo(1));
                 Assert.That(afterViews.Count, Is.EqualTo(1));
                 Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(0));
+                Assert.That(cancelButton.interactable, Is.True);
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.False);
+                Assert.That(confirmButton.gameObject.activeSelf, Is.False);
                 Assert.That(confirmButton.interactable, Is.False);
                 Assert.That(ReadText(messageText), Does.Contain("Strike -> Strike+"));
             }
@@ -317,7 +330,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void CardSelectDialog_CancelClosesPreviewBeforeDialog()
+        public void CardSelectDialog_PreviewCancelClosesPreviewBeforeDialog()
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
             GameObject instance = Object.Instantiate(prefab);
@@ -343,20 +356,26 @@ namespace Dungeon.Tests.EditMode
 
                 System.Collections.IList beforeViews = GetCardViews(dialog);
                 Button cancelButton = GetSerializedReference<Button>(dialog, "_cancelButton");
+                Button previewCancelButton = GetSerializedReference<Button>(dialog, "_previewCancelButton");
                 Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
                 Component messageText = GetSerializedReference<Component>(dialog, "_messageText");
 
                 InvokeButton((Component)beforeViews[0]);
                 Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
                 Assert.That(IsButtonInteractable((Component)GetCardViews(dialog)[0]), Is.False);
+                Assert.That(cancelButton.interactable, Is.False);
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.True);
 
-                InvokeButton(cancelButton);
+                InvokeButton(previewCancelButton);
 
                 System.Collections.IList afterCancelViews = GetCardViews(dialog);
                 Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(0));
                 Assert.That(afterCancelViews.Count, Is.EqualTo(1));
                 Assert.That(IsCardSelected((Component)afterCancelViews[0]), Is.False);
                 Assert.That(IsButtonInteractable((Component)afterCancelViews[0]), Is.True);
+                Assert.That(cancelButton.interactable, Is.True);
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.False);
+                Assert.That(confirmButton.gameObject.activeSelf, Is.False);
                 Assert.That(confirmButton.interactable, Is.False);
                 Assert.That(ReadText(messageText), Is.EqualTo("Select a card to upgrade."));
             }
@@ -398,6 +417,7 @@ namespace Dungeon.Tests.EditMode
 
                 System.Collections.IList beforeViews = GetCardViews(dialog);
                 Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
+                Button previewCancelButton = GetSerializedReference<Button>(dialog, "_previewCancelButton");
                 Component messageText = GetSerializedReference<Component>(dialog, "_messageText");
                 Assert.That(beforeViews.Count, Is.EqualTo(1));
 
@@ -405,6 +425,8 @@ namespace Dungeon.Tests.EditMode
 
                 Assert.That(GetCardViews(dialog).Count, Is.EqualTo(1));
                 Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(previewCancelButton.gameObject.activeSelf, Is.True);
+                Assert.That(confirmButton.gameObject.activeSelf, Is.False);
                 Assert.That(confirmButton.interactable, Is.False);
                 Assert.That(ReadText(messageText), Is.EqualTo("Not enough gold."));
 

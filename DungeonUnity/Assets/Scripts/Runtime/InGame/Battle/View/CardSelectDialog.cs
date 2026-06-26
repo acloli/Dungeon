@@ -11,6 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardSelectDialog : UIDialogBase<CardSelectDialogResult>
     {
         [SerializeField] private Button _cancelButton;
+        [SerializeField] private Button _previewCancelButton;
         [SerializeField] private Button _confirmButton;
         [SerializeField] private TFTextUGUI _messageText;
         [SerializeField] private Transform _cardContainer;
@@ -46,8 +47,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _isPreviewOpen = false;
             SetMessage(_param?.Message);
             SetPreviewVisible(false);
-            SetConfirmVisible(_param?.Mode == CardSelectMode.Upgrade);
-            SetConfirmInteractable(false);
+            SetPreviewCancelVisible(false);
+            SetConfirmVisible(false);
+            SetDialogCancelInteractable(true);
             BuildCardViews();
         }
 
@@ -65,6 +67,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
             {
                 _cancelButton.onClick.AddListener(OnCancelClicked);
             }
+            if (_previewCancelButton != null)
+            {
+                _previewCancelButton.onClick.AddListener(OnPreviewCancelClicked);
+            }
             if (_confirmButton != null)
             {
                 _confirmButton.onClick.AddListener(OnConfirmClicked);
@@ -76,6 +82,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_cancelButton != null)
             {
                 _cancelButton.onClick.RemoveAllListeners();
+            }
+            if (_previewCancelButton != null)
+            {
+                _previewCancelButton.onClick.RemoveAllListeners();
             }
             if (_confirmButton != null)
             {
@@ -165,13 +175,12 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void OnCancelClicked()
         {
-            if (_isPreviewOpen)
-            {
-                ClosePreview();
-                return;
-            }
-
             CloseWithResult(new CardSelectDialogResult { IsCanceled = true });
+        }
+
+        private void OnPreviewCancelClicked()
+        {
+            ClosePreview();
         }
 
         private void OnCardClicked(RuntimeCard card, int cardIndex)
@@ -194,7 +203,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             if (!CanConfirmCard(_selectedCard))
             {
-                SetConfirmInteractable(false);
+                SetConfirmVisible(false);
                 SetMessage(BattleSceneConstants.NotEnoughGold);
                 return;
             }
@@ -214,7 +223,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             ClearPreviewCards();
             _isPreviewOpen = false;
             SetPreviewVisible(false);
-            SetConfirmInteractable(false);
+            SetPreviewCancelVisible(false);
+            SetConfirmVisible(false);
+            SetDialogCancelInteractable(true);
             BuildCardViews();
         }
 
@@ -227,7 +238,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             BuildPreviewCards(card);
 
             bool canConfirm = CanConfirmCard(card);
-            SetConfirmInteractable(canConfirm);
+            SetDialogCancelInteractable(false);
+            SetPreviewCancelVisible(true);
+            SetConfirmVisible(canConfirm);
             if (!canConfirm)
             {
                 SetMessage(BattleSceneConstants.NotEnoughGold);
@@ -244,7 +257,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _isPreviewOpen = false;
             ClearPreviewCards();
             SetPreviewVisible(false);
-            SetConfirmInteractable(false);
+            SetPreviewCancelVisible(false);
+            SetConfirmVisible(false);
+            SetDialogCancelInteractable(true);
             SetMessage(_param?.Message);
             BuildCardViews();
         }
@@ -306,14 +321,24 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_confirmButton != null)
             {
                 _confirmButton.gameObject.SetActive(isVisible);
+                _confirmButton.interactable = isVisible;
             }
         }
 
-        private void SetConfirmInteractable(bool isInteractable)
+        private void SetPreviewCancelVisible(bool isVisible)
         {
-            if (_confirmButton != null)
+            if (_previewCancelButton != null)
             {
-                _confirmButton.interactable = isInteractable;
+                _previewCancelButton.gameObject.SetActive(isVisible);
+                _previewCancelButton.interactable = isVisible;
+            }
+        }
+
+        private void SetDialogCancelInteractable(bool isInteractable)
+        {
+            if (_cancelButton != null)
+            {
+                _cancelButton.interactable = isInteractable;
             }
         }
 
