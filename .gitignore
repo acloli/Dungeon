@@ -107,4 +107,4 @@ InitTestScene*.unity*
 .DS_Store
 .omx
 
-Docs
+GDD/*
