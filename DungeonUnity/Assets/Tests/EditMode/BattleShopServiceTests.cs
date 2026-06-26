@@ -1,6 +1,7 @@
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 using System;
@@ -80,51 +81,36 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeCard CreateCard(int id)
         {
-            return new RuntimeCard(
-                id,
-                $"card_{id}",
-                "Card",
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                1,
-                CardType.Attack,
-                CardRarity.Common,
-                CharacterArchetype.CrimsonExile,
-                Array.Empty<RuntimeCardEffect>());
+            RuntimeCardBuilder builder = BattleTestData.Card(id);
+            builder.DisplayName = "Card";
+            return builder.Build();
         }
 
         private static RuntimeRunDefinition CreateRunDefinition()
         {
-            return new RuntimeRunDefinition(
-                RunProfileId,
-                "profile_1",
-                CharacterArchetype.CrimsonExile,
-                BasePlayerHp,
-                BasePlayerEnergy,
-                BaseStartingGold,
-                0,
-                0,
-                new[] { CreateCard(1) },
-                new Dictionary<int, RuntimeCard> { { 1, CreateCard(1) } },
-                Array.Empty<RuntimeRewardEntry>(),
-                Array.Empty<RuntimeMapNode>(),
-                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
-                Array.Empty<RuntimeEvent>(),
-                new Dictionary<int, RuntimeRelic>(),
-                new Dictionary<int, RuntimePotion>(),
-                new RuntimeShopLineup(
-                    1,
-                    new[]
-                    {
-                        new RuntimeShopSlot(ShopSlotCard, RewardType.Card, CardType.Attack, 100),
-                        new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.Attack, 100),
-                        new RuntimeShopSlot(ShopSlotPotion, RewardType.Potion, CardType.Attack, 100)
-                    }),
-                new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, new RuntimeCardPriceRule(CardRarity.Common, 50, 10) } },
-                new[] { new RuntimeItemPriceRule(RewardType.Relic, 1, 100, 20) }
-            );
+            RuntimeCard card = CreateCard(1);
+            RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
+            builder.RunProfileId = RunProfileId;
+            builder.Key = "profile_1";
+            builder.PlayerMaxHp = BasePlayerHp;
+            builder.StartingGold = BasePlayerEnergy;
+            builder.CardRewardChoiceCount = BaseStartingGold;
+            builder.StarterDeck = new[] { card };
+            builder.CardCatalog = new Dictionary<int, RuntimeCard> { { 1, card } };
+            builder.ShopLineup = new RuntimeShopLineup(
+                1,
+                new[]
+                {
+                    new RuntimeShopSlot(ShopSlotCard, RewardType.Card, CardType.Attack, 100),
+                    new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.Attack, 100),
+                    new RuntimeShopSlot(ShopSlotPotion, RewardType.Potion, CardType.Attack, 100)
+                });
+            builder.CardPriceRules = new Dictionary<CardRarity, RuntimeCardPriceRule>
+            {
+                { CardRarity.Common, new RuntimeCardPriceRule(CardRarity.Common, 50, 10) }
+            };
+            builder.ItemPriceRules = new[] { new RuntimeItemPriceRule(RewardType.Relic, 1, 100, 20) };
+            return builder.Build();
         }
 
         [Test]
@@ -255,26 +241,16 @@ namespace Dungeon.Tests.EditMode
         private static RuntimeRunDefinition CreateRunDefinition(RuntimeCardPriceRule cardPriceRule)
         {
             RuntimeCard card = CreateCard(1);
-            return new RuntimeRunDefinition(
-                RunProfileId,
-                "profile_1",
-                CharacterArchetype.CrimsonExile,
-                BasePlayerHp,
-                BasePlayerEnergy,
-                BaseStartingGold,
-                0,
-                0,
-                new[] { card },
-                new Dictionary<int, RuntimeCard> { { card.Id, card } },
-                Array.Empty<RuntimeRewardEntry>(),
-                Array.Empty<RuntimeMapNode>(),
-                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
-                Array.Empty<RuntimeEvent>(),
-                new Dictionary<int, RuntimeRelic>(),
-                new Dictionary<int, RuntimePotion>(),
-                null,
-                new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, cardPriceRule } },
-                Array.Empty<RuntimeItemPriceRule>());
+            RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
+            builder.RunProfileId = RunProfileId;
+            builder.Key = "profile_1";
+            builder.PlayerMaxHp = BasePlayerHp;
+            builder.StartingGold = BasePlayerEnergy;
+            builder.CardRewardChoiceCount = BaseStartingGold;
+            builder.StarterDeck = new[] { card };
+            builder.CardCatalog = new Dictionary<int, RuntimeCard> { { card.Id, card } };
+            builder.CardPriceRules = new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, cardPriceRule } };
+            return builder.Build();
         }
     }
 }
