@@ -141,8 +141,9 @@ namespace Dungeon.Runtime.InGame.Battle
             CardSelectMode mode,
             bool showPrice,
             IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
             string message,
-            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected,
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
             CancellationToken ct)
         {
             await _uiService.ClearStackAsync(ct);
@@ -158,8 +159,9 @@ namespace Dungeon.Runtime.InGame.Battle
                     mode,
                     showPrice,
                     cardPrices,
+                    upgradedCards,
                     message,
-                    onCardSelected)),
+                    onCardConfirmed)),
                 ct);
         }
 

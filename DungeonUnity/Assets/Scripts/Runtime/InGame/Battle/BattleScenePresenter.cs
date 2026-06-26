@@ -313,8 +313,9 @@ namespace Dungeon.Runtime.InGame.Battle
                         cardSelectMode,
                         cardSelectMode == CardSelectMode.Upgrade,
                         _flowService.GetCardSelectPrices(),
+                        _flowService.GetCardSelectUpgradedCards(),
                         _flowService.GetCardSelectMessage(),
-                        cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardSelected : null,
+                        cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardConfirmed : null,
                         ct);
                     if (cardSelectResult.IsCanceled)
                     {
@@ -340,12 +341,15 @@ namespace Dungeon.Runtime.InGame.Battle
             }
         }
 
-        private BattleCardSelectDialogRefreshData OnUpgradeCardSelected(RuntimeCard card)
+        private BattleCardSelectDialogRefreshData OnUpgradeCardConfirmed(RuntimeCard card)
         {
             _flowService.ConfirmCardSelect(card);
+            BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
             return new BattleCardSelectDialogRefreshData(
                 _flowService.GetCardSelectCards(),
                 _flowService.GetCardSelectPrices(),
+                _flowService.GetCardSelectUpgradedCards(),
+                snapshot.Gold,
                 _flowService.GetCardSelectMessage());
         }
 

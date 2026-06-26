@@ -146,15 +146,21 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattleCardSelectDialogRefreshData(
             IReadOnlyList<RuntimeCard> deckCards,
             IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
+            int gold,
             string message)
         {
             DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
             CardPrices = cardPrices ?? new Dictionary<int, int>();
+            UpgradedCards = upgradedCards ?? new Dictionary<int, RuntimeCard>();
+            Gold = gold;
             Message = message ?? string.Empty;
         }
 
         public IReadOnlyList<RuntimeCard> DeckCards { get; }
         public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public IReadOnlyDictionary<int, RuntimeCard> UpgradedCards { get; }
+        public int Gold { get; }
         public string Message { get; }
     }
 
@@ -169,16 +175,18 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             CardSelectMode mode,
             bool showPrice,
             IReadOnlyDictionary<int, int> cardPrices,
+            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
             string message,
-            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected)
+            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed)
         {
             Snapshot = snapshot;
             DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
             Mode = mode;
             ShowPrice = showPrice;
             CardPrices = cardPrices ?? new Dictionary<int, int>();
+            UpgradedCards = upgradedCards ?? new Dictionary<int, RuntimeCard>();
             Message = message ?? string.Empty;
-            OnCardSelected = onCardSelected;
+            OnCardConfirmed = onCardConfirmed;
         }
 
         public BattleSceneSnapshot Snapshot { get; }
@@ -186,8 +194,9 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public CardSelectMode Mode { get; }
         public bool ShowPrice { get; }
         public IReadOnlyDictionary<int, int> CardPrices { get; }
+        public IReadOnlyDictionary<int, RuntimeCard> UpgradedCards { get; }
         public string Message { get; }
-        public Func<RuntimeCard, BattleCardSelectDialogRefreshData> OnCardSelected { get; }
+        public Func<RuntimeCard, BattleCardSelectDialogRefreshData> OnCardConfirmed { get; }
     }
 
     /// <summary>

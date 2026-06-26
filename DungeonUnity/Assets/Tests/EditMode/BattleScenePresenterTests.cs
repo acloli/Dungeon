@@ -669,6 +669,7 @@ namespace Dungeon.Tests.EditMode
             public BattleSceneSnapshot SnapshotAfterCancelPendingPotionReplace { get; set; }
             public IReadOnlyList<RuntimeCard> CardSelectCards { get; set; } = Array.Empty<RuntimeCard>();
             public IReadOnlyDictionary<int, int> CardSelectPrices { get; set; } = new Dictionary<int, int>();
+            public IReadOnlyDictionary<int, RuntimeCard> CardSelectUpgradedCards { get; set; } = new Dictionary<int, RuntimeCard>();
             public string CardSelectMessage { get; set; } = string.Empty;
             public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
 
@@ -700,6 +701,11 @@ namespace Dungeon.Tests.EditMode
             public IReadOnlyDictionary<int, int> GetCardSelectPrices()
             {
                 return CardSelectPrices;
+            }
+
+            public IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards()
+            {
+                return CardSelectUpgradedCards;
             }
 
             public string GetCardSelectMessage()
@@ -834,6 +840,7 @@ namespace Dungeon.Tests.EditMode
                 ConfirmCardSelectCallCount++;
                 CardSelectCards = Array.Empty<RuntimeCard>();
                 CardSelectPrices = new Dictionary<int, int>();
+                CardSelectUpgradedCards = new Dictionary<int, RuntimeCard>();
                 CardSelectMessage = $"Upgraded {card.DisplayName}.";
             }
 
@@ -1050,6 +1057,7 @@ namespace Dungeon.Tests.EditMode
             public CardSelectMode LastCardSelectMode { get; private set; }
             public bool LastCardSelectShowPrice { get; private set; }
             public IReadOnlyDictionary<int, int> LastCardSelectPrices { get; private set; } = new Dictionary<int, int>();
+            public IReadOnlyDictionary<int, RuntimeCard> LastCardSelectUpgradedCards { get; private set; } = new Dictionary<int, RuntimeCard>();
             public string LastCardSelectMessage { get; private set; }
             public Func<RuntimeCard, BattleCardSelectDialogRefreshData> LastCardSelectCallback { get; private set; }
             public BattleCardSelectDialogRefreshData LastCardSelectRefreshData { get; private set; }
@@ -1108,18 +1116,20 @@ namespace Dungeon.Tests.EditMode
                 CardSelectMode mode,
                 bool showPrice,
                 IReadOnlyDictionary<int, int> cardPrices,
+                IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
                 string message,
-                Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardSelected,
+                Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
                 CancellationToken ct)
             {
                 LastCardSelectMode = mode;
                 LastCardSelectShowPrice = showPrice;
                 LastCardSelectPrices = cardPrices;
+                LastCardSelectUpgradedCards = upgradedCards;
                 LastCardSelectMessage = message;
-                LastCardSelectCallback = onCardSelected;
+                LastCardSelectCallback = onCardConfirmed;
                 if (CardToSelectBeforeResult != null)
                 {
-                    LastCardSelectRefreshData = onCardSelected?.Invoke(CardToSelectBeforeResult);
+                    LastCardSelectRefreshData = onCardConfirmed?.Invoke(CardToSelectBeforeResult);
                 }
 
                 return UniTask.FromResult(CardSelectResult);
