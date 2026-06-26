@@ -263,6 +263,110 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void CardSelectDialog_UpgradePreviewLocksBackgroundSelection()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RuntimeCard firstStrike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard secondStrike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard guard = CreateCard(1003, "Guard", 1, 1004);
+                RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1);
+                RuntimeCard guardPlus = CreateCard(1004, "Guard+", 1);
+                CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
+                BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
+                    CreateSnapshot(BattleScenePage.CardSelect),
+                    new[] { firstStrike, secondStrike, guard },
+                    CardSelectMode.Upgrade,
+                    true,
+                    new System.Collections.Generic.Dictionary<int, int> { { firstStrike.Id, 25 }, { guard.Id, 25 } },
+                    new System.Collections.Generic.Dictionary<int, RuntimeCard> { { firstStrike.Id, strikePlus }, { guard.Id, guardPlus } },
+                    "Select a card to upgrade.",
+                    _ => null);
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(param, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                System.Collections.IList beforeViews = GetCardViews(dialog);
+                Assert.That(beforeViews.Count, Is.EqualTo(3));
+
+                InvokeButton((Component)beforeViews[1]);
+
+                System.Collections.IList previewViews = GetCardViews(dialog);
+                Assert.That(IsCardSelected((Component)previewViews[0]), Is.False);
+                Assert.That(IsCardSelected((Component)previewViews[1]), Is.True);
+                Assert.That(IsCardSelected((Component)previewViews[2]), Is.False);
+                Assert.That(IsButtonInteractable((Component)previewViews[0]), Is.False);
+                Assert.That(IsButtonInteractable((Component)previewViews[1]), Is.False);
+                Assert.That(IsButtonInteractable((Component)previewViews[2]), Is.False);
+
+                InvokeButton((Component)previewViews[2]);
+
+                System.Collections.IList lockedViews = GetCardViews(dialog);
+                Assert.That(IsCardSelected((Component)lockedViews[0]), Is.False);
+                Assert.That(IsCardSelected((Component)lockedViews[1]), Is.True);
+                Assert.That(IsCardSelected((Component)lockedViews[2]), Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void CardSelectDialog_CancelClosesPreviewBeforeDialog()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RuntimeCard strike = CreateCard(1001, "Strike", 1, 1002);
+                RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1);
+                CardSelectDialog dialog = instance.GetComponent<CardSelectDialog>();
+                BattleCardSelectDialogParam param = new BattleCardSelectDialogParam(
+                    CreateSnapshot(BattleScenePage.CardSelect),
+                    new[] { strike },
+                    CardSelectMode.Upgrade,
+                    true,
+                    new System.Collections.Generic.Dictionary<int, int> { { strike.Id, 25 } },
+                    new System.Collections.Generic.Dictionary<int, RuntimeCard> { { strike.Id, strikePlus } },
+                    "Select a card to upgrade.",
+                    _ => null);
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(param, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                System.Collections.IList beforeViews = GetCardViews(dialog);
+                Button cancelButton = GetSerializedReference<Button>(dialog, "_cancelButton");
+                Button confirmButton = GetSerializedReference<Button>(dialog, "_confirmButton");
+                Component messageText = GetSerializedReference<Component>(dialog, "_messageText");
+
+                InvokeButton((Component)beforeViews[0]);
+                Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(2));
+                Assert.That(IsButtonInteractable((Component)GetCardViews(dialog)[0]), Is.False);
+
+                InvokeButton(cancelButton);
+
+                System.Collections.IList afterCancelViews = GetCardViews(dialog);
+                Assert.That(GetPreviewCardViews(dialog).Count, Is.EqualTo(0));
+                Assert.That(afterCancelViews.Count, Is.EqualTo(1));
+                Assert.That(IsCardSelected((Component)afterCancelViews[0]), Is.False);
+                Assert.That(IsButtonInteractable((Component)afterCancelViews[0]), Is.True);
+                Assert.That(confirmButton.interactable, Is.False);
+                Assert.That(ReadText(messageText), Is.EqualTo("Select a card to upgrade."));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
         public void CardSelectDialog_InsufficientGoldShowsPreviewButDisablesConfirm()
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardSelectDialog.prefab");
@@ -535,23 +639,34 @@ namespace Dungeon.Tests.EditMode
             return serialized.FindProperty("m_text").stringValue;
         }
 
+        private static bool IsCardSelected(Component cardView)
+        {
+            SerializedObject serialized = new SerializedObject(cardView);
+            Component selectionHighlight = serialized.FindProperty("_selectionHighlight").objectReferenceValue as Component;
+            return selectionHighlight != null && selectionHighlight.gameObject.activeSelf;
+        }
+
+        private static bool IsButtonInteractable(Component component)
+        {
+            Button button = FindButton(component);
+            return button != null && button.interactable;
+        }
+
         private static void InvokeButton(Component component)
         {
-            Component[] components = component.GetComponentsInChildren<Component>(true);
-            for (int i = 0; i < components.Length; i++)
+            Button button = FindButton(component);
+            if (button != null)
             {
-                Component candidate = components[i];
-                if (candidate == null || candidate.GetType().FullName != "UnityEngine.UI.Button")
-                {
-                    continue;
-                }
-
-                object onClick = candidate.GetType().GetProperty("onClick")?.GetValue(candidate);
-                onClick?.GetType().GetMethod("Invoke")?.Invoke(onClick, null);
+                button.onClick.Invoke();
                 return;
             }
 
             Assert.Fail("Card view button is missing.");
+        }
+
+        private static Button FindButton(Component component)
+        {
+            return component.GetComponentInChildren<Button>(true);
         }
     }
 }

@@ -24,7 +24,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
         private IReadOnlyDictionary<int, int> _cardPrices;
         private IReadOnlyDictionary<int, RuntimeCard> _upgradedCards;
         private RuntimeCard _selectedCard;
+        private int _selectedCardIndex;
         private int _gold;
+        private bool _isPreviewOpen;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
         {
@@ -39,7 +41,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _cardPrices = _param?.CardPrices ?? new Dictionary<int, int>();
             _upgradedCards = _param?.UpgradedCards ?? new Dictionary<int, RuntimeCard>();
             _selectedCard = null;
+            _selectedCardIndex = -1;
             _gold = _param?.Snapshot?.Gold ?? 0;
+            _isPreviewOpen = false;
             SetMessage(_param?.Message);
             SetPreviewVisible(false);
             SetConfirmVisible(_param?.Mode == CardSelectMode.Upgrade);
@@ -100,14 +104,16 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
                 BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
+                int cardIndex = i;
                 int cardPrice = ResolveCardPrice(card);
                 cardView.Bind(
                     card,
                     true,
-                    IsSelectedCard(card),
+                    !_isPreviewOpen,
+                    IsSelectedCard(cardIndex),
                     _param.ShowPrice && cardPrice > 0,
                     cardPrice,
-                    OnCardClicked);
+                    _ => OnCardClicked(card, cardIndex));
                 _cardViews.Add(cardView);
             }
         }
@@ -159,14 +165,20 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void OnCancelClicked()
         {
+            if (_isPreviewOpen)
+            {
+                ClosePreview();
+                return;
+            }
+
             CloseWithResult(new CardSelectDialogResult { IsCanceled = true });
         }
 
-        private void OnCardClicked(RuntimeCard card)
+        private void OnCardClicked(RuntimeCard card, int cardIndex)
         {
             if (_param?.Mode == CardSelectMode.Upgrade && _param.OnCardConfirmed != null)
             {
-                SelectUpgradePreview(card);
+                SelectUpgradePreview(card, cardIndex);
                 return;
             }
 
@@ -189,6 +201,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             BattleCardSelectDialogRefreshData refreshData = _param.OnCardConfirmed.Invoke(_selectedCard);
             _selectedCard = null;
+            _selectedCardIndex = -1;
             if (refreshData != null)
             {
                 _deckCards = refreshData.DeckCards;
@@ -199,14 +212,17 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             ClearPreviewCards();
+            _isPreviewOpen = false;
             SetPreviewVisible(false);
             SetConfirmInteractable(false);
             BuildCardViews();
         }
 
-        private void SelectUpgradePreview(RuntimeCard card)
+        private void SelectUpgradePreview(RuntimeCard card, int cardIndex)
         {
             _selectedCard = card;
+            _selectedCardIndex = cardIndex;
+            _isPreviewOpen = true;
             BuildCardViews();
             BuildPreviewCards(card);
 
@@ -219,6 +235,18 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             SetMessage(_param?.Message);
+        }
+
+        private void ClosePreview()
+        {
+            _selectedCard = null;
+            _selectedCardIndex = -1;
+            _isPreviewOpen = false;
+            ClearPreviewCards();
+            SetPreviewVisible(false);
+            SetConfirmInteractable(false);
+            SetMessage(_param?.Message);
+            BuildCardViews();
         }
 
         private void BuildPreviewCards(RuntimeCard sourceCard)
@@ -252,9 +280,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _previewCardViews.Add(cardView);
         }
 
-        private bool IsSelectedCard(RuntimeCard card)
+        private bool IsSelectedCard(int cardIndex)
         {
-            return _selectedCard != null && card != null && _selectedCard.Id == card.Id;
+            return _selectedCardIndex >= 0 && _selectedCardIndex == cardIndex;
         }
 
         private bool CanConfirmCard(RuntimeCard card)
