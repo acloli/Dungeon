@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
+using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
@@ -27,12 +28,12 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(snapshot.PlayerMaxHp, Is.EqualTo(50));
-            Assert.That(snapshot.PlayerHp, Is.EqualTo(50));
-            Assert.That(snapshot.Gold, Is.EqualTo(120));
-            Assert.That(snapshot.Nodes.Count, Is.EqualTo(2));
-            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
-            Assert.That(snapshot.MapMessage, Does.Contain("Next 1/2"));
+            Assert.That(Combat(snapshot).PlayerMaxHp, Is.EqualTo(50));
+            Assert.That(Combat(snapshot).PlayerHp, Is.EqualTo(50));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(120));
+            Assert.That(Map(snapshot).Nodes.Count, Is.EqualTo(2));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
+            Assert.That(Map(snapshot).MapMessage, Does.Contain("Next 1/2"));
         }
 
         [Test]
@@ -55,7 +56,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
         }
 
         [Test]
@@ -67,9 +68,8 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(1);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(-1));
-            Assert.That(snapshot.MapMessage, Is.EqualTo("You can only go to the next node."));
-            Assert.That(snapshot.AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
+            Assert.That(Map(snapshot).MapMessage, Is.EqualTo("You can only go to the next node."));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 0 }));
         }
 
         [Test]
@@ -88,10 +88,10 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
-            Assert.That(snapshot.Hand.Count, Is.EqualTo(3));
-            Assert.That(snapshot.CurrentEnemy.DisplayName, Is.EqualTo("Slime"));
-            Assert.That(snapshot.Enemies.Count, Is.EqualTo(1));
-            Assert.That(snapshot.BattleHintMessage, Is.EqualTo("Select target, then use card."));
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(3));
+            Assert.That(Combat(snapshot).CurrentEnemy.DisplayName, Is.EqualTo("Slime"));
+            Assert.That(Combat(snapshot).Enemies.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).BattleHintMessage, Is.EqualTo("Select target, then use card."));
         }
 
         [Test]
@@ -110,12 +110,12 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(0);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
             List<int> handCardIds = new List<int>();
-            for (int i = 0; i < snapshot.Hand.Count; i++)
+            for (int i = 0; i < Combat(snapshot).HandCards.Count; i++)
             {
-                handCardIds.Add(snapshot.Hand[i].Id);
+                handCardIds.Add(Combat(snapshot).HandCards[i].Card.Id);
             }
 
-            Assert.That(snapshot.Hand.Count, Is.EqualTo(3));
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(3));
             Assert.That(handCardIds, Is.EquivalentTo(new[] { 1001, 1002, 1003 }));
             Assert.That(service.GetDeckCards().Count, Is.EqualTo(3));
         }
@@ -138,7 +138,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
-            Assert.That(snapshot.Hand.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(1));
             Assert.That(service.GetDeckCards().Count, Is.EqualTo(2));
         }
 
@@ -163,8 +163,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
-            Assert.That(snapshot.Hand.Count, Is.EqualTo(1));
-            Assert.That(snapshot.Hand[0].Id, Is.EqualTo(1001));
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).HandCards[0].Card.Id, Is.EqualTo(1001));
         }
 
         [Test]
@@ -189,7 +189,7 @@ namespace Dungeon.Tests.EditMode
             service.TryPlaySelectedCard();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.Hand.Count, Is.EqualTo(10));
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(10));
         }
 
         [Test]
@@ -211,7 +211,7 @@ namespace Dungeon.Tests.EditMode
             service.TryPlaySelectedCard();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.PlayerEnergy, Is.EqualTo(4));
+            Assert.That(Combat(snapshot).PlayerEnergy, Is.EqualTo(4));
         }
 
         [Test]
@@ -261,10 +261,10 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(0);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.Enemies.Count, Is.EqualTo(2));
-            Assert.That(snapshot.Enemies[0].DisplayName, Is.EqualTo("Mite"));
-            Assert.That(snapshot.Enemies[1].DisplayName, Is.EqualTo("Slime"));
-            Assert.That(snapshot.SelectedEnemyIndex, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).Enemies.Count, Is.EqualTo(2));
+            Assert.That(Combat(snapshot).Enemies[0].DisplayName, Is.EqualTo("Mite"));
+            Assert.That(Combat(snapshot).Enemies[1].DisplayName, Is.EqualTo("Slime"));
+            Assert.That(Combat(snapshot).SelectedEnemyIndex, Is.EqualTo(0));
         }
 
         [Test]
@@ -290,18 +290,18 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(0);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.EnemyIntent, Is.Not.Null);
-            Assert.That(snapshot.EnemyIntent.IntentType, Is.EqualTo(IntentType.AttackDefend));
-            Assert.That(snapshot.EnemyIntent.IntentName, Is.EqualTo(nameof(IntentType.AttackDefend)));
-            Assert.That(snapshot.EnemyIntent.Damage, Is.EqualTo(7));
-            Assert.That(snapshot.EnemyIntent.HitCount, Is.EqualTo(2));
-            Assert.That(snapshot.EnemyIntent.Block, Is.EqualTo(5));
-            Assert.That(snapshot.EnemyIntent.StatusType, Is.EqualTo(StatusType.Weak));
-            Assert.That(snapshot.EnemyIntent.StatusName, Is.EqualTo(nameof(StatusType.Weak)));
-            Assert.That(snapshot.EnemyIntent.StatusValue, Is.EqualTo(2));
-            Assert.That(snapshot.EnemyIntent.BuffType, Is.EqualTo(BuffType.Ritual));
-            Assert.That(snapshot.EnemyIntent.BuffName, Is.EqualTo(nameof(BuffType.Ritual)));
-            Assert.That(snapshot.EnemyIntent.BuffValue, Is.EqualTo(3));
+            Assert.That(Combat(snapshot).EnemyIntent, Is.Not.Null);
+            Assert.That(Combat(snapshot).EnemyIntent.IntentType, Is.EqualTo(IntentType.AttackDefend));
+            Assert.That(Combat(snapshot).EnemyIntent.IntentName, Is.EqualTo(nameof(IntentType.AttackDefend)));
+            Assert.That(Combat(snapshot).EnemyIntent.Damage, Is.EqualTo(7));
+            Assert.That(Combat(snapshot).EnemyIntent.HitCount, Is.EqualTo(2));
+            Assert.That(Combat(snapshot).EnemyIntent.Block, Is.EqualTo(5));
+            Assert.That(Combat(snapshot).EnemyIntent.StatusType, Is.EqualTo(StatusType.Weak));
+            Assert.That(Combat(snapshot).EnemyIntent.StatusName, Is.EqualTo(nameof(StatusType.Weak)));
+            Assert.That(Combat(snapshot).EnemyIntent.StatusValue, Is.EqualTo(2));
+            Assert.That(Combat(snapshot).EnemyIntent.BuffType, Is.EqualTo(BuffType.Ritual));
+            Assert.That(Combat(snapshot).EnemyIntent.BuffName, Is.EqualTo(nameof(BuffType.Ritual)));
+            Assert.That(Combat(snapshot).EnemyIntent.BuffValue, Is.EqualTo(3));
         }
 
         [Test]
@@ -335,15 +335,15 @@ namespace Dungeon.Tests.EditMode
             service.EndTurn();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.PlayerStatuses.Count, Is.EqualTo(1));
-            Assert.That(snapshot.PlayerStatuses[0].Name, Is.EqualTo("表示Vulnerable"));
-            Assert.That(snapshot.PlayerStatuses[0].Value, Is.EqualTo(2));
-            Assert.That(snapshot.EnemyStatuses.Count, Is.EqualTo(1));
-            Assert.That(snapshot.EnemyStatuses[0].Name, Is.EqualTo("表示Weak"));
-            Assert.That(snapshot.EnemyStatuses[0].Value, Is.EqualTo(1));
-            Assert.That(snapshot.EnemyBuffs.Count, Is.EqualTo(1));
-            Assert.That(snapshot.EnemyBuffs[0].Name, Is.EqualTo("表示Ritual"));
-            Assert.That(snapshot.EnemyBuffs[0].Value, Is.EqualTo(3));
+            Assert.That(Combat(snapshot).PlayerStatuses.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).PlayerStatuses[0].Name, Is.EqualTo("表示Vulnerable"));
+            Assert.That(Combat(snapshot).PlayerStatuses[0].Value, Is.EqualTo(2));
+            Assert.That(Combat(snapshot).EnemyStatuses.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).EnemyStatuses[0].Name, Is.EqualTo("表示Weak"));
+            Assert.That(Combat(snapshot).EnemyStatuses[0].Value, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).EnemyBuffs.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).EnemyBuffs[0].Name, Is.EqualTo("表示Ritual"));
+            Assert.That(Combat(snapshot).EnemyBuffs[0].Value, Is.EqualTo(3));
         }
 
         [Test]
@@ -365,10 +365,10 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(120));
-            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(30));
-            Assert.That(snapshot.RewardChoices.Count, Is.EqualTo(1));
-            Assert.That(snapshot.RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(120));
+            Assert.That(Reward(snapshot).BattleGoldReward, Is.EqualTo(30));
+            Assert.That(Reward(snapshot).RewardChoices.Count, Is.EqualTo(1));
+            Assert.That(Reward(snapshot).RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
         }
 
         [Test]
@@ -395,9 +395,9 @@ namespace Dungeon.Tests.EditMode
             service.TryPlaySelectedCard();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.Enemies[0].Hp, Is.EqualTo(10));
-            Assert.That(snapshot.Enemies[1].Hp, Is.EqualTo(6));
-            Assert.That(snapshot.SelectedEnemyIndex, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).Enemies[0].Hp, Is.EqualTo(10));
+            Assert.That(Combat(snapshot).Enemies[1].Hp, Is.EqualTo(6));
+            Assert.That(Combat(snapshot).SelectedEnemyIndex, Is.EqualTo(1));
         }
 
         [Test]
@@ -478,8 +478,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
-            Assert.That(snapshot.Gold, Is.EqualTo(120));
-            Assert.That(snapshot.BattleGoldReward, Is.EqualTo(12));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(120));
+            Assert.That(Reward(snapshot).BattleGoldReward, Is.EqualTo(12));
         }
 
         [Test]
@@ -499,7 +499,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Result));
-            Assert.That(snapshot.ResultMessage, Is.EqualTo("Run Failed"));
+            Assert.That(Result(snapshot).ResultMessage, Is.EqualTo("Run Failed"));
         }
 
         [Test]
@@ -515,8 +515,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot restSnapshot = service.CreateSnapshot();
 
             Assert.That(restSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(restSnapshot.IsRestShopContinueEnabled, Is.True);
-            Assert.That(restSnapshot.RestShopMessage, Does.Contain("Rest done."));
+            Assert.That(RestShop(restSnapshot).IsRestShopContinueEnabled, Is.True);
+            Assert.That(RestShop(restSnapshot).RestShopMessage, Does.Contain("Rest done."));
 
             service.ContinueFromRestShop();
             BattleSceneSnapshot mapSnapshot = service.CreateSnapshot();
@@ -538,8 +538,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(snapshot.RestShopMessage, Is.EqualTo("No cards can be upgraded."));
-            Assert.That(snapshot.IsRestShopContinueEnabled, Is.False);
+            Assert.That(RestShop(snapshot).RestShopMessage, Is.EqualTo("No cards can be upgraded."));
+            Assert.That(RestShop(snapshot).IsRestShopContinueEnabled, Is.False);
         }
 
         [Test]
@@ -585,7 +585,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(service.GetCardSelectCards()[0].Id, Is.EqualTo(1001));
             Assert.That(service.GetCardSelectPrices()[1001], Is.EqualTo(25));
             Assert.That(service.GetCardSelectUpgradedCards()[1001].Id, Is.EqualTo(1002));
-            Assert.That(snapshot.Gold, Is.EqualTo(20));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(20));
         }
 
         [Test]
@@ -607,7 +607,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
-            Assert.That(snapshot.Gold, Is.EqualTo(20));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(20));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1001));
             Assert.That(service.GetCardSelectMessage(), Is.EqualTo("Not enough gold."));
         }
@@ -636,8 +636,8 @@ namespace Dungeon.Tests.EditMode
             Assert.That(service.GetCardSelectMessage(), Does.Contain("Strike"));
             Assert.That(service.GetCardSelectCards(), Has.Count.EqualTo(1));
             Assert.That(service.GetCardSelectCards()[0].Id, Is.EqualTo(1003));
-            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
-            Assert.That(snapshot.Gold, Is.EqualTo(95));
+            Assert.That(RestShop(snapshot).IsRestShopContinueEnabled, Is.True);
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(95));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1002));
             Assert.That(runSaveService.LastSavedData.DeckCardIds[0], Is.EqualTo(1002));
             Assert.That(runSaveService.LastSavedData.Gold, Is.EqualTo(95));
@@ -665,7 +665,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.CardSelect));
             Assert.That(service.GetCardSelectCards(), Is.Empty);
-            Assert.That(snapshot.Gold, Is.EqualTo(70));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(70));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1101));
             Assert.That(service.GetDeckCards()[1].Id, Is.EqualTo(1102));
         }
@@ -689,8 +689,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(snapshot.RestShopMessage, Does.Contain("Strike -> Strike+"));
-            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
+            Assert.That(RestShop(snapshot).RestShopMessage, Does.Contain("Strike -> Strike+"));
+            Assert.That(RestShop(snapshot).IsRestShopContinueEnabled, Is.True);
         }
 
         [Test]
@@ -740,7 +740,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
             Assert.That(service.GetDeckCards()[0].Id, Is.EqualTo(1001));
-            Assert.That(snapshot.IsRestShopContinueEnabled, Is.False);
+            Assert.That(RestShop(snapshot).IsRestShopContinueEnabled, Is.False);
         }
 
         [Test]
@@ -840,7 +840,7 @@ namespace Dungeon.Tests.EditMode
             service.SelectMapNode(0);
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.PlayerBlock, Is.EqualTo(6));
+            Assert.That(Combat(snapshot).PlayerBlock, Is.EqualTo(6));
         }
 
         [Test]
@@ -873,24 +873,24 @@ namespace Dungeon.Tests.EditMode
             service.Initialize(5501);
             service.SelectMapNode(0);
             service.OpenShop();
-            int slotIndex = service.CreateSnapshot().ShopItems[0].SlotIndex;
+            int slotIndex = Shop(service.CreateSnapshot()).ShopItems[0].SlotIndex;
             service.PurchaseShopItem(slotIndex);
 
             service.InspectOwnedRelic(0);
             BattleSceneSnapshot inspectedSnapshot = service.CreateSnapshot();
-            Assert.That(inspectedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(0));
-            Assert.That(inspectedSnapshot.OwnedRelicHintMessage, Does.Contain("Burning Core"));
+            Assert.That(HostChrome(inspectedSnapshot).SelectedOwnedRelicIndex, Is.EqualTo(0));
+            Assert.That(HostChrome(inspectedSnapshot).OwnedRelicHintMessage, Does.Contain("Burning Core"));
 
             service.InspectOwnedRelic(0);
             BattleSceneSnapshot clearedSnapshot = service.CreateSnapshot();
-            Assert.That(clearedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
-            Assert.That(clearedSnapshot.OwnedRelicHintMessage, Is.Empty);
+            Assert.That(HostChrome(clearedSnapshot).SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(clearedSnapshot).OwnedRelicHintMessage, Is.Empty);
 
             service.InspectOwnedRelic(0);
             service.LeaveShop();
             BattleSceneSnapshot pageChangedSnapshot = service.CreateSnapshot();
-            Assert.That(pageChangedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
-            Assert.That(pageChangedSnapshot.OwnedRelicHintMessage, Is.Empty);
+            Assert.That(HostChrome(pageChangedSnapshot).SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(pageChangedSnapshot).OwnedRelicHintMessage, Is.Empty);
         }
 
         [Test]
@@ -925,20 +925,20 @@ namespace Dungeon.Tests.EditMode
             service.InspectOwnedRelic(0);
             service.InspectOwnedPotion(0);
             BattleSceneSnapshot potionSnapshot = service.CreateSnapshot();
-            Assert.That(potionSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
-            Assert.That(potionSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(0));
+            Assert.That(HostChrome(potionSnapshot).SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(potionSnapshot).SelectedOwnedPotionIndex, Is.EqualTo(0));
 
             service.UsePotion(0);
             BattleSceneSnapshot usedPotionSnapshot = service.CreateSnapshot();
-            Assert.That(usedPotionSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
-            Assert.That(usedPotionSnapshot.OwnedPotionHintMessage, Is.Empty);
+            Assert.That(HostChrome(usedPotionSnapshot).SelectedOwnedPotionIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(usedPotionSnapshot).OwnedPotionHintMessage, Is.Empty);
 
             service.InspectOwnedRelic(0);
             service.InspectOwnedPotion(0);
             service.ClearOwnedInspections();
             BattleSceneSnapshot clearedSnapshot = service.CreateSnapshot();
-            Assert.That(clearedSnapshot.SelectedOwnedRelicIndex, Is.EqualTo(-1));
-            Assert.That(clearedSnapshot.SelectedOwnedPotionIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(clearedSnapshot).SelectedOwnedRelicIndex, Is.EqualTo(-1));
+            Assert.That(HostChrome(clearedSnapshot).SelectedOwnedPotionIndex, Is.EqualTo(-1));
         }
 
         [Test]
@@ -969,8 +969,8 @@ namespace Dungeon.Tests.EditMode
             service.EndTurn();
             BattleSceneSnapshot secondTurnSnapshot = service.CreateSnapshot();
 
-            Assert.That(firstTurnSnapshot.PlayerEnergy, Is.EqualTo(4));
-            Assert.That(secondTurnSnapshot.PlayerEnergy, Is.EqualTo(4));
+            Assert.That(Combat(firstTurnSnapshot).PlayerEnergy, Is.EqualTo(4));
+            Assert.That(Combat(secondTurnSnapshot).PlayerEnergy, Is.EqualTo(4));
         }
 
         [Test]
@@ -1021,19 +1021,18 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(snapshot.PlayerHp, Is.EqualTo(23));
-            Assert.That(snapshot.Gold, Is.EqualTo(177));
-            Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(0));
-            Assert.That(snapshot.ShopItems.Count, Is.EqualTo(1));
-            Assert.That(snapshot.ShopItems[0].IsSoldOut, Is.True);
-            Assert.That(snapshot.ShopItems[0].Card.Id, Is.EqualTo(1002));
-            Assert.That(snapshot.IsCardRemovalSoldOut, Is.True);
-            Assert.That(snapshot.CardRemovalPrice, Is.EqualTo(75)); // FakeBattleShopService returns 75
+            Assert.That(Combat(snapshot).PlayerHp, Is.EqualTo(23));
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(177));
+            Assert.That(Shop(snapshot).ShopItems.Count, Is.EqualTo(1));
+            Assert.That(Shop(snapshot).ShopItems[0].IsSoldOut, Is.True);
+            Assert.That(Shop(snapshot).ShopItems[0].Card.Id, Is.EqualTo(1002));
+            Assert.That(Shop(snapshot).IsCardRemovalSoldOut, Is.True);
+            Assert.That(Shop(snapshot).CardRemovalPrice, Is.EqualTo(75)); // FakeBattleShopService returns 75
 
             service.SelectMapNode(1);
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
-            Assert.That(battleSnapshot.Hand.Count, Is.EqualTo(1));
-            Assert.That(battleSnapshot.Hand[0].Id, Is.EqualTo(1002));
+            Assert.That(Combat(battleSnapshot).HandCards.Count, Is.EqualTo(1));
+            Assert.That(Combat(battleSnapshot).HandCards[0].Card.Id, Is.EqualTo(1002));
         }
 
         [Test]
@@ -1065,7 +1064,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
-            Assert.That(snapshot.IsRestShopContinueEnabled, Is.True);
+            Assert.That(RestShop(snapshot).IsRestShopContinueEnabled, Is.True);
         }
 
         [Test]
@@ -1100,15 +1099,15 @@ namespace Dungeon.Tests.EditMode
             service.OpenShop();
 
             BattleSceneSnapshot shopSnapshot = service.CreateSnapshot();
-            Assert.That(shopSnapshot.ShopItems.Count, Is.EqualTo(1));
-            Assert.That(shopSnapshot.ShopItems[0].RewardType, Is.EqualTo(RewardType.Relic));
-            Assert.That(shopSnapshot.ShopItems[0].Relic, Is.Not.Null);
+            Assert.That(Shop(shopSnapshot).ShopItems.Count, Is.EqualTo(1));
+            Assert.That(Shop(shopSnapshot).ShopItems[0].RewardType, Is.EqualTo(RewardType.Relic));
+            Assert.That(Shop(shopSnapshot).ShopItems[0].Relic, Is.Not.Null);
 
-            service.PurchaseShopItem(shopSnapshot.ShopItems[0].SlotIndex);
+            service.PurchaseShopItem(Shop(shopSnapshot).ShopItems[0].SlotIndex);
 
             BattleSceneSnapshot purchasedSnapshot = service.CreateSnapshot();
-            Assert.That(purchasedSnapshot.OwnedRelics.Count, Is.EqualTo(1));
-            Assert.That(purchasedSnapshot.OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+            Assert.That(HostChrome(purchasedSnapshot).OwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(HostChrome(purchasedSnapshot).OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
 
             service.LeaveShop();
             service.ContinueFromRestShop();
@@ -1116,8 +1115,8 @@ namespace Dungeon.Tests.EditMode
 
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
             Assert.That(battleSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
-            Assert.That(battleSnapshot.OwnedRelics.Count, Is.EqualTo(1));
-            Assert.That(battleSnapshot.OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
+            Assert.That(HostChrome(battleSnapshot).OwnedRelics.Count, Is.EqualTo(1));
+            Assert.That(HostChrome(battleSnapshot).OwnedRelics[0].DisplayName, Is.EqualTo("Burning Core"));
         }
 
         [Test]
@@ -1136,8 +1135,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Event));
-            Assert.That(snapshot.CurrentEvent, Is.Not.Null);
-            Assert.That(snapshot.CurrentEvent.EventName, Is.EqualTo("TestEvent"));
+            Assert.That(Event(snapshot).CurrentEvent, Is.Not.Null);
+            Assert.That(Event(snapshot).CurrentEvent.EventName, Is.EqualTo("TestEvent"));
         }
 
         [Test]
@@ -1158,8 +1157,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(snapshot.Gold, Is.EqualTo(150));
-            Assert.That(snapshot.CurrentEvent, Is.Null);
+            Assert.That(Shop(snapshot).Gold, Is.EqualTo(150));
+            Assert.That(Event(snapshot).CurrentEvent, Is.Null);
         }
 
         [Test]
@@ -1182,7 +1181,47 @@ namespace Dungeon.Tests.EditMode
             service.EndTurn();
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
-            Assert.That(snapshot.PlayerHp, Is.EqualTo(48));
+            Assert.That(Combat(snapshot).PlayerHp, Is.EqualTo(48));
+        }
+
+        private static BattleMapSnapshot Map(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Map;
+        }
+
+        private static BattleCombatSnapshot Combat(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Combat;
+        }
+
+        private static BattleRewardSnapshot Reward(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Reward;
+        }
+
+        private static BattleRestShopSnapshot RestShop(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.RestShop;
+        }
+
+        private static BattleShopSnapshot Shop(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Shop;
+        }
+
+        private static BattleHostChromeSnapshot HostChrome(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.HostChrome;
+        }
+
+        private static BattleEventSnapshot Event(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Event;
+        }
+
+        private static BattleResultSnapshot Result(BattleSceneSnapshot snapshot)
+        {
+            return snapshot.Result;
         }
 
         private static BattleSceneFlowService CreateService(RuntimeRunDefinition runDefinition, params int[] values)
@@ -1331,66 +1370,52 @@ namespace Dungeon.Tests.EditMode
                 }
             }
 
-            return new RuntimeRunDefinition(
-                5501,
-                "run_test",
-                CharacterArchetype.CrimsonExile,
-                playerMaxHp,
-                startingGold,
-                3,
-                0,
-                relicDropChance,
-                resolvedStarterDeck,
-                cardCatalog,
-                resolvedRewardCards,
-                nodes ?? new[]
-                {
-                    CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }),
-                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
-                },
-                encounters,
-                events ?? null,
-                relicCatalog ?? new Dictionary<int, RuntimeRelic>(),
-                potionCatalog ?? new Dictionary<int, RuntimePotion>(),
-                shopLineup,
-                null,
-                itemPriceRules);
+            RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
+            builder.RunProfileId = 5501;
+            builder.Key = "run_test";
+            builder.PlayerMaxHp = playerMaxHp;
+            builder.StartingGold = startingGold;
+            builder.RelicDropChance = relicDropChance;
+            builder.StarterDeck = resolvedStarterDeck;
+            builder.CardCatalog = cardCatalog;
+            builder.RewardPool = resolvedRewardCards;
+            builder.Nodes = nodes ?? new[]
+            {
+                CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }),
+                CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+            };
+            builder.EncountersByNodeType = encounters;
+            builder.PossibleEvents = events ?? Array.Empty<RuntimeEvent>();
+            builder.RelicCatalog = relicCatalog ?? new Dictionary<int, RuntimeRelic>();
+            builder.PotionCatalog = potionCatalog ?? new Dictionary<int, RuntimePotion>();
+            builder.ShopLineup = shopLineup;
+            builder.ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
+            return builder.Build();
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false)
         {
-            return new RuntimeCard(
-                id,
-                $"card_{id}",
-                displayName,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                cost,
-                CardType.Attack,
-                CardRarity.Common,
-                CharacterArchetype.CrimsonExile,
-                effects ?? new[]
-                {
-                    new RuntimeCardEffect(1, EffectType.DealDamage, damage, 1, StatusType.None, 0, TargetSide.Enemy)
-                },
-                upgradeCardId,
-                isUpgraded);
+            RuntimeCardBuilder builder = BattleTestData.Card(id);
+            builder.DisplayName = displayName;
+            builder.Cost = cost;
+            builder.Effects = effects ?? new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, damage, 1, StatusType.None, 0, TargetSide.Enemy)
+            };
+            builder.UpgradeCardId = upgradeCardId;
+            builder.IsUpgraded = isUpgraded;
+            return builder.Build();
         }
 
         private static RuntimeEnemy CreateEnemy(int id, string displayName, int hpMin, int hpMax, int goldReward, params RuntimeEnemyAction[] actions)
         {
-            return new RuntimeEnemy(
-                id,
-                $"enemy_{id}",
-                displayName,
-                string.Empty,
-                EnemyTier.Normal,
-                hpMin,
-                hpMax,
-                goldReward,
-                actions);
+            RuntimeEnemyBuilder builder = BattleTestData.Enemy(id);
+            builder.DisplayName = displayName;
+            builder.HpMin = hpMin;
+            builder.HpMax = hpMax;
+            builder.GoldReward = goldReward;
+            builder.Actions = actions;
+            return builder.Build();
         }
 
         private static RuntimeEnemyAction CreateAction(
@@ -1405,22 +1430,27 @@ namespace Dungeon.Tests.EditMode
             BuffType buffType = BuffType.None,
             int buffValue = 0)
         {
-            return new RuntimeEnemyAction(
-                order,
-                intentType,
-                damage,
-                hitCount,
-                block,
-                statusType,
-                statusValue,
-                buffType,
-                buffValue,
-                repeatRule);
+            RuntimeEnemyActionBuilder builder = BattleTestData.EnemyAction(order);
+            builder.Damage = damage;
+            builder.RepeatRule = repeatRule;
+            builder.IntentType = intentType;
+            builder.HitCount = hitCount;
+            builder.Block = block;
+            builder.StatusType = statusType;
+            builder.StatusValue = statusValue;
+            builder.BuffType = buffType;
+            builder.BuffValue = buffValue;
+            return builder.Build();
         }
 
         private static RuntimeMapNode CreateNode(int id, int floor, InGameNodeType nodeType, string displayName, IReadOnlyList<int> nextNodeIndices)
         {
-            return new RuntimeMapNode(id, $"node_{id}", floor, nodeType, displayName, string.Empty, nextNodeIndices);
+            RuntimeMapNodeBuilder builder = BattleTestData.MapNode(id);
+            builder.Floor = floor;
+            builder.NodeType = nodeType;
+            builder.DisplayName = displayName;
+            builder.NextNodeIndices = nextNodeIndices;
+            return builder.Build();
         }
 
         private static RuntimeEncounterEntry CreateEncounter(RuntimeEnemy enemy, int weight)
@@ -1445,37 +1475,33 @@ namespace Dungeon.Tests.EditMode
 
         private static RuntimeRewardEntry CreateRewardEntry(RuntimeCard card, int weight, int minFloor, int maxFloor)
         {
-            return new RuntimeRewardEntry(RewardType.Card, card != null ? card.Id : 0, card, null, null, weight, minFloor, maxFloor);
+            RuntimeRewardEntryBuilder builder = BattleTestData.RewardEntry();
+            builder.RewardType = RewardType.Card;
+            builder.Card = card;
+            builder.Weight = weight;
+            builder.MinFloor = minFloor;
+            builder.MaxFloor = maxFloor;
+            return builder.Build();
         }
 
         private static RuntimeRelic CreateRelic(int id, string displayName, IReadOnlyList<RuntimeRelicEffect> effects)
         {
-            return new RuntimeRelic(
-                id,
-                $"relic_{id}",
-                displayName,
-                string.Empty,
-                $"{displayName} description",
-                string.Empty,
-                $"relic_icon_{id}",
-                CardRarity.Uncommon,
-                effects);
+            RuntimeRelicBuilder builder = BattleTestData.Relic(id);
+            builder.DisplayName = displayName;
+            builder.Description = $"{displayName} description";
+            builder.Effects = effects;
+            return builder.Build();
         }
 
         private static RuntimePotion CreatePotion(int id, string displayName, PotionUseContext useContext, PotionTargetMode targetMode, IReadOnlyList<RuntimePotionEffect> effects)
         {
-            return new RuntimePotion(
-                id,
-                $"potion_{id}",
-                displayName,
-                string.Empty,
-                $"{displayName} description",
-                string.Empty,
-                $"potion_icon_{id}",
-                CardRarity.Uncommon,
-                useContext,
-                targetMode,
-                effects);
+            RuntimePotionBuilder builder = BattleTestData.Potion(id);
+            builder.DisplayName = displayName;
+            builder.Description = $"{displayName} description";
+            builder.UseContext = useContext;
+            builder.TargetMode = targetMode;
+            builder.Effects = effects;
+            return builder.Build();
         }
 
         /// <summary>

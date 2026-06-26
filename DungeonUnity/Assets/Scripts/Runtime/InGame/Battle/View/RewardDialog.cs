@@ -42,7 +42,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             ClearRows();
 
-            BattleSceneSnapshot snapshot = _param?.Snapshot;
+            BattleRewardSnapshot snapshot = _param?.Snapshot;
             if (snapshot == null || _rewardRoot == null || _rewardButtonTemplate == null) return;
 
             _rewardButtonTemplate.gameObject.SetActive(false);

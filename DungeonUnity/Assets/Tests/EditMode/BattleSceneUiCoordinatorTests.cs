@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
 using TFramework.UI;
@@ -26,9 +27,9 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Map);
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowRewardAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowRestShopAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowResultAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowRewardAsync(snapshot.Reward, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowRestShopAsync(snapshot.RestShop, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowResultAsync(snapshot.Result, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.ClearStackCallCount, Is.EqualTo(4));
             Assert.That(uiService.LastRewardDialogParam.CacheOnClose, Is.True);
@@ -46,7 +47,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Shop);
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowShopAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowShopAsync(snapshot.Shop, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.ClearStackCallCount, Is.EqualTo(2));
             Assert.That(uiService.LastShopDialogParam, Is.Not.Null);
@@ -61,7 +62,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Event);
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowEventAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowEventAsync(snapshot.Event, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.ClearStackCallCount, Is.EqualTo(2));
             Assert.That(uiService.LastEventDialogParam, Is.Not.Null);
@@ -86,14 +87,15 @@ namespace Dungeon.Tests.EditMode
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowCardSelectAsync(
-                snapshot,
-                Array.Empty<RuntimeCard>(),
-                CardSelectMode.Upgrade,
-                true,
-                cardPrices,
-                upgradedCards,
-                "Select a card.",
-                onCardConfirmed,
+                new BattleCardSelectDialogParam(
+                    snapshot.Shop.Gold,
+                    Array.Empty<RuntimeCard>(),
+                    CardSelectMode.Upgrade,
+                    true,
+                    cardPrices,
+                    upgradedCards,
+                    "Select a card.",
+                    onCardConfirmed),
                 CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(uiService.LastCardSelectDialogParam, Is.Not.Null);
@@ -117,14 +119,15 @@ namespace Dungeon.Tests.EditMode
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
             coordinator.ShowCardSelectAsync(
-                snapshot,
-                Array.Empty<RuntimeCard>(),
-                CardSelectMode.CardRemoval,
-                false,
-                new Dictionary<int, int>(),
-                new Dictionary<int, RuntimeCard>(),
-                string.Empty,
-                null,
+                new BattleCardSelectDialogParam(
+                    snapshot.Shop.Gold,
+                    Array.Empty<RuntimeCard>(),
+                    CardSelectMode.CardRemoval,
+                    false,
+                    new Dictionary<int, int>(),
+                    new Dictionary<int, RuntimeCard>(),
+                    string.Empty,
+                    null),
                 CancellationToken.None).GetAwaiter().GetResult();
 
             BattleCardSelectDialogParam payload = ExtractPayload<BattleCardSelectDialogParam>(uiService.LastCardSelectDialogParam);
@@ -143,8 +146,8 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = CreateSnapshot(BattleScenePage.Map);
 
             coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowCardPickAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
-            coordinator.ShowPotionReplaceAsync(snapshot, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowCardPickAsync(snapshot.Reward, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowPotionReplaceAsync(snapshot.PotionReplace, CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.That(hostView.SetHostChromeInteractableCallCount, Is.EqualTo(5));
             Assert.That(hostView.LastHostChromeInteractable, Is.True);
@@ -152,44 +155,16 @@ namespace Dungeon.Tests.EditMode
 
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
-            return new BattleSceneSnapshot(
-                page,
-                Array.Empty<RuntimeMapNode>(),
-                Array.Empty<RuntimeCard>(),
-                Array.Empty<RuntimeRewardEntry>(),
-                -1,
-                40,
-                40,
-                3,
-                0,
-                100,
-                null,
-                0,
-                0,
-                false,
-                -1,
-                false,
-                "map",
-                "battle",
-                "rest",
-                "result");
+            BattleSceneSnapshotBuilder builder = BattleTestData.Snapshot(page);
+            return builder.Build();
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost)
         {
-            return new RuntimeCard(
-                id,
-                $"card_{id}",
-                displayName,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                cost,
-                CardType.Attack,
-                CardRarity.Common,
-                CharacterArchetype.CrimsonExile,
-                Array.Empty<RuntimeCardEffect>());
+            RuntimeCardBuilder builder = BattleTestData.Card(id);
+            builder.DisplayName = displayName;
+            builder.Cost = cost;
+            return builder.Build();
         }
 
         private static T ExtractPayload<T>(UIDialogOpenParam param) where T : class

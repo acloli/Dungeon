@@ -13,25 +13,16 @@ namespace Dungeon.Runtime.InGame.Battle
     public interface IBattleSceneUiCoordinator
     {
         UniTask InitializeAsync(IBattleSceneHostView hostView, CancellationToken ct);
-        UniTask ShowMapAsync(BattleSceneSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct);
+        UniTask ShowMapAsync(BattleMapSnapshot snapshot, Action<int> onMapNodeClicked, CancellationToken ct);
         UniTask ShowBattleAsync(CancellationToken ct);
-        UniTask<RewardDialogResult> ShowRewardAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<RestShopDialogAction> ShowRestShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask ShowResultAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<ShopDialogResult> ShowShopAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<CardSelectDialogResult> ShowCardSelectAsync(
-            BattleSceneSnapshot snapshot,
-            IReadOnlyList<RuntimeCard> deckCards,
-            CardSelectMode mode,
-            bool showPrice,
-            IReadOnlyDictionary<int, int> cardPrices,
-            IReadOnlyDictionary<int, RuntimeCard> upgradedCards,
-            string message,
-            Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed,
-            CancellationToken ct);
-        UniTask<EventDialogResult> ShowEventAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
-        UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattleSceneSnapshot snapshot, CancellationToken ct);
+        UniTask<RewardDialogResult> ShowRewardAsync(BattleRewardSnapshot snapshot, CancellationToken ct);
+        UniTask<RestShopDialogAction> ShowRestShopAsync(BattleRestShopSnapshot snapshot, CancellationToken ct);
+        UniTask ShowResultAsync(BattleResultSnapshot snapshot, CancellationToken ct);
+        UniTask<ShopDialogResult> ShowShopAsync(BattleShopSnapshot snapshot, CancellationToken ct);
+        UniTask<CardSelectDialogResult> ShowCardSelectAsync(BattleCardSelectDialogParam param, CancellationToken ct);
+        UniTask<EventDialogResult> ShowEventAsync(BattleEventSnapshot snapshot, CancellationToken ct);
+        UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleRewardSnapshot snapshot, CancellationToken ct);
+        UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattlePotionReplaceSnapshot snapshot, CancellationToken ct);
         void Dispose();
     }
 }

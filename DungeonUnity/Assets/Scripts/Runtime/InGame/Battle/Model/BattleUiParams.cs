@@ -9,13 +9,13 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleMapPageParam
     {
-        public BattleMapPageParam(BattleSceneSnapshot snapshot, Action<int> onMapNodeClicked)
+        public BattleMapPageParam(BattleMapSnapshot snapshot, Action<int> onMapNodeClicked)
         {
             Snapshot = snapshot;
             OnMapNodeClicked = onMapNodeClicked;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleMapSnapshot Snapshot { get; }
         public Action<int> OnMapNodeClicked { get; }
     }
 
@@ -24,12 +24,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleRewardDialogParam
     {
-        public BattleRewardDialogParam(BattleSceneSnapshot snapshot)
+        public BattleRewardDialogParam(BattleRewardSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleRewardSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -37,12 +37,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleCardPickDialogParam
     {
-        public BattleCardPickDialogParam(BattleSceneSnapshot snapshot)
+        public BattleCardPickDialogParam(BattleRewardSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleRewardSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -50,12 +50,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleRestShopDialogParam
     {
-        public BattleRestShopDialogParam(BattleSceneSnapshot snapshot)
+        public BattleRestShopDialogParam(BattleRestShopSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleRestShopSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -63,12 +63,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleResultDialogParam
     {
-        public BattleResultDialogParam(BattleSceneSnapshot snapshot)
+        public BattleResultDialogParam(BattleResultSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleResultSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -112,12 +112,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleShopDialogParam
     {
-        public BattleShopDialogParam(BattleSceneSnapshot snapshot)
+        public BattleShopDialogParam(BattleShopSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleShopSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public sealed class BattleCardSelectDialogParam
     {
         public BattleCardSelectDialogParam(
-            BattleSceneSnapshot snapshot,
+            int gold,
             IReadOnlyList<RuntimeCard> deckCards,
             CardSelectMode mode,
             bool showPrice,
@@ -179,7 +179,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             string message,
             Func<RuntimeCard, BattleCardSelectDialogRefreshData> onCardConfirmed)
         {
-            Snapshot = snapshot;
+            Gold = gold;
             DeckCards = deckCards ?? Array.Empty<RuntimeCard>();
             Mode = mode;
             ShowPrice = showPrice;
@@ -189,7 +189,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             OnCardConfirmed = onCardConfirmed;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public int Gold { get; }
         public IReadOnlyList<RuntimeCard> DeckCards { get; }
         public CardSelectMode Mode { get; }
         public bool ShowPrice { get; }
@@ -213,12 +213,12 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattlePotionReplaceDialogParam
     {
-        public BattlePotionReplaceDialogParam(BattleSceneSnapshot snapshot)
+        public BattlePotionReplaceDialogParam(BattlePotionReplaceSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattlePotionReplaceSnapshot Snapshot { get; }
     }
 
     /// <summary>
@@ -259,11 +259,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleEventDialogParam
     {
-        public BattleEventDialogParam(BattleSceneSnapshot snapshot)
+        public BattleEventDialogParam(BattleEventSnapshot snapshot)
         {
             Snapshot = snapshot;
         }
 
-        public BattleSceneSnapshot Snapshot { get; }
+        public BattleEventSnapshot Snapshot { get; }
     }
 }

@@ -31,7 +31,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 画面描画処理
         /// </summary>
-        public void Render(BattleSceneSnapshot snapshot)
+        public void Render(BattleCombatSnapshot snapshot)
         {
             if (_view == null)
             {
@@ -76,7 +76,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// player表示文言構築
         /// </summary>
-        private static string BuildPlayerText(BattleSceneSnapshot snapshot)
+        private static string BuildPlayerText(BattleCombatSnapshot snapshot)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(BuildPlayerSummary(snapshot));
@@ -88,7 +88,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// enemy表示文言構築
         /// </summary>
-        private static string BuildEnemyText(BattleSceneSnapshot snapshot)
+        private static string BuildEnemyText(BattleCombatSnapshot snapshot)
         {
             BattleEnemyViewModel selectedEnemy = FindSelectedEnemy(snapshot);
             if (selectedEnemy != null)
@@ -111,7 +111,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 選択中敵表示モデル取得
         /// </summary>
-        private static BattleEnemyViewModel FindSelectedEnemy(BattleSceneSnapshot snapshot)
+        private static BattleEnemyViewModel FindSelectedEnemy(BattleCombatSnapshot snapshot)
         {
             if (snapshot.Enemies == null || snapshot.Enemies.Count == 0)
             {
@@ -142,7 +142,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 戦闘HUD表示モデル構築
         /// </summary>
-        private static BattleHudViewModel BuildBattleHud(BattleSceneSnapshot snapshot)
+        private static BattleHudViewModel BuildBattleHud(BattleCombatSnapshot snapshot)
         {
             BattleEnemyViewModel selectedEnemy = FindSelectedEnemy(snapshot);
             if (selectedEnemy != null)
@@ -170,7 +170,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// player概要文言構築
         /// </summary>
-        private static string BuildPlayerSummary(BattleSceneSnapshot snapshot)
+        private static string BuildPlayerSummary(BattleCombatSnapshot snapshot)
         {
             return string.Format(
                 BattleSceneConstants.PlayerStateFormat,
@@ -196,7 +196,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// 代替enemy概要文言構築
         /// </summary>
-        private static string BuildFallbackEnemySummary(BattleSceneSnapshot snapshot)
+        private static string BuildFallbackEnemySummary(BattleCombatSnapshot snapshot)
         {
             return string.Format(
                 BattleSceneConstants.EnemyStateFormat,
