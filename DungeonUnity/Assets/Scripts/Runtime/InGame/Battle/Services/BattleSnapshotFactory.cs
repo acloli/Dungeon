@@ -267,21 +267,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _displayTextService.GetBuffName(action.BuffType));
         }
 
-        private BattleIntentViewModel BuildIntentView(BattleSceneState state, BattleEnemyState enemyState)
-        {
-            RuntimeEnemyAction action = SelectEnemyActionPreview(state, enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return BattleIntentViewModel.FromAction(
-                action,
-                _displayTextService.GetIntentName(action.IntentType),
-                _displayTextService.GetStatusName(action.StatusType),
-                _displayTextService.GetBuffName(action.BuffType));
-        }
-
         private IReadOnlyList<int> BuildAvailableNodeIndices(BattleSceneState state)
         {
             List<int> indices = new List<int>();
