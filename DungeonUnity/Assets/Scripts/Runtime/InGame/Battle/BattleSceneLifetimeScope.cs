@@ -25,6 +25,7 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.BattleCombatEventService>(Lifetime.Singleton).As<Services.IBattleCombatEventService>();
             builder.Register<Services.BattleEventService>(Lifetime.Singleton).As<Services.IBattleEventService>();
             builder.Register<Services.BattleShopService>(Lifetime.Singleton).As<Services.IBattleShopService>();
+            builder.Register<Services.BattleCheckpointService>(Lifetime.Singleton).As<Services.IBattleCheckpointService>();
             builder.Register<Services.BattleSnapshotFactory>(Lifetime.Singleton).As<Services.IBattleSnapshotFactory>();
             builder.Register<Services.BattleSceneRules>(Lifetime.Singleton).As<Services.IBattleSceneRules>();
             builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService>();

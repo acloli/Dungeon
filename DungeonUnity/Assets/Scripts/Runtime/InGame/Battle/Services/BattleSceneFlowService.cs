@@ -26,6 +26,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattlePotionService _potionService;
         private readonly IBattleEventService _eventService;
         private readonly IRunSaveService _runSaveService;
+        private readonly IBattleCheckpointService _checkpointService;
 
         private RuntimeRunDefinition _runDefinition;
 
@@ -40,7 +41,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleRelicService relicService,
             IBattlePotionService potionService,
             IBattleEventService eventService,
-            IRunSaveService runSaveService = null)
+            IRunSaveService runSaveService,
+            IBattleCheckpointService checkpointService)
         {
             _rules = rules;
             _randomProvider = randomProvider;
@@ -53,6 +55,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _potionService = potionService;
             _eventService = eventService;
             _runSaveService = runSaveService;
+            _checkpointService = checkpointService;
         }
 
         /// <summary>
@@ -81,69 +84,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             _runDefinition = _masterDataFacade.BuildRunDefinition(saveData.RunProfileId);
             _rules.InitializeRun(_state, _runDefinition);
-
-            _state.PlayerMaxHp = saveData.PlayerMaxHp;
-            _state.PlayerHp = saveData.PlayerHp;
-            _state.PlayerEnergy = saveData.PlayerEnergy;
-            _state.Gold = saveData.Gold;
-            _state.CurrentNodeIndex = saveData.CurrentNodeIndex;
-            _state.CurrentPage = (BattleScenePage)saveData.CurrentPage;
-
             IReadOnlyDictionary<int, RuntimeCard> cardCatalog = _masterDataFacade.BuildCardCatalog();
-            _state.Deck.Clear();
-            if (saveData.DeckCardIds != null)
-            {
-                foreach (int cardId in saveData.DeckCardIds)
-                {
-                    if (cardCatalog.TryGetValue(cardId, out RuntimeCard card))
-                    {
-                        _state.Deck.Add(card);
-                    }
-                }
-            }
-
-            _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
-            ClearOwnedRelicInspection();
-            ClearOwnedPotionInspection();
-            _state.PendingRelicReward = null;
-            _state.PendingPotionReward = null;
-            _state.PendingPotionOffer = null;
-            _relicService.RestoreOwnedRelics(_state, _runDefinition, saveData.OwnedRelicIds);
-            _potionService.RestoreOwnedPotions(_state, _runDefinition, saveData.OwnedPotionIds);
-
-            _state.ShopItems.Clear();
-            _state.IsCardRemovalSoldOut = saveData.IsCardRemovalSoldOut;
-            _state.CardRemovalCount = saveData.CardRemovalCount;
-            if (saveData.ShopItems != null)
-            {
-                foreach (SaveShopItem savedItem in saveData.ShopItems)
-                {
-                    RuntimeCard card = null;
-                    RuntimeRelic relic = null;
-                    RuntimePotion potion = null;
-                    if (savedItem.RewardType == (int)RewardType.Card && savedItem.CardId > 0)
-                    {
-                        cardCatalog.TryGetValue(savedItem.CardId, out card);
-                    }
-                    else if (savedItem.RewardType == (int)RewardType.Relic && savedItem.ItemId > 0)
-                    {
-                        _runDefinition.RelicCatalog.TryGetValue(savedItem.ItemId, out relic);
-                    }
-                    else if (savedItem.RewardType == (int)RewardType.Potion && savedItem.ItemId > 0)
-                    {
-                        _runDefinition.PotionCatalog.TryGetValue(savedItem.ItemId, out potion);
-                    }
-                    _state.ShopItems.Add(new BattleShopItemState(
-                        savedItem.SlotIndex,
-                        (RewardType)savedItem.RewardType,
-                        card,
-                        relic,
-                        potion,
-                        savedItem.ItemId,
-                        savedItem.Price,
-                        savedItem.IsSoldOut));
-                }
-            }
+            _checkpointService.RestoreFromSave(
+                _state,
+                _runDefinition,
+                saveData,
+                cardCatalog,
+                _relicService,
+                _potionService);
 
             if (_state.CurrentPage == BattleScenePage.Map)
             {
@@ -1314,86 +1262,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void RequestSave()
         {
-            if (_runSaveService == null || _runDefinition == null)
+            if (_runSaveService == null || _runDefinition == null || _checkpointService == null)
             {
                 return;
             }
-            
-            RunSaveData data = new RunSaveData
-            {
-                RunProfileId = _runDefinition.RunProfileId,
-                PlayerMaxHp = _state.PlayerMaxHp,
-                PlayerHp = _state.PlayerHp,
-                PlayerEnergy = _state.PlayerEnergy,
-                Gold = _state.Gold,
-                CurrentNodeIndex = _state.CurrentNodeIndex,
-                CurrentPage = (int)ResolveCheckpointPage(_state.CurrentPage),
-                DeckCardIds = new List<int>(),
-                OwnedRelicIds = new List<int>(),
-                OwnedPotionIds = new List<int>(),
-                ShopItems = new List<SaveShopItem>(),
-                IsCardRemovalSoldOut = _state.IsCardRemovalSoldOut,
-                CardRemovalCount = _state.CardRemovalCount
-            };
-            
-            for (int i = 0; i < _state.Deck.Count; i++)
-            {
-                if (_state.Deck[i] != null)
-                {
-                    data.DeckCardIds.Add(_state.Deck[i].Id);
-                }
-            }
-
-            for (int i = 0; i < _state.OwnedRelics.Count; i++)
-            {
-                if (_state.OwnedRelics[i] != null)
-                {
-                    data.OwnedRelicIds.Add(_state.OwnedRelics[i].Id);
-                }
-            }
-
-            for (int i = 0; i < _state.OwnedPotions.Count; i++)
-            {
-                if (_state.OwnedPotions[i] != null)
-                {
-                    data.OwnedPotionIds.Add(_state.OwnedPotions[i].Id);
-                }
-            }
-
-            for (int i = 0; i < _state.ShopItems.Count; i++)
-            {
-                BattleShopItemState item = _state.ShopItems[i];
-                if (item != null)
-                {
-                    data.ShopItems.Add(new SaveShopItem
-                    {
-                        SlotIndex = item.SlotIndex,
-                        RewardType = (int)item.RewardType,
-                        CardId = item.Card != null ? item.Card.Id : 0,
-                        ItemId = item.ItemId,
-                        Price = item.Price,
-                        IsSoldOut = item.IsSoldOut
-                    });
-                }
-            }
-            
+            RunSaveData data = _checkpointService.BuildSaveData(_state, _runDefinition);
             _runSaveService.SaveCurrentRunAsync(data).Forget(ex =>
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
-        }
-
-        /// <summary>
-        /// checkpoint保存用ページ正規化
-        /// </summary>
-        private static BattleScenePage ResolveCheckpointPage(BattleScenePage currentPage)
-        {
-            return currentPage switch
-            {
-                BattleScenePage.Shop => BattleScenePage.RestShop,
-                BattleScenePage.CardSelect => BattleScenePage.RestShop,
-                _ => currentPage
-            };
         }
     }
 }

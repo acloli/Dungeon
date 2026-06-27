@@ -773,6 +773,27 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ConfirmCardSelect_UpgradeMode_RequestSave_NormalizesCheckpointToRestShop()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
+            RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike },
+                additionalCards: new[] { strikePlus });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(strike);
+
+            Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.RestShop));
+            Assert.That(runSaveService.LastSavedData.DeckCardIds, Is.EqualTo(new[] { 1002 }));
+        }
+
+        [Test]
         public void SelectReward_RequestSave_SavesDeckCheckpoint()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -1236,7 +1257,9 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
                 new BattlePotionService(),
-                new BattleEventService());
+                new BattleEventService(),
+                null,
+                new BattleCheckpointService());
         }
 
         private static BattleSceneFlowService CreateServiceWithCombatEvents(
@@ -1254,7 +1277,9 @@ namespace Dungeon.Tests.EditMode
                 combatEventService,
                 new BattleRelicService(),
                 new BattlePotionService(),
-                new BattleEventService());
+                new BattleEventService(),
+                null,
+                new BattleCheckpointService());
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -1273,7 +1298,8 @@ namespace Dungeon.Tests.EditMode
                 new BattleRelicService(),
                 new BattlePotionService(),
                 new BattleEventService(),
-                runSaveService);
+                runSaveService,
+                new BattleCheckpointService());
         }
 
         private static BattleSceneFlowService CreateServiceWithShop(
@@ -1291,7 +1317,9 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
                 new BattlePotionService(),
-                new BattleEventService());
+                new BattleEventService(),
+                null,
+                new BattleCheckpointService());
         }
 
         private static BattleSceneFlowService CreateServiceWithDisplayText(
@@ -1309,7 +1337,9 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(new BattleRelicService()),
                 new BattleRelicService(),
                 new BattlePotionService(),
-                new BattleEventService());
+                new BattleEventService(),
+                null,
+                new BattleCheckpointService());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(
