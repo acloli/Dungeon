@@ -14,15 +14,18 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     public sealed class BattleSceneRules : IBattleSceneRules
     {
         private readonly IBattleDeckService _deckService;
+        private readonly IBattleEnemyActionSelector _enemyActionSelector;
         private readonly IBattleEncounterSelector _encounterSelector;
         private readonly IBattleRewardRollService _rewardRollService;
 
         public BattleSceneRules(
             IBattleDeckService deckService,
+            IBattleEnemyActionSelector enemyActionSelector,
             IBattleEncounterSelector encounterSelector,
             IBattleRewardRollService rewardRollService)
         {
             _deckService = deckService;
+            _enemyActionSelector = enemyActionSelector;
             _encounterSelector = encounterSelector;
             _rewardRollService = rewardRollService;
         }
@@ -188,7 +191,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return default;
             }
 
-            NormalizeSelectedEnemyIndex(state);
+            _enemyActionSelector.NormalizeSelectedEnemyIndex(state);
             state.Hand.RemoveAt(handIndex);
             state.PlayerEnergy -= card.Cost;
 
@@ -247,7 +250,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 BattleEnemyState enemyState = orderedEnemies[i];
                 enemyState.Block = 0;
-                RuntimeEnemyAction action = SelectEnemyAction(enemyState, randomProvider);
+                RuntimeEnemyAction action = _enemyActionSelector.SelectEnemyAction(enemyState, randomProvider);
                 if (action == null)
                 {
                     continue;
@@ -310,11 +313,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// カードのダメージ効果を解決する
         /// </summary>
-        private static int ResolveCardDamage(BattleSceneState state, RuntimeCardEffect effect)
+        private int ResolveCardDamage(BattleSceneState state, RuntimeCardEffect effect)
         {
             int hitCount = Math.Max(1, effect.HitCount);
             int totalDamage = 0;
-            foreach (BattleEnemyState enemyState in GetTargetEnemies(state, effect.TargetSide))
+            foreach (BattleEnemyState enemyState in _enemyActionSelector.GetTargetEnemies(state, effect.TargetSide))
             {
                 for (int i = 0; i < hitCount; i++)
                 {
@@ -331,7 +334,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// カードの状態付与を解決する
         /// </summary>
-        private static void ApplyCardStatus(BattleSceneState state, RuntimeCardEffect effect)
+        private void ApplyCardStatus(BattleSceneState state, RuntimeCardEffect effect)
         {
             if (effect.TargetSide == TargetSide.Self)
             {
@@ -339,7 +342,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            foreach (BattleEnemyState enemyState in GetTargetEnemies(state, effect.TargetSide))
+            foreach (BattleEnemyState enemyState in _enemyActionSelector.GetTargetEnemies(state, effect.TargetSide))
             {
                 ApplyStatus(enemyState.Statuses, effect.StatusType, effect.StatusValue);
             }
@@ -378,7 +381,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵へのダメージをBlock込みで適用する
         /// </summary>
-        private static int ApplyDamageToEnemy(BattleSceneState state, BattleEnemyState enemyState, int damage)
+        private int ApplyDamageToEnemy(BattleSceneState state, BattleEnemyState enemyState, int damage)
         {
             int remainingDamage = Mathf.Max(0, damage - enemyState.Block);
             enemyState.Block = Mathf.Max(0, enemyState.Block - damage);
@@ -387,7 +390,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 enemyState.Hp = 0;
                 enemyState.IsDefeated = true;
-                NormalizeSelectedEnemyIndex(state);
+                _enemyActionSelector.NormalizeSelectedEnemyIndex(state);
             }
 
             return remainingDamage;
@@ -544,133 +547,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 現在の敵行動を選出する
-        /// </summary>
-        private static RuntimeEnemyAction SelectEnemyAction(BattleEnemyState enemyState, IBattleRandomProvider randomProvider)
-        {
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            if (actions == null || actions.Count == 0)
-            {
-                return null;
-            }
-
-            List<RuntimeEnemyAction> openingActions = FilterActions(actions, RepeatRule.OpeningOnly);
-            if (enemyState.TurnCount == 0 && openingActions.Count > 0)
-            {
-                return openingActions[0];
-            }
-
-            List<RuntimeEnemyAction> repeatActions = FilterActions(actions, RepeatRule.RepeatAfterOpening);
-            if (enemyState.TurnCount > 0 && repeatActions.Count > 0)
-            {
-                return repeatActions[0];
-            }
-
-            List<RuntimeEnemyAction> afterOpeningRandomActions = FilterActions(actions, RepeatRule.AfterOpeningRandom);
-            if (enemyState.TurnCount > 0 && afterOpeningRandomActions.Count > 0)
-            {
-                int index = randomProvider.Range(0, afterOpeningRandomActions.Count);
-                return afterOpeningRandomActions[index];
-            }
-
-            List<RuntimeEnemyAction> randomActions = FilterActions(actions, RepeatRule.Random);
-            if (randomActions.Count > 0)
-            {
-                int index = randomProvider.Range(0, randomActions.Count);
-                return randomActions[index];
-            }
-
-            List<RuntimeEnemyAction> cycleActions = FilterActions(actions, RepeatRule.Cycle);
-            if (cycleActions.Count > 0)
-            {
-                RuntimeEnemyAction selected = cycleActions[enemyState.CycleIndex % cycleActions.Count];
-                enemyState.CycleIndex++;
-                return selected;
-            }
-
-            return actions[0];
-        }
-
-        /// <summary>
-        /// 効果対象の敵一覧取得
-        /// </summary>
-        private static IEnumerable<BattleEnemyState> GetTargetEnemies(BattleSceneState state, TargetSide targetSide)
-        {
-            if (state == null)
-            {
-                yield break;
-            }
-
-            if (targetSide == TargetSide.AllEnemies)
-            {
-                for (int i = 0; i < state.Enemies.Count; i++)
-                {
-                    BattleEnemyState enemyState = state.Enemies[i];
-                    if (enemyState != null && !enemyState.IsDefeated)
-                    {
-                        yield return enemyState;
-                    }
-                }
-
-                yield break;
-            }
-
-            BattleEnemyState selectedEnemy = GetSelectedEnemy(state);
-            if (selectedEnemy != null)
-            {
-                yield return selectedEnemy;
-            }
-        }
-
-        /// <summary>
-        /// 選択中の生存敵取得
-        /// </summary>
-        private static BattleEnemyState GetSelectedEnemy(BattleSceneState state)
-        {
-            NormalizeSelectedEnemyIndex(state);
-            if (state.SelectedEnemyIndex < 0 || state.SelectedEnemyIndex >= state.Enemies.Count)
-            {
-                return null;
-            }
-
-            BattleEnemyState enemyState = state.Enemies[state.SelectedEnemyIndex];
-            return enemyState != null && !enemyState.IsDefeated ? enemyState : null;
-        }
-
-        /// <summary>
-        /// 敵選択を生存敵へ補正する
-        /// </summary>
-        private static void NormalizeSelectedEnemyIndex(BattleSceneState state)
-        {
-            if (state == null || state.Enemies.Count == 0)
-            {
-                return;
-            }
-
-            if (state.SelectedEnemyIndex >= 0 &&
-                state.SelectedEnemyIndex < state.Enemies.Count &&
-                state.Enemies[state.SelectedEnemyIndex] != null &&
-                !state.Enemies[state.SelectedEnemyIndex].IsDefeated)
-            {
-                return;
-            }
-
-            for (int i = 0; i < state.Enemies.Count; i++)
-            {
-                if (state.Enemies[i] != null && !state.Enemies[i].IsDefeated)
-                {
-                    state.SelectedEnemyIndex = i;
-                    return;
-                }
-            }
-        }
-
-        /// <summary>
         /// 単体敵表示互換用stateを同期する
         /// </summary>
-        private static void SyncPrimaryEnemyState(BattleSceneState state)
+        private void SyncPrimaryEnemyState(BattleSceneState state)
         {
-            BattleEnemyState selectedEnemy = GetSelectedEnemy(state);
+            BattleEnemyState selectedEnemy = _enemyActionSelector.GetSelectedEnemy(state);
             if (selectedEnemy == null)
             {
                 state.CurrentEnemy = null;
@@ -700,24 +581,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 destination[entry.Key] = entry.Value;
             }
-        }
-
-        /// <summary>
-        /// 反復規則ごとに行動を抽出する
-        /// </summary>
-        private static List<RuntimeEnemyAction> FilterActions(IReadOnlyList<RuntimeEnemyAction> actions, RepeatRule repeatRule)
-        {
-            List<RuntimeEnemyAction> filtered = new List<RuntimeEnemyAction>();
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == repeatRule)
-                {
-                    filtered.Add(action);
-                }
-            }
-
-            return filtered;
         }
 
         /// <summary>
