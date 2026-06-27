@@ -1299,17 +1299,19 @@ namespace Dungeon.Tests.EditMode
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
             BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService),
+                shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
                 new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1324,17 +1326,19 @@ namespace Dungeon.Tests.EditMode
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
             BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService),
+                shopService,
                 combatEventService,
                 relicService,
                 potionService,
                 new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1349,17 +1353,19 @@ namespace Dungeon.Tests.EditMode
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
             BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService),
+                shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
                 new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 runSaveService,
                 new BattleCheckpointService());
         }
@@ -1385,6 +1391,7 @@ namespace Dungeon.Tests.EditMode
                 relicService,
                 potionService,
                 new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1399,17 +1406,19 @@ namespace Dungeon.Tests.EditMode
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
             BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
-                new FakeBattleShopService(),
+                new BattleSnapshotFactory(displayTextService, shopService),
+                shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
                 new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 null,
                 new BattleCheckpointService());
         }
