@@ -129,6 +129,20 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         /// <summary>
+        /// 新しい戦闘の開始に備えて戦闘関連の状態をリセットする
+        /// </summary>
+        public void PrepareForNewBattle()
+        {
+            BattleFinished = false;
+            SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
+            PlayerBlock = 0;
+            ClearSelectedEnemyDisplay();
+            Enemies.Clear();
+            SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
+        }
+
+        /// <summary>
         /// 所持アイテム選択状態を消去する
         /// </summary>
         public void ClearOwnedInspections()

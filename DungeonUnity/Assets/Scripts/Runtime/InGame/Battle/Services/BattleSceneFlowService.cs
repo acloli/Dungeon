@@ -684,13 +684,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OpenBattle(InGameNodeType nodeType)
         {
             SetCurrentPage(BattleScenePage.Battle);
-            _state.BattleFinished = false;
-            _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
-            _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
-            _state.PlayerBlock = 0;
-            _state.ClearSelectedEnemyDisplay();
-            _state.Enemies.Clear();
-            _state.SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
+            _state.PrepareForNewBattle();
             RuntimeEncounterFormation formation = _rules.SelectEncounterFormation(_runDefinition, nodeType, _randomProvider);
             if (formation != null)
             {

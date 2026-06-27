@@ -96,6 +96,35 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.PendingPotionOffer, Is.Null);
         }
 
+        [Test]
+        public void PrepareForNewBattle_ResetsCombatFieldsTogether()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                BattleFinished = true,
+                SelectedCardIndex = 2,
+                PlayerEnergy = 1,
+                PlayerBlock = 8,
+                SelectedEnemyIndex = 1,
+                CurrentEnemy = BattleTestData.Enemy(3001).Build(),
+                EnemyHp = 5,
+                EnemyBlock = 3
+            };
+            state.Enemies.Add(CreateEnemyState());
+
+            state.PrepareForNewBattle();
+
+            Assert.That(state.BattleFinished, Is.False);
+            Assert.That(state.SelectedCardIndex, Is.EqualTo(UnselectedIndex));
+            Assert.That(state.PlayerEnergy, Is.EqualTo(3));
+            Assert.That(state.PlayerBlock, Is.EqualTo(0));
+            Assert.That(state.Enemies, Is.Empty);
+            Assert.That(state.SelectedEnemyIndex, Is.EqualTo(0));
+            Assert.That(state.CurrentEnemy, Is.Null);
+            Assert.That(state.EnemyHp, Is.EqualTo(0));
+            Assert.That(state.EnemyBlock, Is.EqualTo(0));
+        }
+
         private static BattleEnemyState CreateEnemyState()
         {
             RuntimeEnemyBuilder builder = BattleTestData.Enemy(3001);
