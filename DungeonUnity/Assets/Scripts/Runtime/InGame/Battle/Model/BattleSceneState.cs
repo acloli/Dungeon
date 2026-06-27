@@ -199,6 +199,33 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         /// <summary>
+        /// 指定インデックスへのノード遷移が可能か判定する
+        /// </summary>
+        public bool CanMoveToNode(int index)
+        {
+            if (CurrentNodeIndex < 0)
+            {
+                return index == 0;
+            }
+
+            RuntimeMapNode currentNode = Nodes[CurrentNodeIndex];
+            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
+            {
+                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
+                {
+                    if (currentNode.NextNodeIndices[i] == index)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            return index == CurrentNodeIndex + 1;
+        }
+
+        /// <summary>
         /// 辞書内容を複写する
         /// </summary>
         private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)

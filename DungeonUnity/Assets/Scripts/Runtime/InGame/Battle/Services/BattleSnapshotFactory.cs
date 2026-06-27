@@ -292,7 +292,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             for (int i = 0; i < state.Nodes.Count; i++)
             {
-                if (CanMoveToNode(state, i))
+                if (state.CanMoveToNode(i))
                 {
                     indices.Add(i);
                 }
@@ -385,30 +385,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return views;
-        }
-
-        private bool CanMoveToNode(BattleSceneState state, int index)
-        {
-            if (state.CurrentNodeIndex < 0)
-            {
-                return index == 0;
-            }
-
-            RuntimeMapNode currentNode = state.Nodes[state.CurrentNodeIndex];
-            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
-            {
-                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
-                {
-                    if (currentNode.NextNodeIndices[i] == index)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return index == state.CurrentNodeIndex + 1;
         }
 
         private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)

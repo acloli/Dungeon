@@ -223,7 +223,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            if (!CanMoveToNode(index))
+            if (!_state.CanMoveToNode(index))
             {
                 _state.MapMessage = BattleSceneConstants.NextNodeOnly;
                 return;
@@ -810,34 +810,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             return string.Format(BattleSceneConstants.CardResolvedFormat, card.DisplayName);
         }
-
-        /// <summary>
-        /// ノード遷移可能判定
-        /// </summary>
-        private bool CanMoveToNode(int index)
-        {
-            if (_state.CurrentNodeIndex < 0)
-            {
-                return index == 0;
-            }
-
-            RuntimeMapNode currentNode = _state.Nodes[_state.CurrentNodeIndex];
-            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
-            {
-                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
-                {
-                    if (currentNode.NextNodeIndices[i] == index)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return index == _state.CurrentNodeIndex + 1;
-        }
-
 
         /// <summary>
         /// 選択敵を旧表示項目へ同期する
