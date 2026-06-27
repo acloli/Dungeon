@@ -15,7 +15,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleSceneFlowServiceの編集モード試験クラス
+    /// BattleSceneFlowServiceのEditorモードテストクラス
     /// </summary>
     public sealed class BattleSceneFlowServiceTests
     {
@@ -773,6 +773,27 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ConfirmCardSelect_UpgradeMode_RequestSave_NormalizesCheckpointToRestShop()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeCard strike = CreateCard(1001, "Strike", 1, 6, upgradeCardId: 1002);
+            RuntimeCard strikePlus = CreateCard(1002, "Strike+", 1, 9, isUpgraded: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }) },
+                starterDeck: new[] { strike },
+                additionalCards: new[] { strikePlus });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyUpgrade();
+            service.ConfirmCardSelect(strike);
+
+            Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.RestShop));
+            Assert.That(runSaveService.LastSavedData.DeckCardIds, Is.EqualTo(new[] { 1002 }));
+        }
+
+        [Test]
         public void SelectReward_RequestSave_SavesDeckCheckpoint()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -786,6 +807,37 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.DeckCardIds, Does.Contain(1002));
+        }
+
+        [Test]
+        public void ClaimGold_ThenContinueFromReward_UpdatesGoldAndClearsRewardFlags()
+        {
+            RuntimeCard finisher = CreateCard(1001, "Finisher", 1, 99);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { finisher },
+                rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot beforeClaimSnapshot = service.CreateSnapshot();
+            int startingGold = Shop(beforeClaimSnapshot).Gold;
+            int rewardGold = Reward(beforeClaimSnapshot).BattleGoldReward;
+            service.ClaimGold();
+            BattleSceneSnapshot rewardSnapshot = service.CreateSnapshot();
+
+            Assert.That(Reward(rewardSnapshot).GoldClaimed, Is.True);
+            Assert.That(Shop(rewardSnapshot).Gold, Is.EqualTo(startingGold + rewardGold));
+            Assert.That(Reward(rewardSnapshot).BattleGoldReward, Is.EqualTo(0));
+
+            service.ContinueFromReward();
+            BattleSceneSnapshot mapSnapshot = service.CreateSnapshot();
+
+            Assert.That(mapSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Reward(mapSnapshot).GoldClaimed, Is.False);
+            Assert.That(Shop(mapSnapshot).Gold, Is.EqualTo(startingGold + rewardGold));
         }
 
         [Test]
@@ -1140,6 +1192,22 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_EventNode_WithNoConfiguredEvents_ReturnsToMap()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: Array.Empty<RuntimeEvent>());
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Event(snapshot).CurrentEvent, Is.Null);
+        }
+
+        [Test]
         public void SelectEventChoice_GainGold_AppliesEffectAndReturnsToMap()
         {
             RuntimeEvent evt = new RuntimeEvent(
@@ -1226,17 +1294,27 @@ namespace Dungeon.Tests.EditMode
 
         private static BattleSceneFlowService CreateService(RuntimeRunDefinition runDefinition, params int[] values)
         {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
-                new BattleSceneRules(),
-                new SequenceRandomProvider(values),
+                rules,
+                randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
-                new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
-                new BattleCombatEventService(new BattleRelicService()),
-                new BattleRelicService(),
-                new BattlePotionService(),
-                new BattleEventService());
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
         }
 
         private static BattleSceneFlowService CreateServiceWithCombatEvents(
@@ -1244,17 +1322,27 @@ namespace Dungeon.Tests.EditMode
             IBattleCombatEventService combatEventService,
             params int[] values)
         {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
-                new BattleSceneRules(),
-                new SequenceRandomProvider(values),
+                rules,
+                randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
-                new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                shopService,
                 combatEventService,
-                new BattleRelicService(),
-                new BattlePotionService(),
-                new BattleEventService());
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
         }
 
         private static BattleSceneFlowService CreateServiceWithRunSave(
@@ -1262,18 +1350,27 @@ namespace Dungeon.Tests.EditMode
             IRunSaveService runSaveService,
             params int[] values)
         {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
-                new BattleSceneRules(),
-                new SequenceRandomProvider(values),
+                rules,
+                randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
-                new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), new FakeBattleShopService()),
-                new FakeBattleShopService(),
-                new BattleCombatEventService(new BattleRelicService()),
-                new BattleRelicService(),
-                new BattlePotionService(),
-                new BattleEventService(),
-                runSaveService);
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                runSaveService,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
         }
 
         private static BattleSceneFlowService CreateServiceWithShop(
@@ -1281,17 +1378,26 @@ namespace Dungeon.Tests.EditMode
             IBattleShopService shopService,
             params int[] values)
         {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
-                new BattleSceneRules(),
-                new SequenceRandomProvider(values),
+                rules,
+                randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
-                new BattleRewardService(),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService),
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
                 shopService,
-                new BattleCombatEventService(new BattleRelicService()),
-                new BattleRelicService(),
-                new BattlePotionService(),
-                new BattleEventService());
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
         }
 
         private static BattleSceneFlowService CreateServiceWithDisplayText(
@@ -1299,17 +1405,27 @@ namespace Dungeon.Tests.EditMode
             IBattleDisplayTextService displayTextService,
             params int[] values)
         {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
             return new BattleSceneFlowService(
-                new BattleSceneRules(),
-                new SequenceRandomProvider(values),
+                rules,
+                randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
-                new BattleRewardService(),
-                new BattleSnapshotFactory(displayTextService, new FakeBattleShopService()),
-                new FakeBattleShopService(),
-                new BattleCombatEventService(new BattleRelicService()),
-                new BattleRelicService(),
-                new BattlePotionService(),
-                new BattleEventService());
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(displayTextService, shopService, new BattleEnemyActionSelector()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
         }
 
         private static RuntimeRunDefinition CreateRunDefinition(

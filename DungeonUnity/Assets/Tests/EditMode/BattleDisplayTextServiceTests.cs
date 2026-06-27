@@ -10,7 +10,7 @@ using TFramework.Localization;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleDisplayTextServiceのEditモードテストクラス
+    /// BattleDisplayTextServiceのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleDisplayTextServiceTests

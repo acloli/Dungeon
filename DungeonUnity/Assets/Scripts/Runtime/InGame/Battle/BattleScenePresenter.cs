@@ -16,6 +16,7 @@ namespace Dungeon.Runtime.InGame.Battle
     public sealed class BattleScenePresenter
     {
         private readonly IBattleSceneFlowService _flowService;
+        private readonly IBattleSceneQueryService _queryService;
         private readonly BattlePagePresenter _battlePagePresenter;
         private readonly IBattleSceneUiCoordinator _uiCoordinator;
         private readonly IRunSaveService _runSaveService;
@@ -30,11 +31,13 @@ namespace Dungeon.Runtime.InGame.Battle
 
         public BattleScenePresenter(
             IBattleSceneFlowService flowService,
+            IBattleSceneQueryService queryService,
             BattlePagePresenter battlePagePresenter,
             IBattleSceneUiCoordinator uiCoordinator,
             IRunSaveService runSaveService = null)
         {
             _flowService = flowService;
+            _queryService = queryService;
             _battlePagePresenter = battlePagePresenter;
             _uiCoordinator = uiCoordinator;
             _runSaveService = runSaveService;
@@ -227,7 +230,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
+            BattleSceneSnapshot snapshot = _queryService.CreateSnapshot();
             _lastSnapshot = snapshot;
             _battlePagePresenter.Clear();
             RenderHostChrome(snapshot);
@@ -259,22 +262,22 @@ namespace Dungeon.Runtime.InGame.Battle
                         {
                             case RewardDialogActionType.ClaimGold:
                                 _flowService.ClaimGold();
-                                snapshot = _flowService.CreateSnapshot();
+                                snapshot = _queryService.CreateSnapshot();
                                 break;
                             case RewardDialogActionType.ClaimPotion:
                                 _flowService.ClaimPotion();
-                                snapshot = _flowService.CreateSnapshot();
+                                snapshot = _queryService.CreateSnapshot();
                                 break;
                             case RewardDialogActionType.ClaimRelic:
                                 _flowService.ClaimRelic();
-                                snapshot = _flowService.CreateSnapshot();
+                                snapshot = _queryService.CreateSnapshot();
                                 break;
                             case RewardDialogActionType.PickCard:
                                 RuntimeRewardEntry cardEntry = await _uiCoordinator.ShowCardPickAsync(snapshot.Reward, ct);
                                 if (cardEntry != null)
                                 {
                                     _flowService.SelectReward(cardEntry);
-                                    snapshot = _flowService.CreateSnapshot();
+                                    snapshot = _queryService.CreateSnapshot();
                                 }
                                 break;
                             case RewardDialogActionType.Continue:
@@ -285,7 +288,7 @@ namespace Dungeon.Runtime.InGame.Battle
 
                         if (rewardActive && await TryResolvePotionOfferAsync(snapshot, ct))
                         {
-                            snapshot = _flowService.CreateSnapshot();
+                            snapshot = _queryService.CreateSnapshot();
                             _lastSnapshot = snapshot;
                             RenderHostChrome(snapshot);
                         }
@@ -306,7 +309,7 @@ namespace Dungeon.Runtime.InGame.Battle
                     break;
                 case BattleScenePage.CardSelect:
                     _view.SetSaveQuitVisible(true);
-                    CardSelectMode cardSelectMode = _flowService.GetCardSelectMode();
+                    CardSelectMode cardSelectMode = _queryService.GetCardSelectMode();
                     BattleCardSelectDialogParam cardSelectParam = CreateCardSelectDialogParam(snapshot, cardSelectMode);
                     CardSelectDialogResult cardSelectResult = await _uiCoordinator.ShowCardSelectAsync(cardSelectParam, ct);
                     if (cardSelectResult.IsCanceled)
@@ -336,25 +339,25 @@ namespace Dungeon.Runtime.InGame.Battle
         private BattleCardSelectDialogRefreshData OnUpgradeCardConfirmed(RuntimeCard card)
         {
             _flowService.ConfirmCardSelect(card);
-            BattleSceneSnapshot snapshot = _flowService.CreateSnapshot();
+            BattleSceneSnapshot snapshot = _queryService.CreateSnapshot();
             return new BattleCardSelectDialogRefreshData(
-                _flowService.GetCardSelectCards(),
-                _flowService.GetCardSelectPrices(),
-                _flowService.GetCardSelectUpgradedCards(),
+                _queryService.GetCardSelectCards(),
+                _queryService.GetCardSelectPrices(),
+                _queryService.GetCardSelectUpgradedCards(),
                 snapshot.Shop.Gold,
-                _flowService.GetCardSelectMessage());
+                _queryService.GetCardSelectMessage());
         }
 
         private BattleCardSelectDialogParam CreateCardSelectDialogParam(BattleSceneSnapshot snapshot, CardSelectMode cardSelectMode)
         {
             return new BattleCardSelectDialogParam(
                 snapshot.Shop.Gold,
-                _flowService.GetCardSelectCards(),
+                _queryService.GetCardSelectCards(),
                 cardSelectMode,
                 cardSelectMode == CardSelectMode.Upgrade,
-                _flowService.GetCardSelectPrices(),
-                _flowService.GetCardSelectUpgradedCards(),
-                _flowService.GetCardSelectMessage(),
+                _queryService.GetCardSelectPrices(),
+                _queryService.GetCardSelectUpgradedCards(),
+                _queryService.GetCardSelectMessage(),
                 cardSelectMode == CardSelectMode.Upgrade ? OnUpgradeCardConfirmed : null);
         }
 

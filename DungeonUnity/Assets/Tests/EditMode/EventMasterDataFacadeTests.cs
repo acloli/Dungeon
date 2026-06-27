@@ -11,7 +11,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// EventMasterDataFacadeのEditモードテストクラス
+    /// EventMasterDataFacadeのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class EventMasterDataFacadeTests

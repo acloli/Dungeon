@@ -15,7 +15,7 @@ using NUnit.Framework;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleScenePresenterのEditモードテストクラス
+    /// BattleScenePresenterのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleScenePresenterTests
@@ -26,7 +26,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -42,7 +42,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnEndTurnClicked();
@@ -57,7 +57,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnHandCardClicked(0);
@@ -75,7 +75,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -104,7 +104,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -147,7 +147,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -176,7 +176,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -203,7 +203,7 @@ namespace Dungeon.Tests.EditMode
                 CardToSelectBeforeResult = strike,
                 CardSelectResult = new CardSelectDialogResult { IsCanceled = true }
             };
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -231,7 +231,7 @@ namespace Dungeon.Tests.EditMode
             {
                 CardSelectResult = new CardSelectDialogResult { IsCanceled = true }
             };
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -252,7 +252,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnOwnedRelicClicked(0);
@@ -276,7 +276,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -306,7 +306,7 @@ namespace Dungeon.Tests.EditMode
             };
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
             presenter.OnUsePotionClicked();
@@ -327,7 +327,7 @@ namespace Dungeon.Tests.EditMode
                 HasSavedRunResult = true,
                 LoadResult = CreateValidSaveData()
             };
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -347,7 +347,7 @@ namespace Dungeon.Tests.EditMode
                 HasSavedRunResult = true,
                 LoadResult = new RunSaveData { RunProfileId = 0 }
             };
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator, runSaveService);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -362,7 +362,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -375,7 +375,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -389,7 +389,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
             bool called = false;
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None, () => called = true).GetAwaiter().GetResult();
             view.InvokeSaveQuit();
@@ -489,7 +489,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -504,7 +504,7 @@ namespace Dungeon.Tests.EditMode
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
             FakeBattleSceneHostView view = new FakeBattleSceneHostView();
             FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
-            BattleScenePresenter presenter = new BattleScenePresenter(flowService, new BattlePagePresenter(), uiCoordinator);
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
 
             presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
 

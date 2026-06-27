@@ -11,11 +11,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     {
         private readonly IBattleDisplayTextService _displayTextService;
         private readonly IBattleShopService _shopService;
+        private readonly IBattleEnemyActionSelector _enemyActionSelector;
 
-        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService, IBattleShopService shopService)
+        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService, IBattleShopService shopService, IBattleEnemyActionSelector enemyActionSelector)
         {
             _displayTextService = displayTextService;
             _shopService = shopService;
+            _enemyActionSelector = enemyActionSelector;
         }
 
         public BattleSceneSnapshot CreateSnapshot(BattleSceneState state)
@@ -135,7 +137,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
         {
-            BattleEnemyState enemyState = GetSelectedEnemy(state);
+            BattleEnemyState enemyState = _enemyActionSelector.GetSelectedEnemy(state);
             RuntimeEnemyAction action = SelectEnemyActionPreview(state, enemyState);
             if (action == null)
             {
@@ -265,30 +267,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 _displayTextService.GetBuffName(action.BuffType));
         }
 
-        private BattleEnemyState GetSelectedEnemy(BattleSceneState state)
-        {
-            if (state.SelectedEnemyIndex >= 0 && state.SelectedEnemyIndex < state.Enemies.Count)
-            {
-                BattleEnemyState enemyState = state.Enemies[state.SelectedEnemyIndex];
-                if (enemyState != null && !enemyState.IsDefeated)
-                {
-                    return enemyState;
-                }
-            }
-
-            for (int i = 0; i < state.Enemies.Count; i++)
-            {
-                BattleEnemyState enemyState = state.Enemies[i];
-                if (enemyState != null && !enemyState.IsDefeated)
-                {
-                    state.SelectedEnemyIndex = i;
-                    return enemyState;
-                }
-            }
-
-            return null;
-        }
-
         private IReadOnlyList<int> BuildAvailableNodeIndices(BattleSceneState state)
         {
             List<int> indices = new List<int>();
@@ -299,7 +277,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             for (int i = 0; i < state.Nodes.Count; i++)
             {
-                if (CanMoveToNode(state, i))
+                if (state.CanMoveToNode(i))
                 {
                     indices.Add(i);
                 }
@@ -392,30 +370,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return views;
-        }
-
-        private bool CanMoveToNode(BattleSceneState state, int index)
-        {
-            if (state.CurrentNodeIndex < 0)
-            {
-                return index == 0;
-            }
-
-            RuntimeMapNode currentNode = state.Nodes[state.CurrentNodeIndex];
-            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
-            {
-                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
-                {
-                    if (currentNode.NextNodeIndices[i] == index)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return index == state.CurrentNodeIndex + 1;
         }
 
         private IReadOnlyList<BattleStatusViewModel> BuildStatusViews(IReadOnlyDictionary<StatusType, int> statuses)

@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleRelicServiceのEditモードテストクラス
+    /// BattleRelicServiceのEditorモードテストクラス
     /// </summary>
     public sealed class BattleRelicServiceTests
     {
