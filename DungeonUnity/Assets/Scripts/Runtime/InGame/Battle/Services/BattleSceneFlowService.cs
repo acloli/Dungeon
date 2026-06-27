@@ -18,7 +18,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
-        private readonly IBattleRewardService _rewardService;
+        private readonly IBattleRewardFlowService _rewardFlowService;
         private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IBattleShopService _shopService;
         private readonly IBattleCombatEventService _combatEventService;
@@ -34,7 +34,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleMasterDataFacade masterDataFacade,
-            IBattleRewardService rewardService,
+            IBattleRewardFlowService rewardFlowService,
             IBattleSnapshotFactory snapshotFactory,
             IBattleShopService shopService,
             IBattleCombatEventService combatEventService,
@@ -47,7 +47,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
-            _rewardService = rewardService;
+            _rewardFlowService = rewardFlowService;
             _snapshotFactory = snapshotFactory;
             _shopService = shopService;
             _combatEventService = combatEventService;
@@ -390,9 +390,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectReward(RuntimeRewardEntry rewardEntry)
         {
-            if (rewardEntry == null) return;
-            _rewardService.ApplyReward(_state, rewardEntry);
-            _state.CardRewardPicked = true;
+            _rewardFlowService.SelectReward(_state, rewardEntry);
         }
 
         /// <summary>
@@ -400,15 +398,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ContinueFromReward()
         {
-            _state.GoldClaimed = false;
-            _state.PotionClaimed = false;
-            _state.RelicClaimed = false;
-            _state.PotionDropped = false;
-            _state.PendingRelicReward = null;
-            _state.PendingPotionReward = null;
-            _state.PendingPotionOffer = null;
-            _state.CardRewardPicked = false;
-            OpenMap();
+            _rewardFlowService.ContinueFromReward(_state, OpenMap);
             RequestSave();
         }
 
@@ -417,9 +407,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ClaimGold()
         {
-            _state.GoldClaimed = true;
-            _state.Gold += _state.BattleGoldReward;
-            _state.BattleGoldReward = 0;
+            _rewardFlowService.ClaimGold(_state);
         }
 
         /// <summary>
@@ -427,24 +415,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ClaimPotion()
         {
-            if (_state.PendingPotionReward == null)
-            {
-                return;
-            }
-
-            if (_potionService.HasCapacity(_state))
-            {
-                if (_potionService.AddOwnedPotion(_state, _state.PendingPotionReward))
-                {
-                    _state.PotionClaimed = true;
-                    _state.PendingPotionReward = null;
-                    ClearOwnedPotionInspection();
-                }
-
-                return;
-            }
-
-            _state.PendingPotionOffer = _potionService.CreateOffer(_state.PendingPotionReward, PotionOfferSource.Reward);
+            _rewardFlowService.ClaimPotion(_state);
         }
 
         /// <summary>
@@ -452,17 +423,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ClaimRelic()
         {
-            if (_state.PendingRelicReward == null)
-            {
-                return;
-            }
-
-            if (_relicService.AddOwnedRelic(_state, _state.PendingRelicReward))
-            {
-                _state.RelicClaimed = true;
-                _state.PendingRelicReward = null;
-                ClearOwnedRelicInspection();
-            }
+            _rewardFlowService.ClaimRelic(_state);
         }
 
         /// <summary>
@@ -847,20 +808,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OnBattleVictory()
         {
-            _state.BattleFinished = true;
-            _state.BattleGoldReward = CalculateBattleGoldReward();
-            _state.PendingPotionReward = null;
-            _state.PotionDropped = _rules.RollPotionDrop(_runDefinition, _randomProvider);
-            if (_state.PotionDropped)
-            {
-                _state.PendingPotionReward = _potionService.RollBattleRewardPotion(_runDefinition, _randomProvider);
-            }
-            _state.PendingRelicReward = null;
-            if (_rules.RollRelicDrop(_runDefinition, _randomProvider))
-            {
-                _state.PendingRelicReward = _relicService.RollBattleRewardRelic(_state, _runDefinition, _randomProvider);
-            }
-            _state.CardRewardPicked = false;
+            _rewardFlowService.PrepareBattleRewards(_state, _runDefinition, CalculateBattleGoldReward());
 
             if (GetCurrentNodeType() == InGameNodeType.Boss)
             {
@@ -876,13 +824,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenReward()
         {
-            SetCurrentPage(BattleScenePage.Reward);
-            _state.RewardChoices.Clear();
-            IReadOnlyList<RuntimeRewardEntry> rewardChoices = _rules.SelectCardRewardChoices(_state, _runDefinition, _randomProvider);
-            for (int i = 0; i < rewardChoices.Count; i++)
-            {
-                _state.RewardChoices.Add(rewardChoices[i]);
-            }
+            _rewardFlowService.OpenReward(_state, _runDefinition, SetCurrentPage);
         }
 
         /// <summary>
