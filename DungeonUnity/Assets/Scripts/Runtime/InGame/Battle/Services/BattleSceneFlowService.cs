@@ -28,6 +28,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleRestShopFlowService _restShopFlowService;
         private readonly IRunSaveService _runSaveService;
         private readonly IBattleCheckpointService _checkpointService;
+        private readonly IBattleEnemyActionSelector _enemyActionSelector;
 
         private RuntimeRunDefinition _runDefinition;
 
@@ -44,7 +45,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleEventFlowService eventFlowService,
             IBattleRestShopFlowService restShopFlowService,
             IRunSaveService runSaveService,
-            IBattleCheckpointService checkpointService)
+            IBattleCheckpointService checkpointService,
+            IBattleEnemyActionSelector enemyActionSelector)
         {
             _rules = rules;
             _randomProvider = randomProvider;
@@ -59,6 +61,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _restShopFlowService = restShopFlowService;
             _runSaveService = runSaveService;
             _checkpointService = checkpointService;
+            _enemyActionSelector = enemyActionSelector;
         }
 
         /// <summary>
@@ -837,38 +840,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
 
         /// <summary>
-        /// 選択中敵取得
-        /// </summary>
-        private BattleEnemyState GetSelectedEnemy()
-        {
-            if (_state.SelectedEnemyIndex >= 0 && _state.SelectedEnemyIndex < _state.Enemies.Count)
-            {
-                BattleEnemyState enemyState = _state.Enemies[_state.SelectedEnemyIndex];
-                if (enemyState != null && !enemyState.IsDefeated)
-                {
-                    return enemyState;
-                }
-            }
-
-            for (int i = 0; i < _state.Enemies.Count; i++)
-            {
-                BattleEnemyState enemyState = _state.Enemies[i];
-                if (enemyState != null && !enemyState.IsDefeated)
-                {
-                    _state.SelectedEnemyIndex = i;
-                    return enemyState;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// 選択敵を旧表示項目へ同期する
         /// </summary>
         private void SyncSelectedEnemyForDisplay()
         {
-            BattleEnemyState enemyState = GetSelectedEnemy();
+            BattleEnemyState enemyState = _enemyActionSelector.GetSelectedEnemy(_state);
             if (enemyState == null)
             {
                 _state.ClearSelectedEnemyDisplay();
