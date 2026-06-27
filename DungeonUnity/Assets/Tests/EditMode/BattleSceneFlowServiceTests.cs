@@ -1294,7 +1294,7 @@ namespace Dungeon.Tests.EditMode
 
         private static BattleSceneFlowService CreateService(RuntimeRunDefinition runDefinition, params int[] values)
         {
-            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService());
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleEncounterSelector(), new BattleRewardRollService());
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
@@ -1321,7 +1321,7 @@ namespace Dungeon.Tests.EditMode
             IBattleCombatEventService combatEventService,
             params int[] values)
         {
-            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService());
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleEncounterSelector(), new BattleRewardRollService());
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
@@ -1348,7 +1348,7 @@ namespace Dungeon.Tests.EditMode
             IRunSaveService runSaveService,
             params int[] values)
         {
-            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService());
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleEncounterSelector(), new BattleRewardRollService());
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
@@ -1375,7 +1375,7 @@ namespace Dungeon.Tests.EditMode
             IBattleShopService shopService,
             params int[] values)
         {
-            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService());
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleEncounterSelector(), new BattleRewardRollService());
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
@@ -1401,7 +1401,7 @@ namespace Dungeon.Tests.EditMode
             IBattleDisplayTextService displayTextService,
             params int[] values)
         {
-            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService());
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleEncounterSelector(), new BattleRewardRollService());
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();

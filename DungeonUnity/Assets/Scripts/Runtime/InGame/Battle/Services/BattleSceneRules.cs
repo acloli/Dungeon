@@ -14,10 +14,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     public sealed class BattleSceneRules : IBattleSceneRules
     {
         private readonly IBattleDeckService _deckService;
+        private readonly IBattleEncounterSelector _encounterSelector;
+        private readonly IBattleRewardRollService _rewardRollService;
 
-        public BattleSceneRules(IBattleDeckService deckService)
+        public BattleSceneRules(
+            IBattleDeckService deckService,
+            IBattleEncounterSelector encounterSelector,
+            IBattleRewardRollService rewardRollService)
         {
             _deckService = deckService;
+            _encounterSelector = encounterSelector;
+            _rewardRollService = rewardRollService;
         }
 
         /// <summary>
@@ -117,16 +124,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public RuntimeEncounterFormation SelectEncounterFormation(RuntimeRunDefinition runDefinition, InGameNodeType nodeType, IBattleRandomProvider randomProvider)
         {
-            if (runDefinition == null ||
-                !runDefinition.EncountersByNodeType.TryGetValue(nodeType, out IReadOnlyList<RuntimeEncounterEntry> encounters) ||
-                encounters == null ||
-                encounters.Count == 0)
-            {
-                return CreateFallbackFormation(nodeType);
-            }
-
-            RuntimeEncounterEntry selected = SelectWeightedEntry(encounters, randomProvider);
-            return selected != null ? selected.Formation : CreateFallbackFormation(nodeType);
+            return _encounterSelector.SelectEncounterFormation(runDefinition, nodeType, randomProvider);
         }
 
         /// <summary>
@@ -134,19 +132,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public int RollEnemyHp(RuntimeEnemy enemy, IBattleRandomProvider randomProvider)
         {
-            if (enemy == null)
-            {
-                return BattleSceneConstants.DefaultEnemyHp;
-            }
-
-            int minHp = Mathf.Max(1, enemy.HpMin);
-            int maxHp = Mathf.Max(minHp, enemy.HpMax);
-            if (minHp == maxHp)
-            {
-                return maxHp;
-            }
-
-            return randomProvider.Range(minHp, maxHp + 1);
+            return _encounterSelector.RollEnemyHp(enemy, randomProvider);
         }
 
         /// <summary>
@@ -154,49 +140,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyList<RuntimeRewardEntry> SelectCardRewardChoices(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
-            List<RuntimeRewardEntry> rewards = new List<RuntimeRewardEntry>();
-            if (state == null)
-            {
-                return rewards;
-            }
-
-            List<RuntimeRewardEntry> candidates = BuildRewardCandidates(state, runDefinition);
-            int maxCount = runDefinition != null && runDefinition.CardRewardChoiceCount > 0
-                ? runDefinition.CardRewardChoiceCount
-                : BattleSceneConstants.DefaultRewardChoiceCount;
-            maxCount = Mathf.Min(maxCount, candidates.Count);
-
-            for (int i = 0; i < maxCount; i++)
-            {
-                RuntimeRewardEntry selected = SelectWeightedEntry(candidates, randomProvider);
-                if (selected == null)
-                {
-                    break;
-                }
-
-                rewards.Add(selected);
-                candidates.Remove(selected);
-            }
-
-            if (rewards.Count > 0)
-            {
-                return rewards;
-            }
-
-            // 報酬定義が不足している場合は現在デッキから重複を避けて補完する
-            HashSet<int> pickedCardIds = new HashSet<int>();
-            for (int i = 0; i < state.Deck.Count && rewards.Count < BattleSceneConstants.DefaultRewardChoiceCount; i++)
-            {
-                RuntimeCard card = state.Deck[i];
-                if (card == null || !pickedCardIds.Add(card.Id))
-                {
-                    continue;
-                }
-
-                rewards.Add(new RuntimeRewardEntry(RewardType.Card, 1, card, null, null, 1, 1, 999));
-            }
-
-            return rewards;
+            return _rewardRollService.SelectCardRewardChoices(state, runDefinition, randomProvider);
         }
 
         /// <summary>
@@ -204,8 +148,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public bool RollPotionDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
-            if (runDefinition == null || runDefinition.PotionDropChance <= 0) return false;
-            return randomProvider.Range(0, 100) < runDefinition.PotionDropChance;
+            return _rewardRollService.RollPotionDrop(runDefinition, randomProvider);
         }
 
         /// <summary>
@@ -213,8 +156,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public bool RollRelicDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
         {
-            if (runDefinition == null || runDefinition.RelicDropChance <= 0) return false;
-            return randomProvider.Range(0, 100) < runDefinition.RelicDropChance;
+            return _rewardRollService.RollRelicDrop(runDefinition, randomProvider);
         }
 
         /// <summary>
@@ -779,100 +721,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 報酬候補一覧構築
-        /// </summary>
-        private static List<RuntimeRewardEntry> BuildRewardCandidates(BattleSceneState state, RuntimeRunDefinition runDefinition)
-        {
-            List<RuntimeRewardEntry> candidates = new List<RuntimeRewardEntry>();
-            if (runDefinition == null)
-            {
-                return candidates;
-            }
-
-            int currentFloor = GetCurrentFloor(state);
-            for (int i = 0; i < runDefinition.RewardPool.Count; i++)
-            {
-                RuntimeRewardEntry entry = runDefinition.RewardPool[i];
-                if (entry == null || entry.Card == null) continue;
-
-                if (currentFloor < entry.MinFloor || currentFloor > entry.MaxFloor)
-                {
-                    continue;
-                }
-
-                candidates.Add(entry);
-            }
-
-            return candidates;
-        }
-
-        /// <summary>
-        /// 現在階層取得
-        /// </summary>
-        private static int GetCurrentFloor(BattleSceneState state)
-        {
-            if (state == null ||
-                state.CurrentNodeIndex < 0 ||
-                state.CurrentNodeIndex >= state.Nodes.Count)
-            {
-                return 1;
-            }
-
-            return state.Nodes[state.CurrentNodeIndex].Floor;
-        }
-
-        /// <summary>
-        /// 重み付き候補選択
-        /// </summary>
-        private static T SelectWeightedEntry<T>(IReadOnlyList<T> entries, IBattleRandomProvider randomProvider)
-            where T : class
-        {
-            if (entries == null || entries.Count == 0)
-            {
-                return null;
-            }
-
-            int totalWeight = 0;
-            for (int i = 0; i < entries.Count; i++)
-            {
-                switch (entries[i])
-                {
-                    case RuntimeEncounterEntry encounter:
-                        totalWeight += Mathf.Max(0, encounter.Weight);
-                        break;
-                    case RuntimeRewardEntry reward:
-                        totalWeight += Mathf.Max(0, reward.Weight);
-                        break;
-                }
-            }
-
-            if (totalWeight <= 0)
-            {
-                return entries[0];
-            }
-
-            int roll = randomProvider.Range(0, totalWeight);
-            int currentWeight = 0;
-            for (int i = 0; i < entries.Count; i++)
-            {
-                int weight = entries[i] switch
-                {
-                    RuntimeEncounterEntry encounter => Mathf.Max(0, encounter.Weight),
-                    RuntimeRewardEntry reward => Mathf.Max(0, reward.Weight),
-                    _ => 0
-                };
-
-                currentWeight += weight;
-                if (roll < currentWeight)
-                {
-                    return entries[i];
-                }
-            }
-
-            return entries[entries.Count - 1];
-        }
-
-        /// <summary>
         /// 既定ノード補完
         /// </summary>
         private static void AddDefaultNodes(List<RuntimeMapNode> nodes)
@@ -885,40 +733,5 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             nodes.Add(new RuntimeMapNode(6, "default_06", 6, InGameNodeType.Boss, BattleSceneConstants.DefaultBossNodeLabel, string.Empty, Array.Empty<int>()));
         }
 
-        /// <summary>
-        /// データ不足時のフォールバック敵生成
-        /// </summary>
-        private static RuntimeEncounterFormation CreateFallbackFormation(InGameNodeType nodeType)
-        {
-            int baseHp = nodeType == InGameNodeType.Boss ? 60 : BattleSceneConstants.DefaultEnemyHp;
-            int damage = nodeType == InGameNodeType.EliteBattle ? 8 : 4;
-            RuntimeEnemyAction action = new RuntimeEnemyAction(
-                1,
-                IntentType.Attack,
-                damage,
-                1,
-                0,
-                StatusType.None,
-                0,
-                BuffType.None,
-                0,
-                RepeatRule.RepeatAfterOpening);
-
-            RuntimeEnemy enemy = new RuntimeEnemy(
-                0,
-                "fallback_enemy",
-                BattleSceneConstants.UnknownEnemyName,
-                string.Empty,
-                nodeType == InGameNodeType.Boss ? EnemyTier.Boss : nodeType == InGameNodeType.EliteBattle ? EnemyTier.Elite : EnemyTier.Normal,
-                baseHp,
-                baseHp,
-                20,
-                new[] { action });
-            return new RuntimeEncounterFormation(
-                0,
-                "fallback_formation",
-                BattleSceneConstants.UnknownEnemyName,
-                new[] { new RuntimeEncounterEnemyEntry(enemy, 0) });
-        }
     }
 }
