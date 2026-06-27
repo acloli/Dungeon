@@ -8,62 +8,109 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleSceneState
     {
+        #region Card piles
+
         public List<RuntimeCard> Deck { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> DrawPile { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> DiscardPile { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> ExhaustPile { get; } = new List<RuntimeCard>();
         public List<RuntimeCard> Hand { get; } = new List<RuntimeCard>();
+
+        #endregion
+
+        #region Owned items
+
         public List<RuntimeRelic> OwnedRelics { get; } = new List<RuntimeRelic>();
         public List<RuntimePotion> OwnedPotions { get; } = new List<RuntimePotion>();
+        public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public int SelectedOwnedPotionIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public string OwnedRelicHintMessage { get; set; } = string.Empty;
+        public string OwnedPotionHintMessage { get; set; } = string.Empty;
+
+        #endregion
+
+        #region Reward
+
         public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
-        public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
-        public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
-        public List<BattleShopItemState> ShopItems { get; } = new List<BattleShopItemState>();
-        public bool IsCardRemovalSoldOut { get; set; }
-        public int CardRemovalCount { get; set; }
         public int BattleGoldReward { get; set; }
+        public bool GoldClaimed { get; set; }
         public bool PotionDropped { get; set; }
         public bool RelicDropped { get; set; }
-        public bool CardRewardPicked { get; set; }
-        public bool GoldClaimed { get; set; }
         public bool PotionClaimed { get; set; }
         public bool RelicClaimed { get; set; }
+        public bool CardRewardPicked { get; set; }
+        public RuntimeRelic PendingRelicReward { get; set; }
+        public RuntimePotion PendingPotionReward { get; set; }
+        public PendingPotionOffer PendingPotionOffer { get; set; }
+
+        #endregion
+
+        #region Map
+
+        public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
+        public int CurrentNodeIndex { get; set; } = BattleSceneConstants.DefaultNodeIndex;
+        public string MapMessage { get; set; } = string.Empty;
+
+        #endregion
+
+        #region Battle combat
+
         public Dictionary<StatusType, int> PlayerStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<StatusType, int> EnemyStatuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> PlayerBuffs { get; } = new Dictionary<BuffType, int>();
         public Dictionary<BuffType, int> EnemyBuffs { get; } = new Dictionary<BuffType, int>();
-
-        public BattleScenePage CurrentPage { get; set; } = BattleScenePage.Map;
-        public int CurrentNodeIndex { get; set; } = BattleSceneConstants.DefaultNodeIndex;
+        public List<BattleEnemyState> Enemies { get; } = new List<BattleEnemyState>();
         public int PlayerMaxHp { get; set; }
         public int PlayerHp { get; set; }
         public int PlayerEnergy { get; set; }
         public int PlayerBlock { get; set; }
-        public int Gold { get; set; }
         public RuntimeEnemy CurrentEnemy { get; set; }
         public int EnemyHp { get; set; }
         public int EnemyBlock { get; set; }
-        public bool BattleFinished { get; set; }
-        public int SelectedCardIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
-        public int SelectedEnemyIndex { get; set; } = BattleSceneConstants.DefaultEnemyTargetIndex;
-        public bool IsRestShopContinueEnabled { get; set; }
         public int EnemyTurnCount { get; set; }
         public int EnemyCycleIndex { get; set; }
-        public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
-        public int SelectedOwnedPotionIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
-        public string MapMessage { get; set; } = string.Empty;
+        public int SelectedCardIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public int SelectedEnemyIndex { get; set; } = BattleSceneConstants.DefaultEnemyTargetIndex;
+        public bool BattleFinished { get; set; }
         public string BattleHintMessage { get; set; } = string.Empty;
-        public string OwnedRelicHintMessage { get; set; } = string.Empty;
-        public string OwnedPotionHintMessage { get; set; } = string.Empty;
+        public string ResultMessage { get; set; } = string.Empty;
+
+        #endregion
+
+        #region Inventory
+
+        public int Gold { get; set; }
+
+        #endregion
+
+        #region RestShop
+
+        public List<BattleShopItemState> ShopItems { get; } = new List<BattleShopItemState>();
+        public bool IsCardRemovalSoldOut { get; set; }
+        public int CardRemovalCount { get; set; }
+        public bool IsRestShopContinueEnabled { get; set; }
         public string RestShopMessage { get; set; } = string.Empty;
         public string CardSelectMessage { get; set; } = string.Empty;
-        public string ResultMessage { get; set; } = string.Empty;
-        public RuntimeEvent CurrentEvent { get; set; }
-        public RuntimeRelic PendingRelicReward { get; set; }
-        public RuntimePotion PendingPotionReward { get; set; }
-        public PendingPotionOffer PendingPotionOffer { get; set; }
-        public string EventMessage { get; set; } = string.Empty;
         public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
+
+        #endregion
+
+        #region Event
+
+        public RuntimeEvent CurrentEvent { get; set; }
+        public string EventMessage { get; set; } = string.Empty;
+
+        #endregion
+
+        #region Page / global
+
+        public BattleScenePage CurrentPage { get; set; } = BattleScenePage.Map;
+
+        #endregion
+
+        // ---------------------------------------------------------------
+        // Centralized state transitions
+        // ---------------------------------------------------------------
 
         /// <summary>
         /// 選択中敵の旧表示項目を同期する
