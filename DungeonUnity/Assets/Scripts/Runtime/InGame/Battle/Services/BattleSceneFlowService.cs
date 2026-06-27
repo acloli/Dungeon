@@ -933,19 +933,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 辞書内容コピー
-        /// </summary>
-        private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
-        {
-            destination.Clear();
-            foreach (KeyValuePair<TKey, int> entry in source)
-            {
-                destination[entry.Key] = entry.Value;
-            }
-        }
-
-
-        /// <summary>
         /// 状態をセーブする
         /// </summary>
         private void RequestSave()
