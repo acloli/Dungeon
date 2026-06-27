@@ -36,7 +36,7 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.BattleEncounterSelector>(Lifetime.Singleton).As<Services.IBattleEncounterSelector>();
             builder.Register<Services.BattleRewardRollService>(Lifetime.Singleton).As<Services.IBattleRewardRollService>();
             builder.Register<Services.BattleSceneRules>(Lifetime.Singleton).As<Services.IBattleSceneRules>();
-            builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService>();
+            builder.Register<Services.BattleSceneFlowService>(Lifetime.Scoped).As<Services.IBattleSceneFlowService, Services.IBattleSceneQueryService>();
             builder.Register<BattlePagePresenter>(Lifetime.Scoped);
             builder.Register<BattleSceneUiCoordinator>(Lifetime.Scoped).As<IBattleSceneUiCoordinator>();
             builder.Register<BattleScenePresenter>(Lifetime.Scoped);

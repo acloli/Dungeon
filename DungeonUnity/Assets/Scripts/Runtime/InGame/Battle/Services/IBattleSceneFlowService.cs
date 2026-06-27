@@ -7,7 +7,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// <summary>
     /// BattleScene進行仲介インターフェース
     /// </summary>
-    public interface IBattleSceneFlowService
+    public interface IBattleSceneFlowService : IBattleSceneQueryService
     {
         /// <summary>
         /// Run初期化
