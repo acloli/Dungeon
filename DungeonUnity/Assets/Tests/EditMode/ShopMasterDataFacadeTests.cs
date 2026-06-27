@@ -11,7 +11,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// ShopMasterDataFacadeのEditモードテストクラス
+    /// ShopMasterDataFacadeのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class ShopMasterDataFacadeTests

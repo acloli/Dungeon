@@ -12,7 +12,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// MainRunProfileServiceのEditモードテストクラス
+    /// MainRunProfileServiceのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class MainRunProfileServiceTests

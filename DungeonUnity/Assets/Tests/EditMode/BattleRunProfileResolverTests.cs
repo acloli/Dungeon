@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleRunProfileResolverのEditモードテストクラス
+    /// BattleRunProfileResolverのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleRunProfileResolverTests

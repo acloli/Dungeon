@@ -12,7 +12,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleMasterDataFacadeのEditモードテストクラス
+    /// BattleMasterDataFacadeのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleMasterDataFacadeTests

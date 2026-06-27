@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Dungeon.Tests.EditMode.Save
 {
     /// <summary>
-    /// RunSaveDataおよびRunSaveServiceのEditModeテスト
+    /// RunSaveDataおよびRunSaveServiceのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class RunSaveServiceTests

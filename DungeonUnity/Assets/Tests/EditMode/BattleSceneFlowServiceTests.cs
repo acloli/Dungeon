@@ -15,7 +15,7 @@ using TFramework.MasterData;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleSceneFlowServiceの編集モード試験クラス
+    /// BattleSceneFlowServiceのEditorモードテストクラス
     /// </summary>
     public sealed class BattleSceneFlowServiceTests
     {

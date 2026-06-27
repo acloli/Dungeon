@@ -4,7 +4,7 @@ using Dungeon.Runtime.InGame.Battle.Model;
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
     /// <summary>
-    /// BattleSceneのイベント子フローを扱うインターフェース
+    /// BattleSceneのイベントフローを扱うインターフェース
     /// </summary>
     public interface IBattleEventFlowService
     {

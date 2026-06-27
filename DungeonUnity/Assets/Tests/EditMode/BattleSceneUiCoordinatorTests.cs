@@ -13,7 +13,7 @@ using TFramework.UI;
 namespace Dungeon.Tests.EditMode
 {
     /// <summary>
-    /// BattleSceneUiCoordinatorのEditモードテストクラス
+    /// BattleSceneUiCoordinatorのEditorモードテストクラス
     /// </summary>
     [TestFixture]
     public sealed class BattleSceneUiCoordinatorTests

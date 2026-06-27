@@ -5,7 +5,7 @@ using TFramework.Debug;
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
     /// <summary>
-    /// BattleSceneのイベント子フローを扱うクラス
+    /// BattleSceneのイベントフローを扱うクラス
     /// </summary>
     public sealed class BattleEventFlowService : IBattleEventFlowService
     {
