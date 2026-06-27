@@ -39,15 +39,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.GoldClaimed = false;
             state.PotionClaimed = false;
             state.RelicClaimed = false;
-            state.PendingPotionOffer = null;
-            state.PendingPotionReward = null;
+            state.ClearPendingRewards();
             state.PotionDropped = _rules.RollPotionDrop(runDefinition, _randomProvider);
             if (state.PotionDropped)
             {
                 state.PendingPotionReward = _potionService.RollBattleRewardPotion(runDefinition, _randomProvider);
             }
-
-            state.PendingRelicReward = null;
+ 
             state.RelicDropped = false;
             if (_rules.RollRelicDrop(runDefinition, _randomProvider))
             {
@@ -149,9 +147,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.RelicClaimed = false;
             state.PotionDropped = false;
             state.RelicDropped = false;
-            state.PendingRelicReward = null;
-            state.PendingPotionReward = null;
-            state.PendingPotionOffer = null;
+            state.ClearPendingRewards();
             state.CardRewardPicked = false;
             openMap();
         }

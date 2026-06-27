@@ -119,6 +119,16 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         /// <summary>
+        /// 報酬 pending 状態をクリアする
+        /// </summary>
+        public void ClearPendingRewards()
+        {
+            PendingRelicReward = null;
+            PendingPotionReward = null;
+            PendingPotionOffer = null;
+        }
+
+        /// <summary>
         /// 所持アイテム選択状態を消去する
         /// </summary>
         public void ClearOwnedInspections()

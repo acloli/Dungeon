@@ -75,6 +75,27 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.OwnedPotionHintMessage, Is.Empty);
         }
 
+        [Test]
+        public void ClearPendingRewards_ResetsPendingFieldsTogether()
+        {
+            RuntimeRelic relic = BattleTestData.Relic(4001).Build();
+            RuntimePotion potion = BattleTestData.Potion(5001).Build();
+            PendingPotionOffer offer = new PendingPotionOffer(potion, PotionOfferSource.BattleReward, 0);
+
+            BattleSceneState state = new BattleSceneState
+            {
+                PendingRelicReward = relic,
+                PendingPotionReward = potion,
+                PendingPotionOffer = offer
+            };
+
+            state.ClearPendingRewards();
+
+            Assert.That(state.PendingRelicReward, Is.Null);
+            Assert.That(state.PendingPotionReward, Is.Null);
+            Assert.That(state.PendingPotionOffer, Is.Null);
+        }
+
         private static BattleEnemyState CreateEnemyState()
         {
             RuntimeEnemyBuilder builder = BattleTestData.Enemy(3001);

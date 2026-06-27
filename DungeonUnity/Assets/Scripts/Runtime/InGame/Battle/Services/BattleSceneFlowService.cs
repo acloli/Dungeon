@@ -72,9 +72,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.ClearOwnedInspections();
             _state.OwnedRelics.Clear();
             _state.OwnedPotions.Clear();
-            _state.PendingRelicReward = null;
-            _state.PendingPotionReward = null;
-            _state.PendingPotionOffer = null;
+            _state.ClearPendingRewards();
             OpenMap();
             RequestSave();
         }
