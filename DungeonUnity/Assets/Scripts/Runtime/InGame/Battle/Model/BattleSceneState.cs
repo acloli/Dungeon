@@ -64,5 +64,52 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public PendingPotionOffer PendingPotionOffer { get; set; }
         public string EventMessage { get; set; } = string.Empty;
         public CardSelectMode CardSelectMode { get; set; } = CardSelectMode.CardRemoval;
+
+        /// <summary>
+        /// 選択中敵の旧表示項目を同期する
+        /// </summary>
+        public void SyncSelectedEnemyDisplay(BattleEnemyState enemyState, int selectedEnemyIndex)
+        {
+            SelectedEnemyIndex = selectedEnemyIndex;
+            if (enemyState == null)
+            {
+                ClearSelectedEnemyDisplay();
+                return;
+            }
+
+            CurrentEnemy = enemyState.Enemy;
+            EnemyHp = enemyState.Hp;
+            EnemyBlock = enemyState.Block;
+            EnemyTurnCount = enemyState.TurnCount;
+            EnemyCycleIndex = enemyState.CycleIndex;
+            CopyDictionary(enemyState.Statuses, EnemyStatuses);
+            CopyDictionary(enemyState.Buffs, EnemyBuffs);
+        }
+
+        /// <summary>
+        /// 選択中敵の旧表示項目をクリアする
+        /// </summary>
+        public void ClearSelectedEnemyDisplay()
+        {
+            CurrentEnemy = null;
+            EnemyHp = 0;
+            EnemyBlock = 0;
+            EnemyTurnCount = 0;
+            EnemyCycleIndex = 0;
+            EnemyStatuses.Clear();
+            EnemyBuffs.Clear();
+        }
+
+        /// <summary>
+        /// 辞書内容を複写する
+        /// </summary>
+        private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
+        {
+            destination.Clear();
+            foreach (KeyValuePair<TKey, int> entry in source)
+            {
+                destination[entry.Key] = entry.Value;
+            }
+        }
     }
 }

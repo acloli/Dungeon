@@ -44,13 +44,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.PlayerBlock = 0;
             state.Gold = runDefinition != null ? runDefinition.StartingGold : BattleSceneConstants.DefaultStartingGold;
             state.CurrentNodeIndex = BattleSceneConstants.DefaultNodeIndex;
-            state.CurrentEnemy = null;
-            state.EnemyHp = 0;
-            state.EnemyBlock = 0;
+            state.ClearSelectedEnemyDisplay();
             state.Enemies.Clear();
             state.BattleFinished = false;
-            state.EnemyTurnCount = 0;
-            state.EnemyCycleIndex = 0;
             state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             state.SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
             state.RewardChoices.Clear();
@@ -61,9 +57,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.Hand.Clear();
             state.Nodes.Clear();
             state.PlayerStatuses.Clear();
-            state.EnemyStatuses.Clear();
             state.PlayerBuffs.Clear();
-            state.EnemyBuffs.Clear();
 
             if (runDefinition != null)
             {

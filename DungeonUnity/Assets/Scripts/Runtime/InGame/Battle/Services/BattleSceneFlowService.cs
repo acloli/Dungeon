@@ -286,12 +286,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
-            _state.SelectedEnemyIndex = index;
-            _state.CurrentEnemy = enemyState.Enemy;
-            _state.EnemyHp = enemyState.Hp;
-            _state.EnemyBlock = enemyState.Block;
-            CopyDictionary(enemyState.Statuses, _state.EnemyStatuses);
-            CopyDictionary(enemyState.Buffs, _state.EnemyBuffs);
+            _state.SyncSelectedEnemyDisplay(enemyState, index);
             _state.BattleHintMessage = string.Format(BattleSceneConstants.EnemyTargetSelectedFormat, enemyState.Enemy.DisplayName);
         }
 
@@ -697,10 +692,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             _state.PlayerBlock = 0;
-            _state.EnemyStatuses.Clear();
-            _state.EnemyBuffs.Clear();
-            _state.EnemyTurnCount = 0;
-            _state.EnemyCycleIndex = 0;
+            _state.ClearSelectedEnemyDisplay();
             _state.Enemies.Clear();
             _state.SelectedEnemyIndex = BattleSceneConstants.DefaultEnemyTargetIndex;
             RuntimeEncounterFormation formation = _rules.SelectEncounterFormation(_runDefinition, nodeType, _randomProvider);
@@ -889,19 +881,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             BattleEnemyState enemyState = GetSelectedEnemy();
             if (enemyState == null)
             {
-                _state.CurrentEnemy = null;
-                _state.EnemyHp = 0;
-                _state.EnemyBlock = 0;
-                _state.EnemyStatuses.Clear();
-                _state.EnemyBuffs.Clear();
+                _state.ClearSelectedEnemyDisplay();
                 return;
             }
 
-            _state.CurrentEnemy = enemyState.Enemy;
-            _state.EnemyHp = enemyState.Hp;
-            _state.EnemyBlock = enemyState.Block;
-            CopyDictionary(enemyState.Statuses, _state.EnemyStatuses);
-            CopyDictionary(enemyState.Buffs, _state.EnemyBuffs);
+            _state.SyncSelectedEnemyDisplay(enemyState, _state.SelectedEnemyIndex);
         }
 
         /// <summary>

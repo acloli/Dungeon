@@ -378,33 +378,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             BattleEnemyState selectedEnemy = _enemyActionSelector.GetSelectedEnemy(state);
             if (selectedEnemy == null)
             {
-                state.CurrentEnemy = null;
-                state.EnemyHp = 0;
-                state.EnemyBlock = 0;
-                state.EnemyStatuses.Clear();
-                state.EnemyBuffs.Clear();
+                state.ClearSelectedEnemyDisplay();
                 return;
             }
 
-            state.CurrentEnemy = selectedEnemy.Enemy;
-            state.EnemyHp = selectedEnemy.Hp;
-            state.EnemyBlock = selectedEnemy.Block;
-            CopyDictionary(selectedEnemy.Statuses, state.EnemyStatuses);
-            CopyDictionary(selectedEnemy.Buffs, state.EnemyBuffs);
-            state.EnemyTurnCount = selectedEnemy.TurnCount;
-            state.EnemyCycleIndex = selectedEnemy.CycleIndex;
-        }
-
-        /// <summary>
-        /// 表示互換用辞書コピー
-        /// </summary>
-        private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)
-        {
-            destination.Clear();
-            foreach (KeyValuePair<TKey, int> entry in source)
-            {
-                destination[entry.Key] = entry.Value;
-            }
+            state.SyncSelectedEnemyDisplay(selectedEnemy, state.SelectedEnemyIndex);
         }
     }
 }
