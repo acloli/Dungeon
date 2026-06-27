@@ -1192,6 +1192,22 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_EventNode_WithNoConfiguredEvents_ReturnsToMap()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: Array.Empty<RuntimeEvent>());
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Event(snapshot).CurrentEvent, Is.Null);
+        }
+
+        [Test]
         public void SelectEventChoice_GainGold_AppliesEffectAndReturnsToMap()
         {
             RuntimeEvent evt = new RuntimeEvent(
@@ -1282,6 +1298,7 @@ namespace Dungeon.Tests.EditMode
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
@@ -1292,7 +1309,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
-                new BattleEventService(),
+                new BattleEventFlowService(randomProvider, eventService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1306,6 +1323,7 @@ namespace Dungeon.Tests.EditMode
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
@@ -1316,7 +1334,7 @@ namespace Dungeon.Tests.EditMode
                 combatEventService,
                 relicService,
                 potionService,
-                new BattleEventService(),
+                new BattleEventFlowService(randomProvider, eventService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1330,6 +1348,7 @@ namespace Dungeon.Tests.EditMode
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
@@ -1340,7 +1359,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
-                new BattleEventService(),
+                new BattleEventFlowService(randomProvider, eventService),
                 runSaveService,
                 new BattleCheckpointService());
         }
@@ -1354,6 +1373,7 @@ namespace Dungeon.Tests.EditMode
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
@@ -1364,7 +1384,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
-                new BattleEventService(),
+                new BattleEventFlowService(randomProvider, eventService),
                 null,
                 new BattleCheckpointService());
         }
@@ -1378,6 +1398,7 @@ namespace Dungeon.Tests.EditMode
             SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
             BattleRelicService relicService = new BattleRelicService();
             BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
             return new BattleSceneFlowService(
                 rules,
                 randomProvider,
@@ -1388,7 +1409,7 @@ namespace Dungeon.Tests.EditMode
                 new BattleCombatEventService(relicService),
                 relicService,
                 potionService,
-                new BattleEventService(),
+                new BattleEventFlowService(randomProvider, eventService),
                 null,
                 new BattleCheckpointService());
         }

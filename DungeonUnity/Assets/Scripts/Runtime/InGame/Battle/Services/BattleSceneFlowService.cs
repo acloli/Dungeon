@@ -24,7 +24,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleCombatEventService _combatEventService;
         private readonly IBattleRelicService _relicService;
         private readonly IBattlePotionService _potionService;
-        private readonly IBattleEventService _eventService;
+        private readonly IBattleEventFlowService _eventFlowService;
         private readonly IRunSaveService _runSaveService;
         private readonly IBattleCheckpointService _checkpointService;
 
@@ -40,7 +40,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleCombatEventService combatEventService,
             IBattleRelicService relicService,
             IBattlePotionService potionService,
-            IBattleEventService eventService,
+            IBattleEventFlowService eventFlowService,
             IRunSaveService runSaveService,
             IBattleCheckpointService checkpointService)
         {
@@ -53,7 +53,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _combatEventService = combatEventService;
             _relicService = relicService;
             _potionService = potionService;
-            _eventService = eventService;
+            _eventFlowService = eventFlowService;
             _runSaveService = runSaveService;
             _checkpointService = checkpointService;
         }
@@ -734,14 +734,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectEventChoice(int choiceId)
         {
-            if (_state.CurrentEvent != null)
-            {
-                _eventService.ApplyEventChoice(_state, _state.CurrentEvent, choiceId);
-            }
-
-            _state.CurrentEvent = null;
-            _state.EventMessage = string.Empty;
-            OpenMap();
+            _eventFlowService.SelectEventChoice(_state, choiceId, OpenMap);
             RequestSave();
         }
 
@@ -832,21 +825,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenEvent()
         {
-            if (_runDefinition == null || _runDefinition.PossibleEvents == null || _runDefinition.PossibleEvents.Count == 0)
-            {
-                TLogger.Warning(BattleSceneConstants.NoEventAvailable, "Battle");
-                OpenMap();
-                return;
-            }
-
-            int index = _randomProvider.Range(0, _runDefinition.PossibleEvents.Count);
-            _state.CurrentEvent = _runDefinition.PossibleEvents[index];
-            SetCurrentPage(BattleScenePage.Event);
-            _state.EventMessage = string.Format(
-                BattleSceneConstants.EventStateFormat,
-                _state.PlayerHp,
-                _state.PlayerMaxHp,
-                _state.Gold);
+            _eventFlowService.OpenEvent(_state, _runDefinition, SetCurrentPage, OpenMap);
         }
 
         /// <summary>
