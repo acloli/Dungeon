@@ -42,10 +42,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedRelicHintMessage = string.Empty;
-            state.SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedPotionHintMessage = string.Empty;
+            state.ClearOwnedInspections();
             state.PendingRelicReward = null;
             state.PendingPotionReward = null;
             state.PendingPotionOffer = null;

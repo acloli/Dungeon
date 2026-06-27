@@ -69,8 +69,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
             _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
-            ClearOwnedRelicInspection();
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedInspections();
             _state.OwnedRelics.Clear();
             _state.OwnedPotions.Clear();
             _state.PendingRelicReward = null;
@@ -442,11 +441,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             if (_state.SelectedOwnedRelicIndex == index)
             {
-                ClearOwnedRelicInspection();
+                _state.ClearOwnedRelicInspection();
                 return;
             }
 
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedPotionInspection();
             _state.SelectedOwnedRelicIndex = index;
             _state.OwnedRelicHintMessage = string.IsNullOrEmpty(relic.Description)
                 ? relic.DisplayName
@@ -471,11 +470,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             if (_state.SelectedOwnedPotionIndex == index)
             {
-                ClearOwnedPotionInspection();
+                _state.ClearOwnedPotionInspection();
                 return;
             }
 
-            ClearOwnedRelicInspection();
+            _state.ClearOwnedRelicInspection();
             _state.SelectedOwnedPotionIndex = index;
             _state.OwnedPotionHintMessage = string.IsNullOrEmpty(potion.Description)
                 ? potion.DisplayName
@@ -506,7 +505,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
             }
 
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedPotionInspection();
         }
 
         /// <summary>
@@ -525,7 +524,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 if (!_shopService.PurchaseShopItem(_state, offer.ShopSlotIndex))
                 {
                     _state.PendingPotionOffer = null;
-                    ClearOwnedPotionInspection();
+                    _state.ClearOwnedPotionInspection();
                     return;
                 }
             }
@@ -542,7 +541,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.PendingPotionOffer = null;
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedPotionInspection();
             RequestSave();
         }
 
@@ -552,7 +551,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         public void CancelPendingPotionReplace()
         {
             _state.PendingPotionOffer = null;
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedPotionInspection();
         }
 
         /// <summary>
@@ -560,8 +559,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ClearOwnedInspections()
         {
-            ClearOwnedRelicInspection();
-            ClearOwnedPotionInspection();
+            _state.ClearOwnedInspections();
         }
 
         /// <summary>
@@ -930,32 +928,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 所持レリック選択状態消去
-        /// </summary>
-        private void ClearOwnedRelicInspection()
-        {
-            _state.SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
-            _state.OwnedRelicHintMessage = string.Empty;
-        }
-
-        /// <summary>
-        /// 所持ポーション選択状態消去
-        /// </summary>
-        private void ClearOwnedPotionInspection()
-        {
-            _state.SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
-            _state.OwnedPotionHintMessage = string.Empty;
-        }
-
-        /// <summary>
         /// 画面遷移共通処理
         /// </summary>
         private void SetCurrentPage(BattleScenePage page)
         {
             if (_state.CurrentPage != page)
             {
-                ClearOwnedRelicInspection();
-                ClearOwnedPotionInspection();
+                _state.ClearOwnedInspections();
             }
 
             _state.CurrentPage = page;

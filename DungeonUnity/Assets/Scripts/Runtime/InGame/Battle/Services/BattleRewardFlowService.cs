@@ -112,7 +112,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 {
                     state.PotionClaimed = true;
                     state.PendingPotionReward = null;
-                    ClearOwnedPotionInspection(state);
+                    state.ClearOwnedPotionInspection();
                 }
 
                 return;
@@ -135,7 +135,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 state.RelicClaimed = true;
                 state.PendingRelicReward = null;
-                ClearOwnedRelicInspection(state);
+                state.ClearOwnedRelicInspection();
             }
         }
 
@@ -156,22 +156,5 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             openMap();
         }
 
-        /// <summary>
-        /// 所持レリック選択状態消去
-        /// </summary>
-        private static void ClearOwnedRelicInspection(BattleSceneState state)
-        {
-            state.SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedRelicHintMessage = string.Empty;
-        }
-
-        /// <summary>
-        /// 所持ポーション選択状態消去
-        /// </summary>
-        private static void ClearOwnedPotionInspection(BattleSceneState state)
-        {
-            state.SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedPotionHintMessage = string.Empty;
-        }
     }
 }

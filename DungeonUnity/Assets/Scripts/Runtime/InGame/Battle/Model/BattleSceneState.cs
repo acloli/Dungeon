@@ -101,6 +101,33 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         }
 
         /// <summary>
+        /// 所持レリック選択状態を消去する
+        /// </summary>
+        public void ClearOwnedRelicInspection()
+        {
+            SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
+            OwnedRelicHintMessage = string.Empty;
+        }
+
+        /// <summary>
+        /// 所持ポーション選択状態を消去する
+        /// </summary>
+        public void ClearOwnedPotionInspection()
+        {
+            SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
+            OwnedPotionHintMessage = string.Empty;
+        }
+
+        /// <summary>
+        /// 所持アイテム選択状態を消去する
+        /// </summary>
+        public void ClearOwnedInspections()
+        {
+            ClearOwnedRelicInspection();
+            ClearOwnedPotionInspection();
+        }
+
+        /// <summary>
         /// 辞書内容を複写する
         /// </summary>
         private static void CopyDictionary<TKey>(IReadOnlyDictionary<TKey, int> source, IDictionary<TKey, int> destination)

@@ -10,6 +10,8 @@ namespace Dungeon.Tests.EditMode
     /// </summary>
     public sealed class BattleSceneStateTests
     {
+        private const int UnselectedIndex = -1;
+
         [Test]
         public void SyncSelectedEnemyDisplay_CopiesEnemyMirrorFieldsTogether()
         {
@@ -52,6 +54,25 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.EnemyStatuses, Is.Empty);
             Assert.That(state.EnemyBuffs, Is.Empty);
             Assert.That(state.SelectedEnemyIndex, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ClearOwnedInspections_ResetsOwnedSelectionFieldsTogether()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                SelectedOwnedRelicIndex = 1,
+                SelectedOwnedPotionIndex = 2,
+                OwnedRelicHintMessage = "Relic",
+                OwnedPotionHintMessage = "Potion"
+            };
+
+            state.ClearOwnedInspections();
+
+            Assert.That(state.SelectedOwnedRelicIndex, Is.EqualTo(UnselectedIndex));
+            Assert.That(state.SelectedOwnedPotionIndex, Is.EqualTo(UnselectedIndex));
+            Assert.That(state.OwnedRelicHintMessage, Is.Empty);
+            Assert.That(state.OwnedPotionHintMessage, Is.Empty);
         }
 
         private static BattleEnemyState CreateEnemyState()

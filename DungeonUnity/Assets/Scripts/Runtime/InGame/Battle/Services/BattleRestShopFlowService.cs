@@ -110,7 +110,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 {
                     if (_shopService.PurchaseShopItem(state, slotIndex) && _potionService.AddOwnedPotion(state, item.Potion))
                     {
-                        ClearOwnedPotionInspection(state);
+                        state.ClearOwnedPotionInspection();
                         return true;
                     }
 
@@ -127,7 +127,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             GrantPurchasedRelic(state, slotIndex);
-            ClearOwnedRelicInspection(state);
+            state.ClearOwnedRelicInspection();
             return true;
         }
 
@@ -312,16 +312,5 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return null;
         }
 
-        private static void ClearOwnedRelicInspection(BattleSceneState state)
-        {
-            state.SelectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedRelicHintMessage = string.Empty;
-        }
-
-        private static void ClearOwnedPotionInspection(BattleSceneState state)
-        {
-            state.SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
-            state.OwnedPotionHintMessage = string.Empty;
-        }
     }
 }
