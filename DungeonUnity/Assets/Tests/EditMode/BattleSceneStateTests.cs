@@ -80,7 +80,7 @@ namespace Dungeon.Tests.EditMode
         {
             RuntimeRelic relic = BattleTestData.Relic(4001).Build();
             RuntimePotion potion = BattleTestData.Potion(5001).Build();
-            PendingPotionOffer offer = new PendingPotionOffer(potion, PotionOfferSource.BattleReward, 0);
+            PendingPotionOffer offer = new PendingPotionOffer(potion, PotionOfferSource.Reward, 0);
 
             BattleSceneState state = new BattleSceneState
             {
