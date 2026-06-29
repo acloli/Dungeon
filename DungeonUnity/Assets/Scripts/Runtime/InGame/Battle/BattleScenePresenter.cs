@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
 using UnityEngine;
@@ -52,7 +53,7 @@ namespace Dungeon.Runtime.InGame.Battle
             _onResultBackClicked = onResultBackClicked;
             _onSaveQuitClicked = onSaveQuitClicked;
 
-            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked);
+            _battlePagePresenter.Initialize(_view.BattlePageView, OnHandCardClicked, OnEnemyTargetClicked, OnEndTurnClicked, OnDrawPileClicked, OnDiscardPileClicked, OnExhaustPileClicked);
             _view.WireSaveQuitButton(OnSaveQuitClicked);
             _view.WireHostBackgroundClick(OnHostBackgroundClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
@@ -172,6 +173,33 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// 山札確認通知
+        /// </summary>
+        public void OnDrawPileClicked()
+        {
+            _flowService.OpenPileInspect(BattlePileType.Draw);
+            RequestRender();
+        }
+
+        /// <summary>
+        /// 捨て札確認通知
+        /// </summary>
+        public void OnDiscardPileClicked()
+        {
+            _flowService.OpenPileInspect(BattlePileType.Discard);
+            RequestRender();
+        }
+
+        /// <summary>
+        /// 廃棄札確認通知
+        /// </summary>
+        public void OnExhaustPileClicked()
+        {
+            _flowService.OpenPileInspect(BattlePileType.Exhaust);
+            RequestRender();
+        }
+
+        /// <summary>
         /// 中断ボタン通知
         /// </summary>
         public void OnSaveQuitClicked()
@@ -251,6 +279,14 @@ namespace Dungeon.Runtime.InGame.Battle
                     _view.SetSaveQuitVisible(false);
                     await _uiCoordinator.ShowBattleAsync(ct);
                     _battlePagePresenter.Render(snapshot.Combat);
+
+                    if (snapshot.PileInspect.IsOpen)
+                    {
+                        await _uiCoordinator.ShowPileInspectAsync(snapshot.PileInspect, ct);
+                        _flowService.ClosePileInspect();
+                        await RenderAsync(ct);
+                        return;
+                    }
                     break;
                 case BattleScenePage.Reward:
                     _view.SetSaveQuitVisible(false);

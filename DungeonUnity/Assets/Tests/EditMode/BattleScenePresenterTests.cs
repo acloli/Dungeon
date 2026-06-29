@@ -6,6 +6,7 @@ using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.InGame.Save.Model;
 using Dungeon.Runtime.InGame.Save.Services;
 using Dungeon.Tests.EditMode.Support;
@@ -735,6 +736,14 @@ namespace Dungeon.Tests.EditMode
                 _snapshot = BattleScenePresenterTests.CreateSnapshot(BattleScenePage.Result);
             }
 
+            public void OpenPileInspect(BattlePileType pileType)
+            {
+            }
+
+            public void ClosePileInspect()
+            {
+            }
+
             public void SelectEnemyTarget(int index)
             {
             }
@@ -863,6 +872,7 @@ namespace Dungeon.Tests.EditMode
             public IReadOnlyList<BattleHandCardViewModel> LastHandCards { get; private set; } = Array.Empty<BattleHandCardViewModel>();
             public int LastDrawPileCount { get; private set; }
             public int LastDiscardPileCount { get; private set; }
+            public int LastExhaustPileCount { get; private set; }
             public int LastHandCount { get; private set; }
             public int LastMaxHandCount { get; private set; }
 
@@ -870,7 +880,15 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
+            public void WirePileButtons(Action onDrawPileClicked, Action onDiscardPileClicked, Action onExhaustPileClicked)
+            {
+            }
+
             public void UnwireButtons()
+            {
+            }
+
+            public void UnwirePileButtons()
             {
             }
 
@@ -886,10 +904,11 @@ namespace Dungeon.Tests.EditMode
                 LastHud = hud;
             }
 
-            public void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount)
+            public void SetPileCounters(int drawPileCount, int discardPileCount, int exhaustPileCount, int handCount, int maxHandCount)
             {
                 LastDrawPileCount = drawPileCount;
                 LastDiscardPileCount = discardPileCount;
+                LastExhaustPileCount = exhaustPileCount;
                 LastHandCount = handCount;
                 LastMaxHandCount = maxHandCount;
             }
@@ -918,6 +937,8 @@ namespace Dungeon.Tests.EditMode
             public int ShowShopCallCount { get; private set; }
             public int ShowEventCallCount { get; private set; }
             public int ShowPotionReplaceCallCount { get; private set; }
+            public int ShowPileInspectCallCount { get; private set; }
+            public BattlePileInspectSnapshot LastPileInspectSnapshot { get; private set; }
             public BattleMapSnapshot LastMapSnapshot { get; private set; }
             public BattleShopSnapshot LastShopSnapshot { get; private set; }
             public BattleEventSnapshot LastEventSnapshot { get; private set; }
@@ -968,6 +989,13 @@ namespace Dungeon.Tests.EditMode
                 ShowPotionReplaceCallCount++;
                 LastPotionReplaceSnapshot = snapshot;
                 return UniTask.FromResult(PotionReplaceResult);
+            }
+
+            public UniTask ShowPileInspectAsync(BattlePileInspectSnapshot snapshot, CancellationToken ct)
+            {
+                ShowPileInspectCallCount++;
+                LastPileInspectSnapshot = snapshot;
+                return UniTask.CompletedTask;
             }
 
             public UniTask<RestShopDialogAction> ShowRestShopAsync(BattleRestShopSnapshot snapshot, CancellationToken ct)
