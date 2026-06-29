@@ -23,6 +23,7 @@ namespace Dungeon.Runtime.InGame.Battle
         UniTask<EventDialogResult> ShowEventAsync(BattleEventSnapshot snapshot, CancellationToken ct);
         UniTask<RuntimeRewardEntry> ShowCardPickAsync(BattleRewardSnapshot snapshot, CancellationToken ct);
         UniTask<PotionReplaceDialogResult> ShowPotionReplaceAsync(BattlePotionReplaceSnapshot snapshot, CancellationToken ct);
+        UniTask ShowPileInspectAsync(BattlePileInspectSnapshot snapshot, CancellationToken ct);
         void Dispose();
     }
 }

@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c261eda1085a34d23a14467eeeb9d133
+    m_Address: PileInspectDialog
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9064fad60bf714b52b3949ae898cb68b
     m_Address: MapPage
     m_ReadOnly: 0

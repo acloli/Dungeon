@@ -266,4 +266,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         public BattleEventSnapshot Snapshot { get; }
     }
+
+    /// <summary>
+    /// パイル確認ダイアログ表示パラメータクラス
+    /// </summary>
+    public sealed class BattlePileInspectDialogParam
+    {
+        public BattlePileInspectDialogParam(BattlePileInspectSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+        }
+
+        public BattlePileInspectSnapshot Snapshot { get; }
+    }
 }
