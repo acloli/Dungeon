@@ -118,16 +118,77 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.EnemyBlock, Is.EqualTo(4));
         }
 
+        [Test]
+        public void PlayCard_NormalCard_GoesToDiscardPile()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeCard card = CreateCard(1001, 1, Array.Empty<RuntimeCardEffect>(), exhaustsOnPlay: false);
+            state.Hand.Add(card);
+            state.Enemies.Add(CreateEnemyState(3001, hp: 10, CreateEnemyAction(1, 4)));
+            BattleCombatResolver service = CreateService();
+
+            service.PlayCard(state, 0, new FixedRandomProvider(0));
+
+            Assert.That(state.DiscardPile, Has.Count.EqualTo(1));
+            Assert.That(state.DiscardPile[0].Id, Is.EqualTo(1001));
+            Assert.That(state.ExhaustPile, Is.Empty);
+        }
+
+        [Test]
+        public void PlayCard_ExhaustsOnPlayCard_GoesToExhaustPile()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeCard card = CreateCard(1001, 1, Array.Empty<RuntimeCardEffect>(), exhaustsOnPlay: true);
+            state.Hand.Add(card);
+            state.Enemies.Add(CreateEnemyState(3001, hp: 10, CreateEnemyAction(1, 4)));
+            BattleCombatResolver service = CreateService();
+
+            service.PlayCard(state, 0, new FixedRandomProvider(0));
+
+            Assert.That(state.ExhaustPile, Has.Count.EqualTo(1));
+            Assert.That(state.ExhaustPile[0].Id, Is.EqualTo(1001));
+            Assert.That(state.DiscardPile, Is.Empty);
+        }
+
+        [Test]
+        public void PlayCard_ExhaustsOnPlayCard_DoesNotDuplicateToDiscard()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeCard card = CreateCard(1001, 1, Array.Empty<RuntimeCardEffect>(), exhaustsOnPlay: true);
+            state.Hand.Add(card);
+            state.Enemies.Add(CreateEnemyState(3001, hp: 10, CreateEnemyAction(1, 4)));
+            BattleCombatResolver service = CreateService();
+
+            service.PlayCard(state, 0, new FixedRandomProvider(0));
+
+            Assert.That(state.ExhaustPile, Has.Count.EqualTo(1));
+            Assert.That(state.DiscardPile, Is.Empty);
+            Assert.That(state.Hand, Is.Empty);
+        }
+
         private static BattleCombatResolver CreateService()
         {
             return new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector());
         }
 
-        private static RuntimeCard CreateCard(int id, int cost, IReadOnlyList<RuntimeCardEffect> effects)
+        private static RuntimeCard CreateCard(int id, int cost, IReadOnlyList<RuntimeCardEffect> effects, bool exhaustsOnPlay = false)
         {
             RuntimeCardBuilder builder = BattleTestData.Card(id);
             builder.Cost = cost;
             builder.Effects = effects;
+            builder.ExhaustsOnPlay = exhaustsOnPlay;
             return builder.Build();
         }
 

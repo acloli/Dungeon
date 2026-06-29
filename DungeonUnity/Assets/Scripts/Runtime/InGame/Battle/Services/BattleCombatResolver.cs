@@ -82,7 +82,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
             }
 
-            state.DiscardPile.Add(card);
+            if (card.ExhaustsOnPlay)
+            {
+                state.ExhaustPile.Add(card);
+            }
+            else
+            {
+                state.DiscardPile.Add(card);
+            }
+
             return new BattleCardResolutionResult(totalDamage, totalBlock, totalDraw);
         }
 
