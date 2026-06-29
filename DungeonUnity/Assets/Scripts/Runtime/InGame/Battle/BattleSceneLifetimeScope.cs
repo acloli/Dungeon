@@ -30,6 +30,7 @@ namespace Dungeon.Runtime.InGame.Battle
             builder.Register<Services.BattleRestShopFlowService>(Lifetime.Singleton).As<Services.IBattleRestShopFlowService>();
             builder.Register<Services.BattleCheckpointService>(Lifetime.Singleton).As<Services.IBattleCheckpointService>();
             builder.Register<Services.BattleSnapshotFactory>(Lifetime.Singleton).As<Services.IBattleSnapshotFactory>();
+            builder.Register<Services.BattlePileOrderService>(Lifetime.Singleton).As<Services.IBattlePileOrderService>();
             builder.Register<Services.BattleDeckService>(Lifetime.Singleton).As<Services.IBattleDeckService>();
             builder.Register<Services.BattleEnemyActionSelector>(Lifetime.Singleton).As<Services.IBattleEnemyActionSelector>();
             builder.Register<Services.BattleCombatResolver>(Lifetime.Singleton).As<Services.IBattleCombatResolver>();

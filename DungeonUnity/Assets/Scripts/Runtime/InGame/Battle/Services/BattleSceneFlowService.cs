@@ -868,6 +868,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// パイル確認を開く
+        /// </summary>
+        public void OpenPileInspect(BattlePileType pileType)
+        {
+            if (_state.CurrentPage != BattleScenePage.Battle)
+            {
+                return;
+            }
+
+            _state.OpenPileInspect(pileType);
+        }
+
+        /// <summary>
+        /// パイル確認を閉じる
+        /// </summary>
+        public void ClosePileInspect()
+        {
+            _state.ClosePileInspect();
+        }
+
+        /// <summary>
         /// 画面遷移共通処理
         /// </summary>
         private void SetCurrentPage(BattleScenePage page)

@@ -1,4 +1,5 @@
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.InGame.Save.Model;
 using System.Collections.Generic;
 
@@ -156,5 +157,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// イベント選択肢決定
         /// </summary>
         void SelectEventChoice(int choiceId);
+
+        /// <summary>
+        /// パイル確認を開く
+        /// </summary>
+        void OpenPileInspect(BattlePileType pileType);
+
+        /// <summary>
+        /// パイル確認を閉じる
+        /// </summary>
+        void ClosePileInspect();
     }
 }

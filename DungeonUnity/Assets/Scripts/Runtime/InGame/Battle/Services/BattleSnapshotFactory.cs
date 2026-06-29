@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Domain;
 using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -12,12 +13,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleDisplayTextService _displayTextService;
         private readonly IBattleShopService _shopService;
         private readonly IBattleEnemyActionSelector _enemyActionSelector;
+        private readonly IBattlePileOrderService _pileOrderService;
 
-        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService, IBattleShopService shopService, IBattleEnemyActionSelector enemyActionSelector)
+        public BattleSnapshotFactory(IBattleDisplayTextService displayTextService, IBattleShopService shopService, IBattleEnemyActionSelector enemyActionSelector, IBattlePileOrderService pileOrderService)
         {
             _displayTextService = displayTextService;
             _shopService = shopService;
             _enemyActionSelector = enemyActionSelector;
+            _pileOrderService = pileOrderService;
         }
 
         public BattleSceneSnapshot CreateSnapshot(BattleSceneState state)
@@ -37,7 +40,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 Shop = BuildShopSnapshot(state),
                 Event = BuildEventSnapshot(state),
                 Result = BuildResultSnapshot(state),
-                PotionReplace = BuildPotionReplaceSnapshot(state)
+                PotionReplace = BuildPotionReplaceSnapshot(state),
+                PileInspect = BuildPileInspectSnapshot(state)
             }.Build();
         }
 
@@ -80,6 +84,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 BuildBuffViews(state.EnemyBuffs),
                 state.DrawPile.Count,
                 state.DiscardPile.Count,
+                state.ExhaustPile.Count,
                 state.Hand.Count,
                 BattleSceneConstants.MaxHandSize,
                 state.CurrentEnemy,
@@ -500,6 +505,77 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
         {
             return BattleMultiIconViewModel.CreateCard(card, isAffordable, isInteractable, isSelected);
+        }
+
+        /// <summary>
+        /// パイル確認スナップショットを構築する
+        /// </summary>
+        private BattlePileInspectSnapshot BuildPileInspectSnapshot(BattleSceneState state)
+        {
+            BattlePileType? openedPileType = state.OpenedPileType;
+            if (openedPileType == null)
+            {
+                return new BattlePileInspectSnapshot(isOpen: false);
+            }
+
+            IReadOnlyList<RuntimeCard> sourceCards = GetPileCards(state, openedPileType.Value);
+            IReadOnlyList<RuntimeCard> orderedCards = _pileOrderService.Order(openedPileType.Value, sourceCards, state);
+
+            List<BattleMultiIconViewModel> cardViews = new List<BattleMultiIconViewModel>(orderedCards.Count);
+            for (int i = 0; i < orderedCards.Count; i++)
+            {
+                RuntimeCard card = orderedCards[i];
+                if (card == null)
+                {
+                    continue;
+                }
+
+                cardViews.Add(BattleMultiIconViewModel.CreateCard(card, isInteractable: false));
+            }
+
+            string title = GetPileTitle(openedPileType.Value);
+
+            return new BattlePileInspectSnapshot(
+                openedPileType.Value,
+                title,
+                cardViews,
+                isOpen: true);
+        }
+
+        /// <summary>
+        /// パイル種別に対応するカードリストを取得する
+        /// </summary>
+        private static IReadOnlyList<RuntimeCard> GetPileCards(BattleSceneState state, BattlePileType pileType)
+        {
+            switch (pileType)
+            {
+                case BattlePileType.Draw:
+                    return state.DrawPile;
+                case BattlePileType.Discard:
+                    return state.DiscardPile;
+                case BattlePileType.Exhaust:
+                    return state.ExhaustPile;
+                default:
+                    return System.Array.Empty<RuntimeCard>();
+            }
+        }
+
+        /// <summary>
+        /// パイル種別に対応するタイトルを取得する
+        /// </summary>
+        private static string GetPileTitle(BattlePileType pileType)
+        {
+            switch (pileType)
+            {
+                case BattlePileType.Draw:
+                    return "山札";
+                case BattlePileType.Discard:
+                    return "捨て札";
+                case BattlePileType.Exhaust:
+                    return "廃棄札";
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

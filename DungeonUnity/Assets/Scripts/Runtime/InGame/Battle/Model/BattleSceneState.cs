@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Dungeon.Runtime.InGame.Domain;
 using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
@@ -105,6 +106,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         #region Page / global
 
         public BattleScenePage CurrentPage { get; set; } = BattleScenePage.Map;
+        public BattlePileType? OpenedPileType { get; set; }
 
         #endregion
 
@@ -196,6 +198,22 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         {
             ClearOwnedRelicInspection();
             ClearOwnedPotionInspection();
+        }
+
+        /// <summary>
+        /// パイル確認状態を開く
+        /// </summary>
+        public void OpenPileInspect(BattlePileType pileType)
+        {
+            OpenedPileType = pileType;
+        }
+
+        /// <summary>
+        /// パイル確認状態を閉じる
+        /// </summary>
+        public void ClosePileInspect()
+        {
+            OpenedPileType = null;
         }
 
         /// <summary>
