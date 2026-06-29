@@ -49,7 +49,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             CharacterArchetype characterArchetype,
             IReadOnlyList<RuntimeCardEffect> effects,
             int upgradeCardId = 0,
-            bool isUpgraded = false)
+            bool isUpgraded = false,
+            bool exhaustsOnPlay = false)
         {
             Id = id;
             Key = key;
@@ -65,6 +66,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Effects = effects ?? Array.Empty<RuntimeCardEffect>();
             UpgradeCardId = upgradeCardId;
             IsUpgraded = isUpgraded;
+            ExhaustsOnPlay = exhaustsOnPlay;
         }
 
         public int Id { get; }
@@ -81,6 +83,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<RuntimeCardEffect> Effects { get; }
         public int UpgradeCardId { get; }
         public bool IsUpgraded { get; }
+        public bool ExhaustsOnPlay { get; }
 
         /// <summary>
         /// 表示用の概算ダメージ値

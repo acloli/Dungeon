@@ -26,6 +26,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 1101
+    ExhaustsOnPlay: 0
   - Id: 1002
     Key: card_ash_guard
     Name: Ash Guard
@@ -39,6 +40,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 1102
+    ExhaustsOnPlay: 0
   - Id: 1003
     Key: card_crystal_bash
     Name: Crystal Bash
@@ -52,6 +54,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 1103
+    ExhaustsOnPlay: 0
   - Id: 1004
     Key: card_ember_knuckle
     Name: Ember Knuckle
@@ -65,6 +68,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1104
+    ExhaustsOnPlay: 0
   - Id: 1005
     Key: card_shell_up
     Name: Shell Up
@@ -78,6 +82,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1105
+    ExhaustsOnPlay: 0
   - Id: 1006
     Key: card_dual_fang
     Name: Dual Fang
@@ -91,6 +96,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1106
+    ExhaustsOnPlay: 0
   - Id: 1007
     Key: card_iron_tide
     Name: Iron Tide
@@ -104,6 +110,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1107
+    ExhaustsOnPlay: 0
   - Id: 1008
     Key: card_storm_clap
     Name: Storm Clap
@@ -117,6 +124,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1108
+    ExhaustsOnPlay: 0
   - Id: 1009
     Key: card_char_sweep
     Name: Char Sweep
@@ -130,6 +138,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1109
+    ExhaustsOnPlay: 0
   - Id: 1010
     Key: card_grim_line
     Name: Grim Line
@@ -143,6 +152,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1110
+    ExhaustsOnPlay: 0
   - Id: 1011
     Key: card_spark_focus
     Name: Spark Focus
@@ -156,6 +166,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 1
     UpgradeCardId: 1111
+    ExhaustsOnPlay: 1
   - Id: 1101
     Key: card_cinder_slash_plus
     Name: Cinder Slash+
@@ -169,6 +180,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1102
     Key: card_ash_guard_plus
     Name: Ash Guard+
@@ -182,6 +194,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1103
     Key: card_crystal_bash_plus
     Name: Crystal Bash+
@@ -195,6 +208,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1104
     Key: card_ember_knuckle_plus
     Name: Ember Knuckle+
@@ -208,6 +222,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1105
     Key: card_shell_up_plus
     Name: Shell Up+
@@ -221,6 +236,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1106
     Key: card_dual_fang_plus
     Name: Dual Fang+
@@ -234,6 +250,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1107
     Key: card_iron_tide_plus
     Name: Iron Tide+
@@ -247,6 +264,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1108
     Key: card_storm_clap_plus
     Name: Storm Clap+
@@ -260,6 +278,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1109
     Key: card_char_sweep_plus
     Name: Char Sweep+
@@ -273,6 +292,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1110
     Key: card_grim_line_plus
     Name: Grim Line+
@@ -286,6 +306,7 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 0
   - Id: 1111
     Key: card_spark_focus_plus
     Name: Spark Focus+
@@ -299,3 +320,4 @@ MonoBehaviour:
     CharacterArchetype: 0
     CanAppearInReward: 0
     UpgradeCardId: 0
+    ExhaustsOnPlay: 1

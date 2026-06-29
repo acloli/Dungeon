@@ -449,7 +449,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 master.CharacterArchetype,
                 effects,
                 master.UpgradeCardId,
-                isUpgraded);
+                isUpgraded,
+                master.ExhaustsOnPlay);
         }
 
         private RuntimeRelic CreateRuntimeRelic(RelicMaster master, IReadOnlyList<RuntimeRelicEffect> effects)
