@@ -1784,21 +1784,42 @@ namespace Dungeon.Tests.EditMode
         /// </summary>
         private sealed class SequenceRandomProvider : IBattleRandomProvider
         {
-            private readonly Queue<int> _values;
+            private readonly List<int> _values;
+            private int _index;
+
+            public int Seed { get; private set; }
+
+            public int Counter { get; private set; }
 
             public SequenceRandomProvider(IEnumerable<int> values)
             {
-                _values = new Queue<int>(values);
+                _values = new List<int>(values);
+            }
+
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+                _index = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+                _index = counter;
             }
 
             public int Range(int minInclusive, int maxExclusive)
             {
-                if (_values.Count == 0)
+                Counter++;
+                if (_index >= _values.Count)
                 {
                     return minInclusive;
                 }
 
-                int value = _values.Dequeue();
+                int value = _values[_index];
+                _index++;
                 if (value < minInclusive)
                 {
                     return minInclusive;
