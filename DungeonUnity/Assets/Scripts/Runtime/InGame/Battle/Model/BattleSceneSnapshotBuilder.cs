@@ -20,6 +20,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattleEventSnapshot Event { get; set; }
         public BattleResultSnapshot Result { get; set; }
         public BattlePotionReplaceSnapshot PotionReplace { get; set; }
+        public BattlePileInspectSnapshot PileInspect { get; set; }
 
         public BattleSceneSnapshot Build()
         {
@@ -33,7 +34,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 Shop,
                 Event,
                 Result,
-                PotionReplace);
+                PotionReplace,
+                PileInspect);
         }
     }
 }

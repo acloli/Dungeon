@@ -36,6 +36,11 @@ namespace Dungeon.Runtime.InGame.Battle
         public const string CardSelectDialog = "CardSelectDialog";
 
         /// <summary>
+        /// パイル確認ダイアログPrefabキー
+        /// </summary>
+        public const string PileInspectDialog = "PileInspectDialog";
+
+        /// <summary>
         /// 共通ページ基底Prefabキー
         /// </summary>
         public const string CommonPage = "CommonPage";

@@ -193,6 +193,33 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void TryPlaySelectedCard_DrawCardWithEmptyDrawPile_UpdatesPileCountsWithStsTiming()
+        {
+            RuntimeCard loop = CreateCard(1001, "Loop", 0, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DrawCards, 1, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { loop },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Combat(snapshot).HandCards.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).HandCards[0].Card.Id, Is.EqualTo(1001));
+            Assert.That(Combat(snapshot).DrawPileCount, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).DiscardPileCount, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).ExhaustPileCount, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).HandCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public void TryPlaySelectedCard_GainEnergy_IncreasesCurrentEnergy()
         {
             RuntimeCard sparkFocus = CreateCard(1001, "Spark Focus", 0, 0, new[]
@@ -1305,7 +1332,7 @@ namespace Dungeon.Tests.EditMode
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
@@ -1333,7 +1360,7 @@ namespace Dungeon.Tests.EditMode
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 combatEventService,
                 relicService,
@@ -1361,7 +1388,7 @@ namespace Dungeon.Tests.EditMode
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
@@ -1388,7 +1415,7 @@ namespace Dungeon.Tests.EditMode
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector()),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
@@ -1416,7 +1443,7 @@ namespace Dungeon.Tests.EditMode
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
-                new BattleSnapshotFactory(displayTextService, shopService, new BattleEnemyActionSelector()),
+                new BattleSnapshotFactory(displayTextService, shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,

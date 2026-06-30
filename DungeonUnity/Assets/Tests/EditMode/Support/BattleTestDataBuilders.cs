@@ -99,6 +99,7 @@ namespace Dungeon.Tests.EditMode.Support
         public IReadOnlyList<RuntimeCardEffect> Effects { get; set; } = Array.Empty<RuntimeCardEffect>();
         public int UpgradeCardId { get; set; }
         public bool IsUpgraded { get; set; }
+        public bool ExhaustsOnPlay { get; set; }
 
         public RuntimeCard Build()
         {
@@ -116,7 +117,8 @@ namespace Dungeon.Tests.EditMode.Support
                 CharacterArchetype,
                 Effects,
                 UpgradeCardId,
-                IsUpgraded);
+                IsUpgraded,
+                ExhaustsOnPlay);
         }
     }
 

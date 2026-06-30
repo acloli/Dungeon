@@ -99,6 +99,7 @@ potion.name.smoke_phial,スモークファイアル,Smoke Phial,烟幕小瓶,煙
 potion.desc.smoke_phial,薄煙を閉じ込めた小瓶。上位ポーション表示用。,A phial of smoke. Sample potion for upgraded display.,封存烟雾的小瓶。用于进阶药水显示。,封存煙霧的小瓶。用於進階藥水顯示。,옅은 연기를 담은 작은 병. 상위 포션 표시용.
 battle.pile.draw,山札,Draw,抽牌堆,抽牌堆,드로우
 battle.pile.discard,捨て札,Discard,弃牌堆,棄牌堆,버림
+battle.pile.exhaust,廃棄札,Exhaust,废弃堆,廢棄堆,소멸
 battle.hand.count,手札,Hand,手牌,手牌,패
 potion.name.energy_potion,エナジーポーション,Energy Potion,能量药水,能量藥水,에너지 포션
 potion.desc.energy_potion,エナジーを1得る。,Gain 1 Energy.,获得1点能量。,獲得1點能量。,에너지 1을 얻는다.

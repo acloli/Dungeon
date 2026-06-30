@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.InGame.Domain;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
 {
@@ -18,7 +19,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BattleShopSnapshot shop = null,
             BattleEventSnapshot battleEvent = null,
             BattleResultSnapshot result = null,
-            BattlePotionReplaceSnapshot potionReplace = null)
+            BattlePotionReplaceSnapshot potionReplace = null,
+            BattlePileInspectSnapshot pileInspect = null)
         {
             CurrentPage = currentPage;
             HostChrome = hostChrome ?? new BattleHostChromeSnapshot();
@@ -30,6 +32,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             Event = battleEvent ?? new BattleEventSnapshot();
             Result = result ?? new BattleResultSnapshot();
             PotionReplace = potionReplace ?? new BattlePotionReplaceSnapshot();
+            PileInspect = pileInspect ?? new BattlePileInspectSnapshot();
         }
 
         public BattleScenePage CurrentPage { get; }
@@ -42,6 +45,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattleEventSnapshot Event { get; }
         public BattleResultSnapshot Result { get; }
         public BattlePotionReplaceSnapshot PotionReplace { get; }
+        public BattlePileInspectSnapshot PileInspect { get; }
     }
 
     public sealed class BattleHostChromeSnapshot
@@ -109,6 +113,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyList<BattleStatusViewModel> enemyBuffs = null,
             int drawPileCount = 0,
             int discardPileCount = 0,
+            int exhaustPileCount = 0,
             int handCount = 0,
             int maxHandCount = 0,
             RuntimeEnemy currentEnemy = null,
@@ -131,6 +136,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             EnemyBuffs = enemyBuffs ?? Array.Empty<BattleStatusViewModel>();
             DrawPileCount = drawPileCount;
             DiscardPileCount = discardPileCount;
+            ExhaustPileCount = exhaustPileCount;
             HandCount = handCount;
             MaxHandCount = maxHandCount;
             CurrentEnemy = currentEnemy;
@@ -154,6 +160,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public IReadOnlyList<BattleStatusViewModel> EnemyBuffs { get; }
         public int DrawPileCount { get; }
         public int DiscardPileCount { get; }
+        public int ExhaustPileCount { get; }
         public int HandCount { get; }
         public int MaxHandCount { get; }
         public RuntimeEnemy CurrentEnemy { get; }
@@ -265,5 +272,28 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         public IReadOnlyList<BattleMultiIconViewModel> OwnedPotions { get; }
         public PendingPotionOffer PendingPotionOffer { get; }
+    }
+
+    /// <summary>
+    /// パイル確認用スナップショットクラス
+    /// </summary>
+    public sealed class BattlePileInspectSnapshot
+    {
+        public BattlePileInspectSnapshot(
+            BattlePileType pileType = BattlePileType.Draw,
+            string title = null,
+            IReadOnlyList<BattleMultiIconViewModel> cards = null,
+            bool isOpen = false)
+        {
+            PileType = pileType;
+            Title = title ?? string.Empty;
+            Cards = cards ?? Array.Empty<BattleMultiIconViewModel>();
+            IsOpen = isOpen;
+        }
+
+        public BattlePileType PileType { get; }
+        public string Title { get; }
+        public IReadOnlyList<BattleMultiIconViewModel> Cards { get; }
+        public bool IsOpen { get; }
     }
 }

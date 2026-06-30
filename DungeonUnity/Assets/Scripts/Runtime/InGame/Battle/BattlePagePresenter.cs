@@ -15,17 +15,24 @@ namespace Dungeon.Runtime.InGame.Battle
         private Action<int> _onHandCardClicked;
         private Action<int> _onEnemyTargetClicked;
         private Action _onEndTurnClicked;
+        private Action _onDrawPileClicked;
+        private Action _onDiscardPileClicked;
+        private Action _onExhaustPileClicked;
 
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked)
+        public void Initialize(IBattlePageView view, Action<int> onHandCardClicked, Action<int> onEnemyTargetClicked, Action onEndTurnClicked, Action onDrawPileClicked = null, Action onDiscardPileClicked = null, Action onExhaustPileClicked = null)
         {
             _view = view;
             _onHandCardClicked = onHandCardClicked;
             _onEnemyTargetClicked = onEnemyTargetClicked;
             _onEndTurnClicked = onEndTurnClicked;
+            _onDrawPileClicked = onDrawPileClicked;
+            _onDiscardPileClicked = onDiscardPileClicked;
+            _onExhaustPileClicked = onExhaustPileClicked;
             _view.WireButtons(_onEndTurnClicked);
+            _view.WirePileButtons(_onDrawPileClicked, _onDiscardPileClicked, _onExhaustPileClicked);
         }
 
         /// <summary>
@@ -44,7 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 BuildPlayerText(snapshot),
                 BuildEnemyText(snapshot),
                 snapshot.BattleHintMessage);
-            _view.SetPileCounters(snapshot.DrawPileCount, snapshot.DiscardPileCount, snapshot.HandCount, snapshot.MaxHandCount);
+            _view.SetPileCounters(snapshot.DrawPileCount, snapshot.DiscardPileCount, snapshot.ExhaustPileCount, snapshot.HandCount, snapshot.MaxHandCount);
             _view.SetBattleHud(BuildBattleHud(snapshot));
         }
 
@@ -70,6 +77,7 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
             _view.UnwireButtons();
+            _view.UnwirePileButtons();
             _view = null;
         }
 

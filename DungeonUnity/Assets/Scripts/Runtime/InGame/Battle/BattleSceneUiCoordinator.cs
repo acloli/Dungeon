@@ -187,6 +187,31 @@ namespace Dungeon.Runtime.InGame.Battle
         }
 
         /// <summary>
+        /// パイル確認ダイアログ表示
+        /// </summary>
+        public async UniTask ShowPileInspectAsync(BattlePileInspectSnapshot snapshot, CancellationToken ct)
+        {
+            if (_hostView != null)
+            {
+                _hostView.SetHostChromeInteractable(false);
+            }
+
+            try
+            {
+                await _uiService.ShowDialogAsync<PileInspectDialog>(
+                    BattleDialogOpenParams.SingleUse(new BattlePileInspectDialogParam(snapshot)),
+                    ct);
+            }
+            finally
+            {
+                if (_hostView != null)
+                {
+                    _hostView.SetHostChromeInteractable(true);
+                }
+            }
+        }
+
+        /// <summary>
         /// UI切り離し処理
         /// </summary>
         public void Dispose()

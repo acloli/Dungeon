@@ -79,6 +79,11 @@ namespace Game.MasterData.Generated
         /// </summary>
         public int UpgradeCardId;
 
+        /// <summary>
+        /// 廃棄
+        /// </summary>
+        public bool ExhaustsOnPlay;
+
         public int GetKey() => Id;
     }
 }

@@ -24,12 +24,16 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _enemyBuffText;
         [SerializeField] private TFTextUGUI _drawPileCountText;
         [SerializeField] private TFTextUGUI _discardPileCountText;
+        [SerializeField] private TFTextUGUI _exhaustPileCountText;
         [SerializeField] private TFTextUGUI _handCountText;
         [SerializeField] private Transform _handCardRoot;
         [SerializeField] private BattleCardIconView _handCardTemplate;
         [SerializeField] private Transform _enemyTargetRoot;
         [SerializeField] private Button _enemyTargetButton;
         [SerializeField] private Button _endTurnButton;
+        [SerializeField] private Button _drawPileButton;
+        [SerializeField] private Button _discardPileButton;
+        [SerializeField] private Button _exhaustPileButton;
 
         private readonly List<BattleCardIconView> _handCards = new List<BattleCardIconView>();
         private readonly List<Button> _enemyButtons = new List<Button>();
@@ -50,6 +54,26 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
+        /// パイルボタン登録
+        /// </summary>
+        public void WirePileButtons(Action onDrawPileClicked, Action onDiscardPileClicked, Action onExhaustPileClicked)
+        {
+            UnwirePileButtons();
+            if (_drawPileButton != null)
+            {
+                _drawPileButton.onClick.AddListener(() => onDrawPileClicked?.Invoke());
+            }
+            if (_discardPileButton != null)
+            {
+                _discardPileButton.onClick.AddListener(() => onDiscardPileClicked?.Invoke());
+            }
+            if (_exhaustPileButton != null)
+            {
+                _exhaustPileButton.onClick.AddListener(() => onExhaustPileClicked?.Invoke());
+            }
+        }
+
+        /// <summary>
         /// 固定ボタン解除
         /// </summary>
         public void UnwireButtons()
@@ -61,6 +85,25 @@ namespace Dungeon.Runtime.InGame.Battle.View
             if (_endTurnButton != null)
             {
                 _endTurnButton.onClick.RemoveAllListeners();
+            }
+        }
+
+        /// <summary>
+        /// パイルボタン解除
+        /// </summary>
+        public void UnwirePileButtons()
+        {
+            if (_drawPileButton != null)
+            {
+                _drawPileButton.onClick.RemoveAllListeners();
+            }
+            if (_discardPileButton != null)
+            {
+                _discardPileButton.onClick.RemoveAllListeners();
+            }
+            if (_exhaustPileButton != null)
+            {
+                _exhaustPileButton.onClick.RemoveAllListeners();
             }
         }
 
@@ -142,12 +185,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
-        /// 山札・捨て札・手札枚数反映
+        /// 山札・捨て札・廃棄札・手札枚数反映
         /// </summary>
-        public void SetPileCounters(int drawPileCount, int discardPileCount, int handCount, int maxHandCount)
+        public void SetPileCounters(int drawPileCount, int discardPileCount, int exhaustPileCount, int handCount, int maxHandCount)
         {
             SetText(_drawPileCountText, drawPileCount.ToString());
             SetText(_discardPileCountText, discardPileCount.ToString());
+            SetText(_exhaustPileCountText, exhaustPileCount.ToString());
             SetText(_handCountText, $"{handCount}/{maxHandCount}");
         }
 
