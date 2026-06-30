@@ -19,6 +19,10 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int Gold;
         public int CurrentNodeIndex;
         public int CurrentPage;
+        public int MasterSeed;
+        public int MapSeed;
+        public int MapLayoutVersion = 1;
+        public int RandomCounter;
 
         public List<int> DeckCardIds = new List<int>();
         public List<int> OwnedRelicIds = new List<int>();
@@ -35,6 +39,9 @@ namespace Dungeon.Runtime.InGame.Save.Model
                                && PlayerMaxHp > 0
                                && PlayerHp > 0
                                && (CurrentPage == MapPage || CurrentPage == RestShopPage)
+                               && MasterSeed != 0
+                               && MapLayoutVersion > 0
+                               && RandomCounter >= 0
                                && DeckCardIds != null
                                && OwnedRelicIds != null
                                && OwnedPotionIds != null;

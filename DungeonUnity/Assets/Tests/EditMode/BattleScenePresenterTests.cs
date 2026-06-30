@@ -471,6 +471,10 @@ namespace Dungeon.Tests.EditMode
                 Gold = 100,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 12345,
+                MapSeed = 67890,
+                MapLayoutVersion = 1,
+                RandomCounter = 0,
                 DeckCardIds = new List<int> { 1001 }
             };
         }

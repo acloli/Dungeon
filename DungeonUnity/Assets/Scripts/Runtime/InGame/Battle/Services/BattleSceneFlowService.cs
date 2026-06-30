@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
@@ -14,6 +15,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// </summary>
     public sealed class BattleSceneFlowService : IBattleSceneFlowService
     {
+        private const int CurrentMapLayoutVersion = 1;
+        private const int MapSeedSalt = 0x4D6170;
+
         private readonly BattleSceneState _state = new BattleSceneState();
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
@@ -31,6 +35,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleEnemyActionSelector _enemyActionSelector;
 
         private RuntimeRunDefinition _runDefinition;
+        private int _masterSeed;
+        private int _mapSeed;
 
         public BattleSceneFlowService(
             IBattleSceneRules rules,
@@ -69,6 +75,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void Initialize(int runProfileId)
         {
+            _masterSeed = GenerateMasterSeed();
+            _mapSeed = BuildMapSeed(_masterSeed);
+            _randomProvider.Initialize(_masterSeed);
             _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
             _rules.InitializeRun(_state, _runDefinition);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
@@ -85,6 +94,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void InitializeFromSave(RunSaveData saveData)
         {
+            if (saveData.MapLayoutVersion != CurrentMapLayoutVersion)
+            {
+                _runSaveService?.DeleteSavedRun();
+                Initialize(saveData.RunProfileId);
+                return;
+            }
+
+            _masterSeed = saveData.MasterSeed;
+            _mapSeed = saveData.MapSeed;
+            _randomProvider.Restore(_masterSeed, saveData.RandomCounter);
             _runDefinition = _masterDataFacade.BuildRunDefinition(saveData.RunProfileId);
             _rules.InitializeRun(_state, _runDefinition);
             IReadOnlyDictionary<int, RuntimeCard> cardCatalog = _masterDataFacade.BuildCardCatalog();
@@ -910,11 +929,35 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 return;
             }
-            RunSaveData data = _checkpointService.BuildSaveData(_state, _runDefinition);
+
+            RunSaveData data = _checkpointService.BuildSaveData(
+                _state,
+                _runDefinition,
+                _masterSeed,
+                _mapSeed,
+                CurrentMapLayoutVersion,
+                _randomProvider.Counter);
             _runSaveService.SaveCurrentRunAsync(data).Forget(ex =>
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
+        }
+
+        /// <summary>
+        /// 新規Run用シードを生成する
+        /// </summary>
+        private static int GenerateMasterSeed()
+        {
+            int seed = Environment.TickCount;
+            return seed == 0 ? 1 : seed;
+        }
+
+        /// <summary>
+        /// Map用シードを派生する
+        /// </summary>
+        private static int BuildMapSeed(int masterSeed)
+        {
+            return HashCode.Combine(masterSeed, MapSeedSalt);
         }
     }
 }

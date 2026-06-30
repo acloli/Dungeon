@@ -12,17 +12,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// セーブデータからBattleScene状態を復元する
         /// </summary>
-        void RestoreFromSave(
-            BattleSceneState state,
-            RuntimeRunDefinition runDefinition,
-            RunSaveData saveData,
-            IReadOnlyDictionary<int, RuntimeCard> cardCatalog,
-            IBattleRelicService relicService,
-            IBattlePotionService potionService);
+        void RestoreFromSave(BattleSceneState state, RuntimeRunDefinition runDefinition, RunSaveData saveData, IReadOnlyDictionary<int, RuntimeCard> cardCatalog, IBattleRelicService relicService, IBattlePotionService potionService);
 
         /// <summary>
         /// 現在状態からcheckpoint保存データを構築する
         /// </summary>
-        RunSaveData BuildSaveData(BattleSceneState state, RuntimeRunDefinition runDefinition);
+        RunSaveData BuildSaveData(BattleSceneState state, RuntimeRunDefinition runDefinition, int masterSeed, int mapSeed, int mapLayoutVersion, int randomCounter);
     }
 }

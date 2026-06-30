@@ -781,6 +781,10 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
+            Assert.That(runSaveService.LastSavedData.MasterSeed, Is.Not.EqualTo(0));
+            Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(HashCode.Combine(runSaveService.LastSavedData.MasterSeed, 0x4D6170)));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(0));
         }
 
         [Test]
@@ -1086,6 +1090,9 @@ namespace Dungeon.Tests.EditMode
                 Gold = 177,
                 CurrentNodeIndex = 0,
                 CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 12345,
+                MapSeed = 67890,
+                RandomCounter = 4,
                 DeckCardIds = new List<int> { 1002 },
                 OwnedRelicIds = new List<int>(),
                 IsCardRemovalSoldOut = true,
@@ -1112,6 +1119,76 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
             Assert.That(Combat(battleSnapshot).HandCards.Count, Is.EqualTo(1));
             Assert.That(Combat(battleSnapshot).HandCards[0].Card.Id, Is.EqualTo(1002));
+        }
+
+        [Test]
+        public void ContinueFromRestShop_AfterInitializeFromSave_PreservesSeedMetadata()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.RestShop,
+                MasterSeed = 111,
+                MapSeed = 222,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+            service.ContinueFromRestShop();
+
+            Assert.That(runSaveService.LastSavedData.MasterSeed, Is.EqualTo(111));
+            Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(222));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void InitializeFromSave_WithMismatchedMapLayoutVersion_DeletesSaveAndStartsNewRun()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 111,
+                MapSeed = 222,
+                MapLayoutVersion = 99,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+
+            Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
         }
 
         [Test]
