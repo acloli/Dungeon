@@ -1,6 +1,7 @@
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
@@ -31,6 +32,7 @@ namespace Dungeon.Tests.EditMode
         [TestCase("ResultDialog", true, "CommonDialog")]
         [TestCase("ShopDialog", true, "CommonDialog")]
         [TestCase("CardSelectDialog", true, "CommonDialog")]
+        [TestCase("PileInspectDialog", true, "CommonDialog")]
         [TestCase("PotionReplaceDialog", true, "CommonDialog")]
         [TestCase("MultiIcon", false, null)]
         [TestCase("CardIcon", true, "MultiIcon")]
@@ -66,6 +68,7 @@ namespace Dungeon.Tests.EditMode
             AssertPrefabContainsComponent<ResultDialog>("ResultDialog");
             AssertPrefabContainsComponent<ShopDialog>("ShopDialog");
             AssertPrefabContainsComponent<CardSelectDialog>("CardSelectDialog");
+            AssertPrefabContainsComponent<PileInspectDialog>("PileInspectDialog");
             AssertPrefabContainsComponent<PotionReplaceDialog>("PotionReplaceDialog");
 
             GameObject mapPagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/MapPage.prefab");
@@ -129,6 +132,20 @@ namespace Dungeon.Tests.EditMode
             Assert.That(serialized.FindProperty("_cardContainer").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_previewContainer").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void PileInspectDialog_HasSerializedViewReferences()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/PileInspectDialog.prefab");
+            PileInspectDialog pileInspectDialog = prefab.GetComponent<PileInspectDialog>();
+
+            SerializedObject serialized = new SerializedObject(pileInspectDialog);
+            Assert.That(serialized.FindProperty("_titleText").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_cardTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_closeButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_backgroundAreaButton").objectReferenceValue, Is.Not.Null);
         }
 
         [Test]
@@ -447,6 +464,57 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void PileInspectDialog_ClickingCardHighlightsAndBackgroundClearsSelection()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/PileInspectDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RuntimeCard strike = CreateCard(1001, "Strike", 1);
+                RuntimeCard guard = CreateCard(1002, "Guard", 1);
+                PileInspectDialog dialog = instance.GetComponent<PileInspectDialog>();
+                BattlePileInspectSnapshot snapshot = new BattlePileInspectSnapshot(
+                    BattlePileType.Exhaust,
+                    "Exhaust",
+                    new[]
+                    {
+                        BattleMultiIconViewModel.CreateCard(strike, isInteractable: false),
+                        BattleMultiIconViewModel.CreateCard(guard, isInteractable: false)
+                    },
+                    isOpen: true);
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(new BattlePileInspectDialogParam(snapshot), System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                System.Collections.IList cardViews = GetPileInspectCardViews(dialog);
+                Button backgroundButton = GetSerializedReference<Button>(dialog, "_backgroundAreaButton");
+
+                Assert.That(cardViews.Count, Is.EqualTo(2));
+                Assert.That(IsCardSelected((Component)cardViews[0]), Is.False);
+                Assert.That(IsCardSelected((Component)cardViews[1]), Is.False);
+
+                InvokeButton((Component)cardViews[0]);
+
+                cardViews = GetPileInspectCardViews(dialog);
+                Assert.That(IsCardSelected((Component)cardViews[0]), Is.True);
+                Assert.That(IsCardSelected((Component)cardViews[1]), Is.False);
+
+                InvokeButton(backgroundButton);
+
+                cardViews = GetPileInspectCardViews(dialog);
+                Assert.That(cardViews.Count, Is.EqualTo(2));
+                Assert.That(IsCardSelected((Component)cardViews[0]), Is.False);
+                Assert.That(IsCardSelected((Component)cardViews[1]), Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
         public void AddressableGroup_UsesPrefabNamesAsKeys()
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
@@ -458,6 +526,7 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ResultDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.ShopDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.CardSelectDialog}", yaml);
+            StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.PileInspectDialog}", yaml);
             StringAssert.Contains($"m_Address: {BattleUiAddressCatalog.PotionReplaceDialog}", yaml);
             StringAssert.DoesNotContain("m_Address: MapPageView", yaml);
             StringAssert.DoesNotContain("m_Address: RewardDialogView", yaml);
@@ -507,13 +576,18 @@ namespace Dungeon.Tests.EditMode
             StringAssert.Contains("_enemyBuffText: {fileID:", yaml);
             StringAssert.Contains("_drawPileCountText: {fileID:", yaml);
             StringAssert.Contains("_discardPileCountText: {fileID:", yaml);
+            StringAssert.Contains("_exhaustPileCountText: {fileID:", yaml);
             StringAssert.Contains("_handCountText: {fileID:", yaml);
             StringAssert.Contains("_handCardTemplate: {fileID:", yaml);
+            StringAssert.Contains("_drawPileButton: {fileID:", yaml);
+            StringAssert.Contains("_discardPileButton: {fileID:", yaml);
+            StringAssert.Contains("_exhaustPileButton: {fileID:", yaml);
             StringAssert.Contains("m_Name: IntentPanel", yaml);
             StringAssert.Contains("m_Name: PlayerStatusPanel", yaml);
             StringAssert.Contains("m_Name: EnemyBuffPanel", yaml);
             StringAssert.Contains("m_Name: DrawPilePanel", yaml);
             StringAssert.Contains("m_Name: DiscardPilePanel", yaml);
+            StringAssert.Contains("m_Name: ExhaustPilePanel", yaml);
             StringAssert.Contains("m_Name: HandCountPanel", yaml);
             StringAssert.Contains("m_Name: RelicStrip", yaml);
             StringAssert.Contains("m_Name: OwnedRelicHintPanel", yaml);
@@ -551,6 +625,48 @@ namespace Dungeon.Tests.EditMode
             Assert.That(relicStrip, Is.Not.Null);
             Assert.That(relicStrip.transform.parent, Is.Not.Null);
             Assert.That(relicStrip.transform.parent.name, Is.EqualTo("BattlePanel"));
+        }
+
+        [Test]
+        public void BattleScene_PileLabels_UseExpectedLocalizationKeys()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/BattleScene.unity", OpenSceneMode.Single);
+            Assert.That(scene.IsValid(), Is.True);
+
+            AssertLabelLocalizationKey(scene, "DrawPilePanel", "battle.pile.draw");
+            AssertLabelLocalizationKey(scene, "DiscardPilePanel", "battle.pile.discard");
+            AssertLabelLocalizationKey(scene, "ExhaustPilePanel", "battle.pile.exhaust");
+            AssertLabelLocalizationKey(scene, "HandCountPanel", "battle.hand.count");
+        }
+
+        [Test]
+        public void BattleScene_PilePanels_HaveExpectedInteractivity()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/BattleScene.unity", OpenSceneMode.Single);
+            Assert.That(scene.IsValid(), Is.True);
+
+            Assert.That(FindSceneGameObject(scene, "DrawPilePanel").GetComponent<Button>(), Is.Not.Null);
+            Assert.That(FindSceneGameObject(scene, "DiscardPilePanel").GetComponent<Button>(), Is.Not.Null);
+            Assert.That(FindSceneGameObject(scene, "ExhaustPilePanel").GetComponent<Button>(), Is.Not.Null);
+
+            GameObject handCountPanel = FindSceneGameObject(scene, "HandCountPanel");
+            Assert.That(handCountPanel.GetComponent<Button>(), Is.Null);
+
+            Image handCountImage = handCountPanel.GetComponent<Image>();
+            Assert.That(handCountImage, Is.Not.Null);
+            Assert.That(handCountImage.raycastTarget, Is.False);
+        }
+
+        [Test]
+        public void LocalizationCsv_ContainsBattlePileKeys()
+        {
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string csv = File.ReadAllText(Path.Combine(projectRoot, "Assets/Localization/localization.csv"));
+
+            StringAssert.Contains("battle.pile.draw,", csv);
+            StringAssert.Contains("battle.pile.discard,", csv);
+            StringAssert.Contains("battle.pile.exhaust,", csv);
+            StringAssert.Contains("battle.hand.count,", csv);
         }
 
         [Test]
@@ -604,6 +720,34 @@ namespace Dungeon.Tests.EditMode
             return builder.Build();
         }
 
+        private static void AssertLabelLocalizationKey(UnityEngine.SceneManagement.Scene scene, string panelName, string expectedKey)
+        {
+            GameObject panel = FindSceneGameObject(scene, panelName);
+            Transform labelTransform = panel.transform.Find("Label");
+            Assert.That(labelTransform, Is.Not.Null, $"{panelName}/Label is missing.");
+
+            Component label = labelTransform.GetComponent("TFTextUGUI");
+            Assert.That(label, Is.Not.Null, $"{panelName}/Label is missing TFTextUGUI.");
+
+            SerializedObject serialized = new SerializedObject(label);
+            Assert.That(serialized.FindProperty("_useLocalization").boolValue, Is.True, $"{panelName}/Label should enable localization.");
+            Assert.That(serialized.FindProperty("_localizationKey").stringValue, Is.EqualTo(expectedKey));
+        }
+
+        private static GameObject FindSceneGameObject(UnityEngine.SceneManagement.Scene scene, string gameObjectName)
+        {
+            foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (gameObject.scene == scene && gameObject.name == gameObjectName)
+                {
+                    return gameObject;
+                }
+            }
+
+            Assert.Fail($"{gameObjectName} was not found in scene '{scene.path}'.");
+            return null;
+        }
+
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page, int gold = 100)
         {
             BattleSceneSnapshotBuilder builder = BattleTestData.Snapshot(page);
@@ -630,6 +774,14 @@ namespace Dungeon.Tests.EditMode
         {
             System.Reflection.FieldInfo field = typeof(CardSelectDialog).GetField(
                 "_previewCardViews",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            return field?.GetValue(dialog) as System.Collections.IList;
+        }
+
+        private static System.Collections.IList GetPileInspectCardViews(PileInspectDialog dialog)
+        {
+            System.Reflection.FieldInfo field = typeof(PileInspectDialog).GetField(
+                "_cardViews",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             return field?.GetValue(dialog) as System.Collections.IList;
         }
