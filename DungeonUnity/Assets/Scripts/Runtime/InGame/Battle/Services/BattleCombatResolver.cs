@@ -53,6 +53,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _enemyActionSelector.NormalizeSelectedEnemyIndex(state);
             state.Hand.RemoveAt(handIndex);
             state.PlayerEnergy -= card.Cost;
+            MovePlayedCardToDestinationPile(state, card);
 
             int totalDamage = 0;
             int totalBlock = 0;
@@ -80,15 +81,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         totalDraw += _deckService.DrawCards(state, randomProvider, effect.Value);
                         break;
                 }
-            }
-
-            if (card.ExhaustsOnPlay)
-            {
-                state.ExhaustPile.Add(card);
-            }
-            else
-            {
-                state.DiscardPile.Add(card);
             }
 
             return new BattleCardResolutionResult(totalDamage, totalBlock, totalDraw);
@@ -180,6 +172,36 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             SyncPrimaryEnemyState(state);
+        }
+
+        /// <summary>
+        /// 使用したカードを解決前に遷移先Pileへ移動する
+        /// </summary>
+        private static void MovePlayedCardToDestinationPile(BattleSceneState state, RuntimeCard card)
+        {
+            if (card.ExhaustsOnPlay)
+            {
+                MoveCardToExhaust(state, card);
+                return;
+            }
+
+            MoveCardToDiscard(state, card);
+        }
+
+        /// <summary>
+        /// カードをDiscardPileへ移動する
+        /// </summary>
+        private static void MoveCardToDiscard(BattleSceneState state, RuntimeCard card)
+        {
+            state.DiscardPile.Add(card);
+        }
+
+        /// <summary>
+        /// カードをExhaustPileへ移動する
+        /// </summary>
+        private static void MoveCardToExhaust(BattleSceneState state, RuntimeCard card)
+        {
+            state.ExhaustPile.Add(card);
         }
 
         /// <summary>
