@@ -201,9 +201,9 @@ namespace Dungeon.Tests.EditMode
             BattleCardResolutionResult result = service.PlayCard(state, 0, new FixedRandomProvider(1));
 
             Assert.That(result.TotalDraw, Is.EqualTo(1));
-            Assert.That(state.DrawPile, Is.Empty);
-            Assert.That(state.DiscardPile, Has.Count.EqualTo(1));
-            Assert.That(state.DiscardPile[0].Id, Is.EqualTo(1002));
+            Assert.That(state.DrawPile, Has.Count.EqualTo(1));
+            Assert.That(state.DrawPile[0].Id, Is.EqualTo(1002));
+            Assert.That(state.DiscardPile, Is.Empty);
             Assert.That(state.ExhaustPile, Is.Empty);
             Assert.That(state.Hand, Has.Count.EqualTo(1));
             Assert.That(state.Hand[0].Id, Is.EqualTo(1001));
