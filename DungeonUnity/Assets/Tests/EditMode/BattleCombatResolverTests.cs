@@ -178,6 +178,69 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.Hand, Is.Empty);
         }
 
+        [Test]
+        public void PlayCard_DrawEffectCardWithEmptyDrawPile_CanReshufflePlayedCardFromDiscard()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeCard playedCard = CreateCard(
+                1001,
+                1,
+                new[]
+                {
+                    new RuntimeCardEffect(1, EffectType.DrawCards, 1, 1, StatusType.None, 0, TargetSide.Self)
+                });
+            state.Hand.Add(playedCard);
+            state.DiscardPile.Add(CreateCard(1002, 1, Array.Empty<RuntimeCardEffect>()));
+            state.Enemies.Add(CreateEnemyState(3001, hp: 10, CreateEnemyAction(1, 4)));
+            BattleCombatResolver service = CreateService();
+
+            BattleCardResolutionResult result = service.PlayCard(state, 0, new FixedRandomProvider(1));
+
+            Assert.That(result.TotalDraw, Is.EqualTo(1));
+            Assert.That(state.DrawPile, Is.Empty);
+            Assert.That(state.DiscardPile, Has.Count.EqualTo(1));
+            Assert.That(state.DiscardPile[0].Id, Is.EqualTo(1002));
+            Assert.That(state.ExhaustPile, Is.Empty);
+            Assert.That(state.Hand, Has.Count.EqualTo(1));
+            Assert.That(state.Hand[0].Id, Is.EqualTo(1001));
+        }
+
+        [Test]
+        public void PlayCard_DrawEffectExhaustCardWithEmptyDrawPile_DoesNotReshufflePlayedCard()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeCard playedCard = CreateCard(
+                1001,
+                1,
+                new[]
+                {
+                    new RuntimeCardEffect(1, EffectType.DrawCards, 1, 1, StatusType.None, 0, TargetSide.Self)
+                },
+                exhaustsOnPlay: true);
+            state.Hand.Add(playedCard);
+            state.DiscardPile.Add(CreateCard(1002, 1, Array.Empty<RuntimeCardEffect>()));
+            state.Enemies.Add(CreateEnemyState(3001, hp: 10, CreateEnemyAction(1, 4)));
+            BattleCombatResolver service = CreateService();
+
+            BattleCardResolutionResult result = service.PlayCard(state, 0, new FixedRandomProvider(1));
+
+            Assert.That(result.TotalDraw, Is.EqualTo(1));
+            Assert.That(state.Hand, Has.Count.EqualTo(1));
+            Assert.That(state.Hand[0].Id, Is.EqualTo(1002));
+            Assert.That(state.DrawPile, Is.Empty);
+            Assert.That(state.DiscardPile, Is.Empty);
+            Assert.That(state.ExhaustPile, Has.Count.EqualTo(1));
+            Assert.That(state.ExhaustPile[0].Id, Is.EqualTo(1001));
+        }
+
         private static BattleCombatResolver CreateService()
         {
             return new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector());
