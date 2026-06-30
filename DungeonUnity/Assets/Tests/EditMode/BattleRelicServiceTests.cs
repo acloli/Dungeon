@@ -73,6 +73,7 @@ namespace Dungeon.Tests.EditMode
             RuntimeRunDefinition runDefinition = new RuntimeRunDefinition(
                 5501,
                 "run_test",
+                6301,
                 CharacterArchetype.CrimsonExile,
                 50,
                 120,
