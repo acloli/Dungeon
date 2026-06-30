@@ -37,6 +37,55 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void Initialize_WithGeneratedMap_PrioritizesGeneratedNodes()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Battle, "Authored", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "AuthoredBoss", Array.Empty<int>())
+                });
+            IReadOnlyList<RuntimeMapNode> generatedNodes = new[]
+            {
+                CreateNode(9301, 1, InGameNodeType.Event, "Generated", new[] { 1 }),
+                CreateNode(9302, 2, InGameNodeType.Boss, "GeneratedBoss", Array.Empty<int>())
+            };
+            BattleSceneFlowService service = CreateServiceWithMapGenerator(
+                runDefinition,
+                new FixedBattleMapGenerator(generatedNodes),
+                0);
+
+            service.Initialize(5501);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Map(snapshot).Nodes.Count, Is.EqualTo(2));
+            Assert.That(Map(snapshot).Nodes[0].DisplayName, Is.EqualTo("Generated"));
+            Assert.That(Map(snapshot).Nodes[0].NodeType, Is.EqualTo(InGameNodeType.Event));
+        }
+
+        [Test]
+        public void Initialize_WhenGeneratedMapIsEmpty_FallsBackToAuthoredNodes()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "AuthoredRest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "AuthoredBoss", Array.Empty<int>())
+                });
+            BattleSceneFlowService service = CreateServiceWithMapGenerator(
+                runDefinition,
+                new FixedBattleMapGenerator(Array.Empty<RuntimeMapNode>()),
+                0);
+
+            service.Initialize(5501);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Map(snapshot).Nodes.Count, Is.EqualTo(2));
+            Assert.That(Map(snapshot).Nodes[0].DisplayName, Is.EqualTo("AuthoredRest"));
+            Assert.That(Map(snapshot).Nodes[0].NodeType, Is.EqualTo(InGameNodeType.RestShop));
+        }
+
+        [Test]
         public void CreateSnapshot_AfterBranchNode_ReturnsAvailableNextNodes()
         {
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
@@ -1408,6 +1457,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1436,6 +1486,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1464,6 +1515,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1491,6 +1543,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1519,8 +1572,38 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(displayTextService, shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
+        }
+
+        private static BattleSceneFlowService CreateServiceWithMapGenerator(
+            RuntimeRunDefinition runDefinition,
+            IBattleMapGenerator mapGenerator,
+            params int[] values)
+        {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
+            return new BattleSceneFlowService(
+                rules,
+                randomProvider,
+                new FakeBattleMasterDataFacade(runDefinition),
+                mapGenerator,
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
@@ -1593,6 +1676,7 @@ namespace Dungeon.Tests.EditMode
             RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
             builder.RunProfileId = 5501;
             builder.Key = "run_test";
+            builder.MapTemplateId = 6301;
             builder.PlayerMaxHp = playerMaxHp;
             builder.StartingGold = startingGold;
             builder.RelicDropChance = relicDropChance;
@@ -1744,6 +1828,24 @@ namespace Dungeon.Tests.EditMode
             public IReadOnlyDictionary<int, RuntimeCard> BuildCardCatalog()
             {
                 return _runDefinition?.CardCatalog ?? new Dictionary<int, RuntimeCard>();
+            }
+        }
+
+        /// <summary>
+        /// テスト用固定マップ生成クラス
+        /// </summary>
+        private sealed class FixedBattleMapGenerator : IBattleMapGenerator
+        {
+            private readonly IReadOnlyList<RuntimeMapNode> _nodes;
+
+            public FixedBattleMapGenerator(IReadOnlyList<RuntimeMapNode> nodes)
+            {
+                _nodes = nodes;
+            }
+
+            public IReadOnlyList<RuntimeMapNode> Generate(RuntimeRunDefinition runDefinition, int mapSeed)
+            {
+                return _nodes ?? Array.Empty<RuntimeMapNode>();
             }
         }
 
