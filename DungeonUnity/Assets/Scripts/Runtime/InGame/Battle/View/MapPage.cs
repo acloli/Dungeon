@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Domain;
 using TFramework.UI;
 using UnityEngine;
 
@@ -14,7 +15,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class MapPage : UIPageBase, IMapPageView
     {
         [SerializeField] private Transform _nodeRoot;
-        [SerializeField] private BattleOptionButtonView _nodeButtonTemplate;
+        [SerializeField] private BattleOptionButtonView _battleNodeButtonTemplate;
+        [SerializeField] private BattleOptionButtonView _eliteNodeButtonTemplate;
+        [SerializeField] private BattleOptionButtonView _eventNodeButtonTemplate;
+        [SerializeField] private BattleOptionButtonView _restNodeButtonTemplate;
+        [SerializeField] private BattleOptionButtonView _bossNodeButtonTemplate;
         [SerializeField] private TFTextUGUI _stateText;
 
         private readonly List<BattleOptionButtonView> _buttons = new List<BattleOptionButtonView>();
@@ -55,18 +60,28 @@ namespace Dungeon.Runtime.InGame.Battle.View
         public void BuildMapButtons(IReadOnlyList<RuntimeMapNode> nodes, Action<int> onClicked)
         {
             ClearDynamicButtons();
-            if (_nodeRoot == null || _nodeButtonTemplate == null || nodes == null)
+            if (_nodeRoot == null || nodes == null)
             {
                 return;
             }
 
-            _nodeButtonTemplate.gameObject.SetActive(false);
+            DeactivateTemplate(_battleNodeButtonTemplate);
+            DeactivateTemplate(_eliteNodeButtonTemplate);
+            DeactivateTemplate(_eventNodeButtonTemplate);
+            DeactivateTemplate(_restNodeButtonTemplate);
+            DeactivateTemplate(_bossNodeButtonTemplate);
 
             for (int i = 0; i < nodes.Count; i++)
             {
                 int nodeIndex = i;
                 RuntimeMapNode node = nodes[nodeIndex];
-                BattleOptionButtonView button = Instantiate(_nodeButtonTemplate, _nodeRoot);
+                BattleOptionButtonView template = ResolveTemplate(node.NodeType);
+                if (template == null)
+                {
+                    continue;
+                }
+
+                BattleOptionButtonView button = Instantiate(template, _nodeRoot);
                 button.gameObject.SetActive(true);
                 button.Configure(
                     string.Format(BattleSceneConstants.MapNodeLabelFormat, node.Floor, node.DisplayName),
@@ -111,6 +126,33 @@ namespace Dungeon.Runtime.InGame.Battle.View
         protected override void OnTerminate()
         {
             ClearDynamicButtons();
+        }
+
+        /// <summary>
+        /// ノード種別に応じたテンプレートを返す
+        /// </summary>
+        private BattleOptionButtonView ResolveTemplate(InGameNodeType nodeType)
+        {
+            return nodeType switch
+            {
+                InGameNodeType.Battle => _battleNodeButtonTemplate,
+                InGameNodeType.EliteBattle => _eliteNodeButtonTemplate ?? _battleNodeButtonTemplate,
+                InGameNodeType.Event => _eventNodeButtonTemplate ?? _battleNodeButtonTemplate,
+                InGameNodeType.RestShop => _restNodeButtonTemplate ?? _battleNodeButtonTemplate,
+                InGameNodeType.Boss => _bossNodeButtonTemplate ?? _battleNodeButtonTemplate,
+                _ => _battleNodeButtonTemplate
+            };
+        }
+
+        /// <summary>
+        /// テンプレートを非表示にする
+        /// </summary>
+        private static void DeactivateTemplate(BattleOptionButtonView template)
+        {
+            if (template != null)
+            {
+                template.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
