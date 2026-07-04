@@ -221,26 +221,25 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         /// </summary>
         public bool CanMoveToNode(int index)
         {
+            if (Nodes == null || index < 0 || index >= Nodes.Count)
+            {
+                return false;
+            }
+
             if (CurrentNodeIndex < 0)
             {
                 return index == 0;
             }
 
             RuntimeMapNode currentNode = Nodes[CurrentNodeIndex];
-            if (currentNode.NextNodeIndices != null && currentNode.NextNodeIndices.Count > 0)
+            RuntimeMapNode targetNode = Nodes[index];
+            if (currentNode == null || targetNode == null)
             {
-                for (int i = 0; i < currentNode.NextNodeIndices.Count; i++)
-                {
-                    if (currentNode.NextNodeIndices[i] == index)
-                    {
-                        return true;
-                    }
-                }
-
                 return false;
             }
 
-            return index == CurrentNodeIndex + 1;
+            // 現行MapPageは経路を描画しないため、同一の次フロアに見えているノードはすべて選択可能にする
+            return targetNode.Floor == currentNode.Floor + 1;
         }
 
         /// <summary>

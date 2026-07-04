@@ -109,6 +109,29 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void CreateSnapshot_WithSparseNextNodeIndices_AllowsAllNodesOnNextFloor()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Battle", new[] { 3 }),
+                    CreateNode(5303, 2, InGameNodeType.Event, "Event", new[] { 3 }),
+                    CreateNode(5304, 3, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyRest();
+            service.ContinueFromRestShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
         public void SelectMapNode_UnavailableNode_KeepsCurrentNodeAndShowsMessage()
         {
             BattleSceneFlowService service = CreateService(CreateRunDefinition(), 0);
