@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
+using TFramework.Debug;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
 {
@@ -10,6 +11,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// </summary>
     public sealed class BattleMapGenerator : IBattleMapGenerator
     {
+        private const int DefaultPresetMapTemplateId = 6301;
         private static readonly int[] FloorNodeCounts = { 1, 2, 2, 2, 2, 1 };
 
         /// <summary>
@@ -17,6 +19,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyList<RuntimeMapNode> Generate(RuntimeRunDefinition runDefinition, int mapSeed)
         {
+            WarnIfUnknownMapTemplateId(runDefinition);
             Random random = new Random(mapSeed);
             List<RuntimeMapNode> nodes = new List<RuntimeMapNode>();
             List<InGameNodeType> nodeTypes = BuildNodeTypes(random);
@@ -75,6 +78,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return generatedNodes;
+        }
+
+        /// <summary>
+        /// 未知のMapTemplateId利用時に警告を記録する
+        /// </summary>
+        private static void WarnIfUnknownMapTemplateId(RuntimeRunDefinition runDefinition)
+        {
+            if (runDefinition == null || runDefinition.MapTemplateId == DefaultPresetMapTemplateId)
+            {
+                return;
+            }
+
+            TLogger.Warning(
+                $"MapTemplateId preset is unknown. id={runDefinition.MapTemplateId}. Fallback to default preset.",
+                "Battle");
         }
 
         /// <summary>

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Tests.EditMode.Support;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -85,12 +88,27 @@ namespace Dungeon.Tests.EditMode
             }
         }
 
-        private static RuntimeRunDefinition CreateRunDefinition()
+        [Test]
+        public void Generate_WithUnknownMapTemplateId_UsesDefaultPresetAndLogsWarning()
+        {
+            BattleMapGenerator generator = new BattleMapGenerator();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(9999);
+
+            LogAssert.Expect(LogType.Warning, new Regex("MapTemplateId preset is unknown\\. id=9999\\. Fallback to default preset\\."));
+
+            IReadOnlyList<RuntimeMapNode> nodes = generator.Generate(runDefinition, 12345);
+
+            Assert.That(nodes.Count, Is.EqualTo(10));
+            Assert.That(nodes.Single(node => node.Floor == 1).NodeType, Is.EqualTo(InGameNodeType.Battle));
+            Assert.That(nodes.Single(node => node.Floor == 6).NodeType, Is.EqualTo(InGameNodeType.Boss));
+        }
+
+        private static RuntimeRunDefinition CreateRunDefinition(int mapTemplateId = 6301)
         {
             RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
             builder.RunProfileId = 5501;
             builder.Key = "run_test";
-            builder.MapTemplateId = 6301;
+            builder.MapTemplateId = mapTemplateId;
             return builder.Build();
         }
 
