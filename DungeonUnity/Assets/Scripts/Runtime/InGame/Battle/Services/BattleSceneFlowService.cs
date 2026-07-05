@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
@@ -14,10 +15,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// </summary>
     public sealed class BattleSceneFlowService : IBattleSceneFlowService
     {
+        private const int CurrentMapLayoutVersion = 1;
+        private const int MapSeedSalt = 0x4D6170;
+
         private readonly BattleSceneState _state = new BattleSceneState();
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IBattleMasterDataFacade _masterDataFacade;
+        private readonly IBattleMapGenerator _mapGenerator;
         private readonly IBattleRewardFlowService _rewardFlowService;
         private readonly IBattleSnapshotFactory _snapshotFactory;
         private readonly IBattleShopService _shopService;
@@ -31,11 +36,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleEnemyActionSelector _enemyActionSelector;
 
         private RuntimeRunDefinition _runDefinition;
+        private int _masterSeed;
+        private int _mapSeed;
 
         public BattleSceneFlowService(
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleMasterDataFacade masterDataFacade,
+            IBattleMapGenerator mapGenerator,
             IBattleRewardFlowService rewardFlowService,
             IBattleSnapshotFactory snapshotFactory,
             IBattleShopService shopService,
@@ -51,6 +59,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
+            _mapGenerator = mapGenerator;
             _rewardFlowService = rewardFlowService;
             _snapshotFactory = snapshotFactory;
             _shopService = shopService;
@@ -69,8 +78,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void Initialize(int runProfileId)
         {
+            _masterSeed = GenerateMasterSeed();
+            _mapSeed = BuildMapSeed(_masterSeed);
+            _randomProvider.Initialize(_masterSeed);
             _runDefinition = _masterDataFacade.BuildRunDefinition(runProfileId);
             _rules.InitializeRun(_state, _runDefinition);
+            ApplyInitialMapNodes(_mapSeed);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.ClearOwnedInspections();
             _state.OwnedRelics.Clear();
@@ -85,8 +98,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void InitializeFromSave(RunSaveData saveData)
         {
+            if (saveData.MapLayoutVersion != CurrentMapLayoutVersion)
+            {
+                _runSaveService?.DeleteSavedRun();
+                Initialize(saveData.RunProfileId);
+                return;
+            }
+
+            _masterSeed = saveData.MasterSeed;
+            _mapSeed = saveData.MapSeed;
+            _randomProvider.Restore(_masterSeed, saveData.RandomCounter);
             _runDefinition = _masterDataFacade.BuildRunDefinition(saveData.RunProfileId);
             _rules.InitializeRun(_state, _runDefinition);
+            ApplyInitialMapNodes(_mapSeed);
             IReadOnlyDictionary<int, RuntimeCard> cardCatalog = _masterDataFacade.BuildCardCatalog();
             _checkpointService.RestoreFromSave(
                 _state,
@@ -910,11 +934,82 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 return;
             }
-            RunSaveData data = _checkpointService.BuildSaveData(_state, _runDefinition);
+
+            RunSaveData data = _checkpointService.BuildSaveData(
+                _state,
+                _runDefinition,
+                _masterSeed,
+                _mapSeed,
+                CurrentMapLayoutVersion,
+                _randomProvider.Counter);
             _runSaveService.SaveCurrentRunAsync(data).Forget(ex =>
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
+        }
+
+        /// <summary>
+        /// 初期マップを状態へ反映する
+        /// </summary>
+        private void ApplyInitialMapNodes(int mapSeed)
+        {
+            _state.Nodes.Clear();
+
+            if (TryApplyNodes(_mapGenerator?.Generate(_runDefinition, mapSeed)))
+            {
+                return;
+            }
+
+            if (TryApplyNodes(_runDefinition?.Nodes))
+            {
+                return;
+            }
+
+            _state.Nodes.Add(new RuntimeMapNode(1, "default_01", 1, InGameNodeType.Battle, BattleSceneConstants.DefaultBattleNodeLabel, string.Empty, new[] { 1 }));
+            _state.Nodes.Add(new RuntimeMapNode(2, "default_02", 2, InGameNodeType.RestShop, BattleSceneConstants.DefaultRestNodeLabel, string.Empty, new[] { 2 }));
+            _state.Nodes.Add(new RuntimeMapNode(3, "default_03", 3, InGameNodeType.Battle, BattleSceneConstants.DefaultBattleNodeTwoLabel, string.Empty, new[] { 3 }));
+            _state.Nodes.Add(new RuntimeMapNode(4, "default_04", 4, InGameNodeType.EliteBattle, BattleSceneConstants.DefaultEliteNodeLabel, string.Empty, new[] { 4 }));
+            _state.Nodes.Add(new RuntimeMapNode(5, "default_05", 5, InGameNodeType.RestShop, BattleSceneConstants.DefaultShopNodeLabel, string.Empty, new[] { 5 }));
+            _state.Nodes.Add(new RuntimeMapNode(6, "default_06", 6, InGameNodeType.Boss, BattleSceneConstants.DefaultBossNodeLabel, string.Empty, Array.Empty<int>()));
+        }
+
+        /// <summary>
+        /// ノード一覧を状態へ適用する
+        /// </summary>
+        private bool TryApplyNodes(IReadOnlyList<RuntimeMapNode> nodes)
+        {
+            if (nodes == null || nodes.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                RuntimeMapNode node = nodes[i];
+                if (node != null)
+                {
+                    _state.Nodes.Add(node);
+                }
+            }
+
+            return _state.Nodes.Count > 0;
+        }
+
+        /// <summary>
+        /// 新規Run用シードを生成する
+        /// </summary>
+        private static int GenerateMasterSeed()
+        {
+            int seed = Environment.TickCount;
+            return seed == 0 ? 1 : seed;
+        }
+
+        /// <summary>
+        /// Map用シードを派生する
+        /// </summary>
+        private static int BuildMapSeed(int masterSeed)
+        {
+            return HashCode.Combine(masterSeed, MapSeedSalt);
         }
     }
 }

@@ -69,16 +69,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         state.Deck.Add(card);
                     }
                 }
-
-                for (int i = 0; i < runDefinition.Nodes.Count; i++)
-                {
-                    state.Nodes.Add(runDefinition.Nodes[i]);
-                }
-            }
-
-            if (state.Nodes.Count == 0)
-            {
-                AddDefaultNodes(state.Nodes);
             }
         }
 
@@ -211,19 +201,5 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.Deck.Add(state.Deck[index]);
             return true;
         }
-
-        /// <summary>
-        /// 既定ノード補完
-        /// </summary>
-        private static void AddDefaultNodes(List<RuntimeMapNode> nodes)
-        {
-            nodes.Add(new RuntimeMapNode(1, "default_01", 1, InGameNodeType.Battle, BattleSceneConstants.DefaultBattleNodeLabel, string.Empty, new[] { 1 }));
-            nodes.Add(new RuntimeMapNode(2, "default_02", 2, InGameNodeType.RestShop, BattleSceneConstants.DefaultRestNodeLabel, string.Empty, new[] { 2 }));
-            nodes.Add(new RuntimeMapNode(3, "default_03", 3, InGameNodeType.Battle, BattleSceneConstants.DefaultBattleNodeTwoLabel, string.Empty, new[] { 3 }));
-            nodes.Add(new RuntimeMapNode(4, "default_04", 4, InGameNodeType.EliteBattle, BattleSceneConstants.DefaultEliteNodeLabel, string.Empty, new[] { 4 }));
-            nodes.Add(new RuntimeMapNode(5, "default_05", 5, InGameNodeType.RestShop, BattleSceneConstants.DefaultShopNodeLabel, string.Empty, new[] { 5 }));
-            nodes.Add(new RuntimeMapNode(6, "default_06", 6, InGameNodeType.Boss, BattleSceneConstants.DefaultBossNodeLabel, string.Empty, Array.Empty<int>()));
-        }
-
     }
 }

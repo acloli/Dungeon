@@ -335,6 +335,7 @@ namespace Dungeon.Tests.EditMode.Support
     {
         public int RunProfileId { get; set; } = 5501;
         public string Key { get; set; } = "run_test";
+        public int MapTemplateId { get; set; } = 6301;
         public CharacterArchetype CharacterArchetype { get; set; } = CharacterArchetype.CrimsonExile;
         public int PlayerMaxHp { get; set; } = 50;
         public int StartingGold { get; set; } = 120;
@@ -360,6 +361,7 @@ namespace Dungeon.Tests.EditMode.Support
             return new RuntimeRunDefinition(
                 RunProfileId,
                 Key,
+                MapTemplateId,
                 CharacterArchetype,
                 PlayerMaxHp,
                 StartingGold,

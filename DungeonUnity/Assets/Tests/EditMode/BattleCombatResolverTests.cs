@@ -201,9 +201,9 @@ namespace Dungeon.Tests.EditMode
             BattleCardResolutionResult result = service.PlayCard(state, 0, new FixedRandomProvider(1));
 
             Assert.That(result.TotalDraw, Is.EqualTo(1));
-            Assert.That(state.DrawPile, Is.Empty);
-            Assert.That(state.DiscardPile, Has.Count.EqualTo(1));
-            Assert.That(state.DiscardPile[0].Id, Is.EqualTo(1002));
+            Assert.That(state.DrawPile, Has.Count.EqualTo(1));
+            Assert.That(state.DrawPile[0].Id, Is.EqualTo(1002));
+            Assert.That(state.DiscardPile, Is.Empty);
             Assert.That(state.ExhaustPile, Is.Empty);
             Assert.That(state.Hand, Has.Count.EqualTo(1));
             Assert.That(state.Hand[0].Id, Is.EqualTo(1001));
@@ -290,13 +290,30 @@ namespace Dungeon.Tests.EditMode
         {
             private readonly int _value;
 
+            public int Seed { get; private set; }
+
+            public int Counter { get; private set; }
+
             public FixedRandomProvider(int value)
             {
                 _value = value;
             }
 
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+            }
+
             public int Range(int minInclusive, int maxExclusive)
             {
+                Counter++;
                 return Math.Clamp(_value, minInclusive, maxExclusive - 1);
             }
         }

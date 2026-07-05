@@ -564,6 +564,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimeRunDefinition(
             int runProfileId,
             string key,
+            int mapTemplateId,
             CharacterArchetype characterArchetype,
             int playerMaxHp,
             int startingGold,
@@ -584,6 +585,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         {
             RunProfileId = runProfileId;
             Key = key;
+            MapTemplateId = mapTemplateId;
             CharacterArchetype = characterArchetype;
             PlayerMaxHp = playerMaxHp;
             StartingGold = startingGold;
@@ -606,6 +608,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         public int RunProfileId { get; }
         public string Key { get; }
+        public int MapTemplateId { get; }
         public CharacterArchetype CharacterArchetype { get; }
         public int PlayerMaxHp { get; }
         public int StartingGold { get; }

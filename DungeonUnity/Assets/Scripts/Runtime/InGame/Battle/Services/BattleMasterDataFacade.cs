@@ -60,6 +60,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return new RuntimeRunDefinition(
                 profile.Id,
                 profile.Key,
+                profile.MapTemplateId,
                 profile.CharacterArchetype,
                 profile.PlayerMaxHp,
                 profile.StartingGold,

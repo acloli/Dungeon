@@ -94,8 +94,25 @@ namespace Dungeon.Tests.EditMode
         /// </summary>
         private sealed class FixedRandomProvider : IBattleRandomProvider
         {
+            public int Seed { get; private set; }
+
+            public int Counter { get; private set; }
+
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+            }
+
             public int Range(int minInclusive, int maxExclusive)
             {
+                Counter++;
                 return minInclusive;
             }
         }

@@ -116,13 +116,30 @@ namespace Dungeon.Tests.EditMode
         {
             private readonly int _value;
 
+            public int Seed { get; private set; }
+
+            public int Counter { get; private set; }
+
             public FixedRandomProvider(int value)
             {
                 _value = value;
             }
 
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+            }
+
             public int Range(int minInclusive, int maxExclusive)
             {
+                Counter++;
                 if (_value < minInclusive)
                 {
                     return minInclusive;

@@ -142,6 +142,7 @@ namespace Dungeon.Tests.EditMode
             RuntimeRunDefinition runDefinition = facade.BuildRunDefinition(5501);
 
             Assert.That(runDefinition, Is.Not.Null);
+            Assert.That(runDefinition.MapTemplateId, Is.EqualTo(6301));
             Assert.That(runDefinition.PlayerMaxHp, Is.EqualTo(80));
             Assert.That(runDefinition.StartingGold, Is.EqualTo(99));
             Assert.That(runDefinition.StarterDeck.Count, Is.EqualTo(2));

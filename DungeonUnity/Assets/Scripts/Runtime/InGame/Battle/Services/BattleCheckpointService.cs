@@ -13,13 +13,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// セーブデータからBattleScene状態を復元する
         /// </summary>
-        public void RestoreFromSave(
-            BattleSceneState state,
-            RuntimeRunDefinition runDefinition,
-            RunSaveData saveData,
-            IReadOnlyDictionary<int, RuntimeCard> cardCatalog,
-            IBattleRelicService relicService,
-            IBattlePotionService potionService)
+        public void RestoreFromSave(BattleSceneState state, RuntimeRunDefinition runDefinition, RunSaveData saveData, IReadOnlyDictionary<int, RuntimeCard> cardCatalog, IBattleRelicService relicService, IBattlePotionService potionService)
         {
             state.PlayerMaxHp = saveData.PlayerMaxHp;
             state.PlayerHp = saveData.PlayerHp;
@@ -89,7 +83,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 現在状態からcheckpoint保存データを構築する
         /// </summary>
-        public RunSaveData BuildSaveData(BattleSceneState state, RuntimeRunDefinition runDefinition)
+        public RunSaveData BuildSaveData(BattleSceneState state, RuntimeRunDefinition runDefinition, int masterSeed, int mapSeed, int mapLayoutVersion, int randomCounter)
         {
             RunSaveData data = new RunSaveData
             {
@@ -105,7 +99,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 OwnedPotionIds = new List<int>(),
                 ShopItems = new List<SaveShopItem>(),
                 IsCardRemovalSoldOut = state.IsCardRemovalSoldOut,
-                CardRemovalCount = state.CardRemovalCount
+                CardRemovalCount = state.CardRemovalCount,
+                MasterSeed = masterSeed,
+                MapSeed = mapSeed,
+                MapLayoutVersion = mapLayoutVersion,
+                RandomCounter = randomCounter
             };
 
             for (int i = 0; i < state.Deck.Count; i++)

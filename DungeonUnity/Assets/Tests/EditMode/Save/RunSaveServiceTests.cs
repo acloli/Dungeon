@@ -27,6 +27,10 @@ namespace Dungeon.Tests.EditMode.Save
                 Gold = 150,
                 CurrentNodeIndex = 5,
                 CurrentPage = 1, // Map
+                MasterSeed = 12345,
+                MapSeed = 67890,
+                MapLayoutVersion = 1,
+                RandomCounter = 7,
                 DeckCardIds = new List<int> { 101, 102, 103 }
             };
 
@@ -39,13 +43,17 @@ namespace Dungeon.Tests.EditMode.Save
             Assert.That(json, Does.Contain("\"Gold\":150"));
             Assert.That(json, Does.Contain("\"CurrentNodeIndex\":5"));
             Assert.That(json, Does.Contain("\"CurrentPage\":1"));
+            Assert.That(json, Does.Contain("\"MasterSeed\":12345"));
+            Assert.That(json, Does.Contain("\"MapSeed\":67890"));
+            Assert.That(json, Does.Contain("\"MapLayoutVersion\":1"));
+            Assert.That(json, Does.Contain("\"RandomCounter\":7"));
             Assert.That(json, Does.Contain("\"DeckCardIds\":[101,102,103]"));
         }
 
         [Test]
         public void RunSaveData_CanBeDeserializedFromJson()
         {
-            string json = "{\"RunProfileId\":5501,\"PlayerMaxHp\":80,\"PlayerHp\":45,\"PlayerEnergy\":3,\"Gold\":150,\"CurrentNodeIndex\":5,\"CurrentPage\":0,\"DeckCardIds\":[101,102,103]}";
+            string json = "{\"RunProfileId\":5501,\"PlayerMaxHp\":80,\"PlayerHp\":45,\"PlayerEnergy\":3,\"Gold\":150,\"CurrentNodeIndex\":5,\"CurrentPage\":0,\"MasterSeed\":12345,\"MapSeed\":67890,\"MapLayoutVersion\":1,\"RandomCounter\":7,\"DeckCardIds\":[101,102,103]}";
 
             RunSaveData data = JsonUtility.FromJson<RunSaveData>(json);
 
@@ -56,6 +64,10 @@ namespace Dungeon.Tests.EditMode.Save
             Assert.That(data.Gold, Is.EqualTo(150));
             Assert.That(data.CurrentNodeIndex, Is.EqualTo(5));
             Assert.That(data.CurrentPage, Is.EqualTo(0));
+            Assert.That(data.MasterSeed, Is.EqualTo(12345));
+            Assert.That(data.MapSeed, Is.EqualTo(67890));
+            Assert.That(data.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(data.RandomCounter, Is.EqualTo(7));
             Assert.That(data.DeckCardIds.Count, Is.EqualTo(3));
             Assert.That(data.DeckCardIds[0], Is.EqualTo(101));
             Assert.That(data.DeckCardIds[1], Is.EqualTo(102));
@@ -72,6 +84,15 @@ namespace Dungeon.Tests.EditMode.Save
 
             RunSaveData data2 = CreateValidSaveData();
             Assert.That(data2.IsValid, Is.True);
+        }
+
+        [Test]
+        public void RunSaveData_IsInvalid_WhenSeedMetadataIsMissing()
+        {
+            RunSaveData data = CreateValidSaveData();
+            data.MasterSeed = 0;
+
+            Assert.That(data.IsValid, Is.False);
         }
 
         [Test]
@@ -136,6 +157,10 @@ namespace Dungeon.Tests.EditMode.Save
                 Gold = 150,
                 CurrentNodeIndex = 5,
                 CurrentPage = 0,
+                MasterSeed = 12345,
+                MapSeed = 67890,
+                MapLayoutVersion = 1,
+                RandomCounter = 7,
                 DeckCardIds = new List<int> { 101, 102, 103 }
             };
         }

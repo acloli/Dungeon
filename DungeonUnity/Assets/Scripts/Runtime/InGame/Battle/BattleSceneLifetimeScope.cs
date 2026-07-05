@@ -15,6 +15,7 @@ namespace Dungeon.Runtime.InGame.Battle
         {
             builder.Register<Save.Services.RunSaveService>(Lifetime.Scoped).As<Save.Services.IRunSaveService>();
             builder.Register<Services.BattleRandomProvider>(Lifetime.Singleton).As<Services.IBattleRandomProvider>();
+            builder.Register<Services.BattleMapGenerator>(Lifetime.Singleton).As<Services.IBattleMapGenerator>();
             builder.Register<Services.EventMasterDataFacade>(Lifetime.Singleton);
             builder.Register<Services.ShopMasterDataFacade>(Lifetime.Singleton);
             builder.Register<Services.BattleMasterDataFacade>(Lifetime.Singleton).As<Services.IBattleMasterDataFacade>();

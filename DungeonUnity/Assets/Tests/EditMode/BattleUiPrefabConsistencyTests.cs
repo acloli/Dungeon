@@ -75,6 +75,13 @@ namespace Dungeon.Tests.EditMode
             MapPage mapPageComponent = mapPagePrefab.GetComponent<MapPage>();
             SerializedObject serialized = new SerializedObject(mapPageComponent);
             Assert.That(serialized.FindProperty("_pageAddress").stringValue, Is.EqualTo(BattleUiAddressCatalog.MapPage));
+            Assert.That(serialized.FindProperty("_nodeRoot").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_battleNodeButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_eliteNodeButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_eventNodeButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_restNodeButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_bossNodeButtonTemplate").objectReferenceValue, Is.Not.Null);
+            Assert.That(serialized.FindProperty("_stateText").objectReferenceValue, Is.Not.Null);
         }
 
         [Test]

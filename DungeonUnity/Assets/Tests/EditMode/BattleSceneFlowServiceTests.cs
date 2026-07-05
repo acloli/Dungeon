@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
@@ -37,6 +38,55 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void Initialize_WithGeneratedMap_PrioritizesGeneratedNodes()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Battle, "Authored", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "AuthoredBoss", Array.Empty<int>())
+                });
+            IReadOnlyList<RuntimeMapNode> generatedNodes = new[]
+            {
+                CreateNode(9301, 1, InGameNodeType.Event, "Generated", new[] { 1 }),
+                CreateNode(9302, 2, InGameNodeType.Boss, "GeneratedBoss", Array.Empty<int>())
+            };
+            BattleSceneFlowService service = CreateServiceWithMapGenerator(
+                runDefinition,
+                new FixedBattleMapGenerator(generatedNodes),
+                0);
+
+            service.Initialize(5501);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Map(snapshot).Nodes.Count, Is.EqualTo(2));
+            Assert.That(Map(snapshot).Nodes[0].DisplayName, Is.EqualTo("Generated"));
+            Assert.That(Map(snapshot).Nodes[0].NodeType, Is.EqualTo(InGameNodeType.Event));
+        }
+
+        [Test]
+        public void Initialize_WhenGeneratedMapIsEmpty_FallsBackToAuthoredNodes()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "AuthoredRest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "AuthoredBoss", Array.Empty<int>())
+                });
+            BattleSceneFlowService service = CreateServiceWithMapGenerator(
+                runDefinition,
+                new FixedBattleMapGenerator(Array.Empty<RuntimeMapNode>()),
+                0);
+
+            service.Initialize(5501);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Map(snapshot).Nodes.Count, Is.EqualTo(2));
+            Assert.That(Map(snapshot).Nodes[0].DisplayName, Is.EqualTo("AuthoredRest"));
+            Assert.That(Map(snapshot).Nodes[0].NodeType, Is.EqualTo(InGameNodeType.RestShop));
+        }
+
+        [Test]
         public void CreateSnapshot_AfterBranchNode_ReturnsAvailableNextNodes()
         {
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
@@ -45,6 +95,29 @@ namespace Dungeon.Tests.EditMode
                     CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1, 2 }),
                     CreateNode(5302, 2, InGameNodeType.Battle, "Battle", new[] { 3 }),
                     CreateNode(5303, 2, InGameNodeType.EliteBattle, "Elite", new[] { 3 }),
+                    CreateNode(5304, 3, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ApplyRest();
+            service.ContinueFromRestShop();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void CreateSnapshot_WithSparseNextNodeIndices_AllowsAllNodesOnNextFloor()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Battle", new[] { 3 }),
+                    CreateNode(5303, 2, InGameNodeType.Event, "Event", new[] { 3 }),
                     CreateNode(5304, 3, InGameNodeType.Boss, "Boss", new int[0])
                 });
             BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
@@ -781,6 +854,10 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
             Assert.That(runSaveService.LastSavedData.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
             Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
+            Assert.That(runSaveService.LastSavedData.MasterSeed, Is.Not.EqualTo(0));
+            Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(HashCode.Combine(runSaveService.LastSavedData.MasterSeed, 0x4D6170)));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(0));
         }
 
         [Test]
@@ -1086,6 +1163,9 @@ namespace Dungeon.Tests.EditMode
                 Gold = 177,
                 CurrentNodeIndex = 0,
                 CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 12345,
+                MapSeed = 67890,
+                RandomCounter = 4,
                 DeckCardIds = new List<int> { 1002 },
                 OwnedRelicIds = new List<int>(),
                 IsCardRemovalSoldOut = true,
@@ -1112,6 +1192,300 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot battleSnapshot = service.CreateSnapshot();
             Assert.That(Combat(battleSnapshot).HandCards.Count, Is.EqualTo(1));
             Assert.That(Combat(battleSnapshot).HandCards[0].Card.Id, Is.EqualTo(1002));
+        }
+
+        [Test]
+        public void ContinueFromRestShop_AfterInitializeFromSave_PreservesSeedMetadata()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.RestShop,
+                MasterSeed = 111,
+                MapSeed = 222,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+            service.ContinueFromRestShop();
+
+            Assert.That(runSaveService.LastSavedData.MasterSeed, Is.EqualTo(111));
+            Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(222));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void InitializeFromSave_OnMapCheckpoint_ReplaysSameBattleEncounter()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Battle, "Battle", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", Array.Empty<int>())
+                },
+                starterDeck: new[]
+                {
+                    CreateCard(1001, "Strike", 1, 6),
+                    CreateCard(1002, "Guard", 1, 0, new[]
+                    {
+                        new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+                    }),
+                    CreateCard(1003, "Bash", 2, 8)
+                },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(CreateEnemy(3001, "Slime", 15, 19, 12, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10),
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3002, "Fungi", 11, 13, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3003, "Louse", 8, 10, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                });
+
+            BattleSceneFlowService originalService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider(),
+                runSaveService: runSaveService);
+            originalService.Initialize(5501);
+            RunSaveData saveData = CloneSaveData(runSaveService.LastSavedData);
+            BattleSceneSnapshot originalMapSnapshot = originalService.CreateSnapshot();
+            originalService.SelectMapNode(0);
+            BattleSceneSnapshot originalBattleSnapshot = originalService.CreateSnapshot();
+
+            BattleSceneFlowService restoredService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider());
+            restoredService.InitializeFromSave(saveData);
+            BattleSceneSnapshot restoredMapSnapshot = restoredService.CreateSnapshot();
+            restoredService.SelectMapNode(0);
+            BattleSceneSnapshot restoredBattleSnapshot = restoredService.CreateSnapshot();
+
+            Assert.That(Map(restoredMapSnapshot).AvailableNodeIndices, Is.EqualTo(Map(originalMapSnapshot).AvailableNodeIndices));
+            Assert.That(BuildBattleEncounterSignature(restoredBattleSnapshot), Is.EqualTo(BuildBattleEncounterSignature(originalBattleSnapshot)));
+        }
+
+        [Test]
+        public void InitializeFromSave_OnMapCheckpoint_ReplaysSameShopLineup()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeCard attackCard = CreateCard(1001, "Strike", 1, 6);
+            RuntimeCard skillCard = CreateCard(1002, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeCard bonusCard = CreateCard(1003, "Lunge", 1, 7);
+            RuntimeRelic relicA = CreateRelic(2001, "Anchor", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 4, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRelic relicB = CreateRelic(2002, "Lantern", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.PlayerTurnStart, EffectType.GainEnergy, 1, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion potionA = CreatePotion(3001, "Block Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainBlock, 12, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion potionB = CreatePotion(3002, "Energy Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainEnergy, 2, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", Array.Empty<int>())
+                },
+                starterDeck: new[] { attackCard, skillCard },
+                additionalCards: new[] { bonusCard },
+                rewardCards: new[]
+                {
+                    CreateRewardEntry(attackCard, 10, 1, 99),
+                    CreateRewardEntry(skillCard, 10, 1, 99),
+                    CreateRewardEntry(bonusCard, 10, 1, 99)
+                },
+                shopLineup: new RuntimeShopLineup(
+                    1,
+                    new[]
+                    {
+                        new RuntimeShopSlot(0, RewardType.Card, CardType.None, 100),
+                        new RuntimeShopSlot(1, RewardType.Relic, CardType.None, 100),
+                        new RuntimeShopSlot(2, RewardType.Potion, CardType.None, 100)
+                    }),
+                relicCatalog: new Dictionary<int, RuntimeRelic>
+                {
+                    { relicA.Id, relicA },
+                    { relicB.Id, relicB }
+                },
+                potionCatalog: new Dictionary<int, RuntimePotion>
+                {
+                    { potionA.Id, potionA },
+                    { potionB.Id, potionB }
+                },
+                itemPriceRules: new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, relicA.Id, 120, 10),
+                    new RuntimeItemPriceRule(RewardType.Relic, relicB.Id, 140, 10),
+                    new RuntimeItemPriceRule(RewardType.Potion, potionA.Id, 60, 10),
+                    new RuntimeItemPriceRule(RewardType.Potion, potionB.Id, 70, 10)
+                });
+
+            BattleSceneFlowService originalService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider(),
+                shopService: new BattleShopService(new FakeMasterDataService()),
+                runSaveService: runSaveService);
+            originalService.Initialize(5501);
+            RunSaveData saveData = CloneSaveData(runSaveService.LastSavedData);
+            originalService.SelectMapNode(0);
+            BattleSceneSnapshot originalSnapshot = originalService.CreateSnapshot();
+
+            BattleSceneFlowService restoredService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider(),
+                shopService: new BattleShopService(new FakeMasterDataService()));
+            restoredService.InitializeFromSave(saveData);
+            restoredService.SelectMapNode(0);
+            BattleSceneSnapshot restoredSnapshot = restoredService.CreateSnapshot();
+
+            Assert.That(originalSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(restoredSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
+            Assert.That(BuildShopLineupSignature(Shop(restoredSnapshot)), Is.EqualTo(BuildShopLineupSignature(Shop(originalSnapshot))));
+        }
+
+        [Test]
+        public void InitializeFromSave_OnMapCheckpoint_ReplaysSameBattleRewards()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeCard finisher = CreateCard(1001, "Finisher", 1, 99);
+            RuntimeCard rewardA = CreateCard(1002, "RewardA", 1, 5);
+            RuntimeCard rewardB = CreateCard(1003, "RewardB", 1, 6);
+            RuntimeCard rewardC = CreateCard(1004, "RewardC", 2, 12);
+            RuntimeCard rewardD = CreateCard(1005, "RewardD", 0, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 8, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRelic relicA = CreateRelic(2001, "Anchor", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 4, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRelic relicB = CreateRelic(2002, "Lantern", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.PlayerTurnStart, EffectType.GainEnergy, 1, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion potionA = CreatePotion(3001, "Block Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainBlock, 12, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion potionB = CreatePotion(3002, "Energy Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainEnergy, 2, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                relicDropChance: 100,
+                potionDropChance: 100,
+                starterDeck: new[] { finisher },
+                rewardCards: new[]
+                {
+                    CreateRewardEntry(rewardA, 10, 1, 99),
+                    CreateRewardEntry(rewardB, 10, 1, 99),
+                    CreateRewardEntry(rewardC, 10, 1, 99),
+                    CreateRewardEntry(rewardD, 10, 1, 99)
+                },
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Battle, "Battle", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", Array.Empty<int>())
+                },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(CreateEnemy(3001, "Slime", 18, 22, 30, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10)
+                },
+                relicCatalog: new Dictionary<int, RuntimeRelic>
+                {
+                    { relicA.Id, relicA },
+                    { relicB.Id, relicB }
+                },
+                potionCatalog: new Dictionary<int, RuntimePotion>
+                {
+                    { potionA.Id, potionA },
+                    { potionB.Id, potionB }
+                });
+
+            BattleSceneFlowService originalService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider(),
+                runSaveService: runSaveService);
+            originalService.Initialize(5501);
+            RunSaveData saveData = CloneSaveData(runSaveService.LastSavedData);
+            originalService.SelectMapNode(0);
+            originalService.SelectHandCard(0);
+            originalService.TryPlaySelectedCard();
+            BattleSceneSnapshot originalSnapshot = originalService.CreateSnapshot();
+
+            BattleSceneFlowService restoredService = CreateServiceWithRandomProvider(
+                runDefinition,
+                new BattleRandomProvider());
+            restoredService.InitializeFromSave(saveData);
+            restoredService.SelectMapNode(0);
+            restoredService.SelectHandCard(0);
+            restoredService.TryPlaySelectedCard();
+            BattleSceneSnapshot restoredSnapshot = restoredService.CreateSnapshot();
+
+            Assert.That(originalSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(restoredSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(BuildRewardSignature(restoredSnapshot), Is.EqualTo(BuildRewardSignature(originalSnapshot)));
+        }
+
+        [Test]
+        public void InitializeFromSave_WithMismatchedMapLayoutVersion_DeletesSaveAndStartsNewRun()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 111,
+                MapSeed = 222,
+                MapLayoutVersion = 99,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+
+            Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
         }
 
         [Test]
@@ -1319,6 +1693,31 @@ namespace Dungeon.Tests.EditMode
             return snapshot.Result;
         }
 
+        private static string BuildBattleEncounterSignature(BattleSceneSnapshot snapshot)
+        {
+            string hand = string.Join(",", Combat(snapshot).HandCards.Select(card => card.Card.Id));
+            string enemies = string.Join(
+                "|",
+                Combat(snapshot).Enemies.Select(enemy => $"{enemy.SlotIndex}:{enemy.DisplayName}:{enemy.Hp}:{enemy.Block}:{enemy.Intent?.IntentName}"));
+            return $"{snapshot.CurrentPage}|{Combat(snapshot).PlayerEnergy}|{hand}|{enemies}";
+        }
+
+        private static string BuildShopLineupSignature(BattleShopSnapshot snapshot)
+        {
+            return string.Join(
+                "|",
+                snapshot.ShopItems.Select(item =>
+                    $"{item.SlotIndex}:{item.RewardType}:{item.Card?.Id ?? 0}:{item.Relic?.Id ?? 0}:{item.Potion?.Id ?? 0}:{item.Price}:{item.IsSoldOut}"));
+        }
+
+        private static string BuildRewardSignature(BattleSceneSnapshot snapshot)
+        {
+            string rewards = string.Join(",", Reward(snapshot).RewardChoices.Select(entry => entry.Card?.Id ?? 0));
+            int potionId = Reward(snapshot).PendingPotionReward?.Id ?? 0;
+            int relicId = Reward(snapshot).PendingRelicReward?.Id ?? 0;
+            return $"{snapshot.CurrentPage}|{Reward(snapshot).BattleGoldReward}|{Reward(snapshot).PotionDropped}|{Reward(snapshot).RelicDropped}|{potionId}|{relicId}|{rewards}";
+        }
+
         private static BattleSceneFlowService CreateService(RuntimeRunDefinition runDefinition, params int[] values)
         {
             BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
@@ -1331,6 +1730,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1340,6 +1740,35 @@ namespace Dungeon.Tests.EditMode
                 new BattleEventFlowService(randomProvider, eventService),
                 new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
                 null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
+        }
+
+        private static BattleSceneFlowService CreateServiceWithRandomProvider(
+            RuntimeRunDefinition runDefinition,
+            IBattleRandomProvider randomProvider,
+            IBattleShopService shopService = null,
+            IRunSaveService runSaveService = null)
+        {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            IBattleShopService resolvedShopService = shopService ?? new FakeBattleShopService();
+            return new BattleSceneFlowService(
+                rules,
+                randomProvider,
+                new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), resolvedShopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
+                resolvedShopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, resolvedShopService, potionService, relicService),
+                runSaveService,
                 new BattleCheckpointService(),
                 new BattleEnemyActionSelector());
         }
@@ -1359,6 +1788,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1387,6 +1817,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1414,6 +1845,7 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
@@ -1442,8 +1874,38 @@ namespace Dungeon.Tests.EditMode
                 rules,
                 randomProvider,
                 new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
                 new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
                 new BattleSnapshotFactory(displayTextService, shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
+        }
+
+        private static BattleSceneFlowService CreateServiceWithMapGenerator(
+            RuntimeRunDefinition runDefinition,
+            IBattleMapGenerator mapGenerator,
+            params int[] values)
+        {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService();
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
+            return new BattleSceneFlowService(
+                rules,
+                randomProvider,
+                new FakeBattleMasterDataFacade(runDefinition),
+                mapGenerator,
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
                 shopService,
                 new BattleCombatEventService(relicService),
                 relicService,
@@ -1458,6 +1920,7 @@ namespace Dungeon.Tests.EditMode
         private static RuntimeRunDefinition CreateRunDefinition(
             int playerMaxHp = 50,
             int startingGold = 120,
+            int potionDropChance = 0,
             int relicDropChance = 0,
             IReadOnlyList<RuntimeMapNode> nodes = null,
             IReadOnlyList<RuntimeCard> starterDeck = null,
@@ -1516,8 +1979,10 @@ namespace Dungeon.Tests.EditMode
             RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
             builder.RunProfileId = 5501;
             builder.Key = "run_test";
+            builder.MapTemplateId = 6301;
             builder.PlayerMaxHp = playerMaxHp;
             builder.StartingGold = startingGold;
+            builder.PotionDropChance = potionDropChance;
             builder.RelicDropChance = relicDropChance;
             builder.StarterDeck = resolvedStarterDeck;
             builder.CardCatalog = cardCatalog;
@@ -1534,6 +1999,62 @@ namespace Dungeon.Tests.EditMode
             builder.ShopLineup = shopLineup;
             builder.ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
             return builder.Build();
+        }
+
+        private static RunSaveData CloneSaveData(RunSaveData source)
+        {
+            return new RunSaveData
+            {
+                RunProfileId = source.RunProfileId,
+                PlayerMaxHp = source.PlayerMaxHp,
+                PlayerHp = source.PlayerHp,
+                PlayerEnergy = source.PlayerEnergy,
+                Gold = source.Gold,
+                CurrentNodeIndex = source.CurrentNodeIndex,
+                CurrentPage = source.CurrentPage,
+                MasterSeed = source.MasterSeed,
+                MapSeed = source.MapSeed,
+                MapLayoutVersion = source.MapLayoutVersion,
+                RandomCounter = source.RandomCounter,
+                DeckCardIds = CloneIntList(source.DeckCardIds),
+                OwnedRelicIds = CloneIntList(source.OwnedRelicIds),
+                OwnedPotionIds = CloneIntList(source.OwnedPotionIds),
+                ShopItems = CloneShopItems(source.ShopItems),
+                IsCardRemovalSoldOut = source.IsCardRemovalSoldOut,
+                CardRemovalCount = source.CardRemovalCount
+            };
+        }
+
+        private static List<int> CloneIntList(IReadOnlyList<int> source)
+        {
+            List<int> values = new List<int>();
+            if (source == null)
+            {
+                return values;
+            }
+
+            for (int i = 0; i < source.Count; i++)
+            {
+                values.Add(source[i]);
+            }
+
+            return values;
+        }
+
+        private static List<SaveShopItem> CloneShopItems(IReadOnlyList<SaveShopItem> source)
+        {
+            List<SaveShopItem> items = new List<SaveShopItem>();
+            if (source == null)
+            {
+                return items;
+            }
+
+            for (int i = 0; i < source.Count; i++)
+            {
+                items.Add(source[i]);
+            }
+
+            return items;
         }
 
         private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false)
@@ -1670,6 +2191,24 @@ namespace Dungeon.Tests.EditMode
             }
         }
 
+        /// <summary>
+        /// テスト用固定マップ生成クラス
+        /// </summary>
+        private sealed class FixedBattleMapGenerator : IBattleMapGenerator
+        {
+            private readonly IReadOnlyList<RuntimeMapNode> _nodes;
+
+            public FixedBattleMapGenerator(IReadOnlyList<RuntimeMapNode> nodes)
+            {
+                _nodes = nodes;
+            }
+
+            public IReadOnlyList<RuntimeMapNode> Generate(RuntimeRunDefinition runDefinition, int mapSeed)
+            {
+                return _nodes ?? Array.Empty<RuntimeMapNode>();
+            }
+        }
+
         private sealed class FakeMasterDataService : IMasterDataService
         {
             public UniTask InitializeAsync(CancellationToken ct) => UniTask.CompletedTask;
@@ -1784,21 +2323,42 @@ namespace Dungeon.Tests.EditMode
         /// </summary>
         private sealed class SequenceRandomProvider : IBattleRandomProvider
         {
-            private readonly Queue<int> _values;
+            private readonly List<int> _values;
+            private int _index;
+
+            public int Seed { get; private set; }
+
+            public int Counter { get; private set; }
 
             public SequenceRandomProvider(IEnumerable<int> values)
             {
-                _values = new Queue<int>(values);
+                _values = new List<int>(values);
+            }
+
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+                _index = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+                _index = counter;
             }
 
             public int Range(int minInclusive, int maxExclusive)
             {
-                if (_values.Count == 0)
+                Counter++;
+                if (_index >= _values.Count)
                 {
                     return minInclusive;
                 }
 
-                int value = _values.Dequeue();
+                int value = _values[_index];
+                _index++;
                 if (value < minInclusive)
                 {
                     return minInclusive;

@@ -70,9 +70,28 @@ namespace Dungeon.Tests.EditMode
 
         private sealed class FakeRandomProvider : IBattleRandomProvider
         {
+            public int Seed { get; private set; }
+            public int Counter { get; private set; }
+
+            public void Initialize(int seed)
+            {
+                Seed = seed;
+                Counter = 0;
+            }
+
+            public void Restore(int seed, int counter)
+            {
+                Seed = seed;
+                Counter = counter;
+            }
+
             public float NextFloat(float min, float max) => min;
             public int NextInt(int min, int max) => min;
-            public int Range(int min, int max) => min;
+            public int Range(int min, int max)
+            {
+                Counter++;
+                return min;
+            }
             public float NextFloat() => 0f;
             public int RollWeightedIndex(IReadOnlyList<int> weights) => 0;
             public T SelectRandom<T>(IReadOnlyList<T> list) => list[0];
