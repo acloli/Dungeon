@@ -173,6 +173,66 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.EncountersByNodeType[InGameNodeType.Boss][0].Formation.Enemies[0].Enemy.DisplayName, Is.EqualTo("EnemyB"));
         }
 
+        [Test]
+        public void BuildRunDefinition_PotionWithEnemyTarget_UsesAnyEnemyTargetMode()
+        {
+            RuntimeRunDefinition runDefinition = BuildRunDefinitionForPotion(new[]
+            {
+                new PotionEffectMaster { Id = 3201, PotionId = 1, Order = 1, EffectType = EffectType.DealDamage, Value = 10, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Enemy }
+            });
+
+            Assert.That(runDefinition.PotionCatalog[1].TargetMode, Is.EqualTo(PotionTargetMode.AnyEnemy));
+        }
+
+        [Test]
+        public void BuildRunDefinition_PotionWithAllEnemiesTarget_UsesAllEnemiesTargetMode()
+        {
+            RuntimeRunDefinition runDefinition = BuildRunDefinitionForPotion(new[]
+            {
+                new PotionEffectMaster { Id = 3201, PotionId = 1, Order = 1, EffectType = EffectType.DealDamage, Value = 10, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Enemy },
+                new PotionEffectMaster { Id = 3202, PotionId = 1, Order = 2, EffectType = EffectType.ApplyStatus, Value = 0, HitCount = 1, StatusType = StatusType.Weak, StatusValue = 1, TargetSide = TargetSide.AllEnemies }
+            });
+
+            Assert.That(runDefinition.PotionCatalog[1].TargetMode, Is.EqualTo(PotionTargetMode.AllEnemies));
+        }
+
+        private static RuntimeRunDefinition BuildRunDefinitionForPotion(IReadOnlyList<PotionEffectMaster> potionEffects)
+        {
+            FakeMasterDataService masterDataService = new FakeMasterDataService();
+            masterDataService.SetAll(new[]
+            {
+                new RunProfileMaster
+                {
+                    Id = 5501,
+                    Key = "run_test",
+                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    PlayerMaxHp = 80,
+                    StartingGold = 99,
+                    StarterDeckGroupId = 6001,
+                    RewardPoolId = 6101,
+                    ShopId = 1,
+                    EventPoolId = 1,
+                    MapTemplateId = 6301,
+                    NormalEncounterGroupId = 6201,
+                    EliteEncounterGroupId = 6202,
+                    BossEncounterGroupId = 6203,
+                    CardRewardChoiceCount = 3
+                }
+            });
+            masterDataService.SetAll(new[]
+            {
+                new PotionMaster { Id = 1, Key = "potion_1", Name = "Potion1", LocalizationKey = "potion.1", DescriptionKey = "potion.1.desc", ImageId = "potion_1", Rarity = CardRarity.Common }
+            });
+            masterDataService.SetAll(potionEffects);
+
+            BattleMasterDataFacade facade = new BattleMasterDataFacade(
+                masterDataService,
+                new EventMasterDataFacade(masterDataService),
+                new ShopMasterDataFacade(masterDataService));
+
+            return facade.BuildRunDefinition(5501);
+        }
+
         /// <summary>
         /// テスト用MasterDataService
         /// </summary>
