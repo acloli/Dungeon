@@ -14,7 +14,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         RuntimePotion RollBattleRewardPotion(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
         PendingPotionOffer CreateOffer(RuntimePotion potion, PotionOfferSource source, int shopSlotIndex = BattleSceneConstants.UnselectedCardIndex);
         bool CanUsePotionInCurrentPage(BattleSceneState state, RuntimePotion potion);
-        bool UsePotion(BattleSceneState state, int potionIndex, IBattleSceneRules rules, IBattleRandomProvider randomProvider);
+        bool UsePotion(BattleSceneState state, int potionIndex, BattlePotionUseTarget target, IBattleSceneRules rules, IBattleRandomProvider randomProvider);
         bool ReplaceOwnedPotion(BattleSceneState state, int potionIndex, PendingPotionOffer offer);
     }
 }

@@ -517,7 +517,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             RuntimePotion potion = _state.OwnedPotions[index];
-            if (_potionService.UsePotion(_state, index, _rules, _randomProvider))
+            BattlePotionUseTarget target = new BattlePotionUseTarget(_state.SelectedEnemyIndex);
+            if (_potionService.UsePotion(_state, index, target, _rules, _randomProvider))
             {
                 if (potion != null)
                 {

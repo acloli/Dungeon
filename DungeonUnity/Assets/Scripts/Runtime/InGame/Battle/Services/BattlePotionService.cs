@@ -88,7 +88,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return ResolveUseContext(state.CurrentPage, potion.UseContext);
         }
 
-        public bool UsePotion(BattleSceneState state, int potionIndex, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
+        public bool UsePotion(BattleSceneState state, int potionIndex, BattlePotionUseTarget target, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
         {
             if (state == null || potionIndex < 0 || potionIndex >= state.OwnedPotions.Count)
             {
