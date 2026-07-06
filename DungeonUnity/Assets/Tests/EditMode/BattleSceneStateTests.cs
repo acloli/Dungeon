@@ -13,6 +13,14 @@ namespace Dungeon.Tests.EditMode
         private const int UnselectedIndex = -1;
 
         [Test]
+        public void Constructor_InitializesPendingPotionUseIndexToUnselected()
+        {
+            BattleSceneState state = new BattleSceneState();
+
+            Assert.That(state.PendingPotionUseIndex, Is.EqualTo(UnselectedIndex));
+        }
+
+        [Test]
         public void SyncSelectedEnemyDisplay_CopiesEnemyMirrorFieldsTogether()
         {
             BattleSceneState state = new BattleSceneState();
@@ -63,6 +71,7 @@ namespace Dungeon.Tests.EditMode
             {
                 SelectedOwnedRelicIndex = 1,
                 SelectedOwnedPotionIndex = 2,
+                PendingPotionUseIndex = 3,
                 OwnedRelicHintMessage = "Relic",
                 OwnedPotionHintMessage = "Potion"
             };
@@ -71,6 +80,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(state.SelectedOwnedRelicIndex, Is.EqualTo(UnselectedIndex));
             Assert.That(state.SelectedOwnedPotionIndex, Is.EqualTo(UnselectedIndex));
+            Assert.That(state.PendingPotionUseIndex, Is.EqualTo(UnselectedIndex));
             Assert.That(state.OwnedRelicHintMessage, Is.Empty);
             Assert.That(state.OwnedPotionHintMessage, Is.Empty);
         }
@@ -103,6 +113,7 @@ namespace Dungeon.Tests.EditMode
             {
                 BattleFinished = true,
                 SelectedCardIndex = 2,
+                PendingPotionUseIndex = 3,
                 PlayerEnergy = 1,
                 PlayerBlock = 8,
                 SelectedEnemyIndex = 1,
@@ -116,6 +127,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(state.BattleFinished, Is.False);
             Assert.That(state.SelectedCardIndex, Is.EqualTo(UnselectedIndex));
+            Assert.That(state.PendingPotionUseIndex, Is.EqualTo(UnselectedIndex));
             Assert.That(state.PlayerEnergy, Is.EqualTo(3));
             Assert.That(state.PlayerBlock, Is.EqualTo(0));
             Assert.That(state.Enemies, Is.Empty);
