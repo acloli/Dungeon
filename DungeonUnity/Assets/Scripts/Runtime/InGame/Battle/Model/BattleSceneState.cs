@@ -25,6 +25,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public List<RuntimePotion> OwnedPotions { get; } = new List<RuntimePotion>();
         public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public int SelectedOwnedPotionIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
+        public int PendingPotionUseIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public string OwnedRelicHintMessage { get; set; } = string.Empty;
         public string OwnedPotionHintMessage { get; set; } = string.Empty;
 
@@ -164,6 +165,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public void ClearOwnedPotionInspection()
         {
             SelectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex;
+            PendingPotionUseIndex = BattleSceneConstants.UnselectedCardIndex;
             OwnedPotionHintMessage = string.Empty;
         }
 
@@ -184,6 +186,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         {
             BattleFinished = false;
             SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            PendingPotionUseIndex = BattleSceneConstants.UnselectedCardIndex;
             PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             PlayerBlock = 0;
             ClearSelectedEnemyDisplay();
