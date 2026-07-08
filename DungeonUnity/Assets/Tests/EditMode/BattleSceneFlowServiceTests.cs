@@ -1098,6 +1098,196 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void UsePotion_TargetEnemyPotion_EntersTargetingState()
+        {
+            RuntimePotion potion = CreatePotion(3001, "Fire Potion", PotionUseContext.BattleOnly, PotionTargetMode.AnyEnemy, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.DealDamage, 6, 1, StatusType.None, 0, TargetSide.Enemy)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) },
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            service.UsePotion(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(HostChrome(snapshot).OwnedPotions.Count, Is.EqualTo(1));
+            Assert.That(Combat(snapshot).Enemies[0].Hp, Is.EqualTo(18));
+            Assert.That(Combat(snapshot).BattleHintMessage, Is.EqualTo("Select an enemy for Fire Potion."));
+        }
+
+        [Test]
+        public void SelectEnemyTarget_WhilePotionTargeting_UsesPotionOnClickedEnemy()
+        {
+            RuntimePotion potion = CreatePotion(3001, "Fire Potion", PotionUseContext.BattleOnly, PotionTargetMode.AnyEnemy, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.DealDamage, 6, 1, StatusType.None, 0, TargetSide.Enemy)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3001, "Mite", 10, 10, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3002, "Slime", 12, 12, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                },
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            service.UsePotion(0);
+            service.SelectEnemyTarget(1);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(HostChrome(snapshot).OwnedPotions.Count, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).Enemies[0].Hp, Is.EqualTo(10));
+            Assert.That(Combat(snapshot).Enemies[1].Hp, Is.EqualTo(6));
+            Assert.That(Combat(snapshot).BattleHintMessage, Is.EqualTo("Used Fire Potion."));
+        }
+
+        [Test]
+        public void UsePotion_KillsLastEnemy_OpensReward()
+        {
+            RuntimePotion potion = CreatePotion(3001, "Fire Potion", PotionUseContext.BattleOnly, PotionTargetMode.AnyEnemy, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.DealDamage, 99, 1, StatusType.None, 0, TargetSide.Enemy)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                rewardCards: new[] { CreateRewardEntry(CreateCard(1002, "Reward", 1, 5), 10, 1, 99) },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 8, 8, 30, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10) },
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            service.UsePotion(0);
+            service.SelectEnemyTarget(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(HostChrome(snapshot).OwnedPotions.Count, Is.EqualTo(0));
+            Assert.That(Reward(snapshot).BattleGoldReward, Is.EqualTo(30));
+            Assert.That(Reward(snapshot).RewardChoices.Count, Is.EqualTo(1));
+            Assert.That(Reward(snapshot).RewardChoices[0].Card.DisplayName, Is.EqualTo("Reward"));
+        }
+
+        [Test]
+        public void UsePotion_TargetPotionOutsideBattle_DoesNotConsume()
+        {
+            RuntimePotion potion = CreatePotion(3001, "Fire Potion", PotionUseContext.BattleOnly, PotionTargetMode.AnyEnemy, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.DealDamage, 6, 1, StatusType.None, 0, TargetSide.Enemy)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.UsePotion(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(HostChrome(snapshot).OwnedPotions.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void UsePotion_AllEnemiesPotion_ResolvesImmediatelyWithoutTargeting()
+        {
+            RuntimePotion potion = CreatePotion(3001, "Bomb Potion", PotionUseContext.BattleOnly, PotionTargetMode.AllEnemies, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.DealDamage, 5, 1, StatusType.None, 0, TargetSide.AllEnemies)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(
+                        CreateFormation(
+                            CreateEnemyEntry(CreateEnemy(3001, "Mite", 10, 10, 5, CreateAction(1, 2, RepeatRule.RepeatAfterOpening)), 0),
+                            CreateEnemyEntry(CreateEnemy(3002, "Slime", 12, 12, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 1)),
+                        10)
+                },
+                potionCatalog: new Dictionary<int, RuntimePotion> { { potion.Id, potion } });
+            BattleSceneFlowService service = CreateService(runDefinition, 0, 0, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = -1,
+                CurrentPage = (int)BattleScenePage.Map,
+                OwnedPotionIds = new List<int> { potion.Id }
+            };
+
+            service.InitializeFromSave(saveData);
+            service.SelectMapNode(0);
+            service.UsePotion(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(HostChrome(snapshot).OwnedPotions.Count, Is.EqualTo(0));
+            Assert.That(Combat(snapshot).Enemies[0].Hp, Is.EqualTo(5));
+            Assert.That(Combat(snapshot).Enemies[1].Hp, Is.EqualTo(7));
+            Assert.That(Combat(snapshot).BattleHintMessage, Is.EqualTo("Used Bomb Potion."));
+        }
+
+        [Test]
         public void UsePotion_TargetEnemyDamage_ConsumesAfterBlockAndHpResolution()
         {
             BattleSceneState state = new BattleSceneState
