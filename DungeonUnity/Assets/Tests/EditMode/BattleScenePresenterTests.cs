@@ -318,6 +318,47 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void OnUsePotionClicked_TargetPotion_DelegatesOnceAndRerenders()
+        {
+            BattleMultiIconViewModel firePotion = new BattleMultiIconViewModel(
+                BattleIconKind.Potion,
+                "Fire Potion",
+                "Deal 20 damage.",
+                "potion_fire",
+                CardRarity.Uncommon);
+            BattleSceneSnapshotBuilder readySnapshotBuilder = BattleTestData.Snapshot(BattleScenePage.Battle);
+            readySnapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
+                ownedPotions: new[] { firePotion },
+                selectedOwnedPotionIndex: 0,
+                ownedPotionHintMessage: "Fire Potion\nDeal 20 damage.",
+                canUseSelectedPotion: true);
+            BattleSceneSnapshotBuilder targetingSnapshotBuilder = BattleTestData.Snapshot(BattleScenePage.Battle);
+            targetingSnapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
+                ownedPotions: new[] { firePotion },
+                selectedOwnedPotionIndex: 0,
+                ownedPotionHintMessage: "Select an enemy for Fire Potion.",
+                canUseSelectedPotion: false);
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(readySnapshotBuilder.Build())
+            {
+                SnapshotAfterUsePotion = targetingSnapshotBuilder.Build()
+            };
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+            view.InvokeUsePotion();
+            view.InvokeUsePotion();
+
+            Assert.That(flowService.UsePotionCallCount, Is.EqualTo(1));
+            Assert.That(flowService.LastUsePotionIndex, Is.EqualTo(0));
+            Assert.That(view.LastOwnedPotionHint, Is.EqualTo("Select an enemy for Fire Potion."));
+            Assert.That(view.LastSelectedOwnedPotionIndex, Is.EqualTo(0));
+            Assert.That(view.IsOwnedPotionUseVisible, Is.False);
+            Assert.That(uiCoordinator.ShowBattleCallCount, Is.GreaterThanOrEqualTo(2));
+        }
+
+        [Test]
         public void InitializeAsync_WithValidSave_InitializesFromSave()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
@@ -532,6 +573,7 @@ namespace Dungeon.Tests.EditMode
             public int InspectOwnedRelicCallCount { get; private set; }
             public int InspectOwnedPotionCallCount { get; private set; }
             public int UsePotionCallCount { get; private set; }
+            public int LastUsePotionIndex { get; private set; } = BattleSceneConstants.UnselectedCardIndex;
             public int ReplaceOwnedPotionCallCount { get; private set; }
             public int CancelPendingPotionReplaceCallCount { get; private set; }
             public int ClearOwnedInspectionsCallCount { get; private set; }
@@ -647,6 +689,7 @@ namespace Dungeon.Tests.EditMode
             public void UsePotion(int index)
             {
                 UsePotionCallCount++;
+                LastUsePotionIndex = index;
                 if (SnapshotAfterUsePotion != null)
                 {
                     _snapshot = SnapshotAfterUsePotion;
