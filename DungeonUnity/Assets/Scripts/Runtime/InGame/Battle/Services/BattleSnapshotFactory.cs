@@ -342,11 +342,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return false;
             }
 
+            if (potion.TargetMode == PotionTargetMode.AnyEnemy || potion.TargetMode == PotionTargetMode.AllEnemies)
+            {
+                return state.CurrentPage == BattleScenePage.Battle && HasAliveEnemy(state);
+            }
+
             return state.CurrentPage switch
             {
                 BattleScenePage.Battle => potion.UseContext == PotionUseContext.BattleOnly || potion.UseContext == PotionUseContext.Both,
                 _ => potion.UseContext == PotionUseContext.OutOfBattleOnly || potion.UseContext == PotionUseContext.Both
             };
+        }
+
+        private static bool HasAliveEnemy(BattleSceneState state)
+        {
+            for (int i = 0; i < state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = state.Enemies[i];
+                if (enemyState != null && !enemyState.IsDefeated && enemyState.Hp > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IReadOnlyList<BattleHandCardViewModel> BuildHandCardViews(BattleSceneState state)

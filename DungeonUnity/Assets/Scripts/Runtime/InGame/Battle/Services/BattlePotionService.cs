@@ -88,7 +88,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return ResolveUseContext(state.CurrentPage, potion.UseContext);
         }
 
-        public bool UsePotion(BattleSceneState state, int potionIndex, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
+        public bool UsePotion(BattleSceneState state, int potionIndex, BattlePotionUseTarget target, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
         {
             if (state == null || potionIndex < 0 || potionIndex >= state.OwnedPotions.Count)
             {
@@ -101,7 +101,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return false;
             }
 
-            ApplyEffects(state, potion, rules, randomProvider);
+            if (!TryResolveEnemyTargets(state, potion, target, out BattleEnemyState enemyTarget, out List<BattleEnemyState> allEnemyTargets))
+            {
+                return false;
+            }
+
+            ApplyEffects(state, potion, enemyTarget, allEnemyTargets, rules, randomProvider);
             state.OwnedPotions.RemoveAt(potionIndex);
             return true;
         }
@@ -122,7 +127,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return true;
         }
 
-        private static void ApplyEffects(BattleSceneState state, RuntimePotion potion, IBattleSceneRules rules, IBattleRandomProvider randomProvider)
+        private static void ApplyEffects(
+            BattleSceneState state,
+            RuntimePotion potion,
+            BattleEnemyState enemyTarget,
+            IReadOnlyList<BattleEnemyState> allEnemyTargets,
+            IBattleSceneRules rules,
+            IBattleRandomProvider randomProvider)
         {
             if (state == null || potion?.Effects == null)
             {
@@ -139,6 +150,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
                 switch (effect.EffectType)
                 {
+                    case EffectType.DealDamage:
+                        ApplyDamageToTargets(effect, enemyTarget, allEnemyTargets);
+                        SyncSelectedEnemyDisplay(state);
+                        break;
                     case EffectType.GainBlock:
                         state.PlayerBlock += effect.Value;
                         break;
@@ -149,12 +164,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         rules?.DrawCards(state, randomProvider, effect.Value);
                         break;
                     case EffectType.ApplyStatus:
-                        if (effect.StatusType != StatusType.None && effect.StatusValue > 0)
-                        {
-                            int currentValue = 0;
-                            state.PlayerStatuses.TryGetValue(effect.StatusType, out currentValue);
-                            state.PlayerStatuses[effect.StatusType] = currentValue + effect.StatusValue;
-                        }
+                        ApplyStatusByTarget(state, effect, enemyTarget, allEnemyTargets);
+                        SyncSelectedEnemyDisplay(state);
                         break;
                     case EffectType.GainMaxHp:
                         state.PlayerMaxHp += effect.Value;
@@ -162,6 +173,196 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         break;
                 }
             }
+        }
+
+        private static bool TryResolveEnemyTargets(
+            BattleSceneState state,
+            RuntimePotion potion,
+            BattlePotionUseTarget target,
+            out BattleEnemyState enemyTarget,
+            out List<BattleEnemyState> allEnemyTargets)
+        {
+            enemyTarget = null;
+            allEnemyTargets = null;
+
+            bool requiresEnemy = false;
+            bool requiresAllEnemies = false;
+            for (int i = 0; i < potion.Effects.Count; i++)
+            {
+                RuntimePotionEffect effect = potion.Effects[i];
+                if (effect == null)
+                {
+                    continue;
+                }
+
+                if (effect.TargetSide == TargetSide.Enemy)
+                {
+                    requiresEnemy = true;
+                }
+                else if (effect.TargetSide == TargetSide.AllEnemies)
+                {
+                    requiresAllEnemies = true;
+                }
+            }
+
+            if (requiresEnemy && !TryGetAliveEnemy(state, target.EnemyIndex, out enemyTarget))
+            {
+                return false;
+            }
+
+            if (!requiresAllEnemies)
+            {
+                return true;
+            }
+
+            allEnemyTargets = GetAliveEnemies(state);
+            return allEnemyTargets.Count > 0;
+        }
+
+        private static void ApplyDamageToTargets(RuntimePotionEffect effect, BattleEnemyState enemyTarget, IReadOnlyList<BattleEnemyState> allEnemyTargets)
+        {
+            int hitCount = Math.Max(1, effect.HitCount);
+            if (effect.TargetSide == TargetSide.Enemy)
+            {
+                ApplyDamage(enemyTarget, effect.Value, hitCount);
+                return;
+            }
+
+            if (effect.TargetSide != TargetSide.AllEnemies || allEnemyTargets == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < allEnemyTargets.Count; i++)
+            {
+                ApplyDamage(allEnemyTargets[i], effect.Value, hitCount);
+            }
+        }
+
+        private static void ApplyDamage(BattleEnemyState enemyState, int damage, int hitCount)
+        {
+            if (enemyState == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                int remainingDamage = Math.Max(0, damage - enemyState.Block);
+                enemyState.Block = Math.Max(0, enemyState.Block - damage);
+                enemyState.Hp -= remainingDamage;
+                if (enemyState.Hp <= 0)
+                {
+                    enemyState.Hp = 0;
+                    enemyState.IsDefeated = true;
+                    return;
+                }
+            }
+        }
+
+        private static void ApplyStatusByTarget(
+            BattleSceneState state,
+            RuntimePotionEffect effect,
+            BattleEnemyState enemyTarget,
+            IReadOnlyList<BattleEnemyState> allEnemyTargets)
+        {
+            if (effect.TargetSide == TargetSide.Enemy)
+            {
+                ApplyStatus(enemyTarget?.Statuses, effect.StatusType, effect.StatusValue);
+                return;
+            }
+
+            if (effect.TargetSide == TargetSide.AllEnemies)
+            {
+                if (allEnemyTargets == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < allEnemyTargets.Count; i++)
+                {
+                    ApplyStatus(allEnemyTargets[i]?.Statuses, effect.StatusType, effect.StatusValue);
+                }
+
+                return;
+            }
+
+            ApplyStatus(state.PlayerStatuses, effect.StatusType, effect.StatusValue);
+        }
+
+        private static void ApplyStatus(IDictionary<StatusType, int> statuses, StatusType statusType, int value)
+        {
+            if (statuses == null || statusType == StatusType.None || value <= 0)
+            {
+                return;
+            }
+
+            int currentValue = 0;
+            statuses.TryGetValue(statusType, out currentValue);
+            statuses[statusType] = currentValue + value;
+        }
+
+        private static bool TryGetAliveEnemy(BattleSceneState state, int enemyIndex, out BattleEnemyState enemyState)
+        {
+            enemyState = null;
+            if (state == null || enemyIndex < 0 || enemyIndex >= state.Enemies.Count)
+            {
+                return false;
+            }
+
+            enemyState = state.Enemies[enemyIndex];
+            return IsAliveEnemy(enemyState);
+        }
+
+        private static List<BattleEnemyState> GetAliveEnemies(BattleSceneState state)
+        {
+            List<BattleEnemyState> enemies = new List<BattleEnemyState>();
+            if (state == null)
+            {
+                return enemies;
+            }
+
+            for (int i = 0; i < state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = state.Enemies[i];
+                if (IsAliveEnemy(enemyState))
+                {
+                    enemies.Add(enemyState);
+                }
+            }
+
+            return enemies;
+        }
+
+        private static bool IsAliveEnemy(BattleEnemyState enemyState)
+        {
+            return enemyState != null && !enemyState.IsDefeated && enemyState.Hp > 0;
+        }
+
+        private static void SyncSelectedEnemyDisplay(BattleSceneState state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            if (TryGetAliveEnemy(state, state.SelectedEnemyIndex, out BattleEnemyState selectedEnemy))
+            {
+                state.SyncSelectedEnemyDisplay(selectedEnemy, state.SelectedEnemyIndex);
+                return;
+            }
+
+            for (int i = 0; i < state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = state.Enemies[i];
+                if (IsAliveEnemy(enemyState))
+                {
+                    state.SyncSelectedEnemyDisplay(enemyState, i);
+                    return;
+                }
+            }
+
+            state.ClearSelectedEnemyDisplay();
         }
 
         private static bool ResolveUseContext(BattleScenePage currentPage, PotionUseContext useContext)

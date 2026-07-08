@@ -23,6 +23,19 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ポーション使用時の敵対象 index
+    /// </summary>
+    public readonly struct BattlePotionUseTarget
+    {
+        public BattlePotionUseTarget(int enemyIndex)
+        {
+            EnemyIndex = enemyIndex;
+        }
+
+        public int EnemyIndex { get; }
+    }
+
+    /// <summary>
     /// ポーション提示元
     /// </summary>
     public enum PotionOfferSource

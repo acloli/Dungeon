@@ -55,6 +55,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string CardResolvedFormat = "Used {0}.";
         public const string CardSelectedFormat = "Selected {0}.";
         public const string EnemyTargetSelectedFormat = "Target {0}.";
+        public const string PotionTargetSelectFormat = "Select an enemy for {0}.";
+        public const string PotionUseCanceled = "Potion use canceled.";
         public const string SelectCardFirst = "Select a card first.";
         public const string SelectCardAndTarget = "Select target, then use card.";
         public const string NotEnoughEnergy = "Not enough energy.";

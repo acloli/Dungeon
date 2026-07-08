@@ -585,6 +585,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return PotionTargetMode.None;
             }
 
+            bool hasEnemyTarget = false;
             for (int i = 0; i < effects.Count; i++)
             {
                 RuntimePotionEffect effect = effects[i];
@@ -593,10 +594,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
+                if (effect.TargetSide == TargetSide.AllEnemies)
+                {
+                    return PotionTargetMode.AllEnemies;
+                }
+
                 if (effect.TargetSide == TargetSide.Enemy)
                 {
-                    return PotionTargetMode.AnyEnemy;
+                    hasEnemyTarget = true;
                 }
+            }
+
+            if (hasEnemyTarget)
+            {
+                return PotionTargetMode.AnyEnemy;
             }
 
             return PotionTargetMode.Self;
