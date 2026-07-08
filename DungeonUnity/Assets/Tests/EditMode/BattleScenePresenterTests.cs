@@ -573,7 +573,7 @@ namespace Dungeon.Tests.EditMode
             public int InspectOwnedRelicCallCount { get; private set; }
             public int InspectOwnedPotionCallCount { get; private set; }
             public int UsePotionCallCount { get; private set; }
-            public int LastUsePotionIndex { get; private set; } = BattleSceneConstants.UnselectedCardIndex;
+            public int LastUsePotionIndex { get; private set; } = -1;
             public int ReplaceOwnedPotionCallCount { get; private set; }
             public int CancelPendingPotionReplaceCallCount { get; private set; }
             public int ClearOwnedInspectionsCallCount { get; private set; }
