@@ -299,6 +299,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectEnemyTarget(int index)
         {
+            if (_state.PendingPotionUseIndex != BattleSceneConstants.UnselectedCardIndex)
+            {
+                ResolvePendingPotionUse(index);
+                return;
+            }
+
             if (index < 0 || index >= _state.Enemies.Count)
             {
                 return;
@@ -500,6 +506,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.ClearOwnedRelicInspection();
+            _state.PendingPotionUseIndex = BattleSceneConstants.UnselectedCardIndex;
             _state.SelectedOwnedPotionIndex = index;
             _state.OwnedPotionHintMessage = string.IsNullOrEmpty(potion.Description)
                 ? potion.DisplayName
@@ -517,17 +524,40 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             RuntimePotion potion = _state.OwnedPotions[index];
-            BattlePotionUseTarget target = new BattlePotionUseTarget(_state.SelectedEnemyIndex);
-            if (_potionService.UsePotion(_state, index, target, _rules, _randomProvider))
+            if (potion == null)
             {
-                if (potion != null)
+                return;
+            }
+
+            if (potion.TargetMode == PotionTargetMode.AnyEnemy || potion.TargetMode == PotionTargetMode.Enemy)
+            {
+                if (_state.CurrentPage != BattleScenePage.Battle || !HasAliveEnemy())
                 {
-                    _state.BattleHintMessage = string.Format(BattleSceneConstants.CardResolvedFormat, potion.DisplayName);
+                    _state.ClearOwnedPotionInspection();
+                    return;
                 }
 
+                _state.PendingPotionUseIndex = index;
+                _state.BattleHintMessage = string.Format(BattleSceneConstants.PotionTargetSelectFormat, potion.DisplayName);
+                return;
+            }
+
+            if (potion.TargetMode == PotionTargetMode.AllEnemies
+                && (_state.CurrentPage != BattleScenePage.Battle || !HasAliveEnemy()))
+            {
+                _state.ClearOwnedPotionInspection();
+                return;
+            }
+
+            if (TryUsePotion(index, new BattlePotionUseTarget(_state.SelectedEnemyIndex), potion))
+            {
                 if (_state.CurrentPage != BattleScenePage.Battle)
                 {
                     RequestSave();
+                }
+                else if (AreAllEnemiesDefeated())
+                {
+                    OnBattleVictory();
                 }
             }
 
@@ -871,6 +901,69 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             SyncSelectedEnemyForDisplay();
+            return true;
+        }
+
+        /// <summary>
+        /// 生存中の敵がいるか判定する
+        /// </summary>
+        private bool HasAliveEnemy()
+        {
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState != null && !enemyState.IsDefeated && enemyState.Hp > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 対象待ちポーションを敵クリックで解決する
+        /// </summary>
+        private void ResolvePendingPotionUse(int enemyIndex)
+        {
+            int potionIndex = _state.PendingPotionUseIndex;
+            if (potionIndex < 0 || potionIndex >= _state.OwnedPotions.Count)
+            {
+                _state.ClearOwnedPotionInspection();
+                _state.BattleHintMessage = BattleSceneConstants.PotionUseCanceled;
+                return;
+            }
+
+            RuntimePotion potion = _state.OwnedPotions[potionIndex];
+            if (!TryUsePotion(potionIndex, new BattlePotionUseTarget(enemyIndex), potion))
+            {
+                _state.ClearOwnedPotionInspection();
+                _state.BattleHintMessage = BattleSceneConstants.PotionUseCanceled;
+                return;
+            }
+
+            _state.ClearOwnedPotionInspection();
+            if (_state.CurrentPage == BattleScenePage.Battle && AreAllEnemiesDefeated())
+            {
+                OnBattleVictory();
+            }
+        }
+
+        /// <summary>
+        /// ポーション使用と共通ヒント更新を行う
+        /// </summary>
+        private bool TryUsePotion(int index, BattlePotionUseTarget target, RuntimePotion potion)
+        {
+            if (!_potionService.UsePotion(_state, index, target, _rules, _randomProvider))
+            {
+                return false;
+            }
+
+            if (potion != null)
+            {
+                _state.BattleHintMessage = string.Format(BattleSceneConstants.CardResolvedFormat, potion.DisplayName);
+            }
+
             return true;
         }
 
