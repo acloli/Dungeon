@@ -2565,6 +2565,21 @@ namespace Dungeon.Tests.EditMode
             {
                 _events.Add($"PlayerDamaged:{damage}");
             }
+
+            public void OnShuffle(BattleSceneState state)
+            {
+                _events.Add("Shuffle");
+            }
+
+            public void OnCardExhausted(BattleSceneState state, RuntimeCard card)
+            {
+                _events.Add($"CardExhausted:{card.DisplayName}");
+            }
+
+            public void OnLoseHp(BattleSceneState state, int amount)
+            {
+                _events.Add($"LoseHp:{amount}");
+            }
         }
 
         private sealed class FakeRunSaveService : IRunSaveService
