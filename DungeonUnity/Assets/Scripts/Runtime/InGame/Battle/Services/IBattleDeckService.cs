@@ -26,5 +26,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 指定枚数だけカードを引く
         /// </summary>
         int DrawCards(BattleSceneState state, IBattleRandomProvider randomProvider, int drawCount);
+
+        /// <summary>
+        /// 指定枚数を引く前に山札補充が発生するかを判定する
+        /// </summary>
+        bool WillRefillDrawPile(BattleSceneState state, int drawCount);
     }
 }

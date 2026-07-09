@@ -107,6 +107,32 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 指定枚数を引く前に山札補充が発生するかを判定する
+        /// </summary>
+        public bool WillRefillDrawPile(BattleSceneState state, int drawCount)
+        {
+            if (state == null || drawCount <= 0 || state.DiscardPile.Count == 0)
+            {
+                return false;
+            }
+
+            int remainingHandSize = BattleSceneConstants.MaxHandSize - state.Hand.Count;
+            if (remainingHandSize <= 0)
+            {
+                return false;
+            }
+
+            if (state.DrawPile.Count == 0)
+            {
+                return true;
+            }
+
+            int cardsToDrawBeforeHandLimit = drawCount < remainingHandSize ? drawCount : remainingHandSize;
+            int availableDrawPileCards = CountAvailableCards(state.DrawPile);
+            return availableDrawPileCards < cardsToDrawBeforeHandLimit;
+        }
+
+        /// <summary>
         /// 山札不足時に捨て札を戻す
         /// </summary>
         private static void RefillDrawPileIfNeeded(BattleSceneState state, IBattleRandomProvider randomProvider)
@@ -127,6 +153,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             state.DiscardPile.Clear();
             ShufflePile(state.DrawPile, randomProvider);
+        }
+
+        /// <summary>
+        /// nullではないカード枚数を数える
+        /// </summary>
+        private static int CountAvailableCards(IList<RuntimeCard> cards)
+        {
+            if (cards == null || cards.Count == 0)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i] != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         /// <summary>
