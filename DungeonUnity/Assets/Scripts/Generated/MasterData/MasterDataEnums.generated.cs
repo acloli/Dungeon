@@ -105,6 +105,12 @@ namespace Game.MasterData.Generated
     {
         CombatStart,
         PlayerTurnStart,
+        PlayerTurnEnd,
+        CardPlayed,
+        PlayerDamaged,
+        Shuffle,
+        CardExhausted,
+        LoseHp,
     }
 
     /// <summary>
