@@ -372,7 +372,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            int playerHpBefore = _state.PlayerHp;
             BattleCardResolutionResult result = _rules.PlayCard(_state, _state.SelectedCardIndex, _randomProvider);
+            DispatchLoseHpHook(playerHpBefore);
             _combatEventService.OnCardPlayed(_state, card, result);
             if (card.ExhaustsOnPlay)
             {
@@ -718,7 +720,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectEventChoice(int choiceId)
         {
-            _eventFlowService.SelectEventChoice(_state, choiceId, OpenMap);
+            int playerHpBefore = _state.PlayerHp;
+            _eventFlowService.SelectEventChoice(_state, choiceId, () =>
+            {
+                DispatchLoseHpHook(playerHpBefore);
+                OpenMap();
+            });
             RequestSave();
         }
 
@@ -1015,17 +1022,31 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private bool TryUsePotion(int index, BattlePotionUseTarget target, RuntimePotion potion)
         {
+            int playerHpBefore = _state.PlayerHp;
             if (!_potionService.UsePotion(_state, index, target, _rules, _randomProvider))
             {
                 return false;
             }
 
+            DispatchLoseHpHook(playerHpBefore);
             if (potion != null)
             {
                 _state.BattleHintMessage = string.Format(BattleSceneConstants.CardResolvedFormat, potion.DisplayName);
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// プレイヤーHP減少差分がある場合だけLoseHp通知を発火する
+        /// </summary>
+        private void DispatchLoseHpHook(int playerHpBefore)
+        {
+            int loseHpAmount = playerHpBefore - _state.PlayerHp;
+            if (loseHpAmount > 0)
+            {
+                _combatEventService.OnLoseHp(_state, loseHpAmount);
+            }
         }
 
         /// <summary>
