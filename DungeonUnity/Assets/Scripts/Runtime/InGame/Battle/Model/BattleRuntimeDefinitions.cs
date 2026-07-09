@@ -114,7 +114,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class RuntimeRelicEffect
     {
-        public RuntimeRelicEffect(int order, RelicTriggerType triggerType, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide)
+        public RuntimeRelicEffect(int order, RelicTriggerType triggerType, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide, int potionCapacityDelta = 0)
         {
             Order = order;
             TriggerType = triggerType;
@@ -124,6 +124,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             StatusType = statusType;
             StatusValue = statusValue;
             TargetSide = targetSide;
+            PotionCapacityDelta = potionCapacityDelta;
         }
 
         public int Order { get; }
@@ -134,6 +135,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public StatusType StatusType { get; }
         public int StatusValue { get; }
         public TargetSide TargetSide { get; }
+        public int PotionCapacityDelta { get; }
     }
 
     /// <summary>
