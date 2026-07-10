@@ -20,6 +20,8 @@ namespace Dungeon.Tests.EditMode
     /// </summary>
     public sealed class BattleSceneFlowServiceTests
     {
+        private const int DefaultMaxPotionCountForTest = 3;
+
         [Test]
         public void Initialize_OpensMapWithRunDefaults()
         {
@@ -1657,8 +1659,8 @@ namespace Dungeon.Tests.EditMode
                 new BattlePotionService());
             RunSaveData restoredSaveData = checkpointService.BuildSaveData(state, runDefinition, 111, 222, 1, 7);
 
-            Assert.That(state.MaxPotionCount, Is.EqualTo(BattleSceneConstants.DefaultMaxPotionCount));
-            Assert.That(restoredSaveData.MaxPotionCount, Is.EqualTo(BattleSceneConstants.DefaultMaxPotionCount));
+            Assert.That(state.MaxPotionCount, Is.EqualTo(DefaultMaxPotionCountForTest));
+            Assert.That(restoredSaveData.MaxPotionCount, Is.EqualTo(DefaultMaxPotionCountForTest));
         }
 
         [Test]
