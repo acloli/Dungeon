@@ -1,8 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
+using Dungeon.Runtime.InGame.Domain;
 using Game.MasterData.Generated;
 using NUnit.Framework;
+using TFramework.MasterData;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -285,6 +290,60 @@ namespace Dungeon.Tests.EditMode
             Assert.That(rolledRelic.Id, Is.EqualTo(2));
         }
 
+        [Test]
+        public void RollTreasureRewardRelic_FiltersRewardPoolMasterRelicsByGroupAndFloor()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentNodeIndex = 0
+            };
+            state.Nodes.Add(new RuntimeMapNode(5301, "treasure_1", 4, InGameNodeType.Treasure, "Treasure", string.Empty, new List<int>()));
+            RuntimeRelic targetRelic = CreateRelic(101, new[] { CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 4) });
+            RuntimeRelic wrongGroupRelic = CreateRelic(102, new[] { CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 5) });
+            RuntimeRelic wrongFloorRelic = CreateRelic(103, new[] { CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 6) });
+            RuntimeRelic ownedRelic = CreateRelic(104, new[] { CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 7) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(new Dictionary<int, RuntimeRelic>
+            {
+                { targetRelic.Id, targetRelic },
+                { wrongGroupRelic.Id, wrongGroupRelic },
+                { wrongFloorRelic.Id, wrongFloorRelic },
+                { ownedRelic.Id, ownedRelic }
+            });
+            FakeMasterDataService masterDataService = new FakeMasterDataService(new[]
+            {
+                CreateRewardPoolMaster(1, 801, RewardType.Relic, wrongGroupRelic.Id, 10, 1, 10),
+                CreateRewardPoolMaster(2, 800, RewardType.Card, targetRelic.Id, 10, 1, 10),
+                CreateRewardPoolMaster(3, 800, RewardType.Relic, wrongFloorRelic.Id, 10, 5, 10),
+                CreateRewardPoolMaster(4, 800, RewardType.Relic, ownedRelic.Id, 10, 1, 10),
+                CreateRewardPoolMaster(5, 800, RewardType.Relic, targetRelic.Id, 10, 1, 10)
+            });
+            BattleRelicService service = new BattleRelicService(null, new FixedRandomProvider(), masterDataService);
+            service.AddOwnedRelic(state, ownedRelic);
+
+            RuntimeRelic rolledRelic = service.RollTreasureRewardRelic(state, runDefinition, 800, new FixedRandomProvider());
+
+            Assert.That(rolledRelic.Id, Is.EqualTo(targetRelic.Id));
+        }
+
+        [Test]
+        public void RollTreasureRewardRelic_WithoutGroupFallsBackToBattleRewardRelic()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeRelic ownedRelic = CreateRelic(201, new[] { CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 4) });
+            RuntimeRelic fallbackRelic = CreateRelic(202, new[] { CreateEffect(RelicTriggerType.PlayerTurnStart, EffectType.GainEnergy, 1) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(new Dictionary<int, RuntimeRelic>
+            {
+                { ownedRelic.Id, ownedRelic },
+                { fallbackRelic.Id, fallbackRelic }
+            });
+            BattleRelicService service = new BattleRelicService(null, new FixedRandomProvider(), new FakeMasterDataService(Array.Empty<RewardPoolMaster>()));
+            service.AddOwnedRelic(state, ownedRelic);
+
+            RuntimeRelic rolledRelic = service.RollTreasureRewardRelic(state, runDefinition, 0, new FixedRandomProvider());
+
+            Assert.That(rolledRelic.Id, Is.EqualTo(fallbackRelic.Id));
+        }
+
         private static BattleRelicService CreateServiceWithRules()
         {
             BattleSceneRules rules = new BattleSceneRules(
@@ -327,6 +386,52 @@ namespace Dungeon.Tests.EditMode
             return new RuntimeRelic(id, $"relic_{id}", $"Relic{id}", string.Empty, string.Empty, string.Empty, string.Empty, CardRarity.Uncommon, effects);
         }
 
+        private static RuntimeRunDefinition CreateRunDefinition(IReadOnlyDictionary<int, RuntimeRelic> relicCatalog)
+        {
+            return new RuntimeRunDefinition(
+                5501,
+                "run_test",
+                6301,
+                CharacterArchetype.CrimsonExile,
+                50,
+                120,
+                3,
+                0,
+                100,
+                new List<RuntimeCard>(),
+                new Dictionary<int, RuntimeCard>(),
+                new List<RuntimeRewardEntry>(),
+                new List<RuntimeMapNode>(),
+                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
+                new List<RuntimeEvent>(),
+                relicCatalog,
+                new Dictionary<int, RuntimePotion>(),
+                null,
+                null,
+                null);
+        }
+
+        private static RewardPoolMaster CreateRewardPoolMaster(
+            int id,
+            int rewardPoolId,
+            RewardType rewardType,
+            int rewardValue,
+            int weight,
+            int minFloor,
+            int maxFloor)
+        {
+            return new RewardPoolMaster
+            {
+                Id = id,
+                RewardPoolId = rewardPoolId,
+                RewardType = rewardType,
+                RewardValue = rewardValue,
+                Weight = weight,
+                MinFloor = minFloor,
+                MaxFloor = maxFloor
+            };
+        }
+
         private static RuntimeRelicEffect CreateEffect(
             RelicTriggerType triggerType,
             EffectType effectType,
@@ -362,6 +467,51 @@ namespace Dungeon.Tests.EditMode
             {
                 Counter++;
                 return minInclusive;
+            }
+        }
+
+        private sealed class FakeMasterDataService : IMasterDataService
+        {
+            private readonly IReadOnlyList<RewardPoolMaster> _rewardPoolMasters;
+
+            public FakeMasterDataService(IReadOnlyList<RewardPoolMaster> rewardPoolMasters)
+            {
+                _rewardPoolMasters = rewardPoolMasters ?? Array.Empty<RewardPoolMaster>();
+            }
+
+            public UniTask InitializeAsync(CancellationToken ct)
+            {
+                return UniTask.CompletedTask;
+            }
+
+            public IReadOnlyList<T> GetAll<T>() where T : class, IMasterDataObject
+            {
+                if (typeof(T) == typeof(RewardPoolMaster))
+                {
+                    return (IReadOnlyList<T>)_rewardPoolMasters;
+                }
+
+                return Array.Empty<T>();
+            }
+
+            public T Get<T, TKey>(TKey key) where T : class, IMasterDataObject<TKey>
+            {
+                return null;
+            }
+
+            public T GetContainer<T>() where T : class
+            {
+                return null;
+            }
+
+            public UniTask DownloadFromServerAsync(CancellationToken ct)
+            {
+                return UniTask.CompletedTask;
+            }
+
+            public UniTask ReloadAsync(CancellationToken ct)
+            {
+                return UniTask.CompletedTask;
             }
         }
     }
