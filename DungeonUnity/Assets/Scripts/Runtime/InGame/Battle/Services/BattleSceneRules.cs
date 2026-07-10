@@ -145,6 +145,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 現在階層に対応する宝箱定義を取得する
+        /// </summary>
+        public RuntimeTreasureDefinition GetTreasureDefinition(BattleSceneState state, RuntimeRunDefinition runDefinition)
+        {
+            return GetTreasureDefinition(runDefinition, GetCurrentFloor(state));
+        }
+
+        /// <summary>
+        /// 宝箱Gold報酬を抽選する
+        /// </summary>
+        public int RollTreasureGold(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            return RollTreasureGold(GetTreasureDefinition(state, runDefinition), randomProvider);
+        }
+
+        /// <summary>
+        /// 宝箱Gold報酬を抽選する
+        /// </summary>
+        public int RollTreasureGold(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider)
+        {
+            return RollTreasureGold(GetTreasureDefinition(runDefinition, 1), randomProvider);
+        }
+
+        /// <summary>
         /// 使用可否判定
         /// </summary>
         public bool CanPlayCard(BattleSceneState state, RuntimeCard card)
@@ -200,6 +224,70 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             int index = randomProvider.Range(0, state.Deck.Count);
             state.Deck.Add(state.Deck[index]);
             return true;
+        }
+
+        /// <summary>
+        /// 現在階層を取得する
+        /// </summary>
+        private static int GetCurrentFloor(BattleSceneState state)
+        {
+            if (state == null ||
+                state.CurrentNodeIndex < 0 ||
+                state.CurrentNodeIndex >= state.Nodes.Count)
+            {
+                return 1;
+            }
+
+            return state.Nodes[state.CurrentNodeIndex].Floor;
+        }
+
+        /// <summary>
+        /// 階層に対応する宝箱定義を取得する
+        /// </summary>
+        private static RuntimeTreasureDefinition GetTreasureDefinition(RuntimeRunDefinition runDefinition, int floor)
+        {
+            if (runDefinition == null || runDefinition.TreasureDefinitions.Count == 0)
+            {
+                return null;
+            }
+
+            RuntimeTreasureDefinition fallback = null;
+            for (int i = 0; i < runDefinition.TreasureDefinitions.Count; i++)
+            {
+                RuntimeTreasureDefinition treasureDefinition = runDefinition.TreasureDefinitions[i];
+                if (treasureDefinition == null)
+                {
+                    continue;
+                }
+
+                fallback ??= treasureDefinition;
+                if (floor >= treasureDefinition.MinFloor && floor <= treasureDefinition.MaxFloor)
+                {
+                    return treasureDefinition;
+                }
+            }
+
+            return fallback;
+        }
+
+        /// <summary>
+        /// 宝箱定義からGold報酬を抽選する
+        /// </summary>
+        private static int RollTreasureGold(RuntimeTreasureDefinition treasureDefinition, IBattleRandomProvider randomProvider)
+        {
+            if (treasureDefinition == null)
+            {
+                return 0;
+            }
+
+            int minGold = Mathf.Max(0, treasureDefinition.GoldMin);
+            int maxGold = Mathf.Max(minGold, treasureDefinition.GoldMax);
+            if (minGold == maxGold || randomProvider == null)
+            {
+                return maxGold;
+            }
+
+            return randomProvider.Range(minGold, maxGold + 1);
         }
     }
 }
