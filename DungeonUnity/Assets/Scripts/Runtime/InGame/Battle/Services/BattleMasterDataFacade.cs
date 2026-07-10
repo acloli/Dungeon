@@ -56,6 +56,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             RuntimeShopLineup shopLineup = _shopMasterDataFacade.BuildShopLineup(profile.ShopId);
             IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules = _shopMasterDataFacade.BuildCardPriceRules();
             IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = _shopMasterDataFacade.BuildItemPriceRules();
+            IReadOnlyList<RuntimeTreasureDefinition> treasureDefinitions = BuildTreasureDefinitions();
 
             return new RuntimeRunDefinition(
                 profile.Id,
@@ -77,7 +78,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 potionCatalog,
                 shopLineup,
                 cardPriceRules,
-                itemPriceRules);
+                itemPriceRules,
+                treasureDefinitions);
         }
 
         /// <summary>
@@ -307,6 +309,30 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return rewards;
+        }
+
+        /// <summary>
+        /// 宝箱報酬定義一覧を構築する
+        /// </summary>
+        private IReadOnlyList<RuntimeTreasureDefinition> BuildTreasureDefinitions()
+        {
+            IReadOnlyList<TreasureMaster> masters = _masterDataService.GetAll<TreasureMaster>();
+            List<RuntimeTreasureDefinition> definitions = new List<RuntimeTreasureDefinition>();
+            for (int i = 0; i < masters.Count; i++)
+            {
+                TreasureMaster master = masters[i];
+                definitions.Add(new RuntimeTreasureDefinition(
+                    master.Id,
+                    master.MinFloor,
+                    master.MaxFloor,
+                    master.MinGold,
+                    master.MaxGold,
+                    master.RelicGroupId,
+                    master.PotionDropChance,
+                    master.RelicDropChance));
+            }
+
+            return definitions;
         }
 
         /// <summary>
