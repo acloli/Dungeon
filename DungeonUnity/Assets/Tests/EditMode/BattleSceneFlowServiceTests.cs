@@ -338,7 +338,87 @@ namespace Dungeon.Tests.EditMode
                 "CardPlayed:Strike:1",
                 "PlayerTurnEnd",
                 "PlayerDamaged:2",
-                "PlayerTurnStart"
+                "PlayerTurnStart",
+                "Shuffle"
+            }));
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_ExhaustsOnPlay_FiresCardExhaustedOnce()
+        {
+            RuntimeCard burn = CreateCard(1001, "Burn", 1, 1, exhaustsOnPlay: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { burn },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "CombatStart",
+                "PlayerTurnStart",
+                "CardPlayed:Burn:1",
+                "CardExhausted:Burn"
+            }));
+        }
+
+        [Test]
+        public void EndTurn_WhenDrawPileRefills_FiresShuffleOnce()
+        {
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+
+            Assert.That(combatEventService.Events.Count(evt => evt == "Shuffle"), Is.EqualTo(1));
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "CombatStart",
+                "PlayerTurnStart",
+                "CardPlayed:Guard:0",
+                "PlayerTurnEnd",
+                "PlayerTurnStart",
+                "Shuffle"
+            }));
+        }
+
+        [Test]
+        public void SelectEventChoice_LoseHp_FiresLoseHpOnce()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "BloodFountain", "event.blood_title", "event.blood", "img_blood",
+                new[] { new RuntimeEventChoice(1, "Pay HP", EffectType.LoseHp, 7) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectEventChoice(1);
+
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "LoseHp:7"
             }));
         }
 
@@ -2335,7 +2415,7 @@ namespace Dungeon.Tests.EditMode
             return items;
         }
 
-        private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false)
+        private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false, bool exhaustsOnPlay = false)
         {
             RuntimeCardBuilder builder = BattleTestData.Card(id);
             builder.DisplayName = displayName;
@@ -2346,6 +2426,7 @@ namespace Dungeon.Tests.EditMode
             };
             builder.UpgradeCardId = upgradeCardId;
             builder.IsUpgraded = isUpgraded;
+            builder.ExhaustsOnPlay = exhaustsOnPlay;
             return builder.Build();
         }
 
