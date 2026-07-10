@@ -82,16 +82,47 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattleMapSnapshot(
             IReadOnlyList<RuntimeMapNode> nodes = null,
             IReadOnlyList<int> availableNodeIndices = null,
-            string mapMessage = null)
+            string mapMessage = null,
+            int currentFloor = 1,
+            int totalFloors = 8,
+            int currentNodeIndex = -1,
+            IReadOnlyList<MapNodeLayout> nodeLayouts = null)
         {
             Nodes = nodes ?? Array.Empty<RuntimeMapNode>();
             AvailableNodeIndices = availableNodeIndices ?? Array.Empty<int>();
             MapMessage = mapMessage ?? string.Empty;
+            CurrentFloor = currentFloor;
+            TotalFloors = totalFloors;
+            CurrentNodeIndex = currentNodeIndex;
+            NodeLayouts = nodeLayouts ?? Array.Empty<MapNodeLayout>();
         }
 
         public IReadOnlyList<RuntimeMapNode> Nodes { get; }
         public IReadOnlyList<int> AvailableNodeIndices { get; }
         public string MapMessage { get; }
+        public int CurrentFloor { get; }
+        public int TotalFloors { get; }
+        public int CurrentNodeIndex { get; }
+        public IReadOnlyList<MapNodeLayout> NodeLayouts { get; }
+    }
+
+    /// <summary>
+    /// マップノードのレイアウト情報（View用）
+    /// </summary>
+    public sealed class MapNodeLayout
+    {
+        public MapNodeLayout(int nodeIndex, float x, float y, int floor)
+        {
+            NodeIndex = nodeIndex;
+            X = x;
+            Y = y;
+            Floor = floor;
+        }
+
+        public int NodeIndex { get; }
+        public float X { get; }
+        public float Y { get; }
+        public int Floor { get; }
     }
 
     public sealed class BattleCombatSnapshot
