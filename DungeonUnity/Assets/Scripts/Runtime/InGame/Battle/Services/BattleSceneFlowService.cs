@@ -15,7 +15,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// </summary>
     public sealed class BattleSceneFlowService : IBattleSceneFlowService
     {
-        private const int CurrentMapLayoutVersion = 1;
+        private const int CurrentMapLayoutVersion = 2;
         private const int MapSeedSalt = 0x4D6170;
 
         private readonly BattleSceneState _state = new BattleSceneState();
