@@ -147,7 +147,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                             effect.HitCount,
                             effect.StatusType,
                             effect.StatusValue,
-                            effect.TargetSide))
+                            effect.TargetSide,
+                            effect.PotionCapacityDelta))
                         .ToList());
 
             Dictionary<int, RuntimeRelic> relics = new Dictionary<int, RuntimeRelic>();

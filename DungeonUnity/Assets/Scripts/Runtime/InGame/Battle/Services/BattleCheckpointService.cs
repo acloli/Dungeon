@@ -18,6 +18,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.PlayerMaxHp = saveData.PlayerMaxHp;
             state.PlayerHp = saveData.PlayerHp;
             state.PlayerEnergy = saveData.PlayerEnergy;
+            state.MaxPotionCount = saveData.MaxPotionCount > 0 ? saveData.MaxPotionCount : BattleSceneConstants.DefaultMaxPotionCount;
             state.Gold = saveData.Gold;
             state.CurrentNodeIndex = saveData.CurrentNodeIndex;
             state.CurrentPage = (BattleScenePage)saveData.CurrentPage;
@@ -91,6 +92,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 PlayerMaxHp = state.PlayerMaxHp,
                 PlayerHp = state.PlayerHp,
                 PlayerEnergy = state.PlayerEnergy,
+                MaxPotionCount = state.MaxPotionCount > 0 ? state.MaxPotionCount : BattleSceneConstants.DefaultMaxPotionCount,
                 Gold = state.Gold,
                 CurrentNodeIndex = state.CurrentNodeIndex,
                 CurrentPage = (int)ResolveCheckpointPage(state.CurrentPage),

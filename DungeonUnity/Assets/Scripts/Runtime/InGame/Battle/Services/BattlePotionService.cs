@@ -35,7 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public bool HasCapacity(BattleSceneState state)
         {
-            return state != null && state.OwnedPotions.Count < BattleSceneConstants.MaxPotionCount;
+            return state != null && state.OwnedPotions.Count < state.MaxPotionCount;
         }
 
         public bool AddOwnedPotion(BattleSceneState state, RuntimePotion potion)

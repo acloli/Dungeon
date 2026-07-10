@@ -20,6 +20,8 @@ namespace Dungeon.Tests.EditMode
     /// </summary>
     public sealed class BattleSceneFlowServiceTests
     {
+        private const int DefaultMaxPotionCountForTest = 3;
+
         [Test]
         public void Initialize_OpensMapWithRunDefaults()
         {
@@ -338,7 +340,87 @@ namespace Dungeon.Tests.EditMode
                 "CardPlayed:Strike:1",
                 "PlayerTurnEnd",
                 "PlayerDamaged:2",
-                "PlayerTurnStart"
+                "PlayerTurnStart",
+                "Shuffle"
+            }));
+        }
+
+        [Test]
+        public void TryPlaySelectedCard_ExhaustsOnPlay_FiresCardExhaustedOnce()
+        {
+            RuntimeCard burn = CreateCard(1001, "Burn", 1, 1, exhaustsOnPlay: true);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { burn },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "CombatStart",
+                "PlayerTurnStart",
+                "CardPlayed:Burn:1",
+                "CardExhausted:Burn"
+            }));
+        }
+
+        [Test]
+        public void EndTurn_WhenDrawPileRefills_FiresShuffleOnce()
+        {
+            RuntimeCard guard = CreateCard(1001, "Guard", 1, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.GainBlock, 5, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { guard },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, CreateAction(1, 0, RepeatRule.RepeatAfterOpening)), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0, 0, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            service.EndTurn();
+
+            Assert.That(combatEventService.Events.Count(evt => evt == "Shuffle"), Is.EqualTo(1));
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "CombatStart",
+                "PlayerTurnStart",
+                "CardPlayed:Guard:0",
+                "PlayerTurnEnd",
+                "PlayerTurnStart",
+                "Shuffle"
+            }));
+        }
+
+        [Test]
+        public void SelectEventChoice_LoseHp_FiresLoseHpOnce()
+        {
+            RuntimeEvent evt = new RuntimeEvent(
+                9001, "BloodFountain", "event.blood_title", "event.blood", "img_blood",
+                new[] { new RuntimeEventChoice(1, "Pay HP", EffectType.LoseHp, 7) });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Event, "Event", new[] { 1 }) },
+                events: new[] { evt });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.SelectEventChoice(1);
+
+            Assert.That(combatEventService.Events, Is.EqualTo(new[]
+            {
+                "LoseHp:7"
             }));
         }
 
@@ -1511,6 +1593,77 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ContinueFromRestShop_AfterInitializeFromSave_PreservesMaxPotionCount()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                MaxPotionCount = 5,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.RestShop,
+                MasterSeed = 111,
+                MapSeed = 222,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+            service.ContinueFromRestShop();
+
+            Assert.That(runSaveService.LastSavedData.MaxPotionCount, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void RestoreFromSave_WithLegacyMaxPotionCount_UsesDefaultCapacity()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition();
+            BattleSceneState state = new BattleSceneState();
+            BattleCheckpointService checkpointService = new BattleCheckpointService();
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                MaxPotionCount = 0,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.Map,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            checkpointService.RestoreFromSave(
+                state,
+                runDefinition,
+                saveData,
+                runDefinition.CardCatalog,
+                new BattleRelicService(),
+                new BattlePotionService());
+            RunSaveData restoredSaveData = checkpointService.BuildSaveData(state, runDefinition, 111, 222, 1, 7);
+
+            Assert.That(state.MaxPotionCount, Is.EqualTo(DefaultMaxPotionCountForTest));
+            Assert.That(restoredSaveData.MaxPotionCount, Is.EqualTo(DefaultMaxPotionCountForTest));
+        }
+
+        [Test]
         public void InitializeFromSave_OnMapCheckpoint_ReplaysSameBattleEncounter()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -2287,6 +2440,7 @@ namespace Dungeon.Tests.EditMode
                 PlayerMaxHp = source.PlayerMaxHp,
                 PlayerHp = source.PlayerHp,
                 PlayerEnergy = source.PlayerEnergy,
+                MaxPotionCount = source.MaxPotionCount,
                 Gold = source.Gold,
                 CurrentNodeIndex = source.CurrentNodeIndex,
                 CurrentPage = source.CurrentPage,
@@ -2335,7 +2489,7 @@ namespace Dungeon.Tests.EditMode
             return items;
         }
 
-        private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false)
+        private static RuntimeCard CreateCard(int id, string displayName, int cost, int damage, IReadOnlyList<RuntimeCardEffect> effects = null, int upgradeCardId = 0, bool isUpgraded = false, bool exhaustsOnPlay = false)
         {
             RuntimeCardBuilder builder = BattleTestData.Card(id);
             builder.DisplayName = displayName;
@@ -2346,6 +2500,7 @@ namespace Dungeon.Tests.EditMode
             };
             builder.UpgradeCardId = upgradeCardId;
             builder.IsUpgraded = isUpgraded;
+            builder.ExhaustsOnPlay = exhaustsOnPlay;
             return builder.Build();
         }
 
@@ -2564,6 +2719,21 @@ namespace Dungeon.Tests.EditMode
             public void OnPlayerDamaged(BattleSceneState state, int damage)
             {
                 _events.Add($"PlayerDamaged:{damage}");
+            }
+
+            public void OnShuffle(BattleSceneState state)
+            {
+                _events.Add("Shuffle");
+            }
+
+            public void OnCardExhausted(BattleSceneState state, RuntimeCard card)
+            {
+                _events.Add($"CardExhausted:{card.DisplayName}");
+            }
+
+            public void OnLoseHp(BattleSceneState state, int amount)
+            {
+                _events.Add($"LoseHp:{amount}");
             }
         }
 

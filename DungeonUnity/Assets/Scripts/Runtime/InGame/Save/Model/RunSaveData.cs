@@ -16,6 +16,7 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int PlayerMaxHp;
         public int PlayerHp;
         public int PlayerEnergy;
+        public int MaxPotionCount = 3;
         public int Gold;
         public int CurrentNodeIndex;
         public int CurrentPage;

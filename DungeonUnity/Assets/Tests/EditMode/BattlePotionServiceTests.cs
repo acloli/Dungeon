@@ -130,6 +130,25 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.DrawPile, Is.Empty);
         }
 
+        [Test]
+        public void HasCapacity_UsesRuntimeMaxPotionCount()
+        {
+            BattleSceneState state = CreateBattleState();
+            BattlePotionService service = new BattlePotionService();
+            state.OwnedPotions.Add(CreatePotion(5006, PotionTargetMode.Self));
+            state.OwnedPotions.Add(CreatePotion(5007, PotionTargetMode.Self));
+            state.OwnedPotions.Add(CreatePotion(5008, PotionTargetMode.Self));
+
+            state.MaxPotionCount = 3;
+            Assert.That(service.HasCapacity(state), Is.False);
+
+            state.MaxPotionCount = 4;
+            Assert.That(service.HasCapacity(state), Is.True);
+
+            state.MaxPotionCount = 2;
+            Assert.That(service.HasCapacity(state), Is.False);
+        }
+
         private static BattleSceneState CreateBattleState()
         {
             return new BattleSceneState

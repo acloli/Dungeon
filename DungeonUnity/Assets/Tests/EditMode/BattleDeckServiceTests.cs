@@ -80,6 +80,60 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.DrawPile.Count, Is.EqualTo(2));
         }
 
+        [Test]
+        public void WillRefillDrawPile_WhenDrawPileEmptyAndDiscardPileHasCards_ReturnsTrue()
+        {
+            BattleSceneState state = new BattleSceneState();
+            state.DiscardPile.Add(CreateCard(1001, "Strike"));
+            BattleDeckService service = new BattleDeckService();
+
+            bool willRefill = service.WillRefillDrawPile(state, 1);
+
+            Assert.That(willRefill, Is.True);
+        }
+
+        [Test]
+        public void WillRefillDrawPile_WhenDrawPileHasEnoughCards_ReturnsFalse()
+        {
+            BattleSceneState state = new BattleSceneState();
+            state.DrawPile.Add(CreateCard(1001, "Strike"));
+            state.DiscardPile.Add(CreateCard(1002, "Guard"));
+            BattleDeckService service = new BattleDeckService();
+
+            bool willRefill = service.WillRefillDrawPile(state, 1);
+
+            Assert.That(willRefill, Is.False);
+        }
+
+        [Test]
+        public void WillRefillDrawPile_WhenDrawCountIsZero_ReturnsFalse()
+        {
+            BattleSceneState state = new BattleSceneState();
+            state.DiscardPile.Add(CreateCard(1001, "Strike"));
+            BattleDeckService service = new BattleDeckService();
+
+            bool willRefill = service.WillRefillDrawPile(state, 0);
+
+            Assert.That(willRefill, Is.False);
+        }
+
+        [Test]
+        public void WillRefillDrawPile_WhenHandIsFull_ReturnsFalse()
+        {
+            BattleSceneState state = new BattleSceneState();
+            state.DiscardPile.Add(CreateCard(1001, "Strike"));
+            for (int i = 0; i < MaxHandSize; i++)
+            {
+                state.Hand.Add(CreateCard(2000 + i, $"Hand{i}"));
+            }
+
+            BattleDeckService service = new BattleDeckService();
+
+            bool willRefill = service.WillRefillDrawPile(state, 1);
+
+            Assert.That(willRefill, Is.False);
+        }
+
         private static RuntimeCard CreateCard(int id, string name)
         {
             var builder = Support.BattleTestData.Card(id);

@@ -372,8 +372,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            int playerHpBefore = _state.PlayerHp;
             BattleCardResolutionResult result = _rules.PlayCard(_state, _state.SelectedCardIndex, _randomProvider);
+            DispatchLoseHpHook(playerHpBefore);
             _combatEventService.OnCardPlayed(_state, card, result);
+            if (card.ExhaustsOnPlay)
+            {
+                _combatEventService.OnCardExhausted(_state, card);
+            }
+
             _state.BattleHintMessage = BuildCardHint(card, result);
             _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
 
@@ -410,7 +417,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             _combatEventService.OnPlayerTurnStart(_state);
-            _rules.DrawHand(_state, _randomProvider);
+            DrawHandWithShuffleHook();
         }
 
         /// <summary>
@@ -713,7 +720,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void SelectEventChoice(int choiceId)
         {
-            _eventFlowService.SelectEventChoice(_state, choiceId, OpenMap);
+            int playerHpBefore = _state.PlayerHp;
+            _eventFlowService.SelectEventChoice(_state, choiceId, () =>
+            {
+                DispatchLoseHpHook(playerHpBefore);
+                OpenMap();
+            });
             RequestSave();
         }
 
@@ -762,7 +774,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _combatEventService.OnCombatStart(_state);
             _rules.PrepareBattleDeck(_state, _randomProvider);
             _combatEventService.OnPlayerTurnStart(_state);
-            _rules.DrawHand(_state, _randomProvider);
+            DrawHandWithShuffleHook();
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }
 
@@ -846,6 +858,62 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return _state.Nodes[_state.CurrentNodeIndex].NodeType;
+        }
+
+        /// <summary>
+        /// シャッフル発火を代理してから手札を補充する
+        /// </summary>
+        private void DrawHandWithShuffleHook()
+        {
+            if (WillRefillDrawPile(_state, BattleSceneConstants.DefaultHandSize))
+            {
+                _combatEventService.OnShuffle(_state);
+            }
+
+            _rules.DrawHand(_state, _randomProvider);
+        }
+
+        /// <summary>
+        /// 指定枚数を引く前に山札補充が発生するかを判定する
+        /// </summary>
+        private static bool WillRefillDrawPile(BattleSceneState state, int drawCount)
+        {
+            if (state == null || drawCount <= 0 || state.DiscardPile.Count == 0)
+            {
+                return false;
+            }
+
+            int remainingHandSize = BattleSceneConstants.MaxHandSize - state.Hand.Count;
+            if (remainingHandSize <= 0)
+            {
+                return false;
+            }
+
+            if (state.DrawPile.Count == 0)
+            {
+                return true;
+            }
+
+            int cardsToDrawBeforeHandLimit = drawCount < remainingHandSize ? drawCount : remainingHandSize;
+            int availableDrawPileCards = CountAvailableCards(state.DrawPile);
+            return availableDrawPileCards < cardsToDrawBeforeHandLimit;
+        }
+
+        /// <summary>
+        /// nullではないカード枚数を数える
+        /// </summary>
+        private static int CountAvailableCards(IReadOnlyList<RuntimeCard> cards)
+        {
+            int count = 0;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i] != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         /// <summary>
@@ -954,17 +1022,31 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private bool TryUsePotion(int index, BattlePotionUseTarget target, RuntimePotion potion)
         {
+            int playerHpBefore = _state.PlayerHp;
             if (!_potionService.UsePotion(_state, index, target, _rules, _randomProvider))
             {
                 return false;
             }
 
+            DispatchLoseHpHook(playerHpBefore);
             if (potion != null)
             {
                 _state.BattleHintMessage = string.Format(BattleSceneConstants.CardResolvedFormat, potion.DisplayName);
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// プレイヤーHP減少差分がある場合だけLoseHp通知を発火する
+        /// </summary>
+        private void DispatchLoseHpHook(int playerHpBefore)
+        {
+            int loseHpAmount = playerHpBefore - _state.PlayerHp;
+            if (loseHpAmount > 0)
+            {
+                _combatEventService.OnLoseHp(_state, loseHpAmount);
+            }
         }
 
         /// <summary>

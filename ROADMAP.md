@@ -3,7 +3,7 @@
 本ドキュメントは、Vox Dungeon の中長期的な開発の方向性を示すロードマップです。
 開発の進行状況や技術的な検証結果に基づいて、計画は柔軟に変更される可能性があります。
 
-> **最終更新: 2026-06-25** — Phase 3 は Shop/Event/報酬多様化・RunSave・多敵戦闘・Battle 表示層 UI に加えて、Relic/Potion の所持・使用・表示・保存、ingame chrome、modal input 制御まで完了。主要残件は `Upgrade`、`Exhaust`、`Map auto-generation`。
+> **最終更新: 2026-07-10** — Phase 3 の主要 gameplay core は完了。Shop/Event/報酬多様化・RunSave・多敵戦闘・Battle 表示層 UI・Relic/Potion core・Relic trigger 拡張・Potion capacity runtime/MasterData 接続・Upgrade core・Exhaust core・Map auto-generation・Targeted Potion Use まで実装済み。次の重点は Potion/Relic content pool 拡張、Map polish。
 
 ---
 
@@ -38,7 +38,7 @@
 
 ---
 
-## 🟡 Phase 3: ゲームプレイの拡張とシステム深化 - [進行中]
+## 🟢 Phase 3: ゲームプレイの拡張とシステム深化 - [完了]
 
 ローグライク・デッキ構築ゲームとして必要な複雑な仕様を実装し、設計の堅牢性を検証するフェーズ。
 
@@ -59,17 +59,23 @@
 - [x] **Potion コア実装:** 所持、Save/Load、Shop/Reward 取得、入れ替え、ingame potion strip、直接使用フローを実装
 - [x] **Ingame host chrome:** battle page 依存ではない relic / potion 常駐表示を BattleScene host に移行
 - [x] **Combat event hook:** `OnCombatStart` / `OnPlayerTurnStart` / `OnPlayerTurnEnd` / `OnCardPlayed` / `OnPlayerDamaged` を追加
+- [x] **Relic trigger 拡張:** `OnShuffle` / `OnCardExhausted` / `OnLoseHp` を追加し、戦闘中の主要イベントから Relic effect を発火できるようにした
+- [x] **Potion capacity ランタイム化:** `MaxPotionCount` を runtime state / RunSave / MasterData mapping に接続し、`RelicEffectMaster.PotionCapacityDelta` から容量変更 relic を表現できるようにした
 - [x] **Battle modal/input 整理:** framework dialog の重なり順修正、host chrome input freeze、inspect state cleanup を実装
+- [x] **Upgrade コア実装:** RestShop からカード強化選択へ遷移し、`UpgradeCardId` の置換、Gold 消費、Save/Load 永続化を実装
+- [x] **Exhaust コア実装:** `CardMaster.ExhaustsOnPlay` から `RuntimeCard.ExhaustsOnPlay` へ接続し、使用カードを `DiscardPile` ではなく `ExhaustPile` へ移動
+- [x] **Pile inspect UI:** Draw / Discard / Exhaust / Hand count 表示と、`PileInspectDialog` による pile 内容確認を実装
+- [x] **マップ自動生成:** `BattleMapGenerator` による seed 駆動の決定論的マップ生成、DI 登録、RunSave の `MapSeed` / `MapLayoutVersion` 復元を実装
+- [x] **Targeted Potion Use:** 使用後に対象待ち状態へ入り、敵クリックで単体対象ポーションを発動。`AllEnemies` は即時発動。`BattlePotionUseTarget` / `PendingPotionUseIndex` による状態管理、効果解決 (DealDamage/ApplyStatus)、無効対象時の非消費、全敵撃破時の Reward flow 遷移を実装
 
-### 残件
+### Phase 3 完了時点の残る拡張候補
 
-- [ ] **Upgrade 実装:** `RestShop` の Upgrade 導線は存在するが、カード強化の実ロジックは未実装
-- [ ] **Exhaust システム:** `ExhaustPile` は状態上のみ存在し、カード解決にまだ組み込まれていない
-- [ ] **マップ自動生成:** ノードベースの経路生成アルゴリズムと、各種イベント（ランダムイベント、宝箱など）の実装
+- [ ] **Potion / Relic content pool 拡張:** 容量変更系 relic、追加 potion、追加 passive / combat relic、バランス調整用の MasterData を拡充する
+- [ ] **Map polish:** act-scale の大きいマップ、宝箱などの特殊ノード、経路線表示を追加する
 
 ---
 
-## ⚪ Phase 4: ポリッシュとパフォーマンス最適化
+## ⚪ Phase 4: ポリッシュとパフォーマンス最適化 - [計画中]
 
 プロジェクトの最終的な完成度を高めるフェーズ。
 
@@ -78,4 +84,5 @@
 - [ ] **プロファイリング:** Unity Profiler, Memory Profiler を用いたボトルネックの特定とパフォーマンス最適化
 - [ ] **自動テスト:** 重要なビジネスロジック（ダメージ計算やカード解決）に対するユニットテスト（NUnit）の拡充
 - [ ] **カード強化（Upgrade）ポリッシュ:** 強化前後比較や演出、より分かりやすい UI
-- [ ] **Potion / Relic 拡張:** target selection、容量変更系 relic、より多い content pool
+- [ ] **Potion / Relic 拡張:** 追加 content pool、効果バリエーション、報酬/Shop 出現率とバランス調整
+- [ ] **Map 表示 polish:** 生成済みノードの経路線、フロア配置、特殊ノード表示を強化

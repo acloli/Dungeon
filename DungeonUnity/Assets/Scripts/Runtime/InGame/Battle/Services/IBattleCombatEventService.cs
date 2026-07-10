@@ -31,5 +31,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// プレイヤー被ダメージ通知
         /// </summary>
         void OnPlayerDamaged(BattleSceneState state, int damage);
+
+        /// <summary>
+        /// 山札シャッフル通知
+        /// </summary>
+        void OnShuffle(BattleSceneState state);
+
+        /// <summary>
+        /// カード廃棄通知
+        /// </summary>
+        void OnCardExhausted(BattleSceneState state, RuntimeCard card);
+
+        /// <summary>
+        /// HP損失通知
+        /// </summary>
+        void OnLoseHp(BattleSceneState state, int amount);
     }
 }

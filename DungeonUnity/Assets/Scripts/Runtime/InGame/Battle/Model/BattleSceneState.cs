@@ -23,6 +23,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         public List<RuntimeRelic> OwnedRelics { get; } = new List<RuntimeRelic>();
         public List<RuntimePotion> OwnedPotions { get; } = new List<RuntimePotion>();
+        public int MaxPotionCount { get; set; } = BattleSceneConstants.DefaultMaxPotionCount;
         public int SelectedOwnedRelicIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public int SelectedOwnedPotionIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
         public int PendingPotionUseIndex { get; set; } = BattleSceneConstants.UnselectedCardIndex;
