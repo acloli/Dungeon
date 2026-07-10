@@ -3,7 +3,7 @@
 本ドキュメントは、Vox Dungeon の中長期的な開発の方向性を示すロードマップです。
 開発の進行状況や技術的な検証結果に基づいて、計画は柔軟に変更される可能性があります。
 
-> **最終更新: 2026-07-09** — Phase 3 の主要 gameplay core は完了。Shop/Event/報酬多様化・RunSave・多敵戦闘・Battle 表示層 UI・Relic/Potion core・Upgrade core・Exhaust core・Map auto-generation・Targeted Potion Use まで実装済み。次の重点は Relic trigger 拡張、Potion/Relic content 拡張、Map polish。
+> **最終更新: 2026-07-10** — Phase 3 の主要 gameplay core は完了。Shop/Event/報酬多様化・RunSave・多敵戦闘・Battle 表示層 UI・Relic/Potion core・Relic trigger 拡張・Potion capacity runtime/MasterData 接続・Upgrade core・Exhaust core・Map auto-generation・Targeted Potion Use まで実装済み。次の重点は Potion/Relic content pool 拡張、Map polish。
 
 ---
 
@@ -59,6 +59,8 @@
 - [x] **Potion コア実装:** 所持、Save/Load、Shop/Reward 取得、入れ替え、ingame potion strip、直接使用フローを実装
 - [x] **Ingame host chrome:** battle page 依存ではない relic / potion 常駐表示を BattleScene host に移行
 - [x] **Combat event hook:** `OnCombatStart` / `OnPlayerTurnStart` / `OnPlayerTurnEnd` / `OnCardPlayed` / `OnPlayerDamaged` を追加
+- [x] **Relic trigger 拡張:** `OnShuffle` / `OnCardExhausted` / `OnLoseHp` を追加し、戦闘中の主要イベントから Relic effect を発火できるようにした
+- [x] **Potion capacity ランタイム化:** `MaxPotionCount` を runtime state / RunSave / MasterData mapping に接続し、`RelicEffectMaster.PotionCapacityDelta` から容量変更 relic を表現できるようにした
 - [x] **Battle modal/input 整理:** framework dialog の重なり順修正、host chrome input freeze、inspect state cleanup を実装
 - [x] **Upgrade コア実装:** RestShop からカード強化選択へ遷移し、`UpgradeCardId` の置換、Gold 消費、Save/Load 永続化を実装
 - [x] **Exhaust コア実装:** `CardMaster.ExhaustsOnPlay` から `RuntimeCard.ExhaustsOnPlay` へ接続し、使用カードを `DiscardPile` ではなく `ExhaustPile` へ移動
@@ -68,8 +70,7 @@
 
 ### Phase 3 完了時点の残る拡張候補
 
-- [ ] **Relic trigger 拡張:** `OnShuffle`、`OnCardExhausted`、`OnLoseHp` などの追加 hook と content を拡張する
-- [ ] **Potion / Relic content 拡張:** target selection、容量変更系 relic、より多い content pool を追加する
+- [ ] **Potion / Relic content pool 拡張:** 容量変更系 relic、追加 potion、追加 passive / combat relic、バランス調整用の MasterData を拡充する
 - [ ] **Map polish:** act-scale の大きいマップ、宝箱などの特殊ノード、経路線表示を追加する
 
 ---
@@ -83,5 +84,5 @@
 - [ ] **プロファイリング:** Unity Profiler, Memory Profiler を用いたボトルネックの特定とパフォーマンス最適化
 - [ ] **自動テスト:** 重要なビジネスロジック（ダメージ計算やカード解決）に対するユニットテスト（NUnit）の拡充
 - [ ] **カード強化（Upgrade）ポリッシュ:** 強化前後比較や演出、より分かりやすい UI
-- [ ] **Potion / Relic 拡張:** target selection、容量変更系 relic、より多い content pool
+- [ ] **Potion / Relic 拡張:** 追加 content pool、効果バリエーション、報酬/Shop 出現率とバランス調整
 - [ ] **Map 表示 polish:** 生成済みノードの経路線、フロア配置、特殊ノード表示を強化
