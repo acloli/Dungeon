@@ -21,6 +21,7 @@ namespace Dungeon.Tests.EditMode
     public sealed class BattleSceneFlowServiceTests
     {
         private const int DefaultMaxPotionCountForTest = 3;
+        private const int CurrentMapLayoutVersionForTest = 2;
 
         [Test]
         public void Initialize_OpensMapWithRunDefaults()
@@ -554,6 +555,107 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_TreasureNode_OpensRewardWithoutCardRewards()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Treasure, "Treasure", new[] { 1 }) },
+                treasureDefinitions: new[] { CreateTreasureDefinition(8901, 1, 3, 25, 25, 0, 0, 0) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(Reward(snapshot).BattleGoldReward, Is.EqualTo(25));
+            Assert.That(Reward(snapshot).RewardChoices, Is.Empty);
+            Assert.That(Reward(snapshot).CardRewardPicked, Is.True);
+            Assert.That(Reward(snapshot).PotionDropped, Is.False);
+            Assert.That(Reward(snapshot).RelicDropped, Is.False);
+        }
+
+        [Test]
+        public void SelectMapNode_TreasureNode_UsesTreasureMasterForGoldPotionAndRelic()
+        {
+            RuntimeRelic wrongGroupRelic = CreateRelic(2001, "Wrong Group", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainBlock, 4, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRelic treasureRelic = CreateRelic(2002, "Treasure Relic", new[]
+            {
+                new RuntimeRelicEffect(1, RelicTriggerType.CombatStart, EffectType.GainEnergy, 1, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion firstPotion = CreatePotion(3001, "Block Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainBlock, 12, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimePotion treasurePotion = CreatePotion(3002, "Treasure Potion", PotionUseContext.Both, PotionTargetMode.Self, new[]
+            {
+                new RuntimePotionEffect(1, EffectType.GainEnergy, 2, 1, StatusType.None, 0, TargetSide.Self)
+            });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 2, InGameNodeType.Treasure, "Treasure", new[] { 1 }) },
+                rewardCards: Array.Empty<RuntimeRewardEntry>(),
+                relicCatalog: new Dictionary<int, RuntimeRelic>
+                {
+                    { wrongGroupRelic.Id, wrongGroupRelic },
+                    { treasureRelic.Id, treasureRelic }
+                },
+                potionCatalog: new Dictionary<int, RuntimePotion>
+                {
+                    { firstPotion.Id, firstPotion },
+                    { treasurePotion.Id, treasurePotion }
+                },
+                treasureDefinitions: new[] { CreateTreasureDefinition(8901, 2, 2, 40, 45, 7701, 100, 100) });
+            FakeMasterDataService masterDataService = new FakeMasterDataService(new[]
+            {
+                CreateRewardPoolMaster(1, 8801, RewardType.Relic, wrongGroupRelic.Id, 10, 1, 99),
+                CreateRewardPoolMaster(2, 7701, RewardType.Relic, treasureRelic.Id, 10, 2, 2)
+            });
+            BattleSceneFlowService service = CreateServiceWithRelicMasterData(
+                runDefinition,
+                masterDataService,
+                43,
+                0,
+                1,
+                0,
+                0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(Reward(snapshot).BattleGoldReward, Is.EqualTo(43));
+            Assert.That(Reward(snapshot).RewardChoices, Is.Empty);
+            Assert.That(Reward(snapshot).PendingPotionReward?.Id, Is.EqualTo(treasurePotion.Id));
+            Assert.That(Reward(snapshot).PendingRelicReward?.Id, Is.EqualTo(treasureRelic.Id));
+        }
+
+        [Test]
+        public void ContinueFromReward_AfterTreasureReward_ReturnsToMap()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.Treasure, "Treasure", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", Array.Empty<int>())
+                },
+                treasureDefinitions: new[] { CreateTreasureDefinition(8901, 1, 3, 25, 25, 0, 0, 0) });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.ContinueFromReward();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1 }));
+            Assert.That(Reward(snapshot).PotionDropped, Is.False);
+            Assert.That(Reward(snapshot).RelicDropped, Is.False);
+        }
+
+        [Test]
         public void TryPlaySelectedCard_TargetEnemy_DamagesSelectedEnemyOnly()
         {
             RuntimeCard strike = CreateCard(1001, "Strike", 1, 6);
@@ -893,6 +995,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 DeckCardIds = new List<int> { 1101 }
             };
 
@@ -938,7 +1041,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
             Assert.That(runSaveService.LastSavedData.MasterSeed, Is.Not.EqualTo(0));
             Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(HashCode.Combine(runSaveService.LastSavedData.MasterSeed, 0x4D6170)));
-            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(CurrentMapLayoutVersionForTest));
             Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(0));
         }
 
@@ -1071,6 +1174,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedRelicIds = new List<int> { 1 }
             };
 
@@ -1155,6 +1259,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedRelicIds = new List<int> { relic.Id },
                 OwnedPotionIds = new List<int> { potion.Id }
             };
@@ -1200,6 +1305,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedPotionIds = new List<int> { potion.Id }
             };
 
@@ -1242,6 +1348,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedPotionIds = new List<int> { potion.Id }
             };
 
@@ -1280,6 +1387,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedPotionIds = new List<int> { potion.Id }
             };
 
@@ -1315,6 +1423,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedPotionIds = new List<int> { potion.Id }
             };
 
@@ -1354,6 +1463,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedPotionIds = new List<int> { potion.Id }
             };
 
@@ -1476,6 +1586,7 @@ namespace Dungeon.Tests.EditMode
                 Gold = 120,
                 CurrentNodeIndex = -1,
                 CurrentPage = (int)BattleScenePage.Map,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 OwnedRelicIds = new List<int> { 2 }
             };
 
@@ -1525,6 +1636,7 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.Map,
                 MasterSeed = 12345,
                 MapSeed = 67890,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 RandomCounter = 4,
                 DeckCardIds = new List<int> { 1002 },
                 OwnedRelicIds = new List<int>(),
@@ -1576,6 +1688,7 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.RestShop,
                 MasterSeed = 111,
                 MapSeed = 222,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 RandomCounter = 7,
                 DeckCardIds = new List<int> { 1001 },
                 OwnedRelicIds = new List<int>(),
@@ -1588,7 +1701,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(runSaveService.LastSavedData.MasterSeed, Is.EqualTo(111));
             Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(222));
-            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(CurrentMapLayoutVersionForTest));
             Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(7));
         }
 
@@ -1615,6 +1728,7 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.RestShop,
                 MasterSeed = 111,
                 MapSeed = 222,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
                 RandomCounter = 7,
                 DeckCardIds = new List<int> { 1001 },
                 OwnedRelicIds = new List<int>(),
@@ -1888,7 +2002,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void InitializeFromSave_WithMismatchedMapLayoutVersion_DeletesSaveAndStartsNewRun()
+        public void InitializeFromSave_WithLegacyMapLayoutVersion_DeletesSaveAndStartsNewRun()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
             BattleSceneFlowService service = CreateServiceWithRunSave(CreateRunDefinition(), runSaveService, 0);
@@ -1903,7 +2017,7 @@ namespace Dungeon.Tests.EditMode
                 CurrentPage = (int)BattleScenePage.Map,
                 MasterSeed = 111,
                 MapSeed = 222,
-                MapLayoutVersion = 99,
+                MapLayoutVersion = 1,
                 RandomCounter = 7,
                 DeckCardIds = new List<int> { 1001 },
                 OwnedRelicIds = new List<int>(),
@@ -1915,7 +2029,7 @@ namespace Dungeon.Tests.EditMode
 
             Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(1));
             Assert.That(runSaveService.SaveCallCount, Is.EqualTo(1));
-            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(1));
+            Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(CurrentMapLayoutVersionForTest));
             Assert.That(runSaveService.LastSavedData.CurrentNodeIndex, Is.EqualTo(-1));
         }
 
@@ -2262,6 +2376,35 @@ namespace Dungeon.Tests.EditMode
                 new BattleEnemyActionSelector());
         }
 
+        private static BattleSceneFlowService CreateServiceWithRelicMasterData(
+            RuntimeRunDefinition runDefinition,
+            IMasterDataService masterDataService,
+            params int[] values)
+        {
+            BattleSceneRules rules = new BattleSceneRules(new BattleDeckService(), new BattleCombatResolver(new BattleDeckService(), new BattleEnemyActionSelector()), new BattleEncounterSelector(), new BattleRewardRollService());
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(values);
+            BattleRelicService relicService = new BattleRelicService(rules, randomProvider, masterDataService);
+            BattlePotionService potionService = new BattlePotionService();
+            BattleEventService eventService = new BattleEventService();
+            FakeBattleShopService shopService = new FakeBattleShopService();
+            return new BattleSceneFlowService(
+                rules,
+                randomProvider,
+                new FakeBattleMasterDataFacade(runDefinition),
+                new FixedBattleMapGenerator(runDefinition?.Nodes),
+                new BattleRewardFlowService(new BattleRewardService(), rules, randomProvider, potionService, relicService),
+                new BattleSnapshotFactory(new BattleDisplayTextService(), shopService, new BattleEnemyActionSelector(), new BattlePileOrderService()),
+                shopService,
+                new BattleCombatEventService(relicService),
+                relicService,
+                potionService,
+                new BattleEventFlowService(randomProvider, eventService),
+                new BattleRestShopFlowService(rules, randomProvider, shopService, potionService, relicService),
+                null,
+                new BattleCheckpointService(),
+                new BattleEnemyActionSelector());
+        }
+
         private static BattleSceneFlowService CreateServiceWithShop(
             RuntimeRunDefinition runDefinition,
             IBattleShopService shopService,
@@ -2364,7 +2507,8 @@ namespace Dungeon.Tests.EditMode
             IReadOnlyDictionary<int, RuntimeRelic> relicCatalog = null,
             IReadOnlyDictionary<int, RuntimePotion> potionCatalog = null,
             RuntimeShopLineup shopLineup = null,
-            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = null)
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules = null,
+            IReadOnlyList<RuntimeTreasureDefinition> treasureDefinitions = null)
         {
             Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>> encounters =
                 new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>
@@ -2429,6 +2573,32 @@ namespace Dungeon.Tests.EditMode
             builder.PotionCatalog = potionCatalog ?? new Dictionary<int, RuntimePotion>();
             builder.ShopLineup = shopLineup;
             builder.ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
+            if (treasureDefinitions != null)
+            {
+                return new RuntimeRunDefinition(
+                    builder.RunProfileId,
+                    builder.Key,
+                    builder.MapTemplateId,
+                    builder.CharacterArchetype,
+                    builder.PlayerMaxHp,
+                    builder.StartingGold,
+                    builder.CardRewardChoiceCount,
+                    builder.PotionDropChance,
+                    builder.RelicDropChance,
+                    builder.StarterDeck,
+                    builder.CardCatalog,
+                    builder.RewardPool,
+                    builder.Nodes,
+                    builder.EncountersByNodeType,
+                    builder.PossibleEvents,
+                    builder.RelicCatalog,
+                    builder.PotionCatalog,
+                    builder.ShopLineup,
+                    builder.CardPriceRules,
+                    builder.ItemPriceRules,
+                    treasureDefinitions);
+            }
+
             return builder.Build();
         }
 
@@ -2581,6 +2751,48 @@ namespace Dungeon.Tests.EditMode
             return builder.Build();
         }
 
+        private static RuntimeTreasureDefinition CreateTreasureDefinition(
+            int id,
+            int minFloor,
+            int maxFloor,
+            int goldMin,
+            int goldMax,
+            int relicGroupId,
+            int potionDropChance,
+            int relicDropChance)
+        {
+            return new RuntimeTreasureDefinition(
+                id,
+                minFloor,
+                maxFloor,
+                goldMin,
+                goldMax,
+                relicGroupId,
+                potionDropChance,
+                relicDropChance);
+        }
+
+        private static RewardPoolMaster CreateRewardPoolMaster(
+            int id,
+            int rewardPoolId,
+            RewardType rewardType,
+            int rewardValue,
+            int weight,
+            int minFloor,
+            int maxFloor)
+        {
+            return new RewardPoolMaster
+            {
+                Id = id,
+                RewardPoolId = rewardPoolId,
+                RewardType = rewardType,
+                RewardValue = rewardValue,
+                Weight = weight,
+                MinFloor = minFloor,
+                MaxFloor = maxFloor
+            };
+        }
+
         private static RuntimeRelic CreateRelic(int id, string displayName, IReadOnlyList<RuntimeRelicEffect> effects)
         {
             RuntimeRelicBuilder builder = BattleTestData.Relic(id);
@@ -2644,10 +2856,22 @@ namespace Dungeon.Tests.EditMode
 
         private sealed class FakeMasterDataService : IMasterDataService
         {
+            private readonly IReadOnlyList<RewardPoolMaster> _rewardPoolMasters;
+
+            public FakeMasterDataService(IReadOnlyList<RewardPoolMaster> rewardPoolMasters = null)
+            {
+                _rewardPoolMasters = rewardPoolMasters ?? Array.Empty<RewardPoolMaster>();
+            }
+
             public UniTask InitializeAsync(CancellationToken ct) => UniTask.CompletedTask;
 
             public IReadOnlyList<T> GetAll<T>() where T : class, IMasterDataObject
             {
+                if (typeof(T) == typeof(RewardPoolMaster))
+                {
+                    return _rewardPoolMasters.Cast<T>().ToArray();
+                }
+
                 return Array.Empty<T>();
             }
 
