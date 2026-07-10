@@ -42,6 +42,38 @@ namespace Dungeon.Tests.EditMode
             Assert.That(factory.CreateSnapshot(state).HostChrome.CanUseSelectedPotion, Is.True);
         }
 
+        [Test]
+        public void CreateSnapshot_MapSnapshot_ContainsFloorProgressAndCenteredLayouts()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Map,
+                CurrentNodeIndex = 4
+            };
+            state.Nodes.Add(CreateMapNode(5301, 1));
+            state.Nodes.Add(CreateMapNode(5302, 2));
+            state.Nodes.Add(CreateMapNode(5303, 2));
+            state.Nodes.Add(CreateMapNode(5304, 3));
+            state.Nodes.Add(CreateMapNode(5305, 3));
+            state.Nodes.Add(CreateMapNode(5306, 3));
+            state.Nodes.Add(CreateMapNode(5307, 4));
+            BattleSnapshotFactory factory = CreateFactory();
+
+            BattleMapSnapshot snapshot = factory.CreateSnapshot(state).Map;
+
+            Assert.That(snapshot.CurrentFloor, Is.EqualTo(3));
+            Assert.That(snapshot.TotalFloors, Is.EqualTo(4));
+            Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(4));
+            Assert.That(snapshot.NodeLayouts.Count, Is.EqualTo(state.Nodes.Count));
+            AssertMapNodeLayout(snapshot.NodeLayouts[0], 0, 0f, 0f, 1);
+            AssertMapNodeLayout(snapshot.NodeLayouts[1], 1, -0.5f, 1f, 2);
+            AssertMapNodeLayout(snapshot.NodeLayouts[2], 2, 0.5f, 1f, 2);
+            AssertMapNodeLayout(snapshot.NodeLayouts[3], 3, -1f, 2f, 3);
+            AssertMapNodeLayout(snapshot.NodeLayouts[4], 4, 0f, 2f, 3);
+            AssertMapNodeLayout(snapshot.NodeLayouts[5], 5, 1f, 2f, 3);
+            AssertMapNodeLayout(snapshot.NodeLayouts[6], 6, 0f, 3f, 4);
+        }
+
         private static BattleSceneState CreateState(PotionTargetMode targetMode, BattleScenePage page)
         {
             BattleSceneState state = new BattleSceneState
@@ -63,6 +95,21 @@ namespace Dungeon.Tests.EditMode
             {
                 IsDefeated = isDefeated
             };
+        }
+
+        private static RuntimeMapNode CreateMapNode(int id, int floor)
+        {
+            RuntimeMapNodeBuilder builder = BattleTestData.MapNode(id);
+            builder.Floor = floor;
+            return builder.Build();
+        }
+
+        private static void AssertMapNodeLayout(MapNodeLayout layout, int nodeIndex, float x, float y, int floor)
+        {
+            Assert.That(layout.NodeIndex, Is.EqualTo(nodeIndex));
+            Assert.That(layout.X, Is.EqualTo(x));
+            Assert.That(layout.Y, Is.EqualTo(y));
+            Assert.That(layout.Floor, Is.EqualTo(floor));
         }
 
         private static BattleSnapshotFactory CreateFactory()
