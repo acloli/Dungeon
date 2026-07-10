@@ -38,6 +38,25 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeAsync_MapState_PassesExtendedMapSnapshotThroughCoordinator()
+        {
+            BattleSceneSnapshot snapshot = CreateSnapshotWithExtendedMap();
+            FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
+            FakeBattleSceneHostView view = new FakeBattleSceneHostView();
+            FakeBattleSceneUiCoordinator uiCoordinator = new FakeBattleSceneUiCoordinator();
+            BattleScenePresenter presenter = new BattleScenePresenter(flowService, flowService, new BattlePagePresenter(), uiCoordinator);
+
+            presenter.InitializeAsync(view, 5501, () => { }, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiCoordinator.LastMapSnapshot, Is.SameAs(snapshot.Map));
+            Assert.That(uiCoordinator.LastMapSnapshot.Nodes, Is.SameAs(snapshot.Map.Nodes));
+            Assert.That(uiCoordinator.LastMapSnapshot.AvailableNodeIndices, Is.SameAs(snapshot.Map.AvailableNodeIndices));
+            Assert.That(uiCoordinator.LastMapSnapshot.NodeLayouts, Is.SameAs(snapshot.Map.NodeLayouts));
+            Assert.That(uiCoordinator.LastMapSnapshot.CurrentFloor, Is.EqualTo(2));
+            Assert.That(uiCoordinator.LastMapSnapshot.CurrentNodeIndex, Is.EqualTo(0));
+        }
+
+        [Test]
         public void OnEndTurnClicked_BattleState_RendersBattleBase()
         {
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Battle));
@@ -442,6 +461,28 @@ namespace Dungeon.Tests.EditMode
         private static BattleSceneSnapshot CreateSnapshot(BattleScenePage page)
         {
             BattleSceneSnapshotBuilder builder = BattleTestData.Snapshot(page);
+            return builder.Build();
+        }
+
+        private static BattleSceneSnapshot CreateSnapshotWithExtendedMap()
+        {
+            RuntimeMapNodeBuilder firstNodeBuilder = BattleTestData.MapNode(5301);
+            firstNodeBuilder.NextNodeIndices = new[] { 1 };
+            RuntimeMapNodeBuilder secondNodeBuilder = BattleTestData.MapNode(5302);
+            secondNodeBuilder.Floor = 2;
+            BattleSceneSnapshotBuilder builder = BattleTestData.Snapshot(BattleScenePage.Map);
+            builder.Map = new BattleMapSnapshot(
+                nodes: new[] { firstNodeBuilder.Build(), secondNodeBuilder.Build() },
+                availableNodeIndices: new[] { 1 },
+                mapMessage: "extended map",
+                currentFloor: 2,
+                totalFloors: 4,
+                currentNodeIndex: 0,
+                nodeLayouts: new[]
+                {
+                    new MapNodeLayout(0, 0f, 0f, 1),
+                    new MapNodeLayout(1, 0.5f, 1f, 2)
+                });
             return builder.Build();
         }
 
