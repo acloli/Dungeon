@@ -59,10 +59,99 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         private BattleMapSnapshot BuildMapSnapshot(BattleSceneState state)
         {
+            int currentFloor = GetCurrentFloor(state);
+            int totalFloors = GetTotalFloors(state);
+
             return new BattleMapSnapshot(
                 state.Nodes,
                 BuildAvailableNodeIndices(state),
-                state.MapMessage);
+                state.MapMessage,
+                currentFloor,
+                totalFloors,
+                state.CurrentNodeIndex,
+                BuildMapNodeLayouts(state));
+        }
+
+        private static int GetCurrentFloor(BattleSceneState state)
+        {
+            if (state == null ||
+                state.CurrentNodeIndex < 0 ||
+                state.Nodes == null ||
+                state.CurrentNodeIndex >= state.Nodes.Count)
+            {
+                return 1;
+            }
+
+            return GetNodeFloor(state.Nodes[state.CurrentNodeIndex]);
+        }
+
+        private static int GetTotalFloors(BattleSceneState state)
+        {
+            int totalFloors = 1;
+            if (state == null || state.Nodes == null)
+            {
+                return totalFloors;
+            }
+
+            for (int i = 0; i < state.Nodes.Count; i++)
+            {
+                int floor = GetNodeFloor(state.Nodes[i]);
+                if (floor > totalFloors)
+                {
+                    totalFloors = floor;
+                }
+            }
+
+            return totalFloors;
+        }
+
+        private static IReadOnlyList<MapNodeLayout> BuildMapNodeLayouts(BattleSceneState state)
+        {
+            List<MapNodeLayout> layouts = new List<MapNodeLayout>();
+            if (state == null || state.Nodes == null)
+            {
+                return layouts;
+            }
+
+            Dictionary<int, int> floorNodeCounts = BuildFloorNodeCounts(state.Nodes);
+            Dictionary<int, int> floorSlotCounts = new Dictionary<int, int>();
+            for (int i = 0; i < state.Nodes.Count; i++)
+            {
+                int floor = GetNodeFloor(state.Nodes[i]);
+                floorNodeCounts.TryGetValue(floor, out int nodeCount);
+                floorSlotCounts.TryGetValue(floor, out int slotIndex);
+
+                float x = slotIndex - ((nodeCount - 1) * 0.5f);
+                float y = floor - 1;
+                layouts.Add(new MapNodeLayout(i, x, y, floor));
+
+                floorSlotCounts[floor] = slotIndex + 1;
+            }
+
+            return layouts;
+        }
+
+        private static Dictionary<int, int> BuildFloorNodeCounts(IReadOnlyList<RuntimeMapNode> nodes)
+        {
+            Dictionary<int, int> floorNodeCounts = new Dictionary<int, int>();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                int floor = GetNodeFloor(nodes[i]);
+                floorNodeCounts.TryGetValue(floor, out int count);
+                floorNodeCounts[floor] = count + 1;
+            }
+
+            return floorNodeCounts;
+        }
+
+        private static int GetNodeFloor(RuntimeMapNode node)
+        {
+            if (node == null || node.Floor < 1)
+            {
+                return 1;
+            }
+
+            return node.Floor;
         }
 
         private BattleCombatSnapshot BuildCombatSnapshot(BattleSceneState state)
