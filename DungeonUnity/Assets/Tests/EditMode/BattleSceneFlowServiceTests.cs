@@ -1591,6 +1591,77 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ContinueFromRestShop_AfterInitializeFromSave_PreservesMaxPotionCount()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Boss, "Boss", new int[0])
+                });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                MaxPotionCount = 5,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.RestShop,
+                MasterSeed = 111,
+                MapSeed = 222,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+            service.ContinueFromRestShop();
+
+            Assert.That(runSaveService.LastSavedData.MaxPotionCount, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void RestoreFromSave_WithLegacyMaxPotionCount_UsesDefaultCapacity()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition();
+            BattleSceneState state = new BattleSceneState();
+            BattleCheckpointService checkpointService = new BattleCheckpointService();
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                MaxPotionCount = 0,
+                Gold = 120,
+                CurrentNodeIndex = 0,
+                CurrentPage = (int)BattleScenePage.Map,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            checkpointService.RestoreFromSave(
+                state,
+                runDefinition,
+                saveData,
+                runDefinition.CardCatalog,
+                new BattleRelicService(),
+                new BattlePotionService());
+            RunSaveData restoredSaveData = checkpointService.BuildSaveData(state, runDefinition, 111, 222, 1, 7);
+
+            Assert.That(state.MaxPotionCount, Is.EqualTo(BattleSceneConstants.DefaultMaxPotionCount));
+            Assert.That(restoredSaveData.MaxPotionCount, Is.EqualTo(BattleSceneConstants.DefaultMaxPotionCount));
+        }
+
+        [Test]
         public void InitializeFromSave_OnMapCheckpoint_ReplaysSameBattleEncounter()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -2367,6 +2438,7 @@ namespace Dungeon.Tests.EditMode
                 PlayerMaxHp = source.PlayerMaxHp,
                 PlayerHp = source.PlayerHp,
                 PlayerEnergy = source.PlayerEnergy,
+                MaxPotionCount = source.MaxPotionCount,
                 Gold = source.Gold,
                 CurrentNodeIndex = source.CurrentNodeIndex,
                 CurrentPage = source.CurrentPage,
