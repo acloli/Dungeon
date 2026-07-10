@@ -113,7 +113,7 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
-        public void CreateSnapshot_WithSparseNextNodeIndices_AllowsAllNodesOnNextFloor()
+        public void CreateSnapshot_WithSparseNextNodeIndices_ReturnsConnectedNextNode()
         {
             RuntimeRunDefinition runDefinition = CreateRunDefinition(
                 nodes: new[]
@@ -132,7 +132,7 @@ namespace Dungeon.Tests.EditMode
             BattleSceneSnapshot snapshot = service.CreateSnapshot();
 
             Assert.That(snapshot.CurrentPage, Is.EqualTo(BattleScenePage.Map));
-            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1, 2 }));
+            Assert.That(Map(snapshot).AvailableNodeIndices, Is.EqualTo(new[] { 1 }));
         }
 
         [Test]
