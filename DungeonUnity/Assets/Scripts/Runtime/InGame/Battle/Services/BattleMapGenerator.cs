@@ -12,7 +12,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     public sealed class BattleMapGenerator : IBattleMapGenerator
     {
         private const int DefaultPresetMapTemplateId = 6301;
-        private static readonly int[] FloorNodeCounts = { 1, 2, 2, 2, 2, 1 };
+        private static readonly int[] FloorNodeCounts = { 1, 2, 2, 2, 3, 2, 2, 1 };
 
         /// <summary>
         /// Run定義とシードからマップを生成する
@@ -96,7 +96,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// Floor 2-5 のノード種別を構築する
+        /// Floor 2-7 のノード種別を構築する
         /// </summary>
         private static List<InGameNodeType> BuildNodeTypes(Random random)
         {
@@ -104,8 +104,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 InGameNodeType.EliteBattle,
                 InGameNodeType.Event,
+                InGameNodeType.Treasure,
                 InGameNodeType.RestShop,
                 InGameNodeType.RestShop,
+                InGameNodeType.Battle,
+                InGameNodeType.Battle,
+                InGameNodeType.Battle,
+                InGameNodeType.Battle,
                 InGameNodeType.Battle,
                 InGameNodeType.Battle,
                 InGameNodeType.Battle,
@@ -114,18 +119,75 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             Shuffle(nodeTypes, random);
 
-            int floorFiveStart = 6;
-            if (nodeTypes[floorFiveStart] != InGameNodeType.RestShop
-                && nodeTypes[floorFiveStart + 1] != InGameNodeType.RestShop)
-            {
-                int replacementIndex = nodeTypes[2] == InGameNodeType.RestShop ? 2 : 3;
-                int targetIndex = floorFiveStart + random.Next(0, 2);
-                InGameNodeType original = nodeTypes[targetIndex];
-                nodeTypes[targetIndex] = InGameNodeType.RestShop;
-                nodeTypes[replacementIndex] = original;
-            }
+            EnsureNodeTypeInFloor(nodeTypes, InGameNodeType.RestShop, 7, random);
 
             return nodeTypes;
+        }
+
+        /// <summary>
+        /// 指定フロアに必要なノード種別が含まれるよう補正する
+        /// </summary>
+        private static void EnsureNodeTypeInFloor(
+            IList<InGameNodeType> nodeTypes,
+            InGameNodeType nodeType,
+            int floor,
+            Random random)
+        {
+            int floorStart = GetNodeTypeStartIndex(floor);
+            int floorCount = FloorNodeCounts[floor - 1];
+            for (int i = 0; i < floorCount; i++)
+            {
+                if (nodeTypes[floorStart + i] == nodeType)
+                {
+                    return;
+                }
+            }
+
+            int sourceIndex = FindNodeTypeIndexOutsideRange(nodeTypes, nodeType, floorStart, floorCount);
+            int targetIndex = floorStart + random.Next(0, floorCount);
+            InGameNodeType original = nodeTypes[targetIndex];
+            nodeTypes[targetIndex] = nodeType;
+            nodeTypes[sourceIndex] = original;
+        }
+
+        /// <summary>
+        /// 指定フロアのノード種別リスト上の開始位置を返す
+        /// </summary>
+        private static int GetNodeTypeStartIndex(int floor)
+        {
+            int startIndex = 0;
+            for (int i = 2; i < floor; i++)
+            {
+                startIndex += FloorNodeCounts[i - 1];
+            }
+
+            return startIndex;
+        }
+
+        /// <summary>
+        /// 指定範囲外から対象ノード種別の位置を検索する
+        /// </summary>
+        private static int FindNodeTypeIndexOutsideRange(
+            IList<InGameNodeType> nodeTypes,
+            InGameNodeType nodeType,
+            int rangeStart,
+            int rangeCount)
+        {
+            int rangeEnd = rangeStart + rangeCount;
+            for (int i = 0; i < nodeTypes.Count; i++)
+            {
+                if (i >= rangeStart && i < rangeEnd)
+                {
+                    continue;
+                }
+
+                if (nodeTypes[i] == nodeType)
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException($"Node type guarantee source is missing. nodeType={nodeType}");
         }
 
         /// <summary>
@@ -151,7 +213,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     floorConnections[currentIndex] = targets;
                 }
 
-                EnsureReachability(currentFloor, nextFloor, floorConnections, random);
+                EnsureReachability(nodes, currentFloor, nextFloor, floorConnections, random);
 
                 for (int i = 0; i < currentFloor.Length; i++)
                 {
@@ -177,7 +239,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return targets;
             }
 
-            if (node.NodeType == InGameNodeType.EliteBattle || node.NodeType == InGameNodeType.RestShop)
+            if (ShouldConnectAllNextNodes(node.NodeType))
             {
                 for (int i = 0; i < nextFloor.Count; i++)
                 {
@@ -187,15 +249,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return targets;
             }
 
-            bool connectBoth = random.Next(0, 2) == 0;
-            if (connectBoth)
+            int targetCount = random.Next(1, Math.Min(2, nextFloor.Count) + 1);
+            List<int> candidates = new List<int>(nextFloor);
+            Shuffle(candidates, random);
+            for (int i = 0; i < targetCount; i++)
             {
-                targets.Add(nextFloor[0]);
-                targets.Add(nextFloor[1]);
-                return targets;
+                targets.Add(candidates[i]);
             }
 
-            targets.Add(nextFloor[random.Next(0, nextFloor.Count)]);
             return targets;
         }
 
@@ -203,6 +264,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 次フロア全ノードが到達可能になるよう補正する
         /// </summary>
         private static void EnsureReachability(
+            IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyList<int> currentFloor,
             IReadOnlyList<int> nextFloor,
             IDictionary<int, List<int>> floorConnections,
@@ -216,13 +278,125 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                int sourceIndex = currentFloor[random.Next(0, currentFloor.Count)];
-                List<int> targets = floorConnections[sourceIndex];
-                if (!targets.Contains(targetIndex))
+                AddReachabilityTarget(nodes, targetIndex, currentFloor, floorConnections, random);
+            }
+        }
+
+        /// <summary>
+        /// 到達保証のために遷移先を追加する
+        /// </summary>
+        private static void AddReachabilityTarget(
+            IReadOnlyList<RuntimeMapNode> nodes,
+            int targetIndex,
+            IReadOnlyList<int> currentFloor,
+            IDictionary<int, List<int>> floorConnections,
+            Random random)
+        {
+            List<int> candidates = new List<int>();
+            for (int i = 0; i < currentFloor.Count; i++)
+            {
+                int sourceIndex = currentFloor[i];
+                if (CanAddReachabilityTarget(nodes[sourceIndex], floorConnections[sourceIndex], targetIndex))
                 {
-                    targets.Add(targetIndex);
+                    candidates.Add(sourceIndex);
                 }
             }
+
+            if (candidates.Count > 0)
+            {
+                int sourceIndex = candidates[random.Next(0, candidates.Count)];
+                floorConnections[sourceIndex].Add(targetIndex);
+                return;
+            }
+
+            int replacementSourceIndex = FindReachabilityReplacementSource(currentFloor, floorConnections, random);
+            List<int> targets = floorConnections[replacementSourceIndex];
+            int replaceIndex = FindReplaceableTargetIndex(targets, currentFloor, floorConnections);
+            targets[replaceIndex] = targetIndex;
+        }
+
+        /// <summary>
+        /// 到達保証用の遷移先を追加できるか返す
+        /// </summary>
+        private static bool CanAddReachabilityTarget(RuntimeMapNode node, List<int> targets, int targetIndex)
+        {
+            if (targets.Contains(targetIndex))
+            {
+                return false;
+            }
+
+            return ShouldConnectAllNextNodes(node.NodeType) || targets.Count < 2;
+        }
+
+        /// <summary>
+        /// 到達保証の置換元ノードを選択する
+        /// </summary>
+        private static int FindReachabilityReplacementSource(
+            IReadOnlyList<int> currentFloor,
+            IDictionary<int, List<int>> floorConnections,
+            Random random)
+        {
+            List<int> candidates = new List<int>();
+            for (int i = 0; i < currentFloor.Count; i++)
+            {
+                int sourceIndex = currentFloor[i];
+                List<int> targets = floorConnections[sourceIndex];
+                for (int j = 0; j < targets.Count; j++)
+                {
+                    if (CountIncomingPaths(targets[j], currentFloor, floorConnections) > 1)
+                    {
+                        candidates.Add(sourceIndex);
+                        break;
+                    }
+                }
+            }
+
+            if (candidates.Count > 0)
+            {
+                return candidates[random.Next(0, candidates.Count)];
+            }
+
+            return currentFloor[random.Next(0, currentFloor.Count)];
+        }
+
+        /// <summary>
+        /// 他の到達経路が残る遷移先の位置を返す
+        /// </summary>
+        private static int FindReplaceableTargetIndex(
+            IReadOnlyList<int> targets,
+            IReadOnlyList<int> currentFloor,
+            IDictionary<int, List<int>> floorConnections)
+        {
+            for (int i = 0; i < targets.Count; i++)
+            {
+                if (CountIncomingPaths(targets[i], currentFloor, floorConnections) > 1)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// 指定ノードへの到達元数を返す
+        /// </summary>
+        private static int CountIncomingPaths(
+            int targetIndex,
+            IReadOnlyList<int> currentFloor,
+            IDictionary<int, List<int>> floorConnections)
+        {
+            int count = 0;
+            for (int i = 0; i < currentFloor.Count; i++)
+            {
+                int sourceIndex = currentFloor[i];
+                if (floorConnections[sourceIndex].Contains(targetIndex))
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         /// <summary>
@@ -260,6 +434,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 次フロア全体に接続するノード種別か返す
+        /// </summary>
+        private static bool ShouldConnectAllNextNodes(InGameNodeType nodeType)
+        {
+            return nodeType == InGameNodeType.EliteBattle
+                || nodeType == InGameNodeType.RestShop
+                || nodeType == InGameNodeType.Treasure;
+        }
+
+        /// <summary>
         /// ノードIDを生成する
         /// </summary>
         private static int BuildNodeId(int floor, int slot)
@@ -286,6 +470,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 InGameNodeType.EliteBattle => "Elite",
                 InGameNodeType.Event => "Event",
                 InGameNodeType.RestShop => "Rest",
+                InGameNodeType.Treasure => BattleSceneConstants.TreasureNodeDisplayName,
                 InGameNodeType.Boss => "Boss",
                 _ => "Battle"
             };
