@@ -268,6 +268,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            if (nodeType == InGameNodeType.Treasure)
+            {
+                OpenTreasureReward();
+                return;
+            }
+
             OpenBattle(nodeType);
         }
 
@@ -800,6 +806,60 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OpenReward()
         {
             _rewardFlowService.OpenReward(_state, _runDefinition, SetCurrentPage);
+        }
+
+        /// <summary>
+        /// 宝箱報酬画面遷移
+        /// </summary>
+        private void OpenTreasureReward()
+        {
+            PrepareTreasureRewards();
+            SetCurrentPage(BattleScenePage.Reward);
+        }
+
+        /// <summary>
+        /// 宝箱報酬状態を準備する
+        /// </summary>
+        private void PrepareTreasureRewards()
+        {
+            RuntimeTreasureDefinition treasureDefinition = _rules.GetTreasureDefinition(_state, _runDefinition);
+
+            _state.BattleFinished = true;
+            _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            _state.RewardChoices.Clear();
+            _state.ClearPendingRewards();
+            _state.BattleGoldReward = _rules.RollTreasureGold(_state, _runDefinition, _randomProvider);
+            _state.GoldClaimed = false;
+            _state.PotionClaimed = false;
+            _state.RelicClaimed = false;
+            _state.CardRewardPicked = true;
+
+            _state.PotionDropped = RollTreasureDrop(treasureDefinition?.PotionDropChance ?? 0);
+            if (_state.PotionDropped)
+            {
+                _state.PendingPotionReward = _potionService.RollBattleRewardPotion(_runDefinition, _randomProvider);
+            }
+
+            _state.RelicDropped = false;
+            if (RollTreasureDrop(treasureDefinition?.RelicDropChance ?? 0))
+            {
+                int relicGroupId = treasureDefinition?.RelicGroupId ?? 0;
+                _state.PendingRelicReward = _relicService.RollTreasureRewardRelic(_state, _runDefinition, relicGroupId, _randomProvider);
+                _state.RelicDropped = _state.PendingRelicReward != null;
+            }
+        }
+
+        /// <summary>
+        /// 宝箱ドロップ有無を抽選する
+        /// </summary>
+        private bool RollTreasureDrop(int chance)
+        {
+            if (chance <= 0)
+            {
+                return false;
+            }
+
+            return _randomProvider.Range(0, 100) < chance;
         }
 
         /// <summary>
