@@ -105,6 +105,28 @@ namespace Dungeon.Runtime.InGame.Battle.View
         }
 
         /// <summary>
+        /// グラフ形式マップ構築
+        /// </summary>
+        public void BuildMapGraph(
+            IReadOnlyList<RuntimeMapNode> nodes,
+            IReadOnlyList<MapNodeLayout> layouts,
+            IReadOnlyList<int> availableNodeIndices,
+            int currentFloor,
+            int currentNodeIndex,
+            Action<int> onNodeClicked)
+        {
+            BuildMapButtons(nodes, onNodeClicked);
+            SetMapButtonInteractable(availableNodeIndices);
+        }
+
+        /// <summary>
+        /// 表示フロア位置反映
+        /// </summary>
+        public void SetScrollPosition(int floor)
+        {
+        }
+
+        /// <summary>
         /// 動的ノードボタン消去
         /// </summary>
         public void ClearDynamicButtons()

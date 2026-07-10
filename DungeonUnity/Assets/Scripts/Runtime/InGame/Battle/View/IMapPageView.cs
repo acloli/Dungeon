@@ -13,5 +13,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
         void BuildMapButtons(IReadOnlyList<RuntimeMapNode> nodes, Action<int> onClicked);
         void SetMapButtonInteractable(IReadOnlyList<int> allowedIndices);
         void ClearDynamicButtons();
+        void BuildMapGraph(
+            IReadOnlyList<RuntimeMapNode> nodes,
+            IReadOnlyList<MapNodeLayout> layouts,
+            IReadOnlyList<int> availableNodeIndices,
+            int currentFloor,
+            int currentNodeIndex,
+            Action<int> onNodeClicked);
+        void SetScrollPosition(int floor);
     }
 }
