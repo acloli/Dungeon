@@ -64,6 +64,11 @@ namespace Game.MasterData.Generated
         /// </summary>
         public TargetSide TargetSide;
 
+        /// <summary>
+        /// ポーション容量変化
+        /// </summary>
+        public int PotionCapacityDelta;
+
         public int GetKey() => Id;
     }
 }

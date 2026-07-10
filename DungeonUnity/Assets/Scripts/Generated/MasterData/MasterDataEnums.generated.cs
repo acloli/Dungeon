@@ -103,14 +103,14 @@ namespace Game.MasterData.Generated
     /// </summary>
     public enum RelicTriggerType
     {
-        CombatStart,
-        PlayerTurnStart,
-        PlayerTurnEnd,
-        CardPlayed,
-        PlayerDamaged,
-        Shuffle,
         CardExhausted,
+        CardPlayed,
+        CombatStart,
         LoseHp,
+        PlayerDamaged,
+        PlayerTurnEnd,
+        PlayerTurnStart,
+        Shuffle,
     }
 
     /// <summary>
