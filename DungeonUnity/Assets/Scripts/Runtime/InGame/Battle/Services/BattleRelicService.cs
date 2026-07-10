@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Game.MasterData.Generated;
+using TFramework.MasterData;
 using VContainer;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -13,16 +14,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     {
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
+        private readonly IMasterDataService _masterDataService;
 
         public BattleRelicService()
         {
         }
 
-        [Inject]
         public BattleRelicService(IBattleSceneRules rules, IBattleRandomProvider randomProvider)
+            : this(rules, randomProvider, null)
+        {
+        }
+
+        [Inject]
+        public BattleRelicService(IBattleSceneRules rules, IBattleRandomProvider randomProvider, IMasterDataService masterDataService)
         {
             _rules = rules;
             _randomProvider = randomProvider;
+            _masterDataService = masterDataService;
         }
 
         public void RestoreOwnedRelics(BattleSceneState state, RuntimeRunDefinition runDefinition, IReadOnlyList<int> ownedRelicIds)
@@ -92,6 +100,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return candidates[randomProvider.Range(0, candidates.Count)];
         }
 
+        public RuntimeRelic RollTreasureRewardRelic(BattleSceneState state, RuntimeRunDefinition runDefinition, int relicGroupId, IBattleRandomProvider randomProvider)
+        {
+            if (state == null || runDefinition?.RelicCatalog == null || randomProvider == null)
+            {
+                return null;
+            }
+
+            if (relicGroupId <= 0)
+            {
+                return RollBattleRewardRelic(state, runDefinition, randomProvider);
+            }
+
+            List<RuntimeRewardEntry> candidates = BuildRelicRewardPoolCandidates(state, runDefinition, relicGroupId);
+            if (candidates.Count == 0)
+            {
+                return RollBattleRewardRelic(state, runDefinition, randomProvider);
+            }
+
+            return SelectWeightedRelic(candidates, randomProvider);
+        }
+
         public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
         {
             if (state == null)
@@ -132,6 +161,88 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return false;
+        }
+
+        private List<RuntimeRewardEntry> BuildRelicRewardPoolCandidates(BattleSceneState state, RuntimeRunDefinition runDefinition, int relicGroupId)
+        {
+            List<RuntimeRewardEntry> candidates = new List<RuntimeRewardEntry>();
+            if (_masterDataService == null)
+            {
+                return candidates;
+            }
+
+            int currentFloor = GetCurrentFloor(state);
+            IReadOnlyList<RewardPoolMaster> entries = _masterDataService.GetAll<RewardPoolMaster>();
+            for (int i = 0; i < entries.Count; i++)
+            {
+                RewardPoolMaster entry = entries[i];
+                if (entry == null ||
+                    entry.RewardPoolId != relicGroupId ||
+                    entry.RewardType != RewardType.Relic ||
+                    currentFloor < entry.MinFloor ||
+                    currentFloor > entry.MaxFloor)
+                {
+                    continue;
+                }
+
+                if (HasOwnedRelic(state, entry.RewardValue) ||
+                    !runDefinition.RelicCatalog.TryGetValue(entry.RewardValue, out RuntimeRelic relic) ||
+                    relic == null)
+                {
+                    continue;
+                }
+
+                candidates.Add(new RuntimeRewardEntry(
+                    entry.RewardType,
+                    entry.RewardValue,
+                    null,
+                    relic,
+                    null,
+                    entry.Weight,
+                    entry.MinFloor,
+                    entry.MaxFloor));
+            }
+
+            return candidates;
+        }
+
+        private static RuntimeRelic SelectWeightedRelic(IReadOnlyList<RuntimeRewardEntry> candidates, IBattleRandomProvider randomProvider)
+        {
+            int totalWeight = 0;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                totalWeight += Math.Max(0, candidates[i].Weight);
+            }
+
+            if (totalWeight <= 0)
+            {
+                return candidates[0].Relic;
+            }
+
+            int roll = randomProvider.Range(0, totalWeight);
+            int currentWeight = 0;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                currentWeight += Math.Max(0, candidates[i].Weight);
+                if (roll < currentWeight)
+                {
+                    return candidates[i].Relic;
+                }
+            }
+
+            return candidates[candidates.Count - 1].Relic;
+        }
+
+        private static int GetCurrentFloor(BattleSceneState state)
+        {
+            if (state == null ||
+                state.CurrentNodeIndex < 0 ||
+                state.CurrentNodeIndex >= state.Nodes.Count)
+            {
+                return 1;
+            }
+
+            return state.Nodes[state.CurrentNodeIndex].Floor;
         }
 
         private void ApplyEffect(BattleSceneState state, RuntimeRelicEffect effect)

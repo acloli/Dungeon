@@ -25,6 +25,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         RuntimeRelic RollBattleRewardRelic(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
 
         /// <summary>
+        /// 宝箱報酬候補レリックを報酬プールグループから抽選する
+        /// </summary>
+        RuntimeRelic RollTreasureRewardRelic(BattleSceneState state, RuntimeRunDefinition runDefinition, int relicGroupId, IBattleRandomProvider randomProvider)
+        {
+            return RollBattleRewardRelic(state, runDefinition, randomProvider);
+        }
+
+        /// <summary>
         /// 指定トリガーの効果を適用する
         /// </summary>
         void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType);
