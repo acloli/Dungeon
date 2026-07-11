@@ -31,7 +31,8 @@ namespace Dungeon.Tests.EditMode.Save
                 MapSeed = 67890,
                 MapLayoutVersion = 1,
                 RandomCounter = 7,
-                DeckCardIds = new List<int> { 101, 102, 103 }
+                DeckCardIds = new List<int> { 101, 102, 103 },
+                MapRouteNodeIndices = new List<int> { 0, 2, 5 }
             };
 
             string json = JsonUtility.ToJson(data);
@@ -48,6 +49,7 @@ namespace Dungeon.Tests.EditMode.Save
             Assert.That(json, Does.Contain("\"MapLayoutVersion\":1"));
             Assert.That(json, Does.Contain("\"RandomCounter\":7"));
             Assert.That(json, Does.Contain("\"DeckCardIds\":[101,102,103]"));
+            Assert.That(json, Does.Contain("\"MapRouteNodeIndices\":[0,2,5]"));
         }
 
         [Test]
@@ -161,7 +163,8 @@ namespace Dungeon.Tests.EditMode.Save
                 MapSeed = 67890,
                 MapLayoutVersion = 1,
                 RandomCounter = 7,
-                DeckCardIds = new List<int> { 101, 102, 103 }
+                DeckCardIds = new List<int> { 101, 102, 103 },
+                MapRouteNodeIndices = new List<int> { 0, 2, 5 }
             };
         }
 

@@ -1667,6 +1667,29 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_AppendsActualMapRouteHistory()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest1", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.RestShop, "Rest2", new[] { 2 }),
+                    CreateNode(5303, 3, InGameNodeType.RestShop, "Rest3", new int[0])
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+
+            Assert.That(Map(service.CreateSnapshot()).MapRouteNodeIndices, Is.EqualTo(new[] { 0 }));
+
+            service.ContinueFromRestShop();
+            service.SelectMapNode(1);
+
+            Assert.That(Map(service.CreateSnapshot()).MapRouteNodeIndices, Is.EqualTo(new[] { 0, 1 }));
+        }
+
+        [Test]
         public void ContinueFromRestShop_AfterInitializeFromSave_PreservesSeedMetadata()
         {
             FakeRunSaveService runSaveService = new FakeRunSaveService();
@@ -1703,6 +1726,70 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runSaveService.LastSavedData.MapSeed, Is.EqualTo(222));
             Assert.That(runSaveService.LastSavedData.MapLayoutVersion, Is.EqualTo(CurrentMapLayoutVersionForTest));
             Assert.That(runSaveService.LastSavedData.RandomCounter, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void RestShopCheckpoint_PreservesMapRouteHistory()
+        {
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Rest", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.RestShop, "Rest2", new int[0])
+                });
+            BattleSceneFlowService service = CreateServiceWithRunSave(runDefinition, runSaveService, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+
+            Assert.That(runSaveService.LastSavedData.MapRouteNodeIndices, Is.EqualTo(new[] { 0 }));
+
+            BattleSceneFlowService restoredService = CreateService(runDefinition, 0);
+            restoredService.InitializeFromSave(CloneSaveData(runSaveService.LastSavedData));
+
+            Assert.That(Map(restoredService.CreateSnapshot()).MapRouteNodeIndices, Is.EqualTo(new[] { 0 }));
+        }
+
+        [Test]
+        public void InitializeFromSave_WithoutRouteHistory_ReconstructsDeterministicRouteAndContinues()
+        {
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.RestShop, "Start", new[] { 1, 2 }),
+                    CreateNode(5302, 2, InGameNodeType.RestShop, "Left", new[] { 3 }),
+                    CreateNode(5303, 2, InGameNodeType.RestShop, "Right", new[] { 3 }),
+                    CreateNode(5304, 3, InGameNodeType.RestShop, "Merged", new[] { 4 }),
+                    CreateNode(5305, 4, InGameNodeType.RestShop, "Next", new int[0])
+                });
+            BattleSceneFlowService service = CreateService(runDefinition, 0);
+            RunSaveData saveData = new RunSaveData
+            {
+                RunProfileId = 5501,
+                PlayerMaxHp = 50,
+                PlayerHp = 50,
+                PlayerEnergy = 3,
+                Gold = 120,
+                CurrentNodeIndex = 3,
+                CurrentPage = (int)BattleScenePage.Map,
+                MasterSeed = 111,
+                MapSeed = 222,
+                MapLayoutVersion = CurrentMapLayoutVersionForTest,
+                RandomCounter = 7,
+                DeckCardIds = new List<int> { 1001 },
+                OwnedRelicIds = new List<int>(),
+                OwnedPotionIds = new List<int>(),
+                ShopItems = new List<SaveShopItem>()
+            };
+
+            service.InitializeFromSave(saveData);
+
+            Assert.That(Map(service.CreateSnapshot()).MapRouteNodeIndices, Is.EqualTo(new[] { 0, 1, 3 }));
+
+            service.SelectMapNode(4);
+
+            Assert.That(Map(service.CreateSnapshot()).MapRouteNodeIndices, Is.EqualTo(new[] { 0, 1, 3, 4 }));
         }
 
         [Test]
@@ -2619,6 +2706,7 @@ namespace Dungeon.Tests.EditMode
                 MapLayoutVersion = source.MapLayoutVersion,
                 RandomCounter = source.RandomCounter,
                 DeckCardIds = CloneIntList(source.DeckCardIds),
+                MapRouteNodeIndices = CloneIntList(source.MapRouteNodeIndices),
                 OwnedRelicIds = CloneIntList(source.OwnedRelicIds),
                 OwnedPotionIds = CloneIntList(source.OwnedPotionIds),
                 ShopItems = CloneShopItems(source.ShopItems),

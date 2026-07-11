@@ -22,6 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.Gold = saveData.Gold;
             state.CurrentNodeIndex = saveData.CurrentNodeIndex;
             state.CurrentPage = (BattleScenePage)saveData.CurrentPage;
+            RestoreMapRoute(state, saveData);
 
             state.Deck.Clear();
             if (saveData.DeckCardIds != null)
@@ -97,6 +98,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 CurrentNodeIndex = state.CurrentNodeIndex,
                 CurrentPage = (int)ResolveCheckpointPage(state.CurrentPage),
                 DeckCardIds = new List<int>(),
+                MapRouteNodeIndices = new List<int>(),
                 OwnedRelicIds = new List<int>(),
                 OwnedPotionIds = new List<int>(),
                 ShopItems = new List<SaveShopItem>(),
@@ -114,6 +116,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 {
                     data.DeckCardIds.Add(state.Deck[i].Id);
                 }
+            }
+
+            for (int i = 0; i < state.MapRouteNodeIndices.Count; i++)
+            {
+                data.MapRouteNodeIndices.Add(state.MapRouteNodeIndices[i]);
             }
 
             for (int i = 0; i < state.OwnedRelics.Count; i++)
@@ -152,6 +159,187 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// 保存済みの経路履歴を復元する
+        /// </summary>
+        private static void RestoreMapRoute(BattleSceneState state, RunSaveData saveData)
+        {
+            state.MapRouteNodeIndices.Clear();
+            IReadOnlyList<int> route = ResolveMapRoute(saveData.MapRouteNodeIndices, state.Nodes, state.CurrentNodeIndex);
+            for (int i = 0; i < route.Count; i++)
+            {
+                state.MapRouteNodeIndices.Add(route[i]);
+            }
+        }
+
+        /// <summary>
+        /// 保存済み経路、または旧セーブ向けの復元経路を返す
+        /// </summary>
+        private static IReadOnlyList<int> ResolveMapRoute(
+            IReadOnlyList<int> savedRoute,
+            IReadOnlyList<RuntimeMapNode> nodes,
+            int currentNodeIndex)
+        {
+            if (IsValidRoute(savedRoute, nodes, currentNodeIndex))
+            {
+                return savedRoute;
+            }
+
+            if (TryBuildRoute(nodes, currentNodeIndex, out List<int> restoredRoute))
+            {
+                return restoredRoute;
+            }
+
+            List<int> fallback = new List<int>();
+            if (IsValidNodeIndex(nodes, currentNodeIndex))
+            {
+                fallback.Add(currentNodeIndex);
+            }
+
+            return fallback;
+        }
+
+        /// <summary>
+        /// 経路履歴が現在ノードまでの正しい接続列か判定する
+        /// </summary>
+        private static bool IsValidRoute(
+            IReadOnlyList<int> route,
+            IReadOnlyList<RuntimeMapNode> nodes,
+            int currentNodeIndex)
+        {
+            if (currentNodeIndex < 0)
+            {
+                return route != null && route.Count == 0;
+            }
+
+            if (route == null ||
+                route.Count == 0 ||
+                route[route.Count - 1] != currentNodeIndex ||
+                route[0] != 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < route.Count; i++)
+            {
+                if (!IsValidNodeIndex(nodes, route[i]))
+                {
+                    return false;
+                }
+
+                if (i > 0 && !HasConnection(nodes, route[i - 1], route[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 起点から現在ノードまでの決定的な経路を復元する
+        /// </summary>
+        private static bool TryBuildRoute(
+            IReadOnlyList<RuntimeMapNode> nodes,
+            int currentNodeIndex,
+            out List<int> route)
+        {
+            route = new List<int>();
+            if (!IsValidNodeIndex(nodes, currentNodeIndex))
+            {
+                return false;
+            }
+
+            bool[] visited = new bool[nodes.Count];
+            if (TryBuildRouteRecursive(nodes, 0, currentNodeIndex, route, visited))
+            {
+                return true;
+            }
+
+            route.Clear();
+            return false;
+        }
+
+        /// <summary>
+        /// node index 昇順で経路を探索する
+        /// </summary>
+        private static bool TryBuildRouteRecursive(
+            IReadOnlyList<RuntimeMapNode> nodes,
+            int nodeIndex,
+            int targetNodeIndex,
+            List<int> route,
+            bool[] visited)
+        {
+            if (!IsValidNodeIndex(nodes, nodeIndex) || visited[nodeIndex])
+            {
+                return false;
+            }
+
+            visited[nodeIndex] = true;
+            route.Add(nodeIndex);
+            if (nodeIndex == targetNodeIndex)
+            {
+                return true;
+            }
+
+            IReadOnlyList<int> sourceNextNodeIndices = nodes[nodeIndex].NextNodeIndices;
+            if (sourceNextNodeIndices == null)
+            {
+                route.RemoveAt(route.Count - 1);
+                visited[nodeIndex] = false;
+                return false;
+            }
+
+            List<int> nextNodeIndices = new List<int>(sourceNextNodeIndices);
+            nextNodeIndices.Sort();
+            for (int i = 0; i < nextNodeIndices.Count; i++)
+            {
+                if (TryBuildRouteRecursive(nodes, nextNodeIndices[i], targetNodeIndex, route, visited))
+                {
+                    return true;
+                }
+            }
+
+            route.RemoveAt(route.Count - 1);
+            visited[nodeIndex] = false;
+            return false;
+        }
+
+        /// <summary>
+        /// ノードが存在するか判定する
+        /// </summary>
+        private static bool IsValidNodeIndex(IReadOnlyList<RuntimeMapNode> nodes, int index)
+        {
+            return nodes != null && index >= 0 && index < nodes.Count && nodes[index] != null;
+        }
+
+        /// <summary>
+        /// 2ノード間に接続があるか判定する
+        /// </summary>
+        private static bool HasConnection(IReadOnlyList<RuntimeMapNode> nodes, int sourceIndex, int targetIndex)
+        {
+            if (!IsValidNodeIndex(nodes, sourceIndex) || !IsValidNodeIndex(nodes, targetIndex))
+            {
+                return false;
+            }
+
+            IReadOnlyList<int> nextNodeIndices = nodes[sourceIndex].NextNodeIndices;
+            if (nextNodeIndices == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < nextNodeIndices.Count; i++)
+            {
+                if (nextNodeIndices[i] == targetIndex)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
