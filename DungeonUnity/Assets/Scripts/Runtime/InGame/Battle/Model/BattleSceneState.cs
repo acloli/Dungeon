@@ -51,6 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         #region Map
 
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
+        public List<int> MapRouteNodeIndices { get; } = new List<int>();
         public int CurrentNodeIndex { get; set; } = BattleSceneConstants.DefaultNodeIndex;
         public string MapMessage { get; set; } = string.Empty;
 

@@ -478,6 +478,7 @@ namespace Dungeon.Tests.EditMode
                 currentFloor: 2,
                 totalFloors: 4,
                 currentNodeIndex: 0,
+                mapRouteNodeIndices: new[] { 0 },
                 nodeLayouts: new[]
                 {
                     new MapNodeLayout(0, 0f, 0f, 1),

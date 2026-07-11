@@ -57,6 +57,9 @@ namespace Dungeon.Tests.EditMode
             state.Nodes.Add(CreateMapNode(5305, 3));
             state.Nodes.Add(CreateMapNode(5306, 3));
             state.Nodes.Add(CreateMapNode(5307, 4));
+            state.MapRouteNodeIndices.Add(0);
+            state.MapRouteNodeIndices.Add(2);
+            state.MapRouteNodeIndices.Add(4);
             BattleSnapshotFactory factory = CreateFactory();
 
             BattleMapSnapshot snapshot = factory.CreateSnapshot(state).Map;
@@ -64,6 +67,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(snapshot.CurrentFloor, Is.EqualTo(3));
             Assert.That(snapshot.TotalFloors, Is.EqualTo(4));
             Assert.That(snapshot.CurrentNodeIndex, Is.EqualTo(4));
+            Assert.That(snapshot.MapRouteNodeIndices, Is.EqualTo(new[] { 0, 2, 4 }));
             Assert.That(snapshot.NodeLayouts.Count, Is.EqualTo(state.Nodes.Count));
             AssertMapNodeLayout(snapshot.NodeLayouts[0], 0, 0f, 0f, 1);
             AssertMapNodeLayout(snapshot.NodeLayouts[1], 1, -0.5f, 1f, 2);

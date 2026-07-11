@@ -69,6 +69,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 currentFloor,
                 totalFloors,
                 state.CurrentNodeIndex,
+                state.MapRouteNodeIndices,
                 BuildMapNodeLayouts(state));
         }
 

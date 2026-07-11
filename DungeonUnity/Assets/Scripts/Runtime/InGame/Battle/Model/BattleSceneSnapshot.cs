@@ -86,6 +86,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             int currentFloor = 1,
             int totalFloors = 8,
             int currentNodeIndex = -1,
+            IReadOnlyList<int> mapRouteNodeIndices = null,
             IReadOnlyList<MapNodeLayout> nodeLayouts = null)
         {
             Nodes = nodes ?? Array.Empty<RuntimeMapNode>();
@@ -94,6 +95,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             CurrentFloor = currentFloor;
             TotalFloors = totalFloors;
             CurrentNodeIndex = currentNodeIndex;
+            MapRouteNodeIndices = mapRouteNodeIndices ?? Array.Empty<int>();
             NodeLayouts = nodeLayouts ?? Array.Empty<MapNodeLayout>();
         }
 
@@ -103,6 +105,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int CurrentFloor { get; }
         public int TotalFloors { get; }
         public int CurrentNodeIndex { get; }
+        public IReadOnlyList<int> MapRouteNodeIndices { get; }
         public IReadOnlyList<MapNodeLayout> NodeLayouts { get; }
     }
 

@@ -254,6 +254,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.CurrentNodeIndex = index;
+            AppendMapRouteNode(index);
             InGameNodeType nodeType = _state.Nodes[index].NodeType;
             if (nodeType == InGameNodeType.RestShop)
             {
@@ -1182,6 +1183,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
+        }
+
+        /// <summary>
+        /// 実際に選択したマップ経路を記録する
+        /// </summary>
+        private void AppendMapRouteNode(int nodeIndex)
+        {
+            if (_state.MapRouteNodeIndices.Count > 0 &&
+                _state.MapRouteNodeIndices[_state.MapRouteNodeIndices.Count - 1] == nodeIndex)
+            {
+                return;
+            }
+
+            _state.MapRouteNodeIndices.Add(nodeIndex);
         }
 
         /// <summary>

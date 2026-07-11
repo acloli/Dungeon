@@ -85,6 +85,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(uiService.LastMapPageParam.Snapshot.Nodes, Is.SameAs(mapSnapshot.Nodes));
             Assert.That(uiService.LastMapPageParam.Snapshot.AvailableNodeIndices, Is.SameAs(mapSnapshot.AvailableNodeIndices));
             Assert.That(uiService.LastMapPageParam.Snapshot.NodeLayouts, Is.SameAs(mapSnapshot.NodeLayouts));
+            Assert.That(uiService.LastMapPageParam.Snapshot.MapRouteNodeIndices, Is.SameAs(mapSnapshot.MapRouteNodeIndices));
             Assert.That(uiService.LastMapPageParam.Snapshot.CurrentFloor, Is.EqualTo(2));
             Assert.That(uiService.LastMapPageParam.Snapshot.CurrentNodeIndex, Is.EqualTo(0));
 
@@ -206,6 +207,7 @@ namespace Dungeon.Tests.EditMode
                 currentFloor: 2,
                 totalFloors: 4,
                 currentNodeIndex: 0,
+                mapRouteNodeIndices: new[] { 0 },
                 nodeLayouts: new[]
                 {
                     new MapNodeLayout(0, 0f, 0f, 1),

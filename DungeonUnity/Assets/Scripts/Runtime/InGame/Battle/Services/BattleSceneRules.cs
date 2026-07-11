@@ -56,6 +56,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.ExhaustPile.Clear();
             state.Hand.Clear();
             state.Nodes.Clear();
+            state.MapRouteNodeIndices.Clear();
             state.PlayerStatuses.Clear();
             state.PlayerBuffs.Clear();
 
