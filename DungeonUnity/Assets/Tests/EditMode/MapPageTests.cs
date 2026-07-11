@@ -179,6 +179,7 @@ namespace Dungeon.Tests.EditMode
                     new[] { 1 },
                     1,
                     0,
+                    new[] { 0 },
                     null);
 
                 Transform[] activeChildren = GetActiveChildren(page);
@@ -227,6 +228,7 @@ namespace Dungeon.Tests.EditMode
                     new[] { 1 },
                     1,
                     0,
+                    new[] { 0 },
                     null);
 
                 Transform[] activeChildren = GetActiveChildren(page);
@@ -242,6 +244,101 @@ namespace Dungeon.Tests.EditMode
                 Assert.That(activeChildren[2].GetComponent<Button>().interactable, Is.False);
                 Assert.That(activeChildren[2].localScale, Is.EqualTo(Vector3.one));
                 Assert.That(activeChildren[2].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_HighlightsOnlyActualRouteNodes()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Transform[] activeChildren = GetActiveChildren(page);
+
+                Assert.That(activeChildren[0].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.68f));
+                Assert.That(activeChildren[1].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.68f));
+                Assert.That(activeChildren[2].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+                Assert.That(activeChildren[3].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+                Assert.That(activeChildren[4].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+                Assert.That(activeChildren[5].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+                Assert.That(activeChildren[6].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_HighlightsOnlyActualRouteConnections()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Image[] activeConnectionLines = GetActiveConnectionLines(page);
+
+                Assert.That(activeConnectionLines, Has.Length.EqualTo(7));
+                AssertColor(activeConnectionLines[0].color, new Color(0.22f, 0.82f, 0.78f, 0.85f));
+                AssertColor(activeConnectionLines[1].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
+                AssertColor(activeConnectionLines[2].color, new Color(0.22f, 0.82f, 0.78f, 0.85f));
+                AssertColor(activeConnectionLines[3].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_KeepsAvailableConnectionsDistinctFromRoute()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Image[] activeConnectionLines = GetActiveConnectionLines(page);
+
+                AssertColor(activeConnectionLines[4].color, new Color(0.95f, 0.74f, 0.28f, 0.8f));
+                AssertColor(activeConnectionLines[5].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
             }
             finally
             {
@@ -340,6 +437,34 @@ namespace Dungeon.Tests.EditMode
                 nextNodeIndices);
         }
 
+        private static RuntimeMapNode[] CreateRouteTestNodes()
+        {
+            return new[]
+            {
+                CreateNode(1, InGameNodeType.Battle, "Start", new[] { 1, 2 }),
+                CreateNode(2, InGameNodeType.Event, "RouteEvent", new[] { 3 }),
+                CreateNode(2, InGameNodeType.EliteBattle, "SkippedElite", new[] { 4 }),
+                CreateNode(3, InGameNodeType.RestShop, "CurrentRest", new[] { 5, 6 }),
+                CreateNode(3, InGameNodeType.Treasure, "SkippedTreasure", new[] { 6 }),
+                CreateNode(4, InGameNodeType.Battle, "NextBattle"),
+                CreateNode(4, InGameNodeType.Boss, "LockedBoss")
+            };
+        }
+
+        private static MapNodeLayout[] CreateRouteTestLayouts()
+        {
+            return new[]
+            {
+                new MapNodeLayout(0, 0f, 0f, 1),
+                new MapNodeLayout(1, -0.5f, 1f, 2),
+                new MapNodeLayout(2, 0.5f, 1f, 2),
+                new MapNodeLayout(3, -0.5f, 2f, 3),
+                new MapNodeLayout(4, 0.5f, 2f, 3),
+                new MapNodeLayout(5, -0.5f, 3f, 4),
+                new MapNodeLayout(6, 0.5f, 3f, 4)
+            };
+        }
+
         private static string[] GetActiveButtonLabels(MapPage page)
         {
             Transform[] activeChildren = GetActiveChildren(page);
@@ -391,6 +516,11 @@ namespace Dungeon.Tests.EditMode
         {
             Assert.That(actual.x, Is.EqualTo(expected.x).Within(PositionTolerance));
             Assert.That(actual.y, Is.EqualTo(expected.y).Within(PositionTolerance));
+        }
+
+        private static void AssertColor(Color actual, Color expected)
+        {
+            Assert.That((Color32)actual, Is.EqualTo((Color32)expected));
         }
     }
 }

@@ -2161,7 +2161,7 @@ MonoBehaviour:
   _nodeOffset: {x: 0, y: 0}
   _connectionLineThickness: 6
   _availableConnectionColor: {r: 0.95, g: 0.74, b: 0.28, a: 0.8}
-  _visitedConnectionColor: {r: 0.57, g: 0.78, b: 0.59, a: 0.55}
+  _visitedConnectionColor: {r: 0.22, g: 0.82, b: 0.78, a: 0.85}
   _fogConnectionColor: {r: 0.44, g: 0.47, b: 0.55, a: 0.25}
   _currentNodeAlpha: 1
   _availableNodeAlpha: 1

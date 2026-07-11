@@ -19,6 +19,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             IReadOnlyList<int> availableNodeIndices,
             int currentFloor,
             int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices,
             Action<int> onNodeClicked);
         void SetScrollPosition(int floor);
     }

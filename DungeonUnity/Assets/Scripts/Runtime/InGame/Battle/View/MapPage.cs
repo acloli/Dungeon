@@ -28,7 +28,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Vector2 _nodeOffset = Vector2.zero;
         [SerializeField] private float _connectionLineThickness = 6f;
         [SerializeField] private Color _availableConnectionColor = new Color(0.95f, 0.74f, 0.28f, 0.8f);
-        [SerializeField] private Color _visitedConnectionColor = new Color(0.57f, 0.78f, 0.59f, 0.55f);
+        [SerializeField] private Color _visitedConnectionColor = new Color(0.22f, 0.82f, 0.78f, 0.85f);
         [SerializeField] private Color _fogConnectionColor = new Color(0.44f, 0.47f, 0.55f, 0.25f);
         [SerializeField] private float _currentNodeAlpha = 1f;
         [SerializeField] private float _availableNodeAlpha = 1f;
@@ -60,6 +60,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 _param.Snapshot.AvailableNodeIndices,
                 _param.Snapshot.CurrentFloor,
                 _param.Snapshot.CurrentNodeIndex,
+                _param.Snapshot.MapRouteNodeIndices,
                 _param.OnMapNodeClicked);
             SetMapStateText(_param.Snapshot.MapMessage);
         }
@@ -138,6 +139,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             IReadOnlyList<int> availableNodeIndices,
             int currentFloor,
             int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices,
             Action<int> onNodeClicked)
         {
             ClearDynamicButtons();
@@ -156,8 +158,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             Dictionary<int, MapNodeLayout> layoutByNodeIndex = BuildLayoutLookup(layouts);
             Dictionary<int, Vector2> positionByNodeIndex = BuildPositionLookup(nodes, layoutByNodeIndex);
-            BuildConnectionLines(nodes, positionByNodeIndex, availableNodeIndices, currentFloor, currentNodeIndex);
-            BuildGraphButtons(nodes, positionByNodeIndex, availableNodeIndices, currentFloor, currentNodeIndex, onNodeClicked);
+            BuildConnectionLines(nodes, positionByNodeIndex, availableNodeIndices, currentNodeIndex, mapRouteNodeIndices);
+            BuildGraphButtons(nodes, positionByNodeIndex, availableNodeIndices, currentFloor, currentNodeIndex, mapRouteNodeIndices, onNodeClicked);
         }
 
         /// <summary>
@@ -218,6 +220,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             IReadOnlyList<int> availableNodeIndices,
             int currentFloor,
             int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices,
             Action<int> onNodeClicked)
         {
             for (int i = 0; i < nodes.Count; i++)
@@ -250,7 +253,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     nodeIndex,
                     availableNodeIndices,
                     currentFloor,
-                    currentNodeIndex);
+                    currentNodeIndex,
+                    mapRouteNodeIndices);
                 ApplyNodeViewState(button, state);
 
                 _buttons.Add(button);
@@ -265,8 +269,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
             IReadOnlyList<RuntimeMapNode> nodes,
             IReadOnlyDictionary<int, Vector2> positionByNodeIndex,
             IReadOnlyList<int> availableNodeIndices,
-            int currentFloor,
-            int currentNodeIndex)
+            int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices)
         {
             Transform parent = _connectionRoot != null ? _connectionRoot : _nodeRoot;
             if (parent == null)
@@ -283,6 +287,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
                 RuntimeMapNode sourceNode = nodes[i];
                 IReadOnlyList<int> nextNodeIndices = sourceNode.NextNodeIndices;
+                if (nextNodeIndices == null)
+                {
+                    continue;
+                }
+
                 for (int j = 0; j < nextNodeIndices.Count; j++)
                 {
                     int targetIndex = nextNodeIndices[j];
@@ -298,7 +307,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                         line,
                         startPosition,
                         endPosition,
-                        ResolveConnectionColor(nodes, i, targetIndex, availableNodeIndices, currentFloor, currentNodeIndex));
+                        ResolveConnectionColor(i, targetIndex, availableNodeIndices, currentNodeIndex, mapRouteNodeIndices));
                     _connectionLines.Add(line);
                 }
             }
@@ -381,7 +390,8 @@ namespace Dungeon.Runtime.InGame.Battle.View
             int nodeIndex,
             IReadOnlyList<int> availableNodeIndices,
             int currentFloor,
-            int currentNodeIndex)
+            int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices)
         {
             if (nodeIndex == currentNodeIndex)
             {
@@ -393,7 +403,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 return MapNodeViewState.Available;
             }
 
-            if (currentNodeIndex >= 0 && node.Floor < currentFloor)
+            if (currentNodeIndex >= 0 && ContainsIndex(mapRouteNodeIndices, nodeIndex))
             {
                 return MapNodeViewState.Visited;
             }
@@ -419,20 +429,18 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// 接続線の色を返す
         /// </summary>
         private Color ResolveConnectionColor(
-            IReadOnlyList<RuntimeMapNode> nodes,
             int sourceIndex,
             int targetIndex,
             IReadOnlyList<int> availableNodeIndices,
-            int currentFloor,
-            int currentNodeIndex)
+            int currentNodeIndex,
+            IReadOnlyList<int> mapRouteNodeIndices)
         {
             if (sourceIndex == currentNodeIndex && ContainsIndex(availableNodeIndices, targetIndex))
             {
                 return _availableConnectionColor;
             }
 
-            RuntimeMapNode targetNode = nodes[targetIndex];
-            if (targetIndex == currentNodeIndex || (currentNodeIndex >= 0 && targetNode.Floor < currentFloor))
+            if (ContainsRouteEdge(mapRouteNodeIndices, sourceIndex, targetIndex))
             {
                 return _visitedConnectionColor;
             }
@@ -575,6 +583,27 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < indices.Count; i++)
             {
                 if (indices[i] == index)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 実際に通過した接続線か判定する
+        /// </summary>
+        private static bool ContainsRouteEdge(IReadOnlyList<int> routeNodeIndices, int sourceIndex, int targetIndex)
+        {
+            if (routeNodeIndices == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < routeNodeIndices.Count - 1; i++)
+            {
+                if (routeNodeIndices[i] == sourceIndex && routeNodeIndices[i + 1] == targetIndex)
                 {
                     return true;
                 }
