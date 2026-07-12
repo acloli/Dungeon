@@ -12,7 +12,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     public sealed class BattleMapGenerator : IBattleMapGenerator
     {
         private const int DefaultPresetMapTemplateId = 6301;
-        private static readonly int[] FloorNodeCounts = { 1, 2, 2, 2, 3, 2, 2, 1 };
+        private const int FloorCount = 8;
+        private const int FirstFloorNodeCount = 1;
+        private const int BossFloorNodeCount = 1;
+        private const int MinNodesPerMiddleFloor = 1;
+        private const int MaxNodesPerMiddleFloor = 3;
+        private const int BossPreviousFloor = FloorCount - 1;
 
         /// <summary>
         /// Run定義とシードからマップを生成する
@@ -21,14 +26,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             WarnIfUnknownMapTemplateId(runDefinition);
             Random random = new Random(mapSeed);
+            int[] floorNodeCounts = BuildFloorNodeCounts(random);
             List<RuntimeMapNode> nodes = new List<RuntimeMapNode>();
-            List<InGameNodeType> nodeTypes = BuildNodeTypes(random);
+            List<InGameNodeType> nodeTypes = BuildNodeTypes(floorNodeCounts, random);
             List<int[]> floorIndices = new List<int[]>();
             int typeCursor = 0;
 
-            for (int floor = 1; floor <= FloorNodeCounts.Length; floor++)
+            for (int floor = 1; floor <= floorNodeCounts.Length; floor++)
             {
-                int nodeCount = FloorNodeCounts[floor - 1];
+                int nodeCount = floorNodeCounts[floor - 1];
                 int[] indices = new int[nodeCount];
                 for (int slot = 0; slot < nodeCount; slot++)
                 {
@@ -37,7 +43,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     {
                         nodeType = InGameNodeType.Battle;
                     }
-                    else if (floor == FloorNodeCounts.Length)
+                    else if (floor == floorNodeCounts.Length)
                     {
                         nodeType = InGameNodeType.Boss;
                     }
@@ -96,32 +102,103 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 各フロアのノード数を構築する
+        /// </summary>
+        private static int[] BuildFloorNodeCounts(Random random)
+        {
+            int[] floorNodeCounts = new int[FloorCount];
+            floorNodeCounts[0] = FirstFloorNodeCount;
+            floorNodeCounts[FloorCount - 1] = BossFloorNodeCount;
+
+            for (int i = 1; i < FloorCount - 1; i++)
+            {
+                floorNodeCounts[i] = random.Next(MinNodesPerMiddleFloor, MaxNodesPerMiddleFloor + 1);
+            }
+
+            return floorNodeCounts;
+        }
+
+        /// <summary>
         /// Floor 2-7 のノード種別を構築する
         /// </summary>
-        private static List<InGameNodeType> BuildNodeTypes(Random random)
+        private static List<InGameNodeType> BuildNodeTypes(IReadOnlyList<int> floorNodeCounts, Random random)
         {
-            List<InGameNodeType> nodeTypes = new List<InGameNodeType>
+            int middleNodeCount = CountMiddleNodes(floorNodeCounts);
+            List<InGameNodeType> nodeTypes = new List<InGameNodeType>(middleNodeCount);
+            AddGuaranteedNodeType(nodeTypes, middleNodeCount, InGameNodeType.RestShop);
+            AddGuaranteedNodeType(nodeTypes, middleNodeCount, InGameNodeType.Treasure);
+            AddGuaranteedNodeType(nodeTypes, middleNodeCount, InGameNodeType.EliteBattle);
+            AddGuaranteedNodeType(nodeTypes, middleNodeCount, InGameNodeType.Event);
+
+            while (nodeTypes.Count < middleNodeCount)
             {
-                InGameNodeType.EliteBattle,
-                InGameNodeType.Event,
-                InGameNodeType.Treasure,
-                InGameNodeType.RestShop,
-                InGameNodeType.RestShop,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle,
-                InGameNodeType.Battle
-            };
+                nodeTypes.Add(RollMiddleFloorNodeType(random));
+            }
 
             Shuffle(nodeTypes, random);
 
-            EnsureNodeTypeInFloor(nodeTypes, InGameNodeType.RestShop, 7, random);
+            EnsureNodeTypeInFloor(nodeTypes, floorNodeCounts, InGameNodeType.RestShop, BossPreviousFloor, random);
 
             return nodeTypes;
+        }
+
+        /// <summary>
+        /// 中間フロアのノード数を返す
+        /// </summary>
+        private static int CountMiddleNodes(IReadOnlyList<int> floorNodeCounts)
+        {
+            int count = 0;
+            for (int i = 1; i < floorNodeCounts.Count - 1; i++)
+            {
+                count += floorNodeCounts[i];
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// 保証対象ノード種別を容量内で追加する
+        /// </summary>
+        private static void AddGuaranteedNodeType(
+            ICollection<InGameNodeType> nodeTypes,
+            int maxCount,
+            InGameNodeType nodeType)
+        {
+            if (nodeTypes.Count >= maxCount)
+            {
+                return;
+            }
+
+            nodeTypes.Add(nodeType);
+        }
+
+        /// <summary>
+        /// 中間フロア用の追加ノード種別を重み付きで返す
+        /// </summary>
+        private static InGameNodeType RollMiddleFloorNodeType(Random random)
+        {
+            int value = random.Next(0, 100);
+            if (value < 55)
+            {
+                return InGameNodeType.Battle;
+            }
+
+            if (value < 70)
+            {
+                return InGameNodeType.Event;
+            }
+
+            if (value < 82)
+            {
+                return InGameNodeType.EliteBattle;
+            }
+
+            if (value < 92)
+            {
+                return InGameNodeType.RestShop;
+            }
+
+            return InGameNodeType.Treasure;
         }
 
         /// <summary>
@@ -129,12 +206,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private static void EnsureNodeTypeInFloor(
             IList<InGameNodeType> nodeTypes,
+            IReadOnlyList<int> floorNodeCounts,
             InGameNodeType nodeType,
             int floor,
             Random random)
         {
-            int floorStart = GetNodeTypeStartIndex(floor);
-            int floorCount = FloorNodeCounts[floor - 1];
+            int floorStart = GetNodeTypeStartIndex(floorNodeCounts, floor);
+            int floorCount = floorNodeCounts[floor - 1];
             for (int i = 0; i < floorCount; i++)
             {
                 if (nodeTypes[floorStart + i] == nodeType)
@@ -147,18 +225,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             int targetIndex = floorStart + random.Next(0, floorCount);
             InGameNodeType original = nodeTypes[targetIndex];
             nodeTypes[targetIndex] = nodeType;
-            nodeTypes[sourceIndex] = original;
+            if (sourceIndex >= 0)
+            {
+                nodeTypes[sourceIndex] = original;
+            }
         }
 
         /// <summary>
         /// 指定フロアのノード種別リスト上の開始位置を返す
         /// </summary>
-        private static int GetNodeTypeStartIndex(int floor)
+        private static int GetNodeTypeStartIndex(IReadOnlyList<int> floorNodeCounts, int floor)
         {
             int startIndex = 0;
             for (int i = 2; i < floor; i++)
             {
-                startIndex += FloorNodeCounts[i - 1];
+                startIndex += floorNodeCounts[i - 1];
             }
 
             return startIndex;
@@ -187,7 +268,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 }
             }
 
-            throw new InvalidOperationException($"Node type guarantee source is missing. nodeType={nodeType}");
+            return -1;
         }
 
         /// <summary>
