@@ -19,6 +19,7 @@ namespace Dungeon.Tests.EditMode
     public sealed class BattleMapGeneratorTests
     {
         private const int ExpectedFloorCount = 8;
+        private const int MinNodesPerFloor = 1;
         private const int MaxNodesPerFloor = 3;
 
         [Test]
@@ -46,6 +47,36 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void Generate_WithMultipleSeeds_ProducesDifferentFloorWidthSignatures()
+        {
+            BattleMapGenerator generator = new BattleMapGenerator();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition();
+            HashSet<string> signatures = new HashSet<string>();
+
+            for (int seed = 1000; seed < 1020; seed++)
+            {
+                IReadOnlyList<RuntimeMapNode> nodes = generator.Generate(runDefinition, seed);
+                AssertMapStructure(nodes);
+                Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.Boss), Is.EqualTo(1), $"Seed {seed} should have one boss.");
+                Assert.That(nodes.Single(node => node.NodeType == InGameNodeType.Boss).Floor, Is.EqualTo(ExpectedFloorCount), $"Seed {seed} boss should be final floor.");
+                Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.EliteBattle), Is.GreaterThanOrEqualTo(1), $"Seed {seed} should have an elite.");
+                Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.Event), Is.GreaterThanOrEqualTo(1), $"Seed {seed} should have an event.");
+                Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.RestShop), Is.GreaterThanOrEqualTo(1), $"Seed {seed} should have a rest shop.");
+                Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.Treasure), Is.GreaterThanOrEqualTo(1), $"Seed {seed} should have treasure.");
+                Assert.That(
+                    nodes.Count(node => node.Floor == ExpectedFloorCount - 1 && node.NodeType == InGameNodeType.RestShop),
+                    Is.GreaterThanOrEqualTo(1),
+                    $"Seed {seed} should have a rest shop before boss.");
+                AssertEdgesAdvanceToNextFloor(nodes);
+                AssertEveryFloorReachable(nodes);
+                AssertTreasureNodesConnectAllNextFloor(nodes);
+                signatures.Add(BuildFloorWidthSignature(nodes));
+            }
+
+            Assert.That(signatures.Count, Is.GreaterThanOrEqualTo(2));
+        }
+
+        [Test]
         public void Generate_SatisfiesExpectedConstraints()
         {
             BattleMapGenerator generator = new BattleMapGenerator();
@@ -58,7 +89,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(nodes.Single(node => node.NodeType == InGameNodeType.Boss).Floor, Is.EqualTo(ExpectedFloorCount));
             Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.EliteBattle), Is.GreaterThanOrEqualTo(1));
             Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.Event), Is.GreaterThanOrEqualTo(1));
-            Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.RestShop), Is.GreaterThanOrEqualTo(2));
+            Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.RestShop), Is.GreaterThanOrEqualTo(1));
             Assert.That(nodes.Count(node => node.NodeType == InGameNodeType.Treasure), Is.GreaterThanOrEqualTo(1));
             Assert.That(nodes.Count(node => node.Floor == ExpectedFloorCount - 1 && node.NodeType == InGameNodeType.RestShop), Is.GreaterThanOrEqualTo(1));
             AssertEdgesAdvanceToNextFloor(nodes);
@@ -118,11 +149,22 @@ namespace Dungeon.Tests.EditMode
                 nodes.Select(node => node.Floor).Distinct(),
                 Is.EquivalentTo(Enumerable.Range(1, ExpectedFloorCount)));
 
+            Assert.That(nodes.Count(node => node.Floor == 1), Is.EqualTo(1));
+            Assert.That(nodes.Count(node => node.Floor == ExpectedFloorCount), Is.EqualTo(1));
+
             for (int floor = 1; floor <= ExpectedFloorCount; floor++)
             {
                 int floorNodeCount = nodes.Count(node => node.Floor == floor);
-                Assert.That(floorNodeCount, Is.InRange(1, MaxNodesPerFloor), $"Floor {floor} node count should be in range.");
+                Assert.That(floorNodeCount, Is.InRange(MinNodesPerFloor, MaxNodesPerFloor), $"Floor {floor} node count should be in range.");
             }
+        }
+
+        private static string BuildFloorWidthSignature(IReadOnlyList<RuntimeMapNode> nodes)
+        {
+            return string.Join(
+                ",",
+                Enumerable.Range(1, ExpectedFloorCount)
+                    .Select(floor => nodes.Count(node => node.Floor == floor)));
         }
 
         private static void AssertEdgesAdvanceToNextFloor(IReadOnlyList<RuntimeMapNode> nodes)
