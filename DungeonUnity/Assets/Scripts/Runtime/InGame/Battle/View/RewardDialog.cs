@@ -53,13 +53,16 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.ClaimGold }),
                     true);
 
-            // Card行 — クリックで PickCard、選択済みなら非表示
-            if (!snapshot.CardRewardPicked)
-                AddRow(BattleSceneConstants.PickCardLabel,
-                    () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.PickCard }),
-                    true);
-            else
-                AddRow(BattleSceneConstants.CardPickedLabel, null, false);
+            // Card行 — カード候補がある報酬だけ表示する
+            if (snapshot.RewardChoices.Count > 0)
+            {
+                if (!snapshot.CardRewardPicked)
+                    AddRow(BattleSceneConstants.PickCardLabel,
+                        () => CloseWithResult(new RewardDialogResult { Action = RewardDialogActionType.PickCard }),
+                        true);
+                else
+                    AddRow(BattleSceneConstants.CardPickedLabel, null, false);
+            }
 
             // Potion行
             if (snapshot.PotionDropped && !snapshot.PotionClaimed)
