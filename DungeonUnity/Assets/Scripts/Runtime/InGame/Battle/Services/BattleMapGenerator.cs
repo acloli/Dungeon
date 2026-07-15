@@ -390,6 +390,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return;
             }
 
+            List<int> overflowCandidates = FindReachabilityOverflowSources(targetIndex, currentFloor, floorConnections);
+            if (overflowCandidates.Count > 0)
+            {
+                int sourceIndex = overflowCandidates[random.Next(0, overflowCandidates.Count)];
+                floorConnections[sourceIndex].Add(targetIndex);
+                return;
+            }
+
             int replacementSourceIndex = FindReachabilityReplacementSource(currentFloor, floorConnections, random);
             List<int> targets = floorConnections[replacementSourceIndex];
             int replaceIndex = FindReplaceableTargetIndex(targets, currentFloor, floorConnections);
@@ -407,6 +415,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return ShouldConnectAllNextNodes(node.NodeType) || targets.Count < 2;
+        }
+
+        /// <summary>
+        /// 到達保証のために通常上限を超えて追加できる候補を返す
+        /// </summary>
+        private static List<int> FindReachabilityOverflowSources(
+            int targetIndex,
+            IReadOnlyList<int> currentFloor,
+            IDictionary<int, List<int>> floorConnections)
+        {
+            List<int> candidates = new List<int>();
+            for (int i = 0; i < currentFloor.Count; i++)
+            {
+                int sourceIndex = currentFloor[i];
+                if (!floorConnections[sourceIndex].Contains(targetIndex))
+                {
+                    candidates.Add(sourceIndex);
+                }
+            }
+
+            return candidates;
         }
 
         /// <summary>
