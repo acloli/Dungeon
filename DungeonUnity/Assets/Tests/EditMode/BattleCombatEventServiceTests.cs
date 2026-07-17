@@ -161,10 +161,7 @@ namespace Dungeon.Tests.EditMode
 
             public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
             {
-                BeforeApply?.Invoke(state, triggerType);
-                InvocationSequence.Add($"ApplyEffects:{triggerType}");
-                AppliedStates.Add(state);
-                AppliedTriggers.Add(triggerType);
+                RecordApplication(state, triggerType);
             }
 
             public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
@@ -175,7 +172,15 @@ namespace Dungeon.Tests.EditMode
                 }
 
                 AppliedContexts.Add(context);
-                ApplyEffects(state, context.TriggerType);
+                RecordApplication(state, context.TriggerType);
+            }
+
+            private void RecordApplication(BattleSceneState state, RelicTriggerType triggerType)
+            {
+                BeforeApply?.Invoke(state, triggerType);
+                InvocationSequence.Add($"ApplyEffects:{triggerType}");
+                AppliedStates.Add(state);
+                AppliedTriggers.Add(triggerType);
             }
         }
     }

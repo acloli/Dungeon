@@ -44,7 +44,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 6)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerBlock, Is.EqualTo(6));
         }
@@ -62,7 +62,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.PlayerTurnStart, EffectType.GainEnergy, 1)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerTurnStart));
 
             Assert.That(state.PlayerEnergy, Is.EqualTo(4));
         }
@@ -79,7 +79,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.DealDamage, 5, targetSide: TargetSide.Enemy)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.Enemies[0].Hp, Is.EqualTo(7));
             Assert.That(state.Enemies[1].Hp, Is.EqualTo(14));
@@ -98,7 +98,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.DealDamage, 4, targetSide: TargetSide.AllEnemies)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.Enemies[0].Hp, Is.EqualTo(8));
             Assert.That(state.Enemies[1].Hp, Is.EqualTo(0));
@@ -117,7 +117,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CardPlayed, EffectType.ApplyStatus, 0, StatusType.Weak, 2, TargetSide.Enemy)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CardPlayed);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CardPlayed));
 
             Assert.That(state.Enemies[0].Statuses[StatusType.Weak], Is.EqualTo(2));
             Assert.That(state.Enemies[1].Statuses, Does.Not.ContainKey(StatusType.Weak));
@@ -133,7 +133,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.PlayerDamaged, EffectType.ApplyStatus, 0, StatusType.Vulnerable, 3, TargetSide.Self)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.PlayerDamaged);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerDamaged));
 
             Assert.That(state.PlayerStatuses[StatusType.Vulnerable], Is.EqualTo(3));
         }
@@ -150,7 +150,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.PlayerTurnStart, EffectType.DrawCards, 2)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerTurnStart));
 
             Assert.That(state.Hand.Count, Is.EqualTo(2));
             Assert.That(state.DrawPile, Is.Empty);
@@ -169,7 +169,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.GainGold, 15)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.Gold, Is.EqualTo(35));
         }
@@ -188,7 +188,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.GainMaxHp, 6)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerMaxHp, Is.EqualTo(46));
             Assert.That(state.PlayerHp, Is.EqualTo(30));
@@ -208,7 +208,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.LoseHp, EffectType.LoseHp, 7)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.LoseHp);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.LoseHp));
 
             Assert.That(state.PlayerHp, Is.EqualTo(17));
         }
@@ -226,7 +226,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 0, potionCapacityDelta: 2)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.MaxPotionCount, Is.EqualTo(5));
         }
@@ -245,7 +245,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.PlayerTurnStart, EffectType.GainBlock, 6, potionCapacityDelta: 1)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerBlock, Is.EqualTo(1));
             Assert.That(state.MaxPotionCount, Is.EqualTo(3));
@@ -421,10 +421,10 @@ namespace Dungeon.Tests.EditMode
                     activationLimit: RelicActivationLimit.OncePerTurn)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
-            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerTurnStart));
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerTurnStart));
             state.ClearTurnRelicEffectActivations();
-            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.PlayerTurnStart));
 
             Assert.That(state.PlayerBlock, Is.EqualTo(4));
         }
@@ -444,9 +444,9 @@ namespace Dungeon.Tests.EditMode
                     activationLimit: RelicActivationLimit.OncePerRun)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
             state.ClearTurnRelicEffectActivations();
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerBlock, Is.EqualTo(3));
         }
@@ -461,8 +461,8 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 2)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerBlock, Is.EqualTo(4));
         }
@@ -482,7 +482,7 @@ namespace Dungeon.Tests.EditMode
                     activationLimit: activationLimit)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
 
             Assert.That(state.PlayerBlock, Is.Zero);
         }
@@ -506,7 +506,7 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.CombatVictory, EffectType.HealHp, value)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.CombatVictory);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatVictory));
 
             Assert.That(state.PlayerHp, Is.EqualTo(expectedHp));
         }
@@ -524,8 +524,8 @@ namespace Dungeon.Tests.EditMode
                 CreateEffect(RelicTriggerType.RestShopEntered, EffectType.GainFreeCardUpgrade, 2)
             }));
 
-            service.ApplyEffects(state, RelicTriggerType.RestShopEntered);
-            service.ApplyEffects(state, RelicTriggerType.RestShopEntered);
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.RestShopEntered));
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.RestShopEntered));
 
             Assert.That(state.RestShopFreeUpgradeCount, Is.EqualTo(5));
         }
@@ -573,7 +573,9 @@ namespace Dungeon.Tests.EditMode
             }));
 
             Assert.DoesNotThrow(() => service.ApplyEffects(state, (RelicTriggerContext)null));
-            Assert.DoesNotThrow(() => service.ApplyEffects(state, RelicTriggerType.CombatVictory));
+            Assert.DoesNotThrow(() => service.ApplyEffects(
+                state,
+                new RelicTriggerContext(RelicTriggerType.CombatVictory)));
             Assert.DoesNotThrow(() => serviceWithoutDependency.ApplyEffects(
                 state,
                 new RelicTriggerContext(RelicTriggerType.CombatVictory, runDefinition: runDefinition)));
