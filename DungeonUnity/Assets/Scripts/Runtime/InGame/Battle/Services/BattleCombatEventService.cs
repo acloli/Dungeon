@@ -17,19 +17,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public void OnCombatStart(BattleSceneState state)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.CombatStart);
+            ApplyRelicTrigger(state, RelicTriggerType.CombatStart);
         }
 
         public void OnPlayerTurnStart(BattleSceneState state)
         {
             // 新しいプレイヤーターンを通知する前にターン単位の発火状態をリセットする
             state?.ClearTurnRelicEffectActivations();
-            _relicService.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            ApplyRelicTrigger(state, RelicTriggerType.PlayerTurnStart);
         }
 
         public void OnPlayerTurnEnd(BattleSceneState state)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.PlayerTurnEnd);
+            ApplyRelicTrigger(state, RelicTriggerType.PlayerTurnEnd);
         }
 
         public void OnCardPlayed(BattleSceneState state, RuntimeCard card, BattleCardResolutionResult result)
@@ -42,22 +42,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public void OnPlayerDamaged(BattleSceneState state, int damage)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.PlayerDamaged);
+            ApplyRelicTrigger(state, RelicTriggerType.PlayerDamaged);
         }
 
         public void OnShuffle(BattleSceneState state)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.Shuffle);
+            ApplyRelicTrigger(state, RelicTriggerType.Shuffle);
         }
 
         public void OnCardExhausted(BattleSceneState state, RuntimeCard card)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.CardExhausted);
+            ApplyRelicTrigger(state, RelicTriggerType.CardExhausted);
         }
 
         public void OnLoseHp(BattleSceneState state, int amount)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.LoseHp);
+            ApplyRelicTrigger(state, RelicTriggerType.LoseHp);
+        }
+
+        private void ApplyRelicTrigger(BattleSceneState state, RelicTriggerType triggerType)
+        {
+            RelicTriggerContext context = new RelicTriggerContext(triggerType);
+            _relicService.ApplyEffects(state, context);
         }
     }
 }
