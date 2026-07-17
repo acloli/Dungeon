@@ -15,6 +15,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IMasterDataService _masterDataService;
+        private readonly RelicConditionEvaluator _conditionEvaluator = new RelicConditionEvaluator();
 
         public BattleRelicService()
         {
@@ -123,7 +124,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
         {
-            if (state == null)
+            ApplyEffects(state, new RelicTriggerContext(triggerType));
+        }
+
+        public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
+        {
+            if (state == null || context == null)
             {
                 return;
             }
@@ -139,7 +145,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 for (int effectIndex = 0; effectIndex < relic.Effects.Count; effectIndex++)
                 {
                     RuntimeRelicEffect effect = relic.Effects[effectIndex];
-                    if (effect == null || effect.TriggerType != triggerType)
+                    if (effect == null || effect.TriggerType != context.TriggerType)
+                    {
+                        continue;
+                    }
+
+                    if (!_conditionEvaluator.EvaluateAll(state, context, effect.Conditions))
+                    {
+                        continue;
+                    }
+
+                    if (!TryReserveEffectActivation(state, effect))
                     {
                         continue;
                     }
@@ -149,14 +165,25 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
         }
 
-        public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
+        /// <summary>
+        /// 発動回数制限に応じて効果IDを予約する
+        /// </summary>
+        private static bool TryReserveEffectActivation(BattleSceneState state, RuntimeRelicEffect effect)
         {
-            if (context == null)
+            switch (effect.ActivationLimit)
             {
-                return;
-            }
+                case RelicActivationLimit.Unlimited:
+                    return true;
 
-            ApplyEffects(state, context.TriggerType);
+                case RelicActivationLimit.OncePerTurn:
+                    return effect.Id > 0 && state.TryReserveTurnRelicEffectActivation(effect.Id);
+
+                case RelicActivationLimit.OncePerRun:
+                    return effect.Id > 0 && state.TryReserveRunRelicEffectActivation(effect.Id);
+
+                default:
+                    return false;
+            }
         }
 
         private static bool HasOwnedRelic(BattleSceneState state, int relicId)
