@@ -214,6 +214,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             InGameNodeType nodeType = _state.Nodes[index].NodeType;
             if (nodeType == InGameNodeType.RestShop)
             {
+                // 新規ノード受理時だけ訪問状態を初期化し、発火後の状態でラインナップを生成する。
+                _state.BeginRestShopVisit();
+                RelicTriggerContext context = new RelicTriggerContext(
+                    RelicTriggerType.RestShopEntered,
+                    nodeType: nodeType,
+                    runDefinition: _runDefinition);
+                _relicService.ApplyEffects(_state, context);
                 OpenRestShop();
                 RequestSave();
                 return;
