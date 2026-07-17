@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Game.MasterData.Generated;
 
@@ -77,6 +78,84 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.CardSelectMode = CardSelectMode.Upgrade;
             state.CardSelectMessage = string.Empty;
             setCurrentPage(BattleScenePage.CardSelect);
+        }
+
+        /// <summary>
+        /// 現在のカード選択候補取得
+        /// </summary>
+        public IReadOnlyList<RuntimeCard> GetCardSelectCards(BattleSceneState state, RuntimeRunDefinition runDefinition)
+        {
+            if (state.CardSelectMode != CardSelectMode.Upgrade)
+            {
+                return state.Deck;
+            }
+
+            List<RuntimeCard> upgradeableCards = new List<RuntimeCard>();
+            for (int i = 0; i < state.Deck.Count; i++)
+            {
+                RuntimeCard card = state.Deck[i];
+                if (CanUpgradeCard(runDefinition, card))
+                {
+                    upgradeableCards.Add(card);
+                }
+            }
+
+            return upgradeableCards;
+        }
+
+        /// <summary>
+        /// 現在のカード選択価格取得
+        /// </summary>
+        public IReadOnlyDictionary<int, int> GetCardSelectPrices(
+            BattleSceneState state,
+            RuntimeRunDefinition runDefinition,
+            bool isFreeUpgradeAvailable)
+        {
+            Dictionary<int, int> prices = new Dictionary<int, int>();
+            if (state.CardSelectMode != CardSelectMode.Upgrade)
+            {
+                return prices;
+            }
+
+            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards(state, runDefinition);
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RuntimeCard card = cards[i];
+                if (card != null)
+                {
+                    prices[card.Id] = isFreeUpgradeAvailable
+                        ? 0
+                        : _shopService.GetCardUpgradePrice(runDefinition, card);
+                }
+            }
+
+            return prices;
+        }
+
+        /// <summary>
+        /// 現在のカード選択強化後カード取得
+        /// </summary>
+        public IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards(
+            BattleSceneState state,
+            RuntimeRunDefinition runDefinition)
+        {
+            Dictionary<int, RuntimeCard> upgradedCards = new Dictionary<int, RuntimeCard>();
+            if (state.CardSelectMode != CardSelectMode.Upgrade || runDefinition == null)
+            {
+                return upgradedCards;
+            }
+
+            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards(state, runDefinition);
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RuntimeCard card = cards[i];
+                if (card != null && runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
+                {
+                    upgradedCards[card.Id] = upgradedCard;
+                }
+            }
+
+            return upgradedCards;
         }
 
         /// <summary>
@@ -209,7 +288,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 休憩所から継続する
         /// </summary>
-        public void ContinueFromRestShop(Action openMap)
+        public void ContinueFromRestShop(BattleSceneState state, Action openMap)
         {
             openMap();
         }

@@ -718,7 +718,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ContinueFromRestShop()
         {
-            _restShopFlowService.ContinueFromRestShop(OpenMap);
+            _restShopFlowService.ContinueFromRestShop(_state, OpenMap);
             RequestSave();
         }
 
