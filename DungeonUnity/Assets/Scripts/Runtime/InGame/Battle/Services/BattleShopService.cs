@@ -53,18 +53,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         break;
 
                     case RewardType.Relic:
-                        RuntimeItemPriceRule relicRule = PickItemRuleForSlot(runDef, RewardType.Relic, random);
+                        RuntimeItemPriceRule relicRule = PickRelicRuleForSlot(state, runDef, random);
                         if (relicRule != null)
                         {
                             int price = CalculateItemPrice(relicRule, random);
                             runDef.RelicCatalog.TryGetValue(relicRule.ItemId, out RuntimeRelic relic);
                             state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, relic, null, relicRule.ItemId, price));
-                        }
-                        else
-                        {
-                            // Fallback default relic
-                            runDef.RelicCatalog.TryGetValue(1, out RuntimeRelic relic);
-                            state.ShopItems.Add(new BattleShopItemState(slot.SlotIndex, RewardType.Relic, null, relic, null, 1, 150));
                         }
                         break;
 
@@ -216,6 +210,48 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             List<RuntimeItemPriceRule> rules = runDef.ItemPriceRules.Where(r => r.ItemType == itemType).ToList();
+            if (rules.Count == 0)
+            {
+                return null;
+            }
+
+            int index = random.Range(0, rules.Count);
+            return rules[index];
+        }
+
+        private static RuntimeItemPriceRule PickRelicRuleForSlot(BattleSceneState state, RuntimeRunDefinition runDef, IBattleRandomProvider random)
+        {
+            if (runDef.ItemPriceRules == null || runDef.RelicCatalog == null)
+            {
+                return null;
+            }
+
+            HashSet<int> excludedRelicIds = new HashSet<int>();
+            for (int i = 0; i < state.OwnedRelics.Count; i++)
+            {
+                RuntimeRelic ownedRelic = state.OwnedRelics[i];
+                if (ownedRelic != null)
+                {
+                    excludedRelicIds.Add(ownedRelic.Id);
+                }
+            }
+
+            for (int i = 0; i < state.ShopItems.Count; i++)
+            {
+                BattleShopItemState shopItem = state.ShopItems[i];
+                if (shopItem != null && shopItem.RewardType == RewardType.Relic)
+                {
+                    excludedRelicIds.Add(shopItem.ItemId);
+                }
+            }
+
+            List<RuntimeItemPriceRule> rules = runDef.ItemPriceRules
+                .Where(rule => rule != null
+                    && rule.ItemType == RewardType.Relic
+                    && !excludedRelicIds.Contains(rule.ItemId)
+                    && runDef.RelicCatalog.TryGetValue(rule.ItemId, out RuntimeRelic relic)
+                    && relic != null)
+                .ToList();
             if (rules.Count == 0)
             {
                 return null;
