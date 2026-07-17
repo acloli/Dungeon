@@ -93,6 +93,18 @@ relic.name.burning_core,バーニングコア,Burning Core,燃烧核心,燃燒�
 relic.desc.burning_core,戦闘開始時に6ブロックを得る。,Gain 6 Block at the start of combat.,战斗开始时获得6点格挡。,戰鬥開始時獲得6點格擋。,전투 시작 시 방어도 6을 얻는다.
 relic.name.ember_crown,エンバークラウン,Ember Crown,余烬王冠,餘燼王冠,엠버 크라운
 relic.desc.ember_crown,プレイヤーターン開始時にエナジー1を得る。,Gain 1 Energy at the start of each player turn.,每个玩家回合开始时获得1点能量。,每個玩家回合開始時獲得1點能量。,플레이어 턴 시작 시 에너지 1을 얻는다.
+relic.name.cracked_crystal_core,破損晶核,Cracked Crystal Core,破损晶核,破損晶核,파손된 수정핵
+relic.desc.cracked_crystal_core,戦闘開始時にエナジー1を得る。,Gain 1 Energy at the start of combat.,战斗开始时获得1点能量。,戰鬥開始時獲得1點能量。,전투 시작 시 에너지 1을 얻는다.
+relic.name.hunters_talisman,猟師の護符,Hunter's Talisman,猎人护符,獵人護符,사냥꾼의 부적
+relic.desc.hunters_talisman,戦闘勝利時に10ゴールドを得る。,Gain 10 Gold after winning a battle.,战斗胜利时获得10金币。,戰鬥勝利時獲得10金幣。,전투 승리 시 골드 10을 얻는다.
+relic.name.echo_vessel,反響容器,Echo Vessel,回响容器,迴響容器,메아리 그릇
+relic.desc.echo_vessel,各ターンで最初にコスト0のカードを使用した時、2ブロックを得る。,Gain 2 Block after playing the first 0-cost card each turn.,每回合首次打出0费卡牌时获得2点格挡。,每回合首次打出0費卡牌時獲得2點格擋。,매 턴 처음으로 비용 0 카드를 사용하면 방어도 2를 얻는다.
+relic.name.cracked_idol,亀裂の聖像,Cracked Idol,裂纹圣像,裂紋聖像,금이 간 성상
+relic.desc.cracked_idol,プレイヤーターン開始時、HPが50%以下なら3ブロックを得る。,Gain 3 Block at the start of your turn if HP is 50% or lower.,玩家回合开始时若生命值不高于50%则获得3点格挡。,玩家回合開始時若生命值不高於50%則獲得3點格擋。,플레이어 턴 시작 시 체력이 50% 이하면 방어도 3을 얻는다.
+relic.name.refining_prism,精製プリズム,Refining Prism,精炼棱镜,精煉稜鏡,정제 프리즘
+relic.desc.refining_prism,ラン中に1回、休憩所へ入った時にHPを5回復し、その休憩所でのカード強化を1回無料にする。,Once per run heal 5 HP when entering a Rest Shop and make one card upgrade there free.,每次冒险限一次：进入休息商店时恢复5点生命并可免费强化1张卡牌。,每次冒險限一次：進入休息商店時恢復5點生命並可免費強化1張卡牌。,런당 1회 휴식 상점에 들어가면 체력 5를 회복하고 그곳에서 카드 강화 1회를 무료로 한다.
+relic.name.bone_white_dice_box,骨白のダイス箱,Bone-White Dice Box,骨白骰盒,骨白骰盒,백골 주사위 상자
+relic.desc.bone_white_dice_box,エリート戦の勝利時、Commonカード1枚を規定の順序で強化する。,After winning an Elite Battle upgrade one Common card in a fixed order.,精英战胜利时按固定顺序强化1张普通卡牌。,精英戰勝利時按固定順序強化1張普通卡牌。,엘리트 전투 승리 시 정해진 순서에 따라 Common 카드 1장을 강화한다.
 potion.name.cinder_tonic,シンダートニック,Cinder Tonic,余烬药剂,餘燼藥劑,신더 토닉
 potion.desc.cinder_tonic,火花が沈む薬瓶。基本ポーション表示用。,A bottled cinder. Baseline potion for shared icon display.,封存火星的药剂。用于基础药水显示。,封存火星的藥劑。用於基礎藥水顯示。,불씨가 가라앉은 약병. 기본 포션 표시용.
 potion.name.smoke_phial,スモークファイアル,Smoke Phial,烟幕小瓶,煙幕小瓶,스모크 피알
@@ -109,6 +121,14 @@ potion.name.swift_potion,スイフトポーション,Swift Potion,迅捷药水,�
 potion.desc.swift_potion,カードを3枚引く。,Draw 3 cards.,抽3张牌。,抽3張牌。,카드 3장을 뽑는다.
 potion.name.fruit_juice,フルーツジュース,Fruit Juice,果汁药剂,果汁藥劑,과일 주스
 potion.desc.fruit_juice,最大HPを5増やす。,Gain 5 Max HP.,增加5点最大生命。,增加5點最大生命。,최대 체력 5를 얻는다.
+potion.name.shard_bomb,晶片爆弾,Shard Bomb,晶片炸弹,晶片炸彈,수정 조각 폭탄
+potion.desc.shard_bomb,敵1体に15ダメージを与える。,Deal 15 damage to an enemy.,对1名敌人造成15点伤害。,對1名敵人造成15點傷害。,적 하나에게 피해 15를 준다.
+potion.name.fracture_ampoule,亀裂アンプル,Fracture Ampoule,裂隙安瓿,裂隙安瓿,균열 앰풀
+potion.desc.fracture_ampoule,敵1体に脆弱2を付与する。,Apply 2 Vulnerable to an enemy.,对1名敌人施加2层易伤。,對1名敵人施加2層易傷。,적 하나에게 취약 2를 부여한다.
+potion.name.prism_blast,プリズム爆薬,Prism Blast,棱镜炸药,稜鏡炸藥,프리즘 폭약
+potion.desc.prism_blast,すべての敵に8ダメージを与える。,Deal 8 damage to all enemies.,对所有敌人造成8点伤害。,對所有敵人造成8點傷害。,모든 적에게 피해 8을 준다.
 battle.potion.use,使用,Use,使用,使用,사용
+battle.potion.use_confirm_title,ポーション使用,Use Potion,使用药水,使用藥水,포션 사용
+battle.potion.use_confirm_message,{0}を使用しますか？,Use {0}?,要使用{0}吗？,要使用{0}嗎？,{0}을(를) 사용하시겠습니까?
 battle.potion.replace_title,ポーション入れ替え,Potion Replace,药水替换,藥水替換,포션 교체
 battle.potion.replace_message,所持上限です。入れ替えるポーションを選んでください。,Potion slots are full. Choose a potion to replace.,药水槽已满。请选择要替换的药水。,藥水槽已滿。請選擇要替換的藥水。,포션 슬롯이 가득 찼습니다. 교체할 포션을 선택하세요.
