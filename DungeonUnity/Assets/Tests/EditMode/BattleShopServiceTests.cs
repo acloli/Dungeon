@@ -108,6 +108,7 @@ namespace Dungeon.Tests.EditMode
         private static RuntimeRunDefinition CreateRunDefinition()
         {
             RuntimeCard card = CreateCard(1);
+            RuntimeRelic relic = BattleTestData.Relic(1).Build();
             RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
             builder.RunProfileId = RunProfileId;
             builder.Key = "profile_1";
@@ -116,6 +117,7 @@ namespace Dungeon.Tests.EditMode
             builder.CardRewardChoiceCount = BaseStartingGold;
             builder.StarterDeck = new[] { card };
             builder.CardCatalog = new Dictionary<int, RuntimeCard> { { 1, card } };
+            builder.RelicCatalog = new Dictionary<int, RuntimeRelic> { { relic.Id, relic } };
             builder.ShopLineup = new RuntimeShopLineup(
                 1,
                 new[]
