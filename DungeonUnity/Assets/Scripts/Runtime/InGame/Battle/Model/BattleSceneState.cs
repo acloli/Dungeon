@@ -32,6 +32,16 @@ namespace Dungeon.Runtime.InGame.Battle.Model
 
         #endregion
 
+        #region Relic activation
+
+        private readonly HashSet<int> _activatedRelicEffectIdsThisTurn = new HashSet<int>();
+        private readonly HashSet<int> _activatedRelicEffectIdsThisRun = new HashSet<int>();
+
+        public IReadOnlyCollection<int> ActivatedRelicEffectIdsThisTurn => _activatedRelicEffectIdsThisTurn;
+        public IReadOnlyCollection<int> ActivatedRelicEffectIdsThisRun => _activatedRelicEffectIdsThisRun;
+
+        #endregion
+
         #region Reward
 
         public List<RuntimeRewardEntry> RewardChoices { get; } = new List<RuntimeRewardEntry>();
@@ -203,6 +213,39 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         {
             ClearOwnedRelicInspection();
             ClearOwnedPotionInspection();
+        }
+
+        /// <summary>
+        /// 現在のターンで発火済みのレリック効果をクリアする
+        /// </summary>
+        public void ClearTurnRelicEffectActivations()
+        {
+            _activatedRelicEffectIdsThisTurn.Clear();
+        }
+
+        /// <summary>
+        /// 新しいランの開始に備えてレリック効果の発火状態をリセットする
+        /// </summary>
+        public void ClearRelicEffectActivationsForNewRun()
+        {
+            _activatedRelicEffectIdsThisTurn.Clear();
+            _activatedRelicEffectIdsThisRun.Clear();
+        }
+
+        /// <summary>
+        /// 現在のターンに対するレリック効果の発火を予約する
+        /// </summary>
+        public bool TryReserveTurnRelicEffectActivation(int effectId)
+        {
+            return _activatedRelicEffectIdsThisTurn.Add(effectId);
+        }
+
+        /// <summary>
+        /// 現在のランに対するレリック効果の発火を予約する
+        /// </summary>
+        public bool TryReserveRunRelicEffectActivation(int effectId)
+        {
+            return _activatedRelicEffectIdsThisRun.Add(effectId);
         }
 
         /// <summary>
