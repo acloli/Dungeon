@@ -149,6 +149,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
         }
 
+        public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            ApplyEffects(state, context.TriggerType);
+        }
+
         private static bool HasOwnedRelic(BattleSceneState state, int relicId)
         {
             for (int i = 0; i < state.OwnedRelics.Count; i++)

@@ -99,6 +99,8 @@ namespace Dungeon.Tests.EditMode
 
             public List<RelicTriggerType> AppliedTriggers { get; } = new List<RelicTriggerType>();
 
+            public List<RelicTriggerContext> AppliedContexts { get; } = new List<RelicTriggerContext>();
+
             public void RestoreOwnedRelics(BattleSceneState state, RuntimeRunDefinition runDefinition, IReadOnlyList<int> ownedRelicIds)
             {
             }
@@ -117,6 +119,17 @@ namespace Dungeon.Tests.EditMode
             {
                 AppliedStates.Add(state);
                 AppliedTriggers.Add(triggerType);
+            }
+
+            public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
+            {
+                if (context == null)
+                {
+                    return;
+                }
+
+                AppliedContexts.Add(context);
+                ApplyEffects(state, context.TriggerType);
             }
         }
     }
