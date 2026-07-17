@@ -151,6 +151,165 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void InitializeShop_WithOwnedRelic_ShouldSelectDifferentRelic()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeRelic ownedRelic = BattleTestData.Relic(1).Build();
+            RuntimeRelic availableRelic = BattleTestData.Relic(2).Build();
+            BattleSceneState state = new BattleSceneState();
+            state.OwnedRelics.Add(ownedRelic);
+            RuntimeRunDefinition runDefinition = CreateItemRunDefinition(
+                new[] { new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.None, 100) },
+                new Dictionary<int, RuntimeRelic>
+                {
+                    { ownedRelic.Id, ownedRelic },
+                    { availableRelic.Id, availableRelic }
+                },
+                null,
+                new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, ownedRelic.Id, RelicPurchasePrice, 0),
+                    new RuntimeItemPriceRule(RewardType.Relic, availableRelic.Id, RelicPurchasePrice, 0)
+                });
+
+            service.InitializeShop(state, runDefinition, new FakeRandomProvider());
+
+            Assert.That(state.ShopItems, Has.Count.EqualTo(1));
+            Assert.That(state.ShopItems[0].ItemId, Is.EqualTo(availableRelic.Id));
+            Assert.That(state.ShopItems[0].Relic, Is.SameAs(availableRelic));
+        }
+
+        [Test]
+        public void InitializeShop_WithMultipleRelicSlots_ShouldNotDuplicateRelics()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeRelic firstRelic = BattleTestData.Relic(1).Build();
+            RuntimeRelic secondRelic = BattleTestData.Relic(2).Build();
+            BattleSceneState state = new BattleSceneState();
+            RuntimeRunDefinition runDefinition = CreateItemRunDefinition(
+                new[]
+                {
+                    new RuntimeShopSlot(1, RewardType.Relic, CardType.None, 100),
+                    new RuntimeShopSlot(2, RewardType.Relic, CardType.None, 100)
+                },
+                new Dictionary<int, RuntimeRelic>
+                {
+                    { firstRelic.Id, firstRelic },
+                    { secondRelic.Id, secondRelic }
+                },
+                null,
+                new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, firstRelic.Id, RelicPurchasePrice, 0),
+                    new RuntimeItemPriceRule(RewardType.Relic, secondRelic.Id, RelicPurchasePrice, 0)
+                });
+
+            service.InitializeShop(state, runDefinition, new FakeRandomProvider());
+
+            Assert.That(state.ShopItems, Has.Count.EqualTo(2));
+            Assert.That(state.ShopItems[0].ItemId, Is.EqualTo(firstRelic.Id));
+            Assert.That(state.ShopItems[1].ItemId, Is.EqualTo(secondRelic.Id));
+            Assert.That(state.ShopItems[0].ItemId, Is.Not.EqualTo(state.ShopItems[1].ItemId));
+        }
+
+        [Test]
+        public void InitializeShop_WithMissingRelicCatalogEntry_ShouldExcludeItsPriceRule()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeRelic availableRelic = BattleTestData.Relic(2).Build();
+            BattleSceneState state = new BattleSceneState();
+            RuntimeRunDefinition runDefinition = CreateItemRunDefinition(
+                new[] { new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.None, 100) },
+                new Dictionary<int, RuntimeRelic> { { availableRelic.Id, availableRelic } },
+                null,
+                new[]
+                {
+                    new RuntimeItemPriceRule(RewardType.Relic, 999, RelicPurchasePrice, 0),
+                    new RuntimeItemPriceRule(RewardType.Relic, availableRelic.Id, RelicPurchasePrice, 0)
+                });
+
+            service.InitializeShop(state, runDefinition, new FakeRandomProvider());
+
+            Assert.That(state.ShopItems, Has.Count.EqualTo(1));
+            Assert.That(state.ShopItems[0].ItemId, Is.EqualTo(availableRelic.Id));
+            Assert.That(state.ShopItems[0].Relic, Is.SameAs(availableRelic));
+        }
+
+        [Test]
+        public void InitializeShop_WhenRelicCandidatesAreExhausted_ShouldNotGenerateFallbackItem()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeRelic ownedRelic = BattleTestData.Relic(1).Build();
+            BattleSceneState state = new BattleSceneState();
+            state.OwnedRelics.Add(ownedRelic);
+            RuntimeRunDefinition runDefinition = CreateItemRunDefinition(
+                new[] { new RuntimeShopSlot(ShopSlotRelic, RewardType.Relic, CardType.None, 100) },
+                new Dictionary<int, RuntimeRelic> { { ownedRelic.Id, ownedRelic } },
+                null,
+                new[] { new RuntimeItemPriceRule(RewardType.Relic, ownedRelic.Id, RelicPurchasePrice, 0) });
+
+            service.InitializeShop(state, runDefinition, new FakeRandomProvider());
+
+            Assert.That(state.ShopItems, Is.Empty);
+        }
+
+        [Test]
+        public void PurchaseShopItem_WithOwnedRelicInLegacyLineup_ShouldRejectBeforeStateChanges()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimeRelic ownedRelic = BattleTestData.Relic(1).Build();
+            BattleSceneState state = new BattleSceneState { Gold = SufficientGold };
+            state.OwnedRelics.Add(ownedRelic);
+            state.ShopItems.Add(new BattleShopItemState(
+                ShopSlotRelic,
+                RewardType.Relic,
+                null,
+                ownedRelic,
+                null,
+                ownedRelic.Id,
+                RelicPurchasePrice,
+                false));
+
+            bool result = service.PurchaseShopItem(state, ShopSlotRelic);
+
+            Assert.That(result, Is.False);
+            Assert.That(state.Gold, Is.EqualTo(SufficientGold));
+            Assert.That(state.ShopItems[0].IsSoldOut, Is.False);
+            Assert.That(state.OwnedRelics, Has.Count.EqualTo(1));
+            Assert.That(state.Deck, Is.Empty);
+        }
+
+        [Test]
+        public void PotionDuplicates_ShouldRemainAvailableAndPurchasable()
+        {
+            BattleShopService service = new BattleShopService(new FakeMasterDataService());
+            RuntimePotion potion = BattleTestData.Potion(1).Build();
+            BattleSceneState state = new BattleSceneState { Gold = SufficientGold };
+            state.OwnedPotions.Add(potion);
+            RuntimeRunDefinition runDefinition = CreateItemRunDefinition(
+                new[]
+                {
+                    new RuntimeShopSlot(1, RewardType.Potion, CardType.None, 100),
+                    new RuntimeShopSlot(2, RewardType.Potion, CardType.None, 100)
+                },
+                null,
+                new Dictionary<int, RuntimePotion> { { potion.Id, potion } },
+                new[] { new RuntimeItemPriceRule(RewardType.Potion, potion.Id, PotionPurchasePrice, 0) });
+
+            service.InitializeShop(state, runDefinition, new FakeRandomProvider());
+
+            Assert.That(state.ShopItems, Has.Count.EqualTo(2));
+            Assert.That(state.ShopItems[0].ItemId, Is.EqualTo(potion.Id));
+            Assert.That(state.ShopItems[1].ItemId, Is.EqualTo(potion.Id));
+            Assert.That(service.PurchaseShopItem(state, 1), Is.True);
+            Assert.That(service.PurchaseShopItem(state, 2), Is.True);
+            Assert.That(state.Gold, Is.EqualTo(SufficientGold - PotionPurchasePrice * 2));
+            Assert.That(state.ShopItems[0].IsSoldOut, Is.True);
+            Assert.That(state.ShopItems[1].IsSoldOut, Is.True);
+            Assert.That(state.OwnedPotions, Has.Count.EqualTo(1));
+        }
+
+        [Test]
         public void PurchaseShopItem_WithSufficientGold_ShouldDeductGoldAndReturnTrue()
         {
             var masterData = new FakeMasterDataService();
@@ -271,6 +430,20 @@ namespace Dungeon.Tests.EditMode
             builder.StarterDeck = new[] { card };
             builder.CardCatalog = new Dictionary<int, RuntimeCard> { { card.Id, card } };
             builder.CardPriceRules = new Dictionary<CardRarity, RuntimeCardPriceRule> { { CardRarity.Common, cardPriceRule } };
+            return builder.Build();
+        }
+
+        private static RuntimeRunDefinition CreateItemRunDefinition(
+            IReadOnlyList<RuntimeShopSlot> slots,
+            IReadOnlyDictionary<int, RuntimeRelic> relicCatalog,
+            IReadOnlyDictionary<int, RuntimePotion> potionCatalog,
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules)
+        {
+            RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
+            builder.ShopLineup = new RuntimeShopLineup(1, slots);
+            builder.RelicCatalog = relicCatalog ?? new Dictionary<int, RuntimeRelic>();
+            builder.PotionCatalog = potionCatalog ?? new Dictionary<int, RuntimePotion>();
+            builder.ItemPriceRules = itemPriceRules;
             return builder.Build();
         }
     }
