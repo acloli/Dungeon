@@ -78,6 +78,41 @@ namespace Dungeon.Tests.EditMode.Save
         }
 
         [Test]
+        public void RunSaveData_RelicActivationFields_CanRoundTripThroughJson()
+        {
+            RunSaveData source = CreateValidSaveData();
+            source.ActivatedRelicEffectIdsThisRun = new List<int> { 7101, 7102 };
+            source.RestShopFreeUpgradeCount = 2;
+
+            string json = JsonUtility.ToJson(source);
+            RunSaveData restored = JsonUtility.FromJson<RunSaveData>(json);
+
+            Assert.That(json, Does.Contain("\"ActivatedRelicEffectIdsThisRun\":[7101,7102]"));
+            Assert.That(json, Does.Contain("\"RestShopFreeUpgradeCount\":2"));
+            Assert.That(restored.ActivatedRelicEffectIdsThisRun, Is.EqualTo(new[] { 7101, 7102 }));
+            Assert.That(restored.RestShopFreeUpgradeCount, Is.EqualTo(2));
+            Assert.That(restored.IsValid, Is.True);
+        }
+
+        [Test]
+        public void LoadCurrentRunAsync_LegacyJsonWithoutRelicActivationFields_ReturnsDefaults()
+        {
+            string legacyJson = "{\"RunProfileId\":5501,\"PlayerMaxHp\":80,\"PlayerHp\":45,\"PlayerEnergy\":3,\"Gold\":150,\"CurrentNodeIndex\":5,\"CurrentPage\":0,\"MasterSeed\":12345,\"MapSeed\":67890,\"MapLayoutVersion\":1,\"RandomCounter\":7,\"DeckCardIds\":[101,102,103]}";
+            FakeSaveDataService saveDataService = new FakeSaveDataService
+            {
+                LoadResult = JsonUtility.FromJson<RunSaveData>(legacyJson)
+            };
+            RunSaveService service = new RunSaveService(saveDataService);
+
+            RunSaveData restored = service.LoadCurrentRunAsync().GetAwaiter().GetResult();
+
+            Assert.That(restored, Is.Not.Null);
+            Assert.That(restored.IsValid, Is.True);
+            Assert.That(restored.ActivatedRelicEffectIdsThisRun, Is.Empty);
+            Assert.That(restored.RestShopFreeUpgradeCount, Is.Zero);
+        }
+
+        [Test]
         public void RunSaveData_IsValid_WhenRunProfileIdIsGreaterThanZero()
         {
             RunSaveData data1 = CreateValidSaveData();
