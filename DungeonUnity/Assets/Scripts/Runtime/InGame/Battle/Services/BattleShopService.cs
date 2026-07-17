@@ -94,6 +94,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return false;
             }
 
+            if (item.RewardType == RewardType.Relic
+                && state.OwnedRelics.Any(ownedRelic => ownedRelic != null
+                    && (ownedRelic.Id == item.ItemId
+                        || item.Relic != null && ownedRelic.Id == item.Relic.Id)))
+            {
+                return false;
+            }
+
             state.Gold -= item.Price;
             item.IsSoldOut = true;
 
