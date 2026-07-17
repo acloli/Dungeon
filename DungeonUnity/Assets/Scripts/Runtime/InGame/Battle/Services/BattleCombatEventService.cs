@@ -22,6 +22,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public void OnPlayerTurnStart(BattleSceneState state)
         {
+            // 新しいプレイヤーターンを通知する前にターン単位の発火状態をリセットする
+            state?.ClearTurnRelicEffectActivations();
             _relicService.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
         }
 
@@ -32,7 +34,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         public void OnCardPlayed(BattleSceneState state, RuntimeCard card, BattleCardResolutionResult result)
         {
-            _relicService.ApplyEffects(state, RelicTriggerType.CardPlayed);
+            RelicTriggerContext context = new RelicTriggerContext(
+                RelicTriggerType.CardPlayed,
+                playedCard: card);
+            _relicService.ApplyEffects(state, context);
         }
 
         public void OnPlayerDamaged(BattleSceneState state, int damage)
