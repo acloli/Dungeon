@@ -746,9 +746,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OnBattleVictory()
         {
+            InGameNodeType nodeType = GetCurrentNodeType();
+            RelicTriggerContext context = new RelicTriggerContext(
+                RelicTriggerType.CombatVictory,
+                nodeType: nodeType,
+                runDefinition: _runDefinition);
+            _relicService.ApplyEffects(_state, context);
             _rewardFlowService.PrepareBattleRewards(_state, _runDefinition, CalculateBattleGoldReward());
 
-            if (GetCurrentNodeType() == InGameNodeType.Boss)
+            if (nodeType == InGameNodeType.Boss)
             {
                 OpenResult(true);
                 return;
