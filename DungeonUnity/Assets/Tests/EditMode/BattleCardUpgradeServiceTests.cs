@@ -10,6 +10,7 @@ namespace Dungeon.Tests.EditMode
     /// <summary>
     /// BattleCardUpgradeServiceのEditorモードテストクラス
     /// </summary>
+    [TestFixture]
     public sealed class BattleCardUpgradeServiceTests
     {
         [Test]
