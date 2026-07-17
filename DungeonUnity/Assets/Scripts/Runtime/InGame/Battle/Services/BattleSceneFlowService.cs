@@ -15,7 +15,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
     /// </summary>
     public sealed class BattleSceneFlowService : IBattleSceneFlowService
     {
-        private const int CurrentMapLayoutVersion = 1;
+        private const int CurrentMapLayoutVersion = 2;
         private const int MapSeedSalt = 0x4D6170;
 
         private readonly BattleSceneState _state = new BattleSceneState();
@@ -254,6 +254,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             _state.CurrentNodeIndex = index;
+            AppendMapRouteNode(index);
             InGameNodeType nodeType = _state.Nodes[index].NodeType;
             if (nodeType == InGameNodeType.RestShop)
             {
@@ -265,6 +266,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             if (nodeType == InGameNodeType.Event)
             {
                 OpenEvent();
+                return;
+            }
+
+            if (nodeType == InGameNodeType.Treasure)
+            {
+                OpenTreasureReward();
                 return;
             }
 
@@ -803,6 +810,60 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 宝箱報酬画面遷移
+        /// </summary>
+        private void OpenTreasureReward()
+        {
+            PrepareTreasureRewards();
+            SetCurrentPage(BattleScenePage.Reward);
+        }
+
+        /// <summary>
+        /// 宝箱報酬状態を準備する
+        /// </summary>
+        private void PrepareTreasureRewards()
+        {
+            RuntimeTreasureDefinition treasureDefinition = _rules.GetTreasureDefinition(_state, _runDefinition);
+
+            _state.BattleFinished = true;
+            _state.SelectedCardIndex = BattleSceneConstants.UnselectedCardIndex;
+            _state.RewardChoices.Clear();
+            _state.ClearPendingRewards();
+            _state.BattleGoldReward = _rules.RollTreasureGold(_state, _runDefinition, _randomProvider);
+            _state.GoldClaimed = false;
+            _state.PotionClaimed = false;
+            _state.RelicClaimed = false;
+            _state.CardRewardPicked = true;
+
+            _state.PotionDropped = RollTreasureDrop(treasureDefinition?.PotionDropChance ?? 0);
+            if (_state.PotionDropped)
+            {
+                _state.PendingPotionReward = _potionService.RollBattleRewardPotion(_runDefinition, _randomProvider);
+            }
+
+            _state.RelicDropped = false;
+            if (RollTreasureDrop(treasureDefinition?.RelicDropChance ?? 0))
+            {
+                int relicGroupId = treasureDefinition?.RelicGroupId ?? 0;
+                _state.PendingRelicReward = _relicService.RollTreasureRewardRelic(_state, _runDefinition, relicGroupId, _randomProvider);
+                _state.RelicDropped = _state.PendingRelicReward != null;
+            }
+        }
+
+        /// <summary>
+        /// 宝箱ドロップ有無を抽選する
+        /// </summary>
+        private bool RollTreasureDrop(int chance)
+        {
+            if (chance <= 0)
+            {
+                return false;
+            }
+
+            return _randomProvider.Range(0, 100) < chance;
+        }
+
+        /// <summary>
         /// イベント画面遷移
         /// </summary>
         private void OpenEvent()
@@ -1122,6 +1183,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 TLogger.Error($"RunSave request failed: {ex.Message}", "Battle");
             });
+        }
+
+        /// <summary>
+        /// 実際に選択したマップ経路を記録する
+        /// </summary>
+        private void AppendMapRouteNode(int nodeIndex)
+        {
+            if (_state.MapRouteNodeIndices.Count > 0 &&
+                _state.MapRouteNodeIndices[_state.MapRouteNodeIndices.Count - 1] == nodeIndex)
+            {
+                return;
+            }
+
+            _state.MapRouteNodeIndices.Add(nodeIndex);
         }
 
         /// <summary>

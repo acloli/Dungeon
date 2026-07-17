@@ -133,6 +133,10 @@ namespace Dungeon.Tests.EditMode
             {
                 new PotionEffectMaster { Id = 3201, PotionId = 1, Order = 1, EffectType = EffectType.GainMaxHp, Value = 5, HitCount = 1, StatusType = StatusType.None, StatusValue = 0, TargetSide = TargetSide.Self }
             });
+            masterDataService.SetAll(new[]
+            {
+                new TreasureMaster { Id = 8901, Key = "treasure_act1", MinFloor = 2, MaxFloor = 6, MinGold = 18, MaxGold = 42, RelicGroupId = 7701, PotionDropChance = 25, RelicDropChance = 15 }
+            });
 
             BattleMasterDataFacade facade = new BattleMasterDataFacade(
                 masterDataService,
@@ -160,6 +164,15 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runDefinition.PotionCatalog[1].Effects.Count, Is.EqualTo(1));
             Assert.That(runDefinition.PotionCatalog[1].UseContext, Is.EqualTo(PotionUseContext.Both));
             Assert.That(runDefinition.PotionCatalog[1].TargetMode, Is.EqualTo(PotionTargetMode.Self));
+            Assert.That(runDefinition.TreasureDefinitions.Count, Is.EqualTo(1));
+            Assert.That(runDefinition.TreasureDefinitions[0].Id, Is.EqualTo(8901));
+            Assert.That(runDefinition.TreasureDefinitions[0].MinFloor, Is.EqualTo(2));
+            Assert.That(runDefinition.TreasureDefinitions[0].MaxFloor, Is.EqualTo(6));
+            Assert.That(runDefinition.TreasureDefinitions[0].GoldMin, Is.EqualTo(18));
+            Assert.That(runDefinition.TreasureDefinitions[0].GoldMax, Is.EqualTo(42));
+            Assert.That(runDefinition.TreasureDefinitions[0].RelicGroupId, Is.EqualTo(7701));
+            Assert.That(runDefinition.TreasureDefinitions[0].PotionDropChance, Is.EqualTo(25));
+            Assert.That(runDefinition.TreasureDefinitions[0].RelicDropChance, Is.EqualTo(15));
             Assert.That(runDefinition.PossibleEvents.Count, Is.EqualTo(1));
             Assert.That(runDefinition.PossibleEvents[0].Choices.Count, Is.EqualTo(2));
             Assert.That(runDefinition.ShopLineup.ShopId, Is.EqualTo(1));

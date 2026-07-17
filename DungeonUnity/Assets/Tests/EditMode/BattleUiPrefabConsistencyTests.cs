@@ -10,6 +10,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Dungeon.Tests.EditMode
@@ -23,6 +24,9 @@ namespace Dungeon.Tests.EditMode
         private const string UiFolder = "Assets/Prefabs/InGame/UI";
         private const string CommonUiFolder = "Assets/Prefabs/Common/UI";
         private const string AddressGroupPath = "Assets/AddressableAssetsData/AssetGroups/Default Local Group.asset";
+        private const string RewardGold25Label = "+25 Gold";
+        private const string PickCardLabel = "Pick a Card";
+        private const string CardPickedLabel = "Card Picked";
 
         [TestCase("CommonPage", false, null)]
         [TestCase("CommonDialog", false, null)]
@@ -94,6 +98,72 @@ namespace Dungeon.Tests.EditMode
             Assert.That(serialized.FindProperty("_rewardRoot").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_rewardButtonTemplate").objectReferenceValue, Is.Not.Null);
             Assert.That(serialized.FindProperty("_continueButton").objectReferenceValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void RewardDialog_HidesCardPickedWhenNoCardChoicesExist()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/RewardDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RewardDialog dialog = instance.GetComponent<RewardDialog>();
+                BattleRewardSnapshot snapshot = new BattleRewardSnapshot(
+                    rewardChoices: System.Array.Empty<RuntimeRewardEntry>(),
+                    cardRewardPicked: true,
+                    battleGoldReward: 25);
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(new BattleRewardDialogParam(snapshot), System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                List<string> labels = GetRewardRowLabels(dialog);
+                Assert.That(labels, Does.Contain(RewardGold25Label));
+                Assert.That(labels, Does.Not.Contain(CardPickedLabel));
+                Assert.That(labels, Does.Not.Contain(PickCardLabel));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void RewardDialog_ShowsCardPickedWhenCardChoicesExist()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/RewardDialog.prefab");
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                RewardDialog dialog = instance.GetComponent<RewardDialog>();
+                RuntimeCard card = CreateCard(1001, "Strike", 1);
+                RuntimeRewardEntry rewardEntry = new RuntimeRewardEntry(
+                    RewardType.Card,
+                    card.Id,
+                    card,
+                    null,
+                    null,
+                    10,
+                    1,
+                    99);
+                BattleRewardSnapshot snapshot = new BattleRewardSnapshot(
+                    rewardChoices: new[] { rewardEntry },
+                    cardRewardPicked: true,
+                    battleGoldReward: 25);
+
+                IUIDialog lifecycle = dialog;
+                lifecycle.OnPreOpenAsync(new BattleRewardDialogParam(snapshot), System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+                lifecycle.OnOpened();
+
+                List<string> labels = GetRewardRowLabels(dialog);
+                Assert.That(labels, Does.Contain(CardPickedLabel));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
         }
 
         [Test]
@@ -797,6 +867,19 @@ namespace Dungeon.Tests.EditMode
         {
             SerializedObject serialized = new SerializedObject(target);
             return serialized.FindProperty(propertyName).objectReferenceValue as T;
+        }
+
+        private static List<string> GetRewardRowLabels(RewardDialog dialog)
+        {
+            List<string> labels = new List<string>();
+            BattleOptionButtonView[] rows = dialog.GetComponentsInChildren<BattleOptionButtonView>(false);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                Component labelText = GetSerializedReference<Component>(rows[i], "_labelText");
+                labels.Add(ReadText(labelText));
+            }
+
+            return labels;
         }
 
         private static string ReadText(Component textComponent)

@@ -60,6 +60,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         bool RollRelicDrop(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
 
         /// <summary>
+        /// 現在階層に対応する宝箱定義取得
+        /// </summary>
+        RuntimeTreasureDefinition GetTreasureDefinition(BattleSceneState state, RuntimeRunDefinition runDefinition);
+
+        /// <summary>
+        /// 宝箱Gold報酬抽選
+        /// </summary>
+        int RollTreasureGold(BattleSceneState state, RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
+
+        /// <summary>
+        /// 宝箱Gold報酬抽選
+        /// </summary>
+        int RollTreasureGold(RuntimeRunDefinition runDefinition, IBattleRandomProvider randomProvider);
+
+        /// <summary>
         /// 使用可否判定
         /// </summary>
         bool CanPlayCard(BattleSceneState state, RuntimeCard card);

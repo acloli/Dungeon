@@ -415,6 +415,41 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ランタイム用宝箱報酬定義
+    /// </summary>
+    public sealed class RuntimeTreasureDefinition
+    {
+        public RuntimeTreasureDefinition(
+            int id,
+            int minFloor,
+            int maxFloor,
+            int goldMin,
+            int goldMax,
+            int relicGroupId,
+            int potionDropChance,
+            int relicDropChance)
+        {
+            Id = id;
+            MinFloor = minFloor;
+            MaxFloor = maxFloor;
+            GoldMin = goldMin;
+            GoldMax = goldMax;
+            RelicGroupId = relicGroupId;
+            PotionDropChance = potionDropChance;
+            RelicDropChance = relicDropChance;
+        }
+
+        public int Id { get; }
+        public int MinFloor { get; }
+        public int MaxFloor { get; }
+        public int GoldMin { get; }
+        public int GoldMax { get; }
+        public int RelicGroupId { get; }
+        public int PotionDropChance { get; }
+        public int RelicDropChance { get; }
+    }
+
+    /// <summary>
     /// ランタイム用イベント選択肢定義
     /// </summary>
     public sealed class RuntimeEventChoice
@@ -583,7 +618,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             IReadOnlyDictionary<int, RuntimePotion> potionCatalog,
             RuntimeShopLineup shopLineup,
             IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> cardPriceRules,
-            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules)
+            IReadOnlyList<RuntimeItemPriceRule> itemPriceRules,
+            IReadOnlyList<RuntimeTreasureDefinition> treasureDefinitions = null)
         {
             RunProfileId = runProfileId;
             Key = key;
@@ -606,6 +642,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             ShopLineup = shopLineup;
             CardPriceRules = cardPriceRules ?? new Dictionary<CardRarity, RuntimeCardPriceRule>();
             ItemPriceRules = itemPriceRules ?? Array.Empty<RuntimeItemPriceRule>();
+            TreasureDefinitions = treasureDefinitions ?? Array.Empty<RuntimeTreasureDefinition>();
         }
 
         public int RunProfileId { get; }
@@ -628,6 +665,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimeShopLineup ShopLineup { get; }
         public IReadOnlyDictionary<CardRarity, RuntimeCardPriceRule> CardPriceRules { get; }
         public IReadOnlyList<RuntimeItemPriceRule> ItemPriceRules { get; }
+        public IReadOnlyList<RuntimeTreasureDefinition> TreasureDefinitions { get; }
     }
 
     /// <summary>

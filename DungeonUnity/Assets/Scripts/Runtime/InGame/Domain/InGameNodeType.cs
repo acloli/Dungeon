@@ -6,6 +6,7 @@ namespace Dungeon.Runtime.InGame.Domain
         EliteBattle = 1,
         RestShop = 2,
         Boss = 3,
-        Event = 4
+        Event = 4,
+        Treasure = 5
     }
 }

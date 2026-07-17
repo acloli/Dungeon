@@ -26,6 +26,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public const string DefaultEliteNodeLabel = "Elite";
         public const string DefaultShopNodeLabel = "Shop";
         public const string DefaultBossNodeLabel = "Boss";
+        public const string TreasureNodeDisplayName = "Treasure";
 
         public const string MapNodeLabelFormat = "{0}.{1}";
         public const string CardLabelFormat = "{0} C{1} D{2}";

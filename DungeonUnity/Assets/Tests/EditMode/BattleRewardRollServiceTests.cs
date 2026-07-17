@@ -69,22 +69,54 @@ namespace Dungeon.Tests.EditMode
             Assert.That(service.RollPotionDrop(runDefinition, new FixedRandomProvider(30)), Is.False);
         }
 
-        private static RuntimeRunDefinition CreateRunDefinition(IReadOnlyList<RuntimeRewardEntry> rewardPool)
+        [Test]
+        public void RollTreasureGold_UsesCurrentFloorDefinitionAndInclusiveRange()
         {
-            RuntimeRunDefinitionBuilder builder = BattleTestData.RunDefinition();
-            builder.RunProfileId = 5501;
-            builder.Key = "reward_roll";
-            builder.StarterDeck = Array.Empty<RuntimeCard>();
-            builder.CardCatalog = new Dictionary<int, RuntimeCard>();
-            builder.RewardPool = rewardPool;
-            builder.Nodes = Array.Empty<RuntimeMapNode>();
-            builder.EncountersByNodeType = new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>();
-            builder.PossibleEvents = Array.Empty<RuntimeEvent>();
-            builder.RelicCatalog = new Dictionary<int, RuntimeRelic>();
-            builder.PotionCatalog = new Dictionary<int, RuntimePotion>();
-            builder.ItemPriceRules = Array.Empty<RuntimeItemPriceRule>();
-            builder.CardRewardChoiceCount = 3;
-            return builder.Build();
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentNodeIndex = 0
+            };
+            state.Nodes.Add(new RuntimeMapNode(5301, "node_1", 6, InGameNodeType.Treasure, "Treasure", string.Empty, Array.Empty<int>()));
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                Array.Empty<RuntimeRewardEntry>(),
+                new[]
+                {
+                    new RuntimeTreasureDefinition(1, 1, 5, 10, 12, 0, 0, 0),
+                    new RuntimeTreasureDefinition(2, 6, 8, 30, 35, 0, 0, 0)
+                });
+            BattleSceneRules rules = new BattleSceneRules(null, null, null, new BattleRewardRollService());
+
+            int gold = rules.RollTreasureGold(state, runDefinition, new FixedRandomProvider(35));
+
+            Assert.That(gold, Is.EqualTo(35));
+        }
+
+        private static RuntimeRunDefinition CreateRunDefinition(
+            IReadOnlyList<RuntimeRewardEntry> rewardPool,
+            IReadOnlyList<RuntimeTreasureDefinition> treasureDefinitions = null)
+        {
+            return new RuntimeRunDefinition(
+                5501,
+                "reward_roll",
+                6301,
+                CharacterArchetype.CrimsonExile,
+                50,
+                120,
+                3,
+                0,
+                0,
+                Array.Empty<RuntimeCard>(),
+                new Dictionary<int, RuntimeCard>(),
+                rewardPool,
+                Array.Empty<RuntimeMapNode>(),
+                new Dictionary<InGameNodeType, IReadOnlyList<RuntimeEncounterEntry>>(),
+                Array.Empty<RuntimeEvent>(),
+                new Dictionary<int, RuntimeRelic>(),
+                new Dictionary<int, RuntimePotion>(),
+                null,
+                new Dictionary<CardRarity, RuntimeCardPriceRule>(),
+                Array.Empty<RuntimeItemPriceRule>(),
+                treasureDefinitions);
         }
 
         private static RuntimeRewardEntry CreateRewardEntry(int cardId, string displayName, int weight, int minFloor, int maxFloor)

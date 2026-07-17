@@ -26,6 +26,7 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public int RandomCounter;
 
         public List<int> DeckCardIds = new List<int>();
+        public List<int> MapRouteNodeIndices = new List<int>();
         public List<int> OwnedRelicIds = new List<int>();
         public List<int> OwnedPotionIds = new List<int>();
 

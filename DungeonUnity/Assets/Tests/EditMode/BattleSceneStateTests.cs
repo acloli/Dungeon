@@ -137,11 +137,59 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.EnemyBlock, Is.EqualTo(0));
         }
 
+        [Test]
+        public void CanMoveToNode_FromStart_AllowsFirstNodeOnly()
+        {
+            BattleSceneState state = CreateMapState();
+
+            Assert.That(state.CanMoveToNode(0), Is.True);
+            Assert.That(state.CanMoveToNode(1), Is.False);
+        }
+
+        [Test]
+        public void CanMoveToNode_ConnectedTarget_ReturnsTrue()
+        {
+            BattleSceneState state = CreateMapState();
+            state.CurrentNodeIndex = 0;
+
+            Assert.That(state.CanMoveToNode(1), Is.True);
+        }
+
+        [Test]
+        public void CanMoveToNode_UnconnectedTarget_ReturnsFalse()
+        {
+            BattleSceneState state = CreateMapState();
+            state.CurrentNodeIndex = 0;
+
+            Assert.That(state.CanMoveToNode(2), Is.False);
+        }
+
+        [Test]
+        public void CanMoveToNode_InvalidIndex_ReturnsFalse()
+        {
+            BattleSceneState state = CreateMapState();
+
+            Assert.That(state.CanMoveToNode(-1), Is.False);
+            Assert.That(state.CanMoveToNode(3), Is.False);
+        }
+
         private static BattleEnemyState CreateEnemyState()
         {
             RuntimeEnemyBuilder builder = BattleTestData.Enemy(3001);
             RuntimeEnemy enemy = builder.Build();
             return new BattleEnemyState(enemy, 0, 12);
+        }
+
+        private static BattleSceneState CreateMapState()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeMapNodeBuilder first = BattleTestData.MapNode(5301);
+            first.NextNodeIndices = new[] { 1 };
+            state.Nodes.Add(first.Build());
+            state.Nodes.Add(BattleTestData.MapNode(5302).Build());
+            state.Nodes.Add(BattleTestData.MapNode(5303).Build());
+
+            return state;
         }
     }
 }

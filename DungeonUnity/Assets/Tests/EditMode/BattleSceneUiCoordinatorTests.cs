@@ -69,6 +69,33 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void ShowMapAsync_PassesExtendedSnapshotToMapPageParam()
+        {
+            FakeUIService uiService = new FakeUIService();
+            BattleSceneUiCoordinator coordinator = new BattleSceneUiCoordinator(uiService);
+            FakeBattleSceneHostView hostView = new FakeBattleSceneHostView();
+            BattleMapSnapshot mapSnapshot = CreateExtendedMapSnapshot();
+            int clickedNodeIndex = -1;
+
+            coordinator.InitializeAsync(hostView, CancellationToken.None).GetAwaiter().GetResult();
+            coordinator.ShowMapAsync(mapSnapshot, index => clickedNodeIndex = index, CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.That(uiService.LastMapPageParam, Is.Not.Null);
+            Assert.That(uiService.LastMapPageParam.Snapshot, Is.SameAs(mapSnapshot));
+            Assert.That(uiService.LastMapPageParam.Snapshot.Nodes, Is.SameAs(mapSnapshot.Nodes));
+            Assert.That(uiService.LastMapPageParam.Snapshot.AvailableNodeIndices, Is.SameAs(mapSnapshot.AvailableNodeIndices));
+            Assert.That(uiService.LastMapPageParam.Snapshot.NodeLayouts, Is.SameAs(mapSnapshot.NodeLayouts));
+            Assert.That(uiService.LastMapPageParam.Snapshot.MapRouteNodeIndices, Is.SameAs(mapSnapshot.MapRouteNodeIndices));
+            Assert.That(uiService.LastMapPageParam.Snapshot.CurrentFloor, Is.EqualTo(2));
+            Assert.That(uiService.LastMapPageParam.Snapshot.CurrentNodeIndex, Is.EqualTo(0));
+
+            uiService.LastMapPageParam.OnMapNodeClicked?.Invoke(1);
+
+            Assert.That(clickedNodeIndex, Is.EqualTo(1));
+            Assert.That(hostView.IsBattleVisible, Is.False);
+        }
+
+        [Test]
         public void ShowCardSelectAsync_PassesUpgradeModePayload()
         {
             FakeUIService uiService = new FakeUIService();
@@ -165,6 +192,27 @@ namespace Dungeon.Tests.EditMode
             builder.DisplayName = displayName;
             builder.Cost = cost;
             return builder.Build();
+        }
+
+        private static BattleMapSnapshot CreateExtendedMapSnapshot()
+        {
+            RuntimeMapNodeBuilder firstNodeBuilder = BattleTestData.MapNode(5301);
+            firstNodeBuilder.NextNodeIndices = new[] { 1 };
+            RuntimeMapNodeBuilder secondNodeBuilder = BattleTestData.MapNode(5302);
+            secondNodeBuilder.Floor = 2;
+            return new BattleMapSnapshot(
+                nodes: new[] { firstNodeBuilder.Build(), secondNodeBuilder.Build() },
+                availableNodeIndices: new[] { 1 },
+                mapMessage: "extended map",
+                currentFloor: 2,
+                totalFloors: 4,
+                currentNodeIndex: 0,
+                mapRouteNodeIndices: new[] { 0 },
+                nodeLayouts: new[]
+                {
+                    new MapNodeLayout(0, 0f, 0f, 1),
+                    new MapNodeLayout(1, 0.5f, 1f, 2)
+                });
         }
 
         private static T ExtractPayload<T>(UIDialogOpenParam param) where T : class
@@ -267,13 +315,23 @@ namespace Dungeon.Tests.EditMode
             public UIDialogOpenParam LastEventDialogParam { get; private set; }
             public UIDialogOpenParam LastPotionReplaceDialogParam { get; private set; }
             public UIDialogOpenParam LastCardSelectDialogParam { get; private set; }
+            public BattleMapPageParam LastMapPageParam { get; private set; }
 
             public UIPageBase CurrentPage => null;
             public int PageStackCount => 0;
             public bool IsLoading => false;
 
             public UniTask InitializeAsync(CancellationToken ct) => UniTask.CompletedTask;
-            public UniTask ShowPageAsync<TPage>(object param = null, CancellationToken ct = default) where TPage : UIPageBase => UniTask.CompletedTask;
+            public UniTask ShowPageAsync<TPage>(object param = null, CancellationToken ct = default) where TPage : UIPageBase
+            {
+                if (typeof(TPage) == typeof(MapPage))
+                {
+                    LastMapPageParam = param as BattleMapPageParam;
+                }
+
+                return UniTask.CompletedTask;
+            }
+
             public UniTask ShowPageAsync(string address, object param = null, CancellationToken ct = default) => UniTask.CompletedTask;
             public UniTask<bool> GoBackAsync(CancellationToken ct = default) => UniTask.FromResult(false);
 

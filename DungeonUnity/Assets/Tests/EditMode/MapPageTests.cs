@@ -16,6 +16,7 @@ namespace Dungeon.Tests.EditMode
     public sealed class MapPageTests
     {
         private const string MapPagePrefabPath = "Assets/Prefabs/InGame/UI/MapPage.prefab";
+        private const float PositionTolerance = 0.01f;
 
         [TestCase(InGameNodeType.Battle, "BattleNodeTemplate")]
         [TestCase(InGameNodeType.EliteBattle, "EliteNodeTemplate")]
@@ -64,6 +65,14 @@ namespace Dungeon.Tests.EditMode
             AssertDistinctTemplate(serialized, "_eventNodeButtonTemplate");
             AssertDistinctTemplate(serialized, "_restNodeButtonTemplate");
             AssertDistinctTemplate(serialized, "_bossNodeButtonTemplate");
+            AssertAssignedReference<Transform>(serialized, "_nodeRoot");
+            AssertAssignedReference<Transform>(serialized, "_connectionRoot");
+            AssertAssignedReference<Image>(serialized, "_connectionLineTemplate");
+
+            Assert.That(serialized.FindProperty("_nodeSpacing").vector2Value, Is.EqualTo(new Vector2(160f, 120f)));
+            Assert.That(serialized.FindProperty("_nodeOffset").vector2Value, Is.EqualTo(Vector2.zero));
+            Assert.That(serialized.FindProperty("_connectionLineThickness").floatValue, Is.EqualTo(6f));
+            Assert.That(serialized.FindProperty("_currentNodeScale").vector3Value, Is.EqualTo(new Vector3(1.08f, 1.08f, 1f)));
         }
 
         [Test]
@@ -76,6 +85,19 @@ namespace Dungeon.Tests.EditMode
             AssertTemplateColor(prefab, "EventNodeTemplate", new Color32(63, 97, 153, 255));
             AssertTemplateColor(prefab, "RestNodeTemplate", new Color32(70, 127, 87, 255));
             AssertTemplateColor(prefab, "BossNodeTemplate", new Color32(178, 123, 54, 255));
+            AssertTemplateColor(prefab, "TreasureNodeTemplate", new Color32(183, 146, 61, 255));
+        }
+
+        [Test]
+        public void MapPagePrefab_TreasureTemplateDeclaresButtonAndLabel()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            Transform template = prefab.transform.Find("MapNodeRoot/TreasureNodeTemplate");
+
+            Assert.That(template, Is.Not.Null);
+            Assert.That(template.GetComponent<BattleOptionButtonView>(), Is.Not.Null);
+            Assert.That(template.GetComponent<Button>(), Is.Not.Null);
+            Assert.That(ReadLabel(template), Is.EqualTo("Treasure"));
         }
 
         [Test]
@@ -133,6 +155,198 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void BuildMapGraph_AppliesLayoutCoordinatesAndCreatesUiImageConnectionLines()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    new[]
+                    {
+                        CreateNode(1, InGameNodeType.Battle, "Start", new[] { 1, 2 }),
+                        CreateNode(2, InGameNodeType.EliteBattle, "Elite"),
+                        CreateNode(2, InGameNodeType.Event, "Event")
+                    },
+                    new[]
+                    {
+                        new MapNodeLayout(0, 0f, 0f, 1),
+                        new MapNodeLayout(1, 0.5f, 1f, 2),
+                        new MapNodeLayout(2, -0.5f, 1f, 2)
+                    },
+                    new[] { 1 },
+                    1,
+                    0,
+                    new[] { 0 },
+                    null);
+
+                Transform[] activeChildren = GetActiveChildren(page);
+                Image[] activeConnectionLines = GetActiveConnectionLines(page);
+
+                AssertVector2(ReadAnchoredPosition(activeChildren[0]), Vector2.zero);
+                AssertVector2(ReadAnchoredPosition(activeChildren[1]), new Vector2(80f, 120f));
+                AssertVector2(ReadAnchoredPosition(activeChildren[2]), new Vector2(-80f, 120f));
+
+                Assert.That(activeConnectionLines, Has.Length.EqualTo(2));
+                Assert.That(activeConnectionLines.All(line => line.GetComponent<Image>() != null), Is.True);
+                Assert.That(activeConnectionLines.All(line => line.raycastTarget == false), Is.True);
+                AssertVector2(ReadAnchoredPosition(activeConnectionLines[0].transform), new Vector2(40f, 60f));
+                AssertVector2(ReadSize(activeConnectionLines[0].transform), new Vector2(Mathf.Sqrt(20800f), 6f));
+                Assert.That((Color32)activeConnectionLines[0].color, Is.EqualTo((Color32)new Color(0.95f, 0.74f, 0.28f, 0.8f)));
+                Assert.That((Color32)activeConnectionLines[1].color, Is.EqualTo((Color32)new Color(0.44f, 0.47f, 0.55f, 0.25f)));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_DisablesFogNodeAndHighlightsCurrentNode()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    new[]
+                    {
+                        CreateNode(1, InGameNodeType.Battle, "Start", new[] { 1 }),
+                        CreateNode(2, InGameNodeType.Event, "Event"),
+                        CreateNode(3, InGameNodeType.Boss, "Boss")
+                    },
+                    new[]
+                    {
+                        new MapNodeLayout(0, 0f, 0f, 1),
+                        new MapNodeLayout(1, 0f, 1f, 2),
+                        new MapNodeLayout(2, 0f, 2f, 3)
+                    },
+                    new[] { 1 },
+                    1,
+                    0,
+                    new[] { 0 },
+                    null);
+
+                Transform[] activeChildren = GetActiveChildren(page);
+
+                Assert.That(activeChildren[0].GetComponent<Button>().interactable, Is.False);
+                Assert.That(activeChildren[0].localScale, Is.EqualTo(new Vector3(1.08f, 1.08f, 1f)));
+                Assert.That(activeChildren[0].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+
+                Assert.That(activeChildren[1].GetComponent<Button>().interactable, Is.True);
+                Assert.That(activeChildren[1].localScale, Is.EqualTo(Vector3.one));
+                Assert.That(activeChildren[1].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+
+                Assert.That(activeChildren[2].GetComponent<Button>().interactable, Is.False);
+                Assert.That(activeChildren[2].localScale, Is.EqualTo(Vector3.one));
+                Assert.That(activeChildren[2].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_HighlightsOnlyActualRouteNodes()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Transform[] activeChildren = GetActiveChildren(page);
+
+                Assert.That(activeChildren[0].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.68f));
+                Assert.That(activeChildren[1].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.68f));
+                Assert.That(activeChildren[2].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+                Assert.That(activeChildren[3].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+                Assert.That(activeChildren[4].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+                Assert.That(activeChildren[5].GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+                Assert.That(activeChildren[6].GetComponent<CanvasGroup>().alpha, Is.EqualTo(0.32f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_HighlightsOnlyActualRouteConnections()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Image[] activeConnectionLines = GetActiveConnectionLines(page);
+
+                Assert.That(activeConnectionLines, Has.Length.EqualTo(7));
+                AssertColor(activeConnectionLines[0].color, new Color(0.22f, 0.82f, 0.78f, 0.85f));
+                AssertColor(activeConnectionLines[1].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
+                AssertColor(activeConnectionLines[2].color, new Color(0.22f, 0.82f, 0.78f, 0.85f));
+                AssertColor(activeConnectionLines[3].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void BuildMapGraph_KeepsAvailableConnectionsDistinctFromRoute()
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
+            GameObject instance = Object.Instantiate(prefab);
+
+            try
+            {
+                MapPage page = instance.GetComponent<MapPage>();
+                page.BuildMapGraph(
+                    CreateRouteTestNodes(),
+                    CreateRouteTestLayouts(),
+                    new[] { 5 },
+                    3,
+                    3,
+                    new[] { 0, 1, 3 },
+                    null);
+
+                Image[] activeConnectionLines = GetActiveConnectionLines(page);
+
+                AssertColor(activeConnectionLines[4].color, new Color(0.95f, 0.74f, 0.28f, 0.8f));
+                AssertColor(activeConnectionLines[5].color, new Color(0.44f, 0.47f, 0.55f, 0.25f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
         public void SetMapButtonInteractable_MatchesDisplayedButtonOrder()
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(MapPagePrefabPath);
@@ -169,6 +383,13 @@ namespace Dungeon.Tests.EditMode
             return serialized.FindProperty(propertyName).objectReferenceValue as T;
         }
 
+        private static void AssertAssignedReference<T>(SerializedObject serialized, string propertyName) where T : Object
+        {
+            T component = serialized.FindProperty(propertyName).objectReferenceValue as T;
+
+            Assert.That(component, Is.Not.Null, $"{propertyName} should be assigned.");
+        }
+
         private static void AssertDistinctTemplate(SerializedObject serialized, string propertyName)
         {
             Component component = serialized.FindProperty(propertyName).objectReferenceValue as Component;
@@ -200,6 +421,50 @@ namespace Dungeon.Tests.EditMode
                 System.Array.Empty<int>());
         }
 
+        private static RuntimeMapNode CreateNode(
+            int floor,
+            InGameNodeType nodeType,
+            string displayName,
+            int[] nextNodeIndices)
+        {
+            return new RuntimeMapNode(
+                floor,
+                displayName,
+                floor,
+                nodeType,
+                displayName,
+                string.Empty,
+                nextNodeIndices);
+        }
+
+        private static RuntimeMapNode[] CreateRouteTestNodes()
+        {
+            return new[]
+            {
+                CreateNode(1, InGameNodeType.Battle, "Start", new[] { 1, 2 }),
+                CreateNode(2, InGameNodeType.Event, "RouteEvent", new[] { 3 }),
+                CreateNode(2, InGameNodeType.EliteBattle, "SkippedElite", new[] { 4 }),
+                CreateNode(3, InGameNodeType.RestShop, "CurrentRest", new[] { 5, 6 }),
+                CreateNode(3, InGameNodeType.Treasure, "SkippedTreasure", new[] { 6 }),
+                CreateNode(4, InGameNodeType.Battle, "NextBattle"),
+                CreateNode(4, InGameNodeType.Boss, "LockedBoss")
+            };
+        }
+
+        private static MapNodeLayout[] CreateRouteTestLayouts()
+        {
+            return new[]
+            {
+                new MapNodeLayout(0, 0f, 0f, 1),
+                new MapNodeLayout(1, -0.5f, 1f, 2),
+                new MapNodeLayout(2, 0.5f, 1f, 2),
+                new MapNodeLayout(3, -0.5f, 2f, 3),
+                new MapNodeLayout(4, 0.5f, 2f, 3),
+                new MapNodeLayout(5, -0.5f, 3f, 4),
+                new MapNodeLayout(6, 0.5f, 3f, 4)
+            };
+        }
+
         private static string[] GetActiveButtonLabels(MapPage page)
         {
             Transform[] activeChildren = GetActiveChildren(page);
@@ -212,6 +477,32 @@ namespace Dungeon.Tests.EditMode
             return nodeRoot.Cast<Transform>().Where(child => child.gameObject.activeSelf).ToArray();
         }
 
+        private static Image[] GetActiveConnectionLines(MapPage page)
+        {
+            Transform connectionRoot = GetSerializedReference<Transform>(page, "_connectionRoot");
+            return connectionRoot.Cast<Transform>()
+                .Where(child => child.gameObject.activeSelf)
+                .Select(child => child.GetComponent<Image>())
+                .Where(image => image != null)
+                .ToArray();
+        }
+
+        private static Vector2 ReadAnchoredPosition(Transform transform)
+        {
+            RectTransform rectTransform = transform as RectTransform;
+
+            Assert.That(rectTransform, Is.Not.Null);
+            return rectTransform.anchoredPosition;
+        }
+
+        private static Vector2 ReadSize(Transform transform)
+        {
+            RectTransform rectTransform = transform as RectTransform;
+
+            Assert.That(rectTransform, Is.Not.Null);
+            return rectTransform.sizeDelta;
+        }
+
         private static string ReadLabel(Transform child)
         {
             Component label = child.Find("Label")
@@ -219,6 +510,17 @@ namespace Dungeon.Tests.EditMode
                 .First(component => component.GetType().Name == "TFTextUGUI");
             SerializedObject serialized = new SerializedObject(label);
             return serialized.FindProperty("m_text").stringValue;
+        }
+
+        private static void AssertVector2(Vector2 actual, Vector2 expected)
+        {
+            Assert.That(actual.x, Is.EqualTo(expected.x).Within(PositionTolerance));
+            Assert.That(actual.y, Is.EqualTo(expected.y).Within(PositionTolerance));
+        }
+
+        private static void AssertColor(Color actual, Color expected)
+        {
+            Assert.That((Color32)actual, Is.EqualTo((Color32)expected));
         }
     }
 }

@@ -51,6 +51,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         #region Map
 
         public List<RuntimeMapNode> Nodes { get; } = new List<RuntimeMapNode>();
+        public List<int> MapRouteNodeIndices { get; } = new List<int>();
         public int CurrentNodeIndex { get; set; } = BattleSceneConstants.DefaultNodeIndex;
         public string MapMessage { get; set; } = string.Empty;
 
@@ -242,8 +243,17 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 return false;
             }
 
-            // 現行MapPageは経路を描画しないため、同一の次フロアに見えているノードはすべて選択可能にする
-            return targetNode.Floor == currentNode.Floor + 1;
+            // マップ生成時に決定した接続先のみ選択可能にする
+            IReadOnlyList<int> nextNodeIndices = currentNode.NextNodeIndices;
+            for (int i = 0; i < nextNodeIndices.Count; i++)
+            {
+                if (nextNodeIndices[i] == index)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

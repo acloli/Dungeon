@@ -119,5 +119,10 @@ namespace Game.MasterData.Generated
             return self.GetContainer<ShopLineupMasterContainer>();
         }
 
+        public static TreasureMasterContainer TreasureMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<TreasureMasterContainer>();
+        }
+
     }
 }
