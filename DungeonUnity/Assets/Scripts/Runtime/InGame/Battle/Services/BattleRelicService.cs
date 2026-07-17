@@ -15,6 +15,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleSceneRules _rules;
         private readonly IBattleRandomProvider _randomProvider;
         private readonly IMasterDataService _masterDataService;
+        private readonly IBattleCardUpgradeService _cardUpgradeService;
         private readonly RelicConditionEvaluator _conditionEvaluator = new RelicConditionEvaluator();
 
         public BattleRelicService()
@@ -22,16 +23,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         public BattleRelicService(IBattleSceneRules rules, IBattleRandomProvider randomProvider)
-            : this(rules, randomProvider, null)
+            : this(rules, randomProvider, null, null)
+        {
+        }
+
+        public BattleRelicService(IBattleSceneRules rules, IBattleRandomProvider randomProvider, IMasterDataService masterDataService)
+            : this(rules, randomProvider, masterDataService, null)
         {
         }
 
         [Inject]
-        public BattleRelicService(IBattleSceneRules rules, IBattleRandomProvider randomProvider, IMasterDataService masterDataService)
+        public BattleRelicService(
+            IBattleSceneRules rules,
+            IBattleRandomProvider randomProvider,
+            IMasterDataService masterDataService,
+            IBattleCardUpgradeService cardUpgradeService)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataService = masterDataService;
+            _cardUpgradeService = cardUpgradeService;
         }
 
         public void RestoreOwnedRelics(BattleSceneState state, RuntimeRunDefinition runDefinition, IReadOnlyList<int> ownedRelicIds)
@@ -160,7 +171,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                         continue;
                     }
 
-                    ApplyEffect(state, effect);
+                    ApplyEffect(state, effect, context);
                 }
             }
         }
@@ -282,7 +293,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return state.Nodes[state.CurrentNodeIndex].Floor;
         }
 
-        private void ApplyEffect(BattleSceneState state, RuntimeRelicEffect effect)
+        private void ApplyEffect(BattleSceneState state, RuntimeRelicEffect effect, RelicTriggerContext context)
         {
             switch (effect.EffectType)
             {
@@ -312,6 +323,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     break;
                 case EffectType.LoseHp:
                     state.PlayerHp = Math.Max(0, state.PlayerHp - effect.Value);
+                    break;
+                case EffectType.HealHp:
+                    long healedHp = (long)state.PlayerHp + Math.Max(0, effect.Value);
+                    state.PlayerHp = (int)Math.Min(state.PlayerMaxHp, healedHp);
+                    break;
+                case EffectType.GainFreeCardUpgrade:
+                    state.GrantRestShopFreeUpgrade(effect.Value);
+                    break;
+                case EffectType.UpgradeRandomCommonCard:
+                    if (_cardUpgradeService != null &&
+                        _randomProvider != null &&
+                        context?.RunDefinition != null)
+                    {
+                        _cardUpgradeService.TryUpgradeRandomCard(
+                            state,
+                            context.RunDefinition,
+                            CardRarity.Common,
+                            _randomProvider);
+                    }
+
                     break;
             }
 
