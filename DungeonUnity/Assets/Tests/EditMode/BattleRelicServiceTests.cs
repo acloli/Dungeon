@@ -251,6 +251,335 @@ namespace Dungeon.Tests.EditMode
             Assert.That(state.MaxPotionCount, Is.EqualTo(3));
         }
 
+        [TestCase(2, true)]
+        [TestCase(1, false)]
+        [TestCase(null, false)]
+        public void ApplyEffects_PlayedCardCostEquals_AppliesOnlyForMatchingCard(int? playedCardCost, bool shouldApply)
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(20, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CardPlayed,
+                    EffectType.GainBlock,
+                    3,
+                    conditions: new[]
+                    {
+                        CreateCondition(RelicConditionType.PlayedCardCostEquals, cardCost: 2)
+                    })
+            }));
+            RuntimeCard playedCard = playedCardCost.HasValue
+                ? CreateCard(1101, "Played", playedCardCost.Value)
+                : null;
+
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CardPlayed, playedCard));
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(shouldApply ? 3 : 0));
+        }
+
+        [TestCase(50, 100, true)]
+        [TestCase(49, 100, true)]
+        [TestCase(51, 100, false)]
+        [TestCase(0, 0, false)]
+        public void ApplyEffects_PlayerHpPercentAtMost_HandlesBoundaryAndInvalidMaxHp(
+            int playerHp,
+            int playerMaxHp,
+            bool shouldApply)
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerHp = playerHp,
+                PlayerMaxHp = playerMaxHp
+            };
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(21, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CombatStart,
+                    EffectType.GainBlock,
+                    4,
+                    conditions: new[]
+                    {
+                        CreateCondition(RelicConditionType.PlayerHpPercentAtMost, hpPercent: 50)
+                    })
+            }));
+
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart));
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(shouldApply ? 4 : 0));
+        }
+
+        [TestCase(InGameNodeType.RestShop, true)]
+        [TestCase(InGameNodeType.Battle, false)]
+        public void ApplyEffects_NodeTypeEquals_AppliesOnlyForMatchingNode(InGameNodeType nodeType, bool shouldApply)
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(22, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.RestShopEntered,
+                    EffectType.GainGold,
+                    5,
+                    conditions: new[]
+                    {
+                        CreateCondition(RelicConditionType.NodeTypeEquals, nodeType: InGameNodeType.RestShop)
+                    })
+            }));
+
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.RestShopEntered, nodeType: nodeType));
+
+            Assert.That(state.Gold, Is.EqualTo(shouldApply ? 5 : 0));
+        }
+
+        [Test]
+        public void ApplyEffects_NodeTypeEqualsWithoutNode_DoesNotApply()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(23, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.RestShopEntered,
+                    EffectType.GainGold,
+                    5,
+                    conditions: new[]
+                    {
+                        CreateCondition(RelicConditionType.NodeTypeEquals, nodeType: InGameNodeType.RestShop)
+                    })
+            }));
+
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.RestShopEntered));
+
+            Assert.That(state.Gold, Is.Zero);
+        }
+
+        [Test]
+        public void ApplyEffects_MultipleConditions_RequiresAllConditions()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerHp = 50,
+                PlayerMaxHp = 100
+            };
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(24, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CardPlayed,
+                    EffectType.GainBlock,
+                    6,
+                    conditions: new[]
+                    {
+                        CreateCondition(RelicConditionType.PlayedCardCostEquals, cardCost: 1),
+                        CreateCondition(RelicConditionType.PlayerHpPercentAtMost, hpPercent: 50)
+                    })
+            }));
+            RuntimeCard playedCard = CreateCard(1102, "Played", 1);
+
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CardPlayed, playedCard));
+            state.PlayerHp = 51;
+            service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CardPlayed, playedCard));
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void ApplyEffects_UnknownCondition_DoesNotApplyOrThrow()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(25, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CombatStart,
+                    EffectType.GainBlock,
+                    7,
+                    conditions: new[]
+                    {
+                        CreateCondition((RelicConditionType)999)
+                    })
+            }));
+
+            Assert.DoesNotThrow(() => service.ApplyEffects(state, new RelicTriggerContext(RelicTriggerType.CombatStart)));
+            Assert.That(state.PlayerBlock, Is.Zero);
+        }
+
+        [Test]
+        public void ApplyEffects_OncePerTurn_AppliesAgainAfterTurnActivationClear()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(26, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.PlayerTurnStart,
+                    EffectType.GainBlock,
+                    2,
+                    id: 2601,
+                    activationLimit: RelicActivationLimit.OncePerTurn)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+            state.ClearTurnRelicEffectActivations();
+            service.ApplyEffects(state, RelicTriggerType.PlayerTurnStart);
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void ApplyEffects_OncePerRun_AppliesOnlyOnceAcrossTurnClear()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(27, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CombatStart,
+                    EffectType.GainBlock,
+                    3,
+                    id: 2701,
+                    activationLimit: RelicActivationLimit.OncePerRun)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            state.ClearTurnRelicEffectActivations();
+            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void ApplyEffects_Unlimited_AppliesRepeatedly()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(28, new[]
+            {
+                CreateEffect(RelicTriggerType.CombatStart, EffectType.GainBlock, 2)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+
+            Assert.That(state.PlayerBlock, Is.EqualTo(4));
+        }
+
+        [TestCase(RelicActivationLimit.OncePerTurn)]
+        [TestCase(RelicActivationLimit.OncePerRun)]
+        public void ApplyEffects_LimitedEffectWithoutId_DoesNotApply(RelicActivationLimit activationLimit)
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(29, new[]
+            {
+                CreateEffect(
+                    RelicTriggerType.CombatStart,
+                    EffectType.GainBlock,
+                    5,
+                    activationLimit: activationLimit)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.CombatStart);
+
+            Assert.That(state.PlayerBlock, Is.Zero);
+        }
+
+        [TestCase(8, 10, 5, 10)]
+        [TestCase(8, 10, -3, 8)]
+        public void ApplyEffects_HealHp_UsesNonNegativeValueAndCapsAtMaxHp(
+            int playerHp,
+            int playerMaxHp,
+            int value,
+            int expectedHp)
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerHp = playerHp,
+                PlayerMaxHp = playerMaxHp
+            };
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(30, new[]
+            {
+                CreateEffect(RelicTriggerType.CombatVictory, EffectType.HealHp, value)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.CombatVictory);
+
+            Assert.That(state.PlayerHp, Is.EqualTo(expectedHp));
+        }
+
+        [Test]
+        public void ApplyEffects_GainFreeCardUpgrade_AddsToAggregateCount()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                RestShopFreeUpgradeCount = 1
+            };
+            BattleRelicService service = new BattleRelicService();
+            service.AddOwnedRelic(state, CreateRelic(31, new[]
+            {
+                CreateEffect(RelicTriggerType.RestShopEntered, EffectType.GainFreeCardUpgrade, 2)
+            }));
+
+            service.ApplyEffects(state, RelicTriggerType.RestShopEntered);
+            service.ApplyEffects(state, RelicTriggerType.RestShopEntered);
+
+            Assert.That(state.RestShopFreeUpgradeCount, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void ApplyEffects_UpgradeRandomCommonCard_DelegatesWithSameContextArguments()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(new Dictionary<int, RuntimeRelic>());
+            FixedRandomProvider randomProvider = new FixedRandomProvider();
+            RecordingCardUpgradeService cardUpgradeService = new RecordingCardUpgradeService();
+            BattleRelicService service = new BattleRelicService(null, randomProvider, null, cardUpgradeService);
+            service.AddOwnedRelic(state, CreateRelic(32, new[]
+            {
+                CreateEffect(RelicTriggerType.CombatVictory, EffectType.UpgradeRandomCommonCard, 0)
+            }));
+
+            service.ApplyEffects(
+                state,
+                new RelicTriggerContext(RelicTriggerType.CombatVictory, runDefinition: runDefinition));
+
+            Assert.That(cardUpgradeService.CallCount, Is.EqualTo(1));
+            Assert.That(cardUpgradeService.State, Is.SameAs(state));
+            Assert.That(cardUpgradeService.RunDefinition, Is.SameAs(runDefinition));
+            Assert.That(cardUpgradeService.Rarity, Is.EqualTo(CardRarity.Common));
+            Assert.That(cardUpgradeService.RandomProvider, Is.SameAs(randomProvider));
+        }
+
+        [Test]
+        public void ApplyEffects_UpgradeRandomCommonCard_MissingContextRunOrDependency_DoesNotDelegateOrThrow()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(new Dictionary<int, RuntimeRelic>());
+            FixedRandomProvider randomProvider = new FixedRandomProvider();
+            RecordingCardUpgradeService cardUpgradeService = new RecordingCardUpgradeService();
+            BattleRelicService service = new BattleRelicService(null, randomProvider, null, cardUpgradeService);
+            service.AddOwnedRelic(state, CreateRelic(33, new[]
+            {
+                CreateEffect(RelicTriggerType.CombatVictory, EffectType.UpgradeRandomCommonCard, 0)
+            }));
+            BattleRelicService serviceWithoutDependency = new BattleRelicService(null, randomProvider, null, null);
+            serviceWithoutDependency.AddOwnedRelic(state, CreateRelic(34, new[]
+            {
+                CreateEffect(RelicTriggerType.CombatVictory, EffectType.UpgradeRandomCommonCard, 0)
+            }));
+
+            Assert.DoesNotThrow(() => service.ApplyEffects(state, (RelicTriggerContext)null));
+            Assert.DoesNotThrow(() => service.ApplyEffects(state, RelicTriggerType.CombatVictory));
+            Assert.DoesNotThrow(() => serviceWithoutDependency.ApplyEffects(
+                state,
+                new RelicTriggerContext(RelicTriggerType.CombatVictory, runDefinition: runDefinition)));
+            Assert.That(cardUpgradeService.CallCount, Is.Zero);
+        }
+
         [Test]
         public void RollBattleRewardRelic_SkipsOwnedRelics()
         {
@@ -372,13 +701,22 @@ namespace Dungeon.Tests.EditMode
             };
         }
 
-        private static RuntimeCard CreateCard(int id, string name)
+        private static RuntimeCard CreateCard(int id, string name, int cost = 1)
         {
             var builder = Support.BattleTestData.Card(id);
             builder.DisplayName = name;
-            builder.Cost = 1;
+            builder.Cost = cost;
             builder.Effects = new List<RuntimeCardEffect>();
             return builder.Build();
+        }
+
+        private static RuntimeRelicCondition CreateCondition(
+            RelicConditionType conditionType,
+            int cardCost = 0,
+            int hpPercent = 0,
+            InGameNodeType? nodeType = null)
+        {
+            return new RuntimeRelicCondition(1, 1, conditionType, cardCost, hpPercent, nodeType);
         }
 
         private static RuntimeRelic CreateRelic(int id, IReadOnlyList<RuntimeRelicEffect> effects)
@@ -440,9 +778,24 @@ namespace Dungeon.Tests.EditMode
             int statusValue = 0,
             TargetSide targetSide = TargetSide.Self,
             int hitCount = 1,
-            int potionCapacityDelta = 0)
+            int potionCapacityDelta = 0,
+            int id = 0,
+            IReadOnlyList<RuntimeRelicCondition> conditions = null,
+            RelicActivationLimit activationLimit = RelicActivationLimit.Unlimited)
         {
-            return new RuntimeRelicEffect(1, triggerType, effectType, value, hitCount, statusType, statusValue, targetSide, potionCapacityDelta);
+            return new RuntimeRelicEffect(
+                id,
+                1,
+                triggerType,
+                effectType,
+                value,
+                hitCount,
+                statusType,
+                statusValue,
+                targetSide,
+                potionCapacityDelta,
+                conditions,
+                activationLimit);
         }
 
         private sealed class FixedRandomProvider : IBattleRandomProvider
@@ -512,6 +865,43 @@ namespace Dungeon.Tests.EditMode
             public UniTask ReloadAsync(CancellationToken ct)
             {
                 return UniTask.CompletedTask;
+            }
+        }
+
+        private sealed class RecordingCardUpgradeService : IBattleCardUpgradeService
+        {
+            public int CallCount { get; private set; }
+            public BattleSceneState State { get; private set; }
+            public RuntimeRunDefinition RunDefinition { get; private set; }
+            public CardRarity Rarity { get; private set; }
+            public IBattleRandomProvider RandomProvider { get; private set; }
+
+            public bool TryGetUpgradePreview(
+                RuntimeRunDefinition runDefinition,
+                RuntimeCard card,
+                out RuntimeCard upgradedCard)
+            {
+                upgradedCard = null;
+                return false;
+            }
+
+            public bool TryReplaceDeckCard(BattleSceneState state, int deckIndex, RuntimeCard replacementCard)
+            {
+                return false;
+            }
+
+            public bool TryUpgradeRandomCard(
+                BattleSceneState state,
+                RuntimeRunDefinition runDefinition,
+                CardRarity rarity,
+                IBattleRandomProvider randomProvider)
+            {
+                CallCount++;
+                State = state;
+                RunDefinition = runDefinition;
+                Rarity = rarity;
+                RandomProvider = randomProvider;
+                return true;
             }
         }
     }
