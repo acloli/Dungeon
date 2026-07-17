@@ -79,6 +79,11 @@ namespace Game.MasterData.Generated
             return self.GetContainer<PotionMasterContainer>();
         }
 
+        public static RelicEffectConditionMasterContainer RelicEffectConditionMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<RelicEffectConditionMasterContainer>();
+        }
+
         public static RelicEffectMasterContainer RelicEffectMaster(this IMasterDataService self)
         {
             return self.GetContainer<RelicEffectMasterContainer>();
