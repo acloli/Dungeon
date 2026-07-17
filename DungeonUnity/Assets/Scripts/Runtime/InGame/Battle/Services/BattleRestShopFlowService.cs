@@ -15,19 +15,22 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleShopService _shopService;
         private readonly IBattlePotionService _potionService;
         private readonly IBattleRelicService _relicService;
+        private readonly IBattleCardUpgradeService _cardUpgradeService;
 
         public BattleRestShopFlowService(
             IBattleSceneRules rules,
             IBattleRandomProvider randomProvider,
             IBattleShopService shopService,
             IBattlePotionService potionService,
-            IBattleRelicService relicService)
+            IBattleRelicService relicService,
+            IBattleCardUpgradeService cardUpgradeService = null)
         {
             _rules = rules;
             _randomProvider = randomProvider;
             _shopService = shopService;
             _potionService = potionService;
             _relicService = relicService;
+            _cardUpgradeService = cardUpgradeService;
         }
 
         /// <summary>
@@ -94,7 +97,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < state.Deck.Count; i++)
             {
                 RuntimeCard card = state.Deck[i];
-                if (CanUpgradeCard(runDefinition, card))
+                if (TryGetUpgradePreview(runDefinition, card, out _))
                 {
                     upgradeableCards.Add(card);
                 }
@@ -149,7 +152,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             for (int i = 0; i < cards.Count; i++)
             {
                 RuntimeCard card = cards[i];
-                if (card != null && runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
+                if (TryGetUpgradePreview(runDefinition, card, out RuntimeCard upgradedCard))
                 {
                     upgradedCards[card.Id] = upgradedCard;
                 }
@@ -293,11 +296,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             openMap();
         }
 
-        private static bool HasUpgradeableCards(BattleSceneState state, RuntimeRunDefinition runDefinition)
+        private bool HasUpgradeableCards(BattleSceneState state, RuntimeRunDefinition runDefinition)
         {
             for (int i = 0; i < state.Deck.Count; i++)
             {
-                if (CanUpgradeCard(runDefinition, state.Deck[i]))
+                if (TryGetUpgradePreview(runDefinition, state.Deck[i], out _))
                 {
                     return true;
                 }
@@ -306,24 +309,16 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return false;
         }
 
-        private static bool CanUpgradeCard(RuntimeRunDefinition runDefinition, RuntimeCard card)
-        {
-            return card != null
-                   && card.UpgradeCardId > 0
-                   && runDefinition != null
-                   && runDefinition.CardCatalog.ContainsKey(card.UpgradeCardId);
-        }
-
         private bool ApplyCardUpgrade(BattleSceneState state, RuntimeRunDefinition runDefinition, RuntimeCard card)
         {
-            if (!CanUpgradeCard(runDefinition, card))
+            if (!TryGetUpgradePreview(runDefinition, card, out RuntimeCard upgradedCard))
             {
                 state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
                 return false;
             }
 
             int deckIndex = FindDeckCardIndex(state, card);
-            if (deckIndex < 0 || !runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
+            if (deckIndex < 0)
             {
                 state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
                 return false;
@@ -336,7 +331,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return false;
             }
 
-            state.Deck[deckIndex] = upgradedCard;
+            if (!TryReplaceDeckCard(state, deckIndex, upgradedCard))
+            {
+                state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
+                return false;
+            }
+
             state.Gold -= upgradePrice;
             state.CardSelectMessage = string.Format(
                 BattleSceneConstants.UpgradeDoneFormat,
@@ -345,6 +345,40 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 upgradePrice,
                 state.Gold);
             state.IsRestShopContinueEnabled = true;
+            return true;
+        }
+
+        private bool TryGetUpgradePreview(RuntimeRunDefinition runDefinition, RuntimeCard card, out RuntimeCard upgradedCard)
+        {
+            if (_cardUpgradeService != null)
+            {
+                return _cardUpgradeService.TryGetUpgradePreview(runDefinition, card, out upgradedCard);
+            }
+
+            // 旧コンストラクタを直接利用する既存テスト向けの最小互換境界
+            upgradedCard = null;
+            return runDefinition != null
+                   && card != null
+                   && !card.IsUpgraded
+                   && card.UpgradeCardId > 0
+                   && runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out upgradedCard)
+                   && upgradedCard != null;
+        }
+
+        private bool TryReplaceDeckCard(BattleSceneState state, int deckIndex, RuntimeCard upgradedCard)
+        {
+            if (_cardUpgradeService != null)
+            {
+                return _cardUpgradeService.TryReplaceDeckCard(state, deckIndex, upgradedCard);
+            }
+
+            // 旧コンストラクタを直接利用する既存テスト向けの最小互換境界
+            if (state == null || upgradedCard == null || deckIndex < 0 || deckIndex >= state.Deck.Count)
+            {
+                return false;
+            }
+
+            state.Deck[deckIndex] = upgradedCard;
             return true;
         }
 
