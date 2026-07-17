@@ -36,10 +36,5 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 指定コンテキストの効果を適用する
         /// </summary>
         void ApplyEffects(BattleSceneState state, RelicTriggerContext context);
-
-        /// <summary>
-        /// 指定トリガーの効果を適用する
-        /// </summary>
-        void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType);
     }
 }

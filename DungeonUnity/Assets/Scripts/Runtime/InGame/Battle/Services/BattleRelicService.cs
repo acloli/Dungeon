@@ -133,11 +133,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return SelectWeightedRelic(candidates, randomProvider);
         }
 
-        public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
-        {
-            ApplyEffects(state, new RelicTriggerContext(triggerType));
-        }
-
         public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
         {
             if (state == null || context == null)

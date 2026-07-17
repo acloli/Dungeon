@@ -159,11 +159,6 @@ namespace Dungeon.Tests.EditMode
                 return null;
             }
 
-            public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
-            {
-                RecordApplication(state, triggerType);
-            }
-
             public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
             {
                 if (context == null)
