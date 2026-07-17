@@ -69,6 +69,11 @@ namespace Game.MasterData.Generated
         /// </summary>
         public int PotionCapacityDelta;
 
+        /// <summary>
+        /// 発動回数制限
+        /// </summary>
+        public RelicActivationLimit ActivationLimit;
+
         public int GetKey() => Id;
     }
 }
