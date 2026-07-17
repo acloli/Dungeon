@@ -293,6 +293,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public void ContinueFromRestShop(BattleSceneState state, Action openMap)
         {
+            state.EndRestShopVisit();
             openMap();
         }
 
@@ -324,7 +325,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 return false;
             }
 
-            int upgradePrice = _shopService.GetCardUpgradePrice(runDefinition, card);
+            bool isFreeUpgrade = state.RestShopFreeUpgradeCount > 0;
+            int upgradePrice = isFreeUpgrade
+                ? 0
+                : _shopService.GetCardUpgradePrice(runDefinition, card);
             if (state.Gold < upgradePrice)
             {
                 state.CardSelectMessage = BattleSceneConstants.NotEnoughGold;
@@ -335,6 +339,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 state.CardSelectMessage = BattleSceneConstants.NoUpgradeableCards;
                 return false;
+            }
+
+            if (isFreeUpgrade)
+            {
+                state.TryConsumeRestShopFreeUpgrade();
             }
 
             state.Gold -= upgradePrice;
