@@ -155,22 +155,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyList<RuntimeCard> GetCardSelectCards()
         {
-            if (_state.CardSelectMode != CardSelectMode.Upgrade)
-            {
-                return _state.Deck;
-            }
-
-            List<RuntimeCard> upgradeableCards = new List<RuntimeCard>();
-            for (int i = 0; i < _state.Deck.Count; i++)
-            {
-                RuntimeCard card = _state.Deck[i];
-                if (CanUpgradeCard(card))
-                {
-                    upgradeableCards.Add(card);
-                }
-            }
-
-            return upgradeableCards;
+            return _restShopFlowService.GetCardSelectCards(_state, _runDefinition);
         }
 
         /// <summary>
@@ -178,23 +163,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyDictionary<int, int> GetCardSelectPrices()
         {
-            Dictionary<int, int> prices = new Dictionary<int, int>();
-            if (_state.CardSelectMode != CardSelectMode.Upgrade)
-            {
-                return prices;
-            }
-
-            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards();
-            for (int i = 0; i < cards.Count; i++)
-            {
-                RuntimeCard card = cards[i];
-                if (card != null)
-                {
-                    prices[card.Id] = _shopService.GetCardUpgradePrice(_runDefinition, card);
-                }
-            }
-
-            return prices;
+            return _restShopFlowService.GetCardSelectPrices(
+                _state,
+                _runDefinition,
+                _state.RestShopFreeUpgradeCount > 0);
         }
 
         /// <summary>
@@ -202,23 +174,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards()
         {
-            Dictionary<int, RuntimeCard> upgradedCards = new Dictionary<int, RuntimeCard>();
-            if (_state.CardSelectMode != CardSelectMode.Upgrade)
-            {
-                return upgradedCards;
-            }
-
-            IReadOnlyList<RuntimeCard> cards = GetCardSelectCards();
-            for (int i = 0; i < cards.Count; i++)
-            {
-                RuntimeCard card = cards[i];
-                if (card != null && _runDefinition.CardCatalog.TryGetValue(card.UpgradeCardId, out RuntimeCard upgradedCard))
-                {
-                    upgradedCards[card.Id] = upgradedCard;
-                }
-            }
-
-            return upgradedCards;
+            return _restShopFlowService.GetCardSelectUpgradedCards(_state, _runDefinition);
         }
 
         /// <summary>
@@ -877,17 +833,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private void OpenRestShop()
         {
             _restShopFlowService.OpenRestShop(_state, _runDefinition, SetCurrentPage);
-        }
-
-        /// <summary>
-        /// カードが強化可能か
-        /// </summary>
-        private bool CanUpgradeCard(RuntimeCard card)
-        {
-            return card != null
-                   && card.UpgradeCardId > 0
-                   && _runDefinition != null
-                   && _runDefinition.CardCatalog.ContainsKey(card.UpgradeCardId);
         }
 
         /// <summary>
