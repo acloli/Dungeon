@@ -62,3 +62,45 @@ MonoBehaviour:
     Weight: 6
     MinFloor: 1
     MaxFloor: 99
+  - Id: 5108
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 1
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5109
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 2
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5110
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 3
+    Weight: 8
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5111
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 4
+    Weight: 10
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5112
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 5
+    Weight: 5
+    MinFloor: 1
+    MaxFloor: 99
+  - Id: 5113
+    RewardPoolId: 6101
+    RewardType: 3
+    RewardValue: 6
+    Weight: 5
+    MinFloor: 1
+    MaxFloor: 99
