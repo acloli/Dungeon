@@ -34,6 +34,7 @@ namespace Dungeon.Tests.PlayMode
 
             yield return _harness.LoadAsync();
             yield return WaitForInitialSave();
+            yield return WaitForSceneObject("MapPage");
 
             RunSaveData restShopReadySave = CloneSaveData(_harness.SavedRun);
             PrepareRestShopEntry(restShopReadySave);
@@ -53,11 +54,10 @@ namespace Dungeon.Tests.PlayMode
             Assert.That(checkpoint.RestShopFreeUpgradeCount, Is.EqualTo(1));
             Assert.That(expectedLineup, Is.Not.Empty);
 
-            LogAssert.Expect(LogType.Exception, "OperationCanceledException: The operation was canceled.");
-            LogAssert.Expect(LogType.Exception, "OperationCanceledException: The operation was canceled.");
             yield return _harness.UnloadAsync();
             yield return _harness.LoadAsync();
             yield return WaitForRestoredRestShop(expectedLineup);
+            yield return WaitForSceneObject("RestShopDialog");
 
             BattleSceneSnapshot restoredSnapshot = _harness.QueryService.CreateSnapshot();
             Assert.That(restoredSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.RestShop));
@@ -71,7 +71,9 @@ namespace Dungeon.Tests.PlayMode
             Assert.That(upgradePrices.Values, Is.All.EqualTo(0), "無料強化回数を復元する必要がある。");
             _harness.FlowService.CancelCardSelect();
 
-            _harness.FlowService.ContinueFromRestShop();
+            ClickSceneButton("RestShopContinueButton");
+            yield return WaitForContinuedCheckpoint();
+            yield return WaitForSceneObject("MapPage");
             RunSaveData continuedCheckpoint = _harness.SavedRun;
 
             Assert.That(continuedCheckpoint, Is.Not.Null);
@@ -123,6 +125,67 @@ namespace Dungeon.Tests.PlayMode
             }
 
             Assert.Fail("BattleScene再ロード後にRestShop checkpointが復元されなかった。");
+        }
+
+        private IEnumerator WaitForContinuedCheckpoint()
+        {
+            int waitedFrames = 0;
+            while ((_harness.SavedRun == null
+                    || _harness.SavedRun.CurrentPage != (int)BattleScenePage.Map)
+                   && waitedFrames++ < SceneStateFrameLimit)
+            {
+                yield return null;
+            }
+
+            Assert.That(_harness.SavedRun, Is.Not.Null, "RestShop継続後のcheckpointが生成されなかった。");
+            Assert.That(_harness.SavedRun.CurrentPage, Is.EqualTo((int)BattleScenePage.Map));
+        }
+
+        private static IEnumerator WaitForSceneObject(string objectName)
+        {
+            int waitedFrames = 0;
+            GameObject sceneObject = FindSceneObject(objectName);
+            while (sceneObject == null && waitedFrames++ < SceneStateFrameLimit)
+            {
+                yield return null;
+                sceneObject = FindSceneObject(objectName);
+            }
+
+            Assert.That(sceneObject, Is.Not.Null, $"{objectName}の初期化が完了しなかった。");
+            CanvasGroup canvasGroup = sceneObject.GetComponent<CanvasGroup>();
+            Assert.That(canvasGroup, Is.Not.Null, $"{objectName}にCanvasGroupが設定されていない。");
+
+            waitedFrames = 0;
+            while (!canvasGroup.interactable && waitedFrames++ < SceneStateFrameLimit)
+            {
+                yield return null;
+            }
+
+            Assert.That(canvasGroup.interactable, Is.True, $"{objectName}の表示遷移が完了しなかった。");
+        }
+
+        private static GameObject FindSceneObject(string objectName)
+        {
+            GameObject[] sceneObjects = UnityEngine.Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
+            return sceneObjects.FirstOrDefault(candidate =>
+                candidate.activeInHierarchy
+                && (candidate.name == objectName || candidate.name == $"{objectName}(Clone)"));
+        }
+
+        private static void ClickSceneButton(string objectName)
+        {
+            GameObject buttonObject = FindSceneObject(objectName);
+            Assert.That(buttonObject, Is.Not.Null, $"{objectName}が見つからなかった。");
+
+            Component button = buttonObject.GetComponent("Button");
+            Assert.That(button, Is.Not.Null, $"{objectName}にButtonが設定されていない。");
+
+            object clickEvent = button.GetType().GetProperty("onClick")?.GetValue(button);
+            System.Reflection.MethodInfo invokeMethod = clickEvent?.GetType().GetMethod("Invoke", Type.EmptyTypes);
+            Assert.That(invokeMethod, Is.Not.Null, $"{objectName}のclick eventを取得できなかった。");
+            invokeMethod.Invoke(clickEvent, null);
         }
 
         private static IReadOnlyList<RuntimeMapNode> CreateRestShopNodes()
