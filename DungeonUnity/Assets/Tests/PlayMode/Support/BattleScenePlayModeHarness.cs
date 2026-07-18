@@ -22,6 +22,9 @@ namespace Dungeon.Tests.PlayMode.Support
     {
         private const string BattleScenePath = "Assets/Scenes/BattleScene.unity";
         private const int ScopeReadyFrameLimit = 300;
+        private const int SceneUiReadyFrameLimit = 300;
+        private const string MapPageObjectName = "MapPage";
+        private const string RestShopDialogObjectName = "RestShopDialog";
 
         private readonly DeterministicRandomProvider _randomProvider;
         private readonly DeterministicMapGenerator _mapGenerator;
@@ -93,6 +96,7 @@ namespace Dungeon.Tests.PlayMode.Support
 
             FlowService = lifetimeScope.Container.Resolve<IBattleSceneFlowService>();
             QueryService = lifetimeScope.Container.Resolve<IBattleSceneQueryService>();
+            yield return WaitForInitialUiReady();
         }
 
         /// <summary>
@@ -120,6 +124,49 @@ namespace Dungeon.Tests.PlayMode.Support
         {
             _overrideInstallation?.Dispose();
             _overrideInstallation = null;
+        }
+
+        /// <summary>
+        /// 初期UIの生成と表示遷移完了待機
+        /// </summary>
+        private IEnumerator WaitForInitialUiReady()
+        {
+            int waitedFrames = 0;
+            while (waitedFrames++ < SceneUiReadyFrameLimit)
+            {
+                string objectName = GetExpectedInitialUiObjectName();
+                if (!string.IsNullOrEmpty(objectName))
+                {
+                    GameObject sceneUi = GameObject.Find(objectName)
+                                         ?? GameObject.Find($"{objectName}(Clone)");
+                    CanvasGroup canvasGroup = sceneUi != null
+                        ? sceneUi.GetComponent<CanvasGroup>()
+                        : null;
+                    if (sceneUi != null && canvasGroup != null && canvasGroup.interactable)
+                    {
+                        yield break;
+                    }
+                }
+
+                yield return null;
+            }
+
+            throw new TimeoutException("BattleSceneの初期UI表示が完了しなかった。");
+        }
+
+        private string GetExpectedInitialUiObjectName()
+        {
+            if (_runSaveService.SavedRun == null)
+            {
+                return null;
+            }
+
+            return (BattleScenePage)_runSaveService.SavedRun.CurrentPage switch
+            {
+                BattleScenePage.Map => MapPageObjectName,
+                BattleScenePage.RestShop => RestShopDialogObjectName,
+                _ => null
+            };
         }
 
         private sealed class DeterministicRandomProvider : IBattleRandomProvider
