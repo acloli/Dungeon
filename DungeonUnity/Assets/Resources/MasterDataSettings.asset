@@ -40,5 +40,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 421e0f2f7d168450fbfe07da9df6106f, type: 2}
   - {fileID: 11400000, guid: 0c47d1430e67946f58fd57ae53d7ff8d, type: 2}
   - {fileID: 11400000, guid: d3beff575cbab4d76a7f656af0cb5da5, type: 2}
+  - {fileID: 11400000, guid: e077d3710494749bf84d9f80ac014e0e, type: 2}
   _enableServerSync: 0
   _serverUrl: https://example.com/api/masterdata
