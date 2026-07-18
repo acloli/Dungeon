@@ -57,9 +57,16 @@ namespace Game.MasterData.Generated
         DrawCards,
         GainBlock,
         GainEnergy,
+        GainFreeCardUpgrade,
         GainGold,
         GainMaxHp,
+        GainPotion,
+        GainRelic,
+        GainStrength,
+        HealHp,
+        LoseGold,
         LoseHp,
+        UpgradeRandomCommonCard,
     }
 
     /// <summary>
@@ -96,6 +103,27 @@ namespace Game.MasterData.Generated
         EliteBattle,
         Event,
         RestShop,
+        Treasure,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: RelicActivationLimit
+    /// </summary>
+    public enum RelicActivationLimit
+    {
+        OncePerRun,
+        OncePerTurn,
+        Unlimited,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: RelicConditionType
+    /// </summary>
+    public enum RelicConditionType
+    {
+        NodeTypeEquals,
+        PlayedCardCostEquals,
+        PlayerHpPercentAtMost,
     }
 
     /// <summary>
@@ -106,10 +134,12 @@ namespace Game.MasterData.Generated
         CardExhausted,
         CardPlayed,
         CombatStart,
+        CombatVictory,
         LoseHp,
         PlayerDamaged,
         PlayerTurnEnd,
         PlayerTurnStart,
+        RestShopEntered,
         Shuffle,
     }
 

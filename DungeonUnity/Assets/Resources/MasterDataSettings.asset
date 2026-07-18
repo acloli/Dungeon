@@ -32,6 +32,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 29931de824e814d08b07fbdbdff5108e, type: 2}
   - {fileID: 11400000, guid: b8dbf2f12bcb44f40be035f6104952c9, type: 2}
   - {fileID: 11400000, guid: 4b04414b4625544e8b2c7b0d37b90260, type: 2}
+  - {fileID: 11400000, guid: f5b34bd743f9d4059b17fb1027667907, type: 2}
   - {fileID: 11400000, guid: d9a644db98b6045feb0d9b34ab4f0889, type: 2}
   - {fileID: 11400000, guid: 39e51a09e4691432e84c8b0036fc82a4, type: 2}
   - {fileID: 11400000, guid: 81dfaca2d2f404a6babd24739cb2b862, type: 2}
@@ -40,5 +41,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 421e0f2f7d168450fbfe07da9df6106f, type: 2}
   - {fileID: 11400000, guid: 0c47d1430e67946f58fd57ae53d7ff8d, type: 2}
   - {fileID: 11400000, guid: d3beff575cbab4d76a7f656af0cb5da5, type: 2}
+  - {fileID: 11400000, guid: e077d3710494749bf84d9f80ac014e0e, type: 2}
   _enableServerSync: 0
   _serverUrl: https://example.com/api/masterdata

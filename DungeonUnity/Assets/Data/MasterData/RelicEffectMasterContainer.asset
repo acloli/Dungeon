@@ -17,17 +17,6 @@ MonoBehaviour:
     RelicId: 1
     Order: 1
     TriggerType: 2
-    EffectType: 3
-    Value: 6
-    HitCount: 1
-    StatusType: 0
-    StatusValue: 0
-    TargetSide: 2
-    PotionCapacityDelta: 0
-  - Id: 30002
-    RelicId: 2
-    Order: 1
-    TriggerType: 6
     EffectType: 4
     Value: 1
     HitCount: 1
@@ -35,10 +24,23 @@ MonoBehaviour:
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
+    ActivationLimit: 2
+  - Id: 30002
+    RelicId: 2
+    Order: 1
+    TriggerType: 3
+    EffectType: 6
+    Value: 10
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 2
+    PotionCapacityDelta: 0
+    ActivationLimit: 2
   - Id: 30003
-    RelicId: 1
-    Order: 2
-    TriggerType: 5
+    RelicId: 3
+    Order: 1
+    TriggerType: 1
     EffectType: 3
     Value: 2
     HitCount: 1
@@ -46,10 +48,11 @@ MonoBehaviour:
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
+    ActivationLimit: 1
   - Id: 30004
-    RelicId: 1
-    Order: 3
-    TriggerType: 4
+    RelicId: 4
+    Order: 1
+    TriggerType: 7
     EffectType: 3
     Value: 3
     HitCount: 1
@@ -57,58 +60,40 @@ MonoBehaviour:
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
+    ActivationLimit: 2
   - Id: 30005
-    RelicId: 1
-    Order: 4
-    TriggerType: 3
-    EffectType: 3
-    Value: 4
+    RelicId: 5
+    Order: 1
+    TriggerType: 8
+    EffectType: 11
+    Value: 5
     HitCount: 1
     StatusType: 0
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
+    ActivationLimit: 0
   - Id: 30006
-    RelicId: 2
+    RelicId: 5
     Order: 2
-    TriggerType: 1
-    EffectType: 2
+    TriggerType: 8
+    EffectType: 5
     Value: 1
     HitCount: 1
     StatusType: 0
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
+    ActivationLimit: 0
   - Id: 30007
-    RelicId: 2
-    Order: 3
-    TriggerType: 7
-    EffectType: 4
+    RelicId: 6
+    Order: 1
+    TriggerType: 3
+    EffectType: 14
     Value: 1
     HitCount: 1
     StatusType: 0
     StatusValue: 0
     TargetSide: 2
     PotionCapacityDelta: 0
-  - Id: 30008
-    RelicId: 2
-    Order: 4
-    TriggerType: 0
-    EffectType: 2
-    Value: 1
-    HitCount: 1
-    StatusType: 0
-    StatusValue: 0
-    TargetSide: 2
-    PotionCapacityDelta: 0
-  - Id: 30009
-    RelicId: 2
-    Order: 5
-    TriggerType: 2
-    EffectType: 4
-    Value: 0
-    HitCount: 1
-    StatusType: 0
-    StatusValue: 0
-    TargetSide: 2
-    PotionCapacityDelta: 1
+    ActivationLimit: 2

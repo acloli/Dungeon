@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 
 namespace Dungeon.Runtime.InGame.Battle.Services
@@ -22,6 +23,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// 強化候補選択を開く
         /// </summary>
         void ApplyUpgrade(BattleSceneState state, RuntimeRunDefinition runDefinition, Action<BattleScenePage> setCurrentPage);
+
+        /// <summary>
+        /// 現在のカード選択候補取得
+        /// </summary>
+        IReadOnlyList<RuntimeCard> GetCardSelectCards(BattleSceneState state, RuntimeRunDefinition runDefinition);
+
+        /// <summary>
+        /// 現在のカード選択価格取得
+        /// </summary>
+        IReadOnlyDictionary<int, int> GetCardSelectPrices(
+            BattleSceneState state,
+            RuntimeRunDefinition runDefinition,
+            bool isFreeUpgradeAvailable);
+
+        /// <summary>
+        /// 現在のカード選択強化後カード取得
+        /// </summary>
+        IReadOnlyDictionary<int, RuntimeCard> GetCardSelectUpgradedCards(
+            BattleSceneState state,
+            RuntimeRunDefinition runDefinition);
 
         /// <summary>
         /// ショップ画面を開く
@@ -65,6 +86,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 休憩所から継続する
         /// </summary>
-        void ContinueFromRestShop(Action openMap);
+        void ContinueFromRestShop(BattleSceneState state, Action openMap);
     }
 }

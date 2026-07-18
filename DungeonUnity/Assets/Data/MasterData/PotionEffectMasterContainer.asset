@@ -43,9 +43,36 @@ MonoBehaviour:
   - Id: 3204
     PotionId: 4
     Order: 1
-    EffectType: 6
+    EffectType: 7
     Value: 5
     HitCount: 1
     StatusType: 0
     StatusValue: 0
     TargetSide: 2
+  - Id: 3205
+    PotionId: 5
+    Order: 1
+    EffectType: 1
+    Value: 15
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 1
+  - Id: 3206
+    PotionId: 6
+    Order: 1
+    EffectType: 0
+    Value: 0
+    HitCount: 1
+    StatusType: 2
+    StatusValue: 2
+    TargetSide: 1
+  - Id: 3207
+    PotionId: 7
+    Order: 1
+    EffectType: 1
+    Value: 8
+    HitCount: 1
+    StatusType: 0
+    StatusValue: 0
+    TargetSide: 0

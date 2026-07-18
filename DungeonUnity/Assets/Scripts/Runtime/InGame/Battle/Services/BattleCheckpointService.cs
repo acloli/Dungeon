@@ -42,6 +42,20 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             state.ClearPendingRewards();
             relicService.RestoreOwnedRelics(state, runDefinition, saveData.OwnedRelicIds);
             potionService.RestoreOwnedPotions(state, runDefinition, saveData.OwnedPotionIds);
+            state.ClearRelicEffectActivationsForNewRun();
+            if (saveData.ActivatedRelicEffectIdsThisRun != null)
+            {
+                for (int i = 0; i < saveData.ActivatedRelicEffectIdsThisRun.Count; i++)
+                {
+                    state.TryReserveRunRelicEffectActivation(saveData.ActivatedRelicEffectIdsThisRun[i]);
+                }
+            }
+
+            state.RestShopFreeUpgradeCount = 0;
+            if (saveData.RestShopFreeUpgradeCount > 0)
+            {
+                state.GrantRestShopFreeUpgrade(saveData.RestShopFreeUpgradeCount);
+            }
 
             state.ShopItems.Clear();
             state.IsCardRemovalSoldOut = saveData.IsCardRemovalSoldOut;
@@ -101,9 +115,11 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 MapRouteNodeIndices = new List<int>(),
                 OwnedRelicIds = new List<int>(),
                 OwnedPotionIds = new List<int>(),
+                ActivatedRelicEffectIdsThisRun = new List<int>(state.ActivatedRelicEffectIdsThisRun),
                 ShopItems = new List<SaveShopItem>(),
                 IsCardRemovalSoldOut = state.IsCardRemovalSoldOut,
                 CardRemovalCount = state.CardRemovalCount,
+                RestShopFreeUpgradeCount = state.RestShopFreeUpgradeCount > 0 ? state.RestShopFreeUpgradeCount : 0,
                 MasterSeed = masterSeed,
                 MapSeed = mapSeed,
                 MapLayoutVersion = mapLayoutVersion,

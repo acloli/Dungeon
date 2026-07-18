@@ -14,16 +14,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.RelicMasterContainer
   _data:
   - Id: 1
-    Key: relic_burning_core
-    Name: Burning Core
-    LocalizationKey: relic.name.burning_core
-    DescriptionKey: relic.desc.burning_core
-    ImageId: relic_art_burning_core
-    Rarity: 4
+    Key: relic_cracked_crystal_core
+    Name: Cracked Crystal Core
+    LocalizationKey: relic.name.cracked_crystal_core
+    DescriptionKey: relic.desc.cracked_crystal_core
+    ImageId: relic_art_cracked_crystal_core
+    Rarity: 1
   - Id: 2
-    Key: relic_ember_crown
-    Name: Ember Crown
-    LocalizationKey: relic.name.ember_crown
-    DescriptionKey: relic.desc.ember_crown
-    ImageId: relic_art_ember_crown
+    Key: relic_hunters_talisman
+    Name: Hunter's Talisman
+    LocalizationKey: relic.name.hunters_talisman
+    DescriptionKey: relic.desc.hunters_talisman
+    ImageId: relic_art_hunters_talisman
+    Rarity: 1
+  - Id: 3
+    Key: relic_echo_vessel
+    Name: Echo Vessel
+    LocalizationKey: relic.name.echo_vessel
+    DescriptionKey: relic.desc.echo_vessel
+    ImageId: relic_art_echo_vessel
+    Rarity: 4
+  - Id: 4
+    Key: relic_cracked_idol
+    Name: Cracked Idol
+    LocalizationKey: relic.name.cracked_idol
+    DescriptionKey: relic.desc.cracked_idol
+    ImageId: relic_art_cracked_idol
+    Rarity: 1
+  - Id: 5
+    Key: relic_refining_prism
+    Name: Refining Prism
+    LocalizationKey: relic.name.refining_prism
+    DescriptionKey: relic.desc.refining_prism
+    ImageId: relic_art_refining_prism
+    Rarity: 2
+  - Id: 6
+    Key: relic_bone_white_dice_box
+    Name: Bone-White Dice Box
+    LocalizationKey: relic.name.bone_white_dice_box
+    DescriptionKey: relic.desc.bone_white_dice_box
+    ImageId: relic_art_bone_white_dice_box
     Rarity: 2

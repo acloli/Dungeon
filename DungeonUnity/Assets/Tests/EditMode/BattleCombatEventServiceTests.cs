@@ -28,6 +28,46 @@ namespace Dungeon.Tests.EditMode
             Assert.That(relicService.AppliedTriggers, Is.EqualTo(new[] { expectedTrigger }));
         }
 
+        [Test]
+        public void OnCardPlayed_PassesPlayedCardContextAndState()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeCard playedCard = CreateCard();
+            FakeBattleRelicService relicService = new FakeBattleRelicService();
+            BattleCombatEventService service = new BattleCombatEventService(relicService);
+
+            service.OnCardPlayed(state, playedCard, new BattleCardResolutionResult(0, 0, 0));
+
+            Assert.That(relicService.AppliedStates, Is.EqualTo(new[] { state }));
+            Assert.That(relicService.AppliedContexts, Has.Count.EqualTo(1));
+            Assert.That(relicService.AppliedContexts[0].TriggerType, Is.EqualTo(RelicTriggerType.CardPlayed));
+            Assert.That(relicService.AppliedContexts[0].PlayedCard, Is.SameAs(playedCard));
+        }
+
+        [Test]
+        public void OnPlayerTurnStart_ClearsTurnActivationsBeforeApplyingTrigger()
+        {
+            BattleSceneState state = new BattleSceneState();
+            state.TryReserveTurnRelicEffectActivation(101);
+            state.TryReserveTurnRelicEffectActivation(102);
+            FakeBattleRelicService relicService = new FakeBattleRelicService();
+            relicService.BeforeApply = (appliedState, triggerType) =>
+            {
+                Assert.That(appliedState, Is.SameAs(state));
+                Assert.That(triggerType, Is.EqualTo(RelicTriggerType.PlayerTurnStart));
+                Assert.That(appliedState.ActivatedRelicEffectIdsThisTurn, Is.Empty);
+                relicService.InvocationSequence.Add("TurnActivationsCleared");
+            };
+            BattleCombatEventService service = new BattleCombatEventService(relicService);
+
+            service.OnPlayerTurnStart(state);
+
+            Assert.That(state.ActivatedRelicEffectIdsThisTurn, Is.Empty);
+            Assert.That(
+                relicService.InvocationSequence,
+                Is.EqualTo(new[] { "TurnActivationsCleared", "ApplyEffects:PlayerTurnStart" }));
+        }
+
         private static IEnumerable<TestCaseData> AdditionalRelicHookCases
         {
             get
@@ -99,6 +139,12 @@ namespace Dungeon.Tests.EditMode
 
             public List<RelicTriggerType> AppliedTriggers { get; } = new List<RelicTriggerType>();
 
+            public List<RelicTriggerContext> AppliedContexts { get; } = new List<RelicTriggerContext>();
+
+            public List<string> InvocationSequence { get; } = new List<string>();
+
+            public Action<BattleSceneState, RelicTriggerType> BeforeApply { get; set; }
+
             public void RestoreOwnedRelics(BattleSceneState state, RuntimeRunDefinition runDefinition, IReadOnlyList<int> ownedRelicIds)
             {
             }
@@ -113,8 +159,21 @@ namespace Dungeon.Tests.EditMode
                 return null;
             }
 
-            public void ApplyEffects(BattleSceneState state, RelicTriggerType triggerType)
+            public void ApplyEffects(BattleSceneState state, RelicTriggerContext context)
             {
+                if (context == null)
+                {
+                    return;
+                }
+
+                AppliedContexts.Add(context);
+                RecordApplication(state, context.TriggerType);
+            }
+
+            private void RecordApplication(BattleSceneState state, RelicTriggerType triggerType)
+            {
+                BeforeApply?.Invoke(state, triggerType);
+                InvocationSequence.Add($"ApplyEffects:{triggerType}");
                 AppliedStates.Add(state);
                 AppliedTriggers.Add(triggerType);
             }

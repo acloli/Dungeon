@@ -110,12 +110,80 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
+    /// ランタイム用レリック効果条件定義
+    /// </summary>
+    public sealed class RuntimeRelicCondition
+    {
+        public RuntimeRelicCondition(
+            int id,
+            int order,
+            RelicConditionType conditionType,
+            int cardCost,
+            int hpPercent,
+            InGameNodeType? nodeType)
+        {
+            Id = id;
+            Order = order;
+            ConditionType = conditionType;
+            CardCost = cardCost;
+            HpPercent = hpPercent;
+            NodeType = nodeType;
+        }
+
+        public int Id { get; }
+        public int Order { get; }
+        public RelicConditionType ConditionType { get; }
+        public int CardCost { get; }
+        public int HpPercent { get; }
+        public InGameNodeType? NodeType { get; }
+    }
+
+    /// <summary>
     /// ランタイム用レリック効果定義
     /// </summary>
     public sealed class RuntimeRelicEffect
     {
-        public RuntimeRelicEffect(int order, RelicTriggerType triggerType, EffectType effectType, int value, int hitCount, StatusType statusType, int statusValue, TargetSide targetSide, int potionCapacityDelta = 0)
+        public RuntimeRelicEffect(
+            int order,
+            RelicTriggerType triggerType,
+            EffectType effectType,
+            int value,
+            int hitCount,
+            StatusType statusType,
+            int statusValue,
+            TargetSide targetSide,
+            int potionCapacityDelta = 0)
+            : this(
+                0,
+                order,
+                triggerType,
+                effectType,
+                value,
+                hitCount,
+                statusType,
+                statusValue,
+                targetSide,
+                potionCapacityDelta,
+                null,
+                RelicActivationLimit.Unlimited)
         {
+        }
+
+        public RuntimeRelicEffect(
+            int id,
+            int order,
+            RelicTriggerType triggerType,
+            EffectType effectType,
+            int value,
+            int hitCount,
+            StatusType statusType,
+            int statusValue,
+            TargetSide targetSide,
+            int potionCapacityDelta = 0,
+            IReadOnlyList<RuntimeRelicCondition> conditions = null,
+            RelicActivationLimit activationLimit = RelicActivationLimit.Unlimited)
+        {
+            Id = id;
             Order = order;
             TriggerType = triggerType;
             EffectType = effectType;
@@ -125,8 +193,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             StatusValue = statusValue;
             TargetSide = targetSide;
             PotionCapacityDelta = potionCapacityDelta;
+            Conditions = conditions ?? Array.Empty<RuntimeRelicCondition>();
+            ActivationLimit = activationLimit;
         }
 
+        public int Id { get; }
         public int Order { get; }
         public RelicTriggerType TriggerType { get; }
         public EffectType EffectType { get; }
@@ -136,6 +207,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public int StatusValue { get; }
         public TargetSide TargetSide { get; }
         public int PotionCapacityDelta { get; }
+        public IReadOnlyList<RuntimeRelicCondition> Conditions { get; }
+        public RelicActivationLimit ActivationLimit { get; }
     }
 
     /// <summary>

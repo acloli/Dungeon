@@ -134,6 +134,17 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         public IReadOnlyDictionary<int, RuntimeRelic> BuildRelicCatalog()
         {
+            IReadOnlyList<RelicEffectConditionMaster> conditionMasters = _masterDataService.GetAll<RelicEffectConditionMaster>();
+            Dictionary<int, List<RuntimeRelicCondition>> conditionsByEffectId = conditionMasters
+                .GroupBy(condition => condition.RelicEffectId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderBy(condition => condition.Order)
+                        .ThenBy(condition => condition.Id)
+                        .Select(CreateRuntimeRelicCondition)
+                        .ToList());
+
             IReadOnlyList<RelicEffectMaster> effectMasters = _masterDataService.GetAll<RelicEffectMaster>();
             Dictionary<int, List<RuntimeRelicEffect>> effectsByRelicId = effectMasters
                 .GroupBy(effect => effect.RelicId)
@@ -141,16 +152,24 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     group => group.Key,
                     group => group
                         .OrderBy(effect => effect.Order)
-                        .Select(effect => new RuntimeRelicEffect(
-                            effect.Order,
-                            effect.TriggerType,
-                            effect.EffectType,
-                            effect.Value,
-                            effect.HitCount,
-                            effect.StatusType,
-                            effect.StatusValue,
-                            effect.TargetSide,
-                            effect.PotionCapacityDelta))
+                        .ThenBy(effect => effect.Id)
+                        .Select(effect =>
+                        {
+                            conditionsByEffectId.TryGetValue(effect.Id, out List<RuntimeRelicCondition> conditions);
+                            return new RuntimeRelicEffect(
+                                effect.Id,
+                                effect.Order,
+                                effect.TriggerType,
+                                effect.EffectType,
+                                effect.Value,
+                                effect.HitCount,
+                                effect.StatusType,
+                                effect.StatusValue,
+                                effect.TargetSide,
+                                effect.PotionCapacityDelta,
+                                conditions,
+                                effect.ActivationLimit);
+                        })
                         .ToList());
 
             Dictionary<int, RuntimeRelic> relics = new Dictionary<int, RuntimeRelic>();
@@ -163,6 +182,35 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
 
             return relics;
+        }
+
+        /// <summary>
+        /// レリック効果条件をランタイム定義へ変換する
+        /// </summary>
+        private static RuntimeRelicCondition CreateRuntimeRelicCondition(RelicEffectConditionMaster condition)
+        {
+            return new RuntimeRelicCondition(
+                condition.Id,
+                condition.Order,
+                condition.ConditionType,
+                condition.CardCost,
+                condition.HpPercent,
+                ParseConditionNodeType(condition.NodeType));
+        }
+
+        /// <summary>
+        /// 条件用ノード種別を安全に変換する
+        /// </summary>
+        private static InGameNodeType? ParseConditionNodeType(string nodeType)
+        {
+            if (string.IsNullOrWhiteSpace(nodeType) ||
+                !Enum.TryParse(nodeType.Trim(), true, out InGameNodeType parsedNodeType) ||
+                !Enum.IsDefined(typeof(InGameNodeType), parsedNodeType))
+            {
+                return null;
+            }
+
+            return parsedNodeType;
         }
 
         /// <summary>

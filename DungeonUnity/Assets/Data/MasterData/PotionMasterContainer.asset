@@ -41,3 +41,24 @@ MonoBehaviour:
     DescriptionKey: potion.desc.fruit_juice
     ImageId: potion_art_cinder_tonic
     Rarity: 2
+  - Id: 5
+    Key: potion_shard_bomb
+    Name: Shard Bomb
+    LocalizationKey: potion.name.shard_bomb
+    DescriptionKey: potion.desc.shard_bomb
+    ImageId: potion_art_cinder_tonic
+    Rarity: 1
+  - Id: 6
+    Key: potion_fracture_ampoule
+    Name: Fracture Ampoule
+    LocalizationKey: potion.name.fracture_ampoule
+    DescriptionKey: potion.desc.fracture_ampoule
+    ImageId: potion_art_smoke_phial
+    Rarity: 4
+  - Id: 7
+    Key: potion_prism_blast
+    Name: Prism Blast
+    LocalizationKey: potion.name.prism_blast
+    DescriptionKey: potion.desc.prism_blast
+    ImageId: potion_art_cinder_tonic
+    Rarity: 2

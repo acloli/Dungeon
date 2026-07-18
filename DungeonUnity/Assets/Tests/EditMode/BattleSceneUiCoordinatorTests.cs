@@ -349,7 +349,7 @@ namespace Dungeon.Tests.EditMode
 
             public UniTask<TResult> ShowDialogAsync<TDialog, TResult>(object param = null, CancellationToken ct = default) where TDialog : UIDialogBase<TResult>
             {
-                // 型ごとの受け取り方だけを検証できれば十分なので、結果は常にdefaultを返す。
+                // 型ごとの受け取り方だけを検証できれば十分なので、結果は常にdefaultを返す
                 if (typeof(TDialog) == typeof(RewardDialog))
                 {
                     LastRewardDialogParam = param as UIDialogOpenParam;

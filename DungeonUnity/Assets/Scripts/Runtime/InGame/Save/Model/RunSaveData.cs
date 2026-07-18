@@ -29,10 +29,12 @@ namespace Dungeon.Runtime.InGame.Save.Model
         public List<int> MapRouteNodeIndices = new List<int>();
         public List<int> OwnedRelicIds = new List<int>();
         public List<int> OwnedPotionIds = new List<int>();
+        public List<int> ActivatedRelicEffectIdsThisRun = new List<int>();
 
         public List<SaveShopItem> ShopItems = new List<SaveShopItem>();
         public bool IsCardRemovalSoldOut;
         public int CardRemovalCount;
+        public int RestShopFreeUpgradeCount;
 
         /// <summary>
         /// 再開できるcheckpointデータか

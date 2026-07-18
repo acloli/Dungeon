@@ -21,7 +21,7 @@ MonoBehaviour:
   - Id: 8202
     ItemType: 3
     ItemId: 2
-    BasePrice: 250
+    BasePrice: 160
     JitterPercent: 15
   - Id: 8203
     ItemType: 2
@@ -48,3 +48,38 @@ MonoBehaviour:
     ItemId: 0
     BasePrice: 0
     JitterPercent: 0
+  - Id: 8208
+    ItemType: 3
+    ItemId: 3
+    BasePrice: 180
+    JitterPercent: 15
+  - Id: 8209
+    ItemType: 3
+    ItemId: 4
+    BasePrice: 150
+    JitterPercent: 15
+  - Id: 8210
+    ItemType: 3
+    ItemId: 5
+    BasePrice: 220
+    JitterPercent: 15
+  - Id: 8211
+    ItemType: 3
+    ItemId: 6
+    BasePrice: 210
+    JitterPercent: 15
+  - Id: 8212
+    ItemType: 2
+    ItemId: 5
+    BasePrice: 55
+    JitterPercent: 10
+  - Id: 8213
+    ItemType: 2
+    ItemId: 6
+    BasePrice: 60
+    JitterPercent: 10
+  - Id: 8214
+    ItemType: 2
+    ItemId: 7
+    BasePrice: 70
+    JitterPercent: 10
