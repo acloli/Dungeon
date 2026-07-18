@@ -3,7 +3,7 @@
 本ドキュメントは、Vox Dungeon の中長期的な開発の方向性を示すロードマップです。
 開発の進行状況や技術的な検証結果に基づいて、計画は柔軟に変更される可能性があります。
 
-> **最終更新: 2026-07-10** — Phase 3 の主要 gameplay core は完了。Shop/Event/報酬多様化・RunSave・多敵戦闘・Battle 表示層 UI・Relic/Potion core・Relic trigger 拡張・Potion capacity runtime/MasterData 接続・Upgrade core・Exhaust core・Map auto-generation・Targeted Potion Use まで実装済み。次の重点は Potion/Relic content pool 拡張、Map polish。
+> **最終更新: 2026-07-18** — Phase 3 の主要 gameplay core は完了。`feature/map-polish` で 8フロアの seed 駆動マップ、Treasure、グラフ型 MapPage と保存互換性を整備し、`feature/chapter1-relic-potion-content` で Chapter 1 向け Relic / Potion content、RestShop・Reward・Treasure・Shop・Save/Continue への統合、MasterData container 登録を完了。次の重点は追加 content のバランス調整、複数 map preset / Act、演出 polish。
 
 ---
 
@@ -67,11 +67,14 @@
 - [x] **Pile inspect UI:** Draw / Discard / Exhaust / Hand count 表示と、`PileInspectDialog` による pile 内容確認を実装
 - [x] **マップ自動生成:** `BattleMapGenerator` による seed 駆動の決定論的マップ生成、DI 登録、RunSave の `MapSeed` / `MapLayoutVersion` 復元を実装
 - [x] **Targeted Potion Use:** 使用後に対象待ち状態へ入り、敵クリックで単体対象ポーションを発動。`AllEnemies` は即時発動。`BattlePotionUseTarget` / `PendingPotionUseIndex` による状態管理、効果解決 (DealDamage/ApplyStatus)、無効対象時の非消費、全敵撃破時の Reward flow 遷移を実装
+- [x] **Map polish:** 8フロア可変幅マップ（Floor 1 / Floor 8 は 1 ノード固定、Floor 2-7 は seed ごとに 1-3 ノード）、Boss 前 `RestShop` 保証、`Treasure` ノード、MasterData 駆動 Treasure 報酬、UI Image 接続線によるグラフ型 `MapPage`、`NextNodeIndices` による厳密移動判定、経路履歴と `MapLayoutVersion = 2` を含む RunSave 互換性を実装
+- [x] **Chapter 1 Relic / Potion content:** Relic 6種と Potion 3種を追加し、発動条件・発動回数制限・combat trigger context・重複 Relic 防止を実装。RestShop の訪問内固定 lineup と初回無料 Upgrade、Reward / Treasure / Shop への配布統合、Save/Continue 永続化、必要な MasterData container 登録まで接続
 
 ### Phase 3 完了時点の残る拡張候補
 
-- [ ] **Potion / Relic content pool 拡張:** 容量変更系 relic、追加 potion、追加 passive / combat relic、バランス調整用の MasterData を拡充する
-- [ ] **Map polish:** act-scale の大きいマップ、宝箱などの特殊ノード、経路線表示を追加する
+- [ ] **追加 content とバランス調整:** Chapter 1 の Relic / Potion content を基準に、追加 Act 向け content、出現率、価格、効果量、容量変更系 Relic を調整・拡充する
+- [ ] **Map content / preset 拡張:** 複数 `MapTemplateId` preset、Act / chapter、Scout / node preview、Treasure 開封演出などを検討する
+- [ ] **対象選択の一般化:** Potion で確立した対象待ちフローを、将来のカード・Relic・Event 効果へ安全に展開できる共通化を検討する
 
 ---
 
@@ -84,5 +87,6 @@
 - [ ] **プロファイリング:** Unity Profiler, Memory Profiler を用いたボトルネックの特定とパフォーマンス最適化
 - [ ] **自動テスト:** 重要なビジネスロジック（ダメージ計算やカード解決）に対するユニットテスト（NUnit）の拡充
 - [ ] **カード強化（Upgrade）ポリッシュ:** 強化前後比較や演出、より分かりやすい UI
-- [ ] **Potion / Relic 拡張:** 追加 content pool、効果バリエーション、報酬/Shop 出現率とバランス調整
-- [ ] **Map 表示 polish:** 生成済みノードの経路線、フロア配置、特殊ノード表示を強化
+- [ ] **Chapter / content バランス polish:** 追加 content pool、効果バリエーション、Reward/Shop 出現率、価格、難易度曲線を調整
+- [ ] **対象選択 UX polish:** Potion の対象選択を起点に、カード・Relic・Event でも一貫した対象選択と取消操作を提供
+- [ ] **Map 後続 polish:** 複数 preset / Act、ノード出現アニメーション、Treasure 開封演出、Scout / preview、経路線アニメーションを追加
