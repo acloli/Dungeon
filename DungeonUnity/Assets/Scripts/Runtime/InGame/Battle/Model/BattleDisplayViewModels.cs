@@ -9,7 +9,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     /// </summary>
     public sealed class BattleIntentViewModel
     {
-        public BattleIntentViewModel(IntentType intentType, string intentName, int damage, int hitCount, int block, StatusType statusType, string statusName, int statusValue, BuffType buffType, string buffName, int buffValue)
+        public BattleIntentViewModel(IntentType intentType, string intentName, int damage, int hitCount, int block, StatusType statusType, string statusName, int statusValue, BuffType buffType, string buffName, int buffValue, int actionOrder = 0)
         {
             IntentType = intentType;
             IntentName = intentName;
@@ -22,9 +22,10 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             BuffType = buffType;
             BuffName = buffName;
             BuffValue = buffValue;
+            ActionOrder = actionOrder;
         }
 
-        public static BattleIntentViewModel FromAction(RuntimeEnemyAction action, string intentName, string statusName, string buffName)
+        public static BattleIntentViewModel FromAction(RuntimeEnemyAction action, int damage, string intentName, string statusName, string buffName)
         {
             if (action == null)
             {
@@ -34,7 +35,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             return new BattleIntentViewModel(
                 action.IntentType,
                 intentName,
-                action.Damage,
+                damage,
                 action.HitCount,
                 action.Block,
                 action.StatusType,
@@ -42,9 +43,11 @@ namespace Dungeon.Runtime.InGame.Battle.Model
                 action.StatusValue,
                 action.BuffType,
                 buffName,
-                action.BuffValue);
+                action.BuffValue,
+                action.Order);
         }
 
+        public int ActionOrder { get; }
         public IntentType IntentType { get; }
         public string IntentName { get; }
         public int Damage { get; }

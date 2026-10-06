@@ -78,6 +78,125 @@ namespace Dungeon.Tests.EditMode
             AssertMapNodeLayout(snapshot.NodeLayouts[6], 6, 0f, 3f, 4);
         }
 
+        [Test]
+        public void CreateSnapshot_UsesPlannedRandomActionWithoutAdvancingSelectionState()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Battle,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeEnemyAction firstAction = CreateAction(1, 5, RepeatRule.Random);
+            RuntimeEnemyAction secondAction = CreateAction(2, 8, RepeatRule.Random);
+            BattleEnemyState enemyState = CreateEnemyState(firstAction, secondAction);
+            enemyState.PlannedAction = secondAction;
+            enemyState.TurnCount = 1;
+            state.Enemies.Add(enemyState);
+            BattleSnapshotFactory factory = CreateFactory();
+
+            BattleCombatSnapshot firstSnapshot = factory.CreateSnapshot(state).Combat;
+            BattleCombatSnapshot secondSnapshot = factory.CreateSnapshot(state).Combat;
+
+            Assert.That(firstSnapshot.EnemyIntent.Damage, Is.EqualTo(8));
+            Assert.That(firstSnapshot.Enemies[0].Intent.Damage, Is.EqualTo(8));
+            Assert.That(secondSnapshot.EnemyIntent.Damage, Is.EqualTo(8));
+            Assert.That(enemyState.PlannedAction, Is.SameAs(secondAction));
+            Assert.That(enemyState.TurnCount, Is.EqualTo(1));
+            Assert.That(enemyState.CycleIndex, Is.Zero);
+        }
+
+        [Test]
+        public void CreateSnapshot_PredictsSharedDamageAndLaterEnemyStatusWithoutMutatingState()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Battle,
+                SelectedEnemyIndex = 0,
+                PlayerHp = 20,
+                PlayerBlock = 2
+            };
+            BattleEnemyState laterEnemy = CreateEnemyState(1, CreateAction(1, 5, RepeatRule.RepeatAfterOpening));
+            laterEnemy.PlannedAction = laterEnemy.Enemy.Actions[0];
+            BattleEnemyState earlierEnemy = CreateEnemyState(0, CreateAction(
+                2,
+                0,
+                RepeatRule.RepeatAfterOpening,
+                statusType: StatusType.Vulnerable,
+                statusValue: 2));
+            earlierEnemy.Hp = 1;
+            earlierEnemy.PlannedAction = earlierEnemy.Enemy.Actions[0];
+            state.Enemies.Add(laterEnemy);
+            state.Enemies.Add(earlierEnemy);
+            laterEnemy.Statuses[StatusType.Weak] = 1;
+            laterEnemy.Buffs[BuffType.Strength] = 3;
+            BattleSnapshotFactory factory = CreateFactory();
+
+            RuntimeEnemyAction laterEnemyPlan = laterEnemy.PlannedAction;
+            BattleCombatSnapshot snapshotBeforeEarlierEnemyDies = factory.CreateSnapshot(state).Combat;
+
+            Assert.That(snapshotBeforeEarlierEnemyDies.Enemies[0].Intent.Damage, Is.EqualTo(9));
+            Assert.That(snapshotBeforeEarlierEnemyDies.Enemies[1].Intent.Damage, Is.Zero);
+            Assert.That(snapshotBeforeEarlierEnemyDies.EnemyIntent.Damage, Is.EqualTo(9));
+            Assert.That(state.PlayerStatuses, Is.Empty);
+            Assert.That(laterEnemy.Statuses[StatusType.Weak], Is.EqualTo(1));
+            Assert.That(laterEnemy.Buffs[BuffType.Strength], Is.EqualTo(3));
+            Assert.That(state.PlayerHp, Is.EqualTo(20));
+            Assert.That(state.PlayerBlock, Is.EqualTo(2));
+
+            RuntimeCardBuilder finisherBuilder = BattleTestData.Card(1001);
+            finisherBuilder.Cost = 0;
+            finisherBuilder.Effects = new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, 1, 1, StatusType.None, 0, TargetSide.Enemy)
+            };
+            state.Hand.Add(finisherBuilder.Build());
+            state.SelectedEnemyIndex = 1;
+            BattleCombatResolver resolver = new BattleCombatResolver(
+                new BattleDeckService(),
+                new BattleEnemyActionSelector());
+            resolver.PlayCard(state, 0, new BattleRandomProvider());
+
+            BattleCombatSnapshot snapshotAfterEarlierEnemyDies = factory.CreateSnapshot(state).Combat;
+
+            Assert.That(earlierEnemy.IsDefeated, Is.True);
+            Assert.That(earlierEnemy.PlannedAction, Is.Null);
+            Assert.That(laterEnemy.PlannedAction, Is.SameAs(laterEnemyPlan));
+            Assert.That(snapshotAfterEarlierEnemyDies.Enemies[0].Intent.Damage, Is.EqualTo(6));
+            Assert.That(snapshotAfterEarlierEnemyDies.EnemyIntent.Damage, Is.EqualTo(6));
+            Assert.That(snapshotAfterEarlierEnemyDies.Enemies[1].Intent, Is.Null);
+            Assert.That(state.PlayerStatuses, Is.Empty);
+        }
+
+        [Test]
+        public void CreateSnapshot_RefreshesDamageAfterPlayerStatusChangesAndDoesNotPreapplyActionBuff()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Battle,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeEnemyAction action = CreateAction(
+                1,
+                6,
+                RepeatRule.RepeatAfterOpening,
+                buffType: BuffType.Strength,
+                buffValue: 3);
+            BattleEnemyState enemyState = CreateEnemyState(action);
+            enemyState.PlannedAction = action;
+            enemyState.Statuses[StatusType.Weak] = 1;
+            enemyState.Buffs[BuffType.Strength] = 3;
+            state.Enemies.Add(enemyState);
+            BattleSnapshotFactory factory = CreateFactory();
+
+            int initialDamage = factory.CreateSnapshot(state).Combat.EnemyIntent.Damage;
+            state.PlayerStatuses[StatusType.Vulnerable] = 2;
+            int updatedDamage = factory.CreateSnapshot(state).Combat.EnemyIntent.Damage;
+
+            Assert.That(initialDamage, Is.EqualTo(7));
+            Assert.That(updatedDamage, Is.EqualTo(11));
+            Assert.That(enemyState.Buffs[BuffType.Strength], Is.EqualTo(3));
+        }
+
         private static BattleSceneState CreateState(PotionTargetMode targetMode, BattleScenePage page)
         {
             BattleSceneState state = new BattleSceneState
@@ -105,6 +224,38 @@ namespace Dungeon.Tests.EditMode
         {
             RuntimeMapNodeBuilder builder = BattleTestData.MapNode(id);
             builder.Floor = floor;
+            return builder.Build();
+        }
+
+        private static BattleEnemyState CreateEnemyState(params RuntimeEnemyAction[] actions)
+        {
+            return CreateEnemyState(0, actions);
+        }
+
+        private static BattleEnemyState CreateEnemyState(int slotIndex, params RuntimeEnemyAction[] actions)
+        {
+            RuntimeEnemyBuilder builder = BattleTestData.Enemy(3001);
+            builder.Actions = actions;
+            return new BattleEnemyState(builder.Build(), slotIndex, 10);
+        }
+
+        private static RuntimeEnemyAction CreateAction(
+            int order,
+            int damage,
+            RepeatRule repeatRule,
+            StatusType statusType = StatusType.None,
+            int statusValue = 0,
+            BuffType buffType = BuffType.None,
+            int buffValue = 0)
+        {
+            RuntimeEnemyActionBuilder builder = BattleTestData.EnemyAction(order);
+            builder.Damage = damage;
+            builder.HitCount = 1;
+            builder.StatusType = statusType;
+            builder.StatusValue = statusValue;
+            builder.BuffType = buffType;
+            builder.BuffValue = buffValue;
+            builder.RepeatRule = repeatRule;
             return builder.Build();
         }
 

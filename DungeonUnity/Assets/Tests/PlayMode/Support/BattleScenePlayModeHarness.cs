@@ -44,6 +44,7 @@ namespace Dungeon.Tests.PlayMode.Support
         public IBattleSceneFlowService FlowService { get; private set; }
         public IBattleSceneQueryService QueryService { get; private set; }
         public RunSaveData SavedRun => _runSaveService.SavedRun;
+        public int RandomCounter => _randomProvider.Counter;
         public bool IsLoaded => _battleScene.IsValid() && _battleScene.isLoaded;
 
         /// <summary>

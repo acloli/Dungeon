@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
@@ -157,6 +158,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
         private BattleCombatSnapshot BuildCombatSnapshot(BattleSceneState state)
         {
+            Dictionary<BattleEnemyState, int> predictedDamagePerHit = BattleEnemyIntentPredictor.PredictDamagePerHit(state);
             return new BattleCombatSnapshot(
                 state.PlayerMaxHp,
                 state.PlayerHp,
@@ -165,9 +167,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.Gold,
                 state.BattleHintMessage,
                 BuildHandCardViews(state),
-                BuildEnemyViews(state),
+                BuildEnemyViews(state, predictedDamagePerHit),
                 state.SelectedEnemyIndex,
-                BuildEnemyIntent(state),
+                BuildEnemyIntent(state, predictedDamagePerHit),
                 BuildStatusViews(state.PlayerStatuses),
                 BuildStatusViews(state.EnemyStatuses),
                 BuildBuffViews(state.PlayerBuffs),
@@ -230,99 +232,15 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 state.PendingPotionOffer);
         }
 
-        private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state)
+        private BattleIntentViewModel BuildEnemyIntent(BattleSceneState state, IReadOnlyDictionary<BattleEnemyState, int> predictedDamagePerHit)
         {
             BattleEnemyState enemyState = _enemyActionSelector.GetSelectedEnemy(state);
-            RuntimeEnemyAction action = SelectEnemyActionPreview(state, enemyState);
-            if (action == null)
-            {
-                return null;
-            }
-
-            return BattleIntentViewModel.FromAction(
-                action,
-                _displayTextService.GetIntentName(action.IntentType),
-                _displayTextService.GetStatusName(action.StatusType),
-                _displayTextService.GetBuffName(action.BuffType));
+            return BuildIntentView(state, enemyState, predictedDamagePerHit);
         }
 
-        private RuntimeEnemyAction SelectEnemyActionPreview(BattleSceneState state, BattleEnemyState enemyState)
-        {
-            if (state.CurrentPage != BattleScenePage.Battle ||
-                enemyState == null ||
-                enemyState.Enemy == null ||
-                enemyState.Enemy.Actions == null ||
-                enemyState.Enemy.Actions.Count == 0 ||
-                enemyState.IsDefeated)
-            {
-                return null;
-            }
-
-            RuntimeEnemyAction openingAction = FindFirstAction(enemyState, RepeatRule.OpeningOnly);
-            if (enemyState.TurnCount == 0 && openingAction != null)
-            {
-                return openingAction;
-            }
-
-            RuntimeEnemyAction repeatAction = FindFirstAction(enemyState, RepeatRule.RepeatAfterOpening);
-            if (enemyState.TurnCount > 0 && repeatAction != null)
-            {
-                return repeatAction;
-            }
-
-            RuntimeEnemyAction afterOpeningRandomAction = FindFirstAction(enemyState, RepeatRule.AfterOpeningRandom);
-            if (enemyState.TurnCount > 0 && afterOpeningRandomAction != null)
-            {
-                return afterOpeningRandomAction;
-            }
-
-            RuntimeEnemyAction randomAction = FindFirstAction(enemyState, RepeatRule.Random);
-            if (randomAction != null)
-            {
-                return randomAction;
-            }
-
-            RuntimeEnemyAction cycleAction = FindCycleActionPreview(enemyState);
-            return cycleAction ?? enemyState.Enemy.Actions[0];
-        }
-
-        private RuntimeEnemyAction FindFirstAction(BattleEnemyState enemyState, RepeatRule repeatRule)
-        {
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == repeatRule)
-                {
-                    return action;
-                }
-            }
-
-            return null;
-        }
-
-        private RuntimeEnemyAction FindCycleActionPreview(BattleEnemyState enemyState)
-        {
-            List<RuntimeEnemyAction> cycleActions = new List<RuntimeEnemyAction>();
-            IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
-            for (int i = 0; i < actions.Count; i++)
-            {
-                RuntimeEnemyAction action = actions[i];
-                if (action.RepeatRule == RepeatRule.Cycle)
-                {
-                    cycleActions.Add(action);
-                }
-            }
-
-            if (cycleActions.Count == 0)
-            {
-                return null;
-            }
-
-            return cycleActions[enemyState.CycleIndex % cycleActions.Count];
-        }
-
-        private IReadOnlyList<BattleEnemyViewModel> BuildEnemyViews(BattleSceneState state)
+        private IReadOnlyList<BattleEnemyViewModel> BuildEnemyViews(
+            BattleSceneState state,
+            IReadOnlyDictionary<BattleEnemyState, int> predictedDamagePerHit)
         {
             List<BattleEnemyViewModel> views = new List<BattleEnemyViewModel>();
             for (int i = 0; i < state.Enemies.Count; i++)
@@ -339,7 +257,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     enemyState.Hp,
                     enemyState.Block,
                     enemyState.IsDefeated,
-                    BuildIntentView(state, enemyState),
+                    BuildIntentView(state, enemyState, predictedDamagePerHit),
                     BuildStatusViews(enemyState.Statuses),
                     BuildBuffViews(enemyState.Buffs)));
             }
@@ -347,16 +265,29 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return views;
         }
 
-        private BattleIntentViewModel BuildIntentView(BattleSceneState state, BattleEnemyState enemyState)
+        private BattleIntentViewModel BuildIntentView(
+            BattleSceneState state,
+            BattleEnemyState enemyState,
+            IReadOnlyDictionary<BattleEnemyState, int> predictedDamagePerHit)
         {
-            RuntimeEnemyAction action = SelectEnemyActionPreview(state, enemyState);
-            if (action == null)
+            if (state.CurrentPage != BattleScenePage.Battle ||
+                enemyState == null ||
+                enemyState.Enemy == null ||
+                enemyState.IsDefeated ||
+                enemyState.PlannedAction == null)
             {
                 return null;
             }
 
+            RuntimeEnemyAction action = enemyState.PlannedAction;
+            if (!predictedDamagePerHit.TryGetValue(enemyState, out int damagePerHit))
+            {
+                throw new InvalidOperationException($"Enemy {enemyState.Enemy.Id} has a planned action without an intent prediction.");
+            }
+
             return BattleIntentViewModel.FromAction(
                 action,
+                damagePerHit,
                 _displayTextService.GetIntentName(action.IntentType),
                 _displayTextService.GetStatusName(action.StatusType),
                 _displayTextService.GetBuffName(action.BuffType));

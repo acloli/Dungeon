@@ -456,6 +456,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public bool IsDefeated { get; set; }
         public int TurnCount { get; set; }
         public int CycleIndex { get; set; }
+        public RuntimeEnemyAction PlannedAction { get; set; }
         public Dictionary<StatusType, int> Statuses { get; } = new Dictionary<StatusType, int>();
         public Dictionary<BuffType, int> Buffs { get; } = new Dictionary<BuffType, int>();
     }

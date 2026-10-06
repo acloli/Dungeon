@@ -41,6 +41,83 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectEnemyAction_MultipleTurnsRetainOpeningAndRepeatPriority()
+        {
+            BattleEnemyState enemyState = CreateEnemyState(
+                CreateAction(1, RepeatRule.Random),
+                CreateAction(2, RepeatRule.OpeningOnly),
+                CreateAction(3, RepeatRule.RepeatAfterOpening),
+                CreateAction(4, RepeatRule.AfterOpeningRandom),
+                CreateAction(5, RepeatRule.Cycle));
+            FixedRandomProvider randomProvider = new FixedRandomProvider(0);
+            BattleEnemyActionSelector service = new BattleEnemyActionSelector();
+
+            RuntimeEnemyAction openingAction = service.SelectEnemyAction(enemyState, randomProvider);
+            enemyState.TurnCount++;
+            RuntimeEnemyAction repeatedAction = service.SelectEnemyAction(enemyState, randomProvider);
+            enemyState.TurnCount++;
+            RuntimeEnemyAction nextRepeatedAction = service.SelectEnemyAction(enemyState, randomProvider);
+
+            Assert.That(openingAction.Order, Is.EqualTo(2));
+            Assert.That(repeatedAction.Order, Is.EqualTo(3));
+            Assert.That(nextRepeatedAction.Order, Is.EqualTo(3));
+            Assert.That(randomProvider.Counter, Is.Zero);
+            Assert.That(enemyState.CycleIndex, Is.Zero);
+        }
+
+        [Test]
+        public void SelectEnemyAction_AfterOpeningRandomWinsOverRandomAndCycleAcrossTurns()
+        {
+            BattleEnemyState enemyState = CreateEnemyState(
+                CreateAction(1, RepeatRule.Random),
+                CreateAction(2, RepeatRule.AfterOpeningRandom),
+                CreateAction(3, RepeatRule.AfterOpeningRandom),
+                CreateAction(4, RepeatRule.Cycle));
+            enemyState.TurnCount = 1;
+            FixedRandomProvider randomProvider = new FixedRandomProvider(1);
+            BattleEnemyActionSelector service = new BattleEnemyActionSelector();
+
+            RuntimeEnemyAction firstSelected = service.SelectEnemyAction(enemyState, randomProvider);
+            enemyState.TurnCount++;
+            RuntimeEnemyAction secondSelected = service.SelectEnemyAction(enemyState, randomProvider);
+
+            Assert.That(firstSelected.Order, Is.EqualTo(3));
+            Assert.That(secondSelected.Order, Is.EqualTo(3));
+            Assert.That(randomProvider.Counter, Is.EqualTo(2));
+            Assert.That(enemyState.CycleIndex, Is.Zero);
+        }
+
+        [Test]
+        public void SelectEnemyAction_RandomWinsOverCycleAndCycleAdvancesOncePerTurn()
+        {
+            BattleEnemyState randomEnemy = CreateEnemyState(
+                CreateAction(1, RepeatRule.Random),
+                CreateAction(2, RepeatRule.Random),
+                CreateAction(3, RepeatRule.Cycle));
+            FixedRandomProvider randomProvider = new FixedRandomProvider(1);
+            BattleEnemyActionSelector service = new BattleEnemyActionSelector();
+
+            RuntimeEnemyAction randomAction = service.SelectEnemyAction(randomEnemy, randomProvider);
+
+            BattleEnemyState cycleEnemy = CreateEnemyState(
+                CreateAction(4, RepeatRule.Cycle),
+                CreateAction(5, RepeatRule.Cycle));
+            RuntimeEnemyAction firstCycleAction = service.SelectEnemyAction(cycleEnemy, randomProvider);
+            cycleEnemy.TurnCount++;
+            RuntimeEnemyAction secondCycleAction = service.SelectEnemyAction(cycleEnemy, randomProvider);
+            cycleEnemy.TurnCount++;
+            RuntimeEnemyAction thirdCycleAction = service.SelectEnemyAction(cycleEnemy, randomProvider);
+
+            Assert.That(randomAction.Order, Is.EqualTo(2));
+            Assert.That(randomEnemy.CycleIndex, Is.Zero);
+            Assert.That(firstCycleAction.Order, Is.EqualTo(4));
+            Assert.That(secondCycleAction.Order, Is.EqualTo(5));
+            Assert.That(thirdCycleAction.Order, Is.EqualTo(4));
+            Assert.That(cycleEnemy.CycleIndex, Is.EqualTo(3));
+            Assert.That(randomProvider.Counter, Is.EqualTo(1));
+        }
+
+        [Test]
         public void SelectEnemyAction_CycleRule_AdvancesCycleIndex()
         {
             BattleEnemyState enemyState = CreateEnemyState(
