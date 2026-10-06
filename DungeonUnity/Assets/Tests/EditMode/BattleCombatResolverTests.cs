@@ -105,8 +105,9 @@ namespace Dungeon.Tests.EditMode
             enemyState.TurnCount = 1;
             state.Enemies.Add(enemyState);
             BattleCombatResolver service = CreateService();
+            service.PrepareEnemyActions(state, new FixedRandomProvider(0));
 
-            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state, new FixedRandomProvider(0));
+            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state);
 
             Assert.That(result.DamageDealt, Is.EqualTo(3));
             Assert.That(state.PlayerHp, Is.EqualTo(17));
@@ -116,6 +117,210 @@ namespace Dungeon.Tests.EditMode
             Assert.That(enemyState.Buffs[BuffType.Strength], Is.EqualTo(2));
             Assert.That(enemyState.TurnCount, Is.EqualTo(2));
             Assert.That(state.EnemyBlock, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void PrepareEnemyActions_IsIdempotentAndResolutionConsumesPlannedAction()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerHp = 20
+            };
+            RuntimeEnemyAction firstAction = CreateEnemyAction(1, 5, repeatRule: RepeatRule.Random);
+            RuntimeEnemyAction secondAction = CreateEnemyAction(2, 9, repeatRule: RepeatRule.Random);
+            state.Enemies.Add(CreateEnemyState(3001, 20, firstAction, secondAction));
+            FixedRandomProvider randomProvider = new FixedRandomProvider(1);
+            BattleCombatResolver service = CreateService();
+
+            service.PrepareEnemyActions(state, randomProvider);
+            RuntimeEnemyAction plannedAction = state.Enemies[0].PlannedAction;
+            service.PrepareEnemyActions(state, randomProvider);
+            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state);
+
+            Assert.That(plannedAction.Order, Is.EqualTo(2));
+            Assert.That(result.Action, Is.SameAs(plannedAction));
+            Assert.That(result.DamageDealt, Is.EqualTo(9));
+            Assert.That(randomProvider.Counter, Is.EqualTo(1));
+            Assert.That(state.Enemies[0].TurnCount, Is.EqualTo(1));
+            Assert.That(state.Enemies[0].PlannedAction, Is.Null);
+        }
+
+        [Test]
+        public void PrepareEnemyActions_CycleAdvancesOnlyOnceForThePlannedAction()
+        {
+            BattleSceneState state = new BattleSceneState();
+            RuntimeEnemyAction firstAction = CreateEnemyAction(1, 3, repeatRule: RepeatRule.Cycle);
+            RuntimeEnemyAction secondAction = CreateEnemyAction(2, 4, repeatRule: RepeatRule.Cycle);
+            BattleEnemyState enemyState = CreateEnemyState(3001, 10, firstAction, secondAction);
+            enemyState.TurnCount = 1;
+            enemyState.CycleIndex = 1;
+            state.Enemies.Add(enemyState);
+            BattleCombatResolver service = CreateService();
+            FixedRandomProvider randomProvider = new FixedRandomProvider(0);
+
+            service.PrepareEnemyActions(state, randomProvider);
+            RuntimeEnemyAction plannedAction = enemyState.PlannedAction;
+            service.PrepareEnemyActions(state, randomProvider);
+
+            Assert.That(plannedAction.Order, Is.EqualTo(2));
+            Assert.That(enemyState.PlannedAction, Is.SameAs(plannedAction));
+            Assert.That(enemyState.CycleIndex, Is.EqualTo(2));
+            Assert.That(randomProvider.Counter, Is.Zero);
+        }
+
+        [TestCase(TargetSide.Enemy, false)]
+        [TestCase(TargetSide.AllEnemies, true)]
+        public void PlayCard_KillingPlannedEnemyClearsOnlyDeadPlansWithoutDrawingAgain(
+            TargetSide targetSide,
+            bool killAllEnemies)
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerEnergy = 3,
+                SelectedEnemyIndex = 0
+            };
+            RuntimeEnemyAction firstAction = CreateEnemyAction(1, 5, repeatRule: RepeatRule.Random);
+            RuntimeEnemyAction secondAction = CreateEnemyAction(2, 8, repeatRule: RepeatRule.Random);
+            BattleEnemyState firstEnemy = CreateEnemyState(3001, 1, firstAction, secondAction);
+            BattleEnemyState secondEnemy = CreateEnemyState(3002, 1, 1, firstAction, secondAction);
+            state.Enemies.Add(firstEnemy);
+            state.Enemies.Add(secondEnemy);
+            state.Hand.Add(CreateCard(1001, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.DealDamage, 1, 1, StatusType.None, 0, targetSide)
+            }));
+            BattleCombatResolver service = CreateService();
+            FixedRandomProvider randomProvider = new FixedRandomProvider(1);
+            service.PrepareEnemyActions(state, randomProvider);
+            RuntimeEnemyAction remainingPlan = secondEnemy.PlannedAction;
+            int counterAfterPreparation = randomProvider.Counter;
+
+            service.PlayCard(state, 0, randomProvider);
+
+            Assert.That(randomProvider.Counter, Is.EqualTo(counterAfterPreparation));
+            Assert.That(firstEnemy.IsDefeated, Is.True);
+            Assert.That(firstEnemy.PlannedAction, Is.Null);
+            Assert.That(secondEnemy.IsDefeated, Is.EqualTo(killAllEnemies));
+            Assert.That(secondEnemy.PlannedAction, Is.EqualTo(killAllEnemies ? null : remainingPlan));
+        }
+
+        [Test]
+        public void ResolveEnemyTurn_UnpreparedEnemyActionIsRejectedBeforeStateChanges()
+        {
+            BattleSceneState state = new BattleSceneState();
+            BattleEnemyState enemyState = CreateEnemyState(3001, 10, CreateEnemyAction(1, 5));
+            enemyState.Block = 3;
+            state.Enemies.Add(enemyState);
+            state.PlayerStatuses[StatusType.Weak] = 2;
+            BattleCombatResolver service = CreateService();
+
+            Assert.Throws<InvalidOperationException>(() => service.ResolveEnemyTurn(state));
+
+            Assert.That(state.PlayerStatuses[StatusType.Weak], Is.EqualTo(2));
+            Assert.That(enemyState.Block, Is.EqualTo(3));
+            Assert.That(enemyState.TurnCount, Is.Zero);
+        }
+
+        [TestCase(1, 3)]
+        [TestCase(3, 13)]
+        public void ResolveEnemyTurn_PredictedPerHitDamageMatchesHpLossAfterBlock(int hitCount, int expectedHpLoss)
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Battle,
+                PlayerHp = 20,
+                PlayerBlock = 2
+            };
+            BattleEnemyState enemyState = CreateEnemyState(
+                3001,
+                10,
+                CreateEnemyAction(1, 5, hitCount: hitCount, repeatRule: RepeatRule.OpeningOnly));
+            state.Enemies.Add(enemyState);
+            BattleCombatResolver service = CreateService();
+            service.PrepareEnemyActions(state, new FixedRandomProvider(0));
+
+            int displayedDamagePerHit = BattleEnemyIntentPredictor.PredictDamagePerHit(state)[enemyState];
+            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state);
+
+            Assert.That(displayedDamagePerHit, Is.EqualTo(5));
+            Assert.That(result.DamageDealt, Is.EqualTo(expectedHpLoss));
+            Assert.That(state.PlayerHp, Is.EqualTo(20 - expectedHpLoss));
+            Assert.That(state.PlayerBlock, Is.Zero);
+        }
+
+        [TestCase(1, 3, 1)]
+        [TestCase(2, 5, 3)]
+        public void ResolveEnemyTurn_VulnerableDurationPredictionMatchesWeakAndBlockTiming(
+            int vulnerableDuration,
+            int expectedDamagePerHit,
+            int expectedHpLoss)
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                CurrentPage = BattleScenePage.Battle,
+                PlayerHp = 20,
+                PlayerBlock = 2
+            };
+            state.PlayerStatuses[StatusType.Vulnerable] = vulnerableDuration;
+            BattleEnemyState enemyState = CreateEnemyState(
+                3001,
+                10,
+                CreateEnemyAction(1, 5, repeatRule: RepeatRule.OpeningOnly));
+            enemyState.Statuses[StatusType.Weak] = 1;
+            state.Enemies.Add(enemyState);
+            BattleCombatResolver service = CreateService();
+            service.PrepareEnemyActions(state, new FixedRandomProvider(0));
+
+            int displayedDamagePerHit = BattleEnemyIntentPredictor.PredictDamagePerHit(state)[enemyState];
+            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state);
+
+            Assert.That(displayedDamagePerHit, Is.EqualTo(expectedDamagePerHit));
+            Assert.That(result.DamageDealt, Is.EqualTo(expectedHpLoss));
+            Assert.That(state.PlayerHp, Is.EqualTo(20 - expectedHpLoss));
+            if (vulnerableDuration == 1)
+            {
+                Assert.That(state.PlayerStatuses.ContainsKey(StatusType.Vulnerable), Is.False);
+            }
+            else
+            {
+                Assert.That(state.PlayerStatuses[StatusType.Vulnerable], Is.EqualTo(vulnerableDuration - 1));
+            }
+
+            Assert.That(enemyState.Statuses.ContainsKey(StatusType.Weak), Is.False);
+        }
+
+        [Test]
+        public void ResolveEnemyTurn_ZeroDamageActionDoesNotApplyAttackBuffToHpButKeepsOtherEffects()
+        {
+            BattleSceneState state = new BattleSceneState
+            {
+                PlayerHp = 20,
+                PlayerBlock = 4
+            };
+            RuntimeEnemyAction action = CreateEnemyAction(
+                1,
+                0,
+                block: 3,
+                statusType: StatusType.Weak,
+                statusValue: 2,
+                buffType: BuffType.Strength,
+                buffValue: 2);
+            BattleEnemyState enemyState = CreateEnemyState(3001, 10, action);
+            enemyState.TurnCount = 1;
+            enemyState.Buffs[BuffType.Ritual] = 5;
+            state.Enemies.Add(enemyState);
+            BattleCombatResolver service = CreateService();
+            service.PrepareEnemyActions(state, new FixedRandomProvider(0));
+
+            BattleEnemyTurnResult result = service.ResolveEnemyTurn(state);
+
+            Assert.That(result.DamageDealt, Is.Zero);
+            Assert.That(state.PlayerHp, Is.EqualTo(20));
+            Assert.That(state.PlayerBlock, Is.Zero);
+            Assert.That(state.PlayerStatuses[StatusType.Weak], Is.EqualTo(2));
+            Assert.That(enemyState.Block, Is.EqualTo(3));
+            Assert.That(enemyState.Buffs[BuffType.Ritual], Is.EqualTo(5));
+            Assert.That(enemyState.Buffs[BuffType.Strength], Is.EqualTo(2));
         }
 
         [Test]
@@ -257,8 +462,18 @@ namespace Dungeon.Tests.EditMode
 
         private static BattleEnemyState CreateEnemyState(int id, int hp, RuntimeEnemyAction action, int slotIndex = 0)
         {
+            return CreateEnemyState(id, hp, slotIndex, action);
+        }
+
+        private static BattleEnemyState CreateEnemyState(int id, int hp, params RuntimeEnemyAction[] actions)
+        {
+            return CreateEnemyState(id, hp, 0, actions);
+        }
+
+        private static BattleEnemyState CreateEnemyState(int id, int hp, int slotIndex, params RuntimeEnemyAction[] actions)
+        {
             RuntimeEnemyBuilder builder = BattleTestData.Enemy(id);
-            builder.Actions = new[] { action };
+            builder.Actions = actions;
             RuntimeEnemy enemy = builder.Build();
             return new BattleEnemyState(enemy, slotIndex, hp);
         }
@@ -270,16 +485,19 @@ namespace Dungeon.Tests.EditMode
             StatusType statusType = StatusType.None,
             int statusValue = 0,
             BuffType buffType = BuffType.None,
-            int buffValue = 0)
+            int buffValue = 0,
+            RepeatRule repeatRule = RepeatRule.RepeatAfterOpening,
+            int hitCount = 1)
         {
             RuntimeEnemyActionBuilder builder = BattleTestData.EnemyAction(order);
             builder.Damage = damage;
+            builder.HitCount = hitCount;
             builder.Block = block;
             builder.StatusType = statusType;
             builder.StatusValue = statusValue;
             builder.BuffType = buffType;
             builder.BuffValue = buffValue;
-            builder.RepeatRule = RepeatRule.RepeatAfterOpening;
+            builder.RepeatRule = repeatRule;
             return builder.Build();
         }
 
