@@ -85,9 +85,14 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         BattleCardResolutionResult PlayCard(BattleSceneState state, int handIndex, IBattleRandomProvider randomProvider);
 
         /// <summary>
+        /// 生存敵の次の行動を準備する
+        /// </summary>
+        void PrepareEnemyActions(BattleSceneState state, IBattleRandomProvider randomProvider);
+
+        /// <summary>
         /// 敵ターン解決
         /// </summary>
-        BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state, IBattleRandomProvider randomProvider);
+        BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state);
 
         /// <summary>
         /// 休憩適用

@@ -186,11 +186,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 生存敵の次の行動を準備する
+        /// </summary>
+        public void PrepareEnemyActions(BattleSceneState state, IBattleRandomProvider randomProvider)
+        {
+            _combatResolver.PrepareEnemyActions(state, randomProvider);
+        }
+
+        /// <summary>
         /// 敵ターン解決
         /// </summary>
-        public BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state, IBattleRandomProvider randomProvider)
+        public BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state)
         {
-            return _combatResolver.ResolveEnemyTurn(state, randomProvider);
+            return _combatResolver.ResolveEnemyTurn(state);
         }
 
         /// <summary>

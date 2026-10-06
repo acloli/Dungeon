@@ -372,7 +372,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             _combatEventService.OnPlayerTurnEnd(_state);
             _rules.DiscardHand(_state);
-            BattleEnemyTurnResult result = _rules.ResolveEnemyTurn(_state, _randomProvider);
+            BattleEnemyTurnResult result = _rules.ResolveEnemyTurn(_state);
             if (result.DamageDealt > 0)
             {
                 _combatEventService.OnPlayerDamaged(_state, result.DamageDealt);
@@ -388,6 +388,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _state.PlayerEnergy = BattleSceneConstants.DefaultPlayerEnergy;
             _combatEventService.OnPlayerTurnStart(_state);
             DrawHandWithShuffleHook();
+            _rules.PrepareEnemyActions(_state, _randomProvider);
         }
 
         /// <summary>
@@ -745,6 +746,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             _rules.PrepareBattleDeck(_state, _randomProvider);
             _combatEventService.OnPlayerTurnStart(_state);
             DrawHandWithShuffleHook();
+            _rules.PrepareEnemyActions(_state, _randomProvider);
             _state.BattleHintMessage = BattleSceneConstants.SelectCardAndTarget;
         }
 
@@ -753,6 +755,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OnBattleVictory()
         {
+            _state.BattleFinished = true;
+            ClearPlannedEnemyActions();
             InGameNodeType nodeType = GetCurrentNodeType();
             RelicTriggerContext context = new RelicTriggerContext(
                 RelicTriggerType.CombatVictory,
@@ -853,12 +857,26 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// </summary>
         private void OpenResult(bool victory)
         {
+            _state.BattleFinished = true;
+            ClearPlannedEnemyActions();
             SetCurrentPage(BattleScenePage.Result);
             _state.ResultMessage = victory
                 ? string.Format(BattleSceneConstants.ResultVictoryFormat, _state.PlayerHp, _state.PlayerMaxHp, _state.Gold)
                 : BattleSceneConstants.RunFailedMessage;
                 
             _runSaveService?.DeleteSavedRun();
+        }
+
+        private void ClearPlannedEnemyActions()
+        {
+            for (int i = 0; i < _state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = _state.Enemies[i];
+                if (enemyState != null)
+                {
+                    enemyState.PlannedAction = null;
+                }
+            }
         }
 
         /// <summary>

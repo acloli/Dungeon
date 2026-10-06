@@ -37,7 +37,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// カード使用結果を解決する
         /// </summary>
-        public BattleCardResolutionResult PlayCard(BattleSceneState state, int handIndex, IBattleRandomProvider randomProvider)
+        public BattleCardResolutionResult PlayCard(BattleSceneState state, int handIndex,
+            IBattleRandomProvider randomProvider)
         {
             if (state == null || handIndex < 0 || handIndex >= state.Hand.Count)
             {
@@ -87,16 +88,68 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
+        /// 生存敵の次の行動を一度だけ確定する
+        /// </summary>
+        public void PrepareEnemyActions(BattleSceneState state, IBattleRandomProvider randomProvider)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            List<BattleEnemyState> orderedEnemies = state.Enemies
+                .Where(enemy => enemy != null && !enemy.IsDefeated && enemy.Enemy != null)
+                .OrderBy(enemy => enemy.SlotIndex)
+                .ToList();
+            for (int i = 0; i < orderedEnemies.Count; i++)
+            {
+                BattleEnemyState enemyState = orderedEnemies[i];
+                IReadOnlyList<RuntimeEnemyAction> actions = enemyState.Enemy.Actions;
+                if (actions == null || actions.Count == 0)
+                {
+                    enemyState.PlannedAction = null;
+                    continue;
+                }
+
+                if (enemyState.PlannedAction != null)
+                {
+                    continue;
+                }
+
+                RuntimeEnemyAction plannedAction = _enemyActionSelector.SelectEnemyAction(enemyState, randomProvider);
+                if (plannedAction == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Enemy {enemyState.Enemy.Id} has actions but no action could be planned.");
+                }
+
+                enemyState.PlannedAction = plannedAction;
+            }
+        }
+
+        /// <summary>
         /// 敵ターン結果を解決する
         /// </summary>
-        public BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state, IBattleRandomProvider randomProvider)
+        public BattleEnemyTurnResult ResolveEnemyTurn(BattleSceneState state)
         {
             if (state == null || state.Enemies.Count == 0)
             {
                 return default;
             }
 
-            TickExpiringStatuses(state.PlayerStatuses);
+            for (int i = 0; i < state.Enemies.Count; i++)
+            {
+                BattleEnemyState enemyState = state.Enemies[i];
+                IReadOnlyList<RuntimeEnemyAction> actions = enemyState?.Enemy?.Actions;
+                if (enemyState != null && !enemyState.IsDefeated && actions != null && actions.Count > 0 &&
+                    enemyState.PlannedAction == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Enemy {enemyState.Enemy.Id} reached resolution without a planned action.");
+                }
+            }
+
+            BattleCombatRules.TickExpiringStatuses(state.PlayerStatuses);
 
             RuntimeEnemyAction lastAction = null;
             int totalDamage = 0;
@@ -108,23 +161,28 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 BattleEnemyState enemyState = orderedEnemies[i];
                 enemyState.Block = 0;
-                RuntimeEnemyAction action = _enemyActionSelector.SelectEnemyAction(enemyState, randomProvider);
+                RuntimeEnemyAction action = enemyState.PlannedAction;
                 if (action == null)
                 {
                     continue;
                 }
 
-                totalDamage += ResolveEnemyDamage(state, enemyState, action);
+                enemyState.PlannedAction = null;
+                if (action.Damage > 0)
+                {
+                    totalDamage += ResolveEnemyDamage(state, enemyState, action);
+                }
+
                 if (action.Block > 0)
                 {
                     enemyState.Block += action.Block;
                 }
 
-                ApplyStatus(state.PlayerStatuses, action.StatusType, action.StatusValue);
-                ApplyBuff(enemyState.Buffs, action.BuffType, action.BuffValue);
+                BattleCombatRules.ApplyStatus(state.PlayerStatuses, action.StatusType, action.StatusValue);
+                BattleCombatRules.ApplyBuff(enemyState.Buffs, action.BuffType, action.BuffValue);
 
                 enemyState.TurnCount++;
-                TickExpiringStatuses(enemyState.Statuses);
+                BattleCombatRules.TickExpiringStatuses(enemyState.Statuses);
                 lastAction = action;
             }
 
@@ -145,8 +203,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 for (int i = 0; i < hitCount; i++)
                 {
-                    int damage = ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses, state.PlayerBuffs);
-                    damage = ApplyIncomingModifiers(damage, enemyState.Statuses);
+                    int damage =
+                        BattleCombatRules.ApplyOutgoingModifiers(effect.Value, state.PlayerStatuses, state.PlayerBuffs);
+                    damage = BattleCombatRules.ApplyIncomingModifiers(damage, enemyState.Statuses);
                     totalDamage += ApplyDamageToEnemy(state, enemyState, damage);
                 }
             }
@@ -162,13 +221,13 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         {
             if (effect.TargetSide == TargetSide.Self)
             {
-                ApplyStatus(state.PlayerStatuses, effect.StatusType, effect.StatusValue);
+                BattleCombatRules.ApplyStatus(state.PlayerStatuses, effect.StatusType, effect.StatusValue);
                 return;
             }
 
             foreach (BattleEnemyState enemyState in _enemyActionSelector.GetTargetEnemies(state, effect.TargetSide))
             {
-                ApplyStatus(enemyState.Statuses, effect.StatusType, effect.StatusValue);
+                BattleCombatRules.ApplyStatus(enemyState.Statuses, effect.StatusType, effect.StatusValue);
             }
 
             SyncPrimaryEnemyState(state);
@@ -207,14 +266,21 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         /// <summary>
         /// 敵のダメージ行動を解決する
         /// </summary>
-        private static int ResolveEnemyDamage(BattleSceneState state, BattleEnemyState enemyState, RuntimeEnemyAction action)
+        private static int ResolveEnemyDamage(BattleSceneState state, BattleEnemyState enemyState,
+            RuntimeEnemyAction action)
         {
+            if (action.Damage <= 0)
+            {
+                return 0;
+            }
+
             int hitCount = Math.Max(1, action.HitCount);
             int totalDamage = 0;
             for (int i = 0; i < hitCount; i++)
             {
-                int damage = ApplyOutgoingModifiers(action.Damage, enemyState.Statuses, enemyState.Buffs);
-                damage = ApplyIncomingModifiers(damage, state.PlayerStatuses);
+                int damage =
+                    BattleCombatRules.ApplyOutgoingModifiers(action.Damage, enemyState.Statuses, enemyState.Buffs);
+                damage = BattleCombatRules.ApplyIncomingModifiers(damage, state.PlayerStatuses);
                 totalDamage += ApplyDamageToPlayer(state, damage);
             }
 
@@ -244,6 +310,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 enemyState.Hp = 0;
                 enemyState.IsDefeated = true;
+                enemyState.PlannedAction = null;
                 _enemyActionSelector.NormalizeSelectedEnemyIndex(state);
             }
 
@@ -251,9 +318,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         }
 
         /// <summary>
-        /// 与ダメージ側補正
+        /// 単体敵表示互換用stateを同期する
         /// </summary>
-        private static int ApplyOutgoingModifiers(
+        private void SyncPrimaryEnemyState(BattleSceneState state)
+        {
+            BattleEnemyState selectedEnemy = _enemyActionSelector.GetSelectedEnemy(state);
+            if (selectedEnemy == null)
+            {
+                state.ClearSelectedEnemyDisplay();
+                return;
+            }
+
+            state.SyncSelectedEnemyDisplay(selectedEnemy, state.SelectedEnemyIndex);
+        }
+    }
+
+    /// <summary>
+    /// 戦闘予測と実行で共有する計算規則
+    /// </summary>
+    public static class BattleCombatRules
+    {
+        public static int ApplyOutgoingModifiers(
             int baseDamage,
             IReadOnlyDictionary<StatusType, int> statuses,
             IReadOnlyDictionary<BuffType, int> buffs)
@@ -268,10 +353,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return Mathf.Max(0, damage);
         }
 
-        /// <summary>
-        /// 被ダメージ側補正
-        /// </summary>
-        private static int ApplyIncomingModifiers(int damage, IReadOnlyDictionary<StatusType, int> statuses)
+        public static int ApplyIncomingModifiers(int damage, IReadOnlyDictionary<StatusType, int> statuses)
         {
             int result = Mathf.Max(0, damage);
             if (TryGetStatusValue(statuses, StatusType.Vulnerable, out int vulnerableValue) && vulnerableValue > 0)
@@ -282,10 +364,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return Mathf.Max(0, result);
         }
 
-        /// <summary>
-        /// ステータス付与
-        /// </summary>
-        private static void ApplyStatus(IDictionary<StatusType, int> statuses, StatusType statusType, int value)
+        public static void ApplyStatus(IDictionary<StatusType, int> statuses, StatusType statusType, int value)
         {
             if (statuses == null || statusType == StatusType.None || value <= 0)
             {
@@ -301,10 +380,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             statuses[statusType] = value;
         }
 
-        /// <summary>
-        /// バフ付与
-        /// </summary>
-        private static void ApplyBuff(IDictionary<BuffType, int> buffs, BuffType buffType, int value)
+        public static void ApplyBuff(IDictionary<BuffType, int> buffs, BuffType buffType, int value)
         {
             if (buffs == null || buffType == BuffType.None || value <= 0)
             {
@@ -320,10 +396,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             buffs[buffType] = value;
         }
 
-        /// <summary>
-        /// ターンで自然減衰する状態を更新する
-        /// </summary>
-        private static void TickExpiringStatuses(IDictionary<StatusType, int> statuses)
+        public static void TickExpiringStatuses(IDictionary<StatusType, int> statuses)
         {
             if (statuses == null || statuses.Count == 0)
             {
@@ -350,9 +423,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             }
         }
 
-        /// <summary>
-        /// 自然減衰対象判定
-        /// </summary>
         private static bool ShouldExpire(StatusType statusType)
         {
             return statusType == StatusType.Weak ||
@@ -360,9 +430,6 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                    statusType == StatusType.Slimed;
         }
 
-        /// <summary>
-        /// バフ値合算
-        /// </summary>
         private static int GetBuffValue(IReadOnlyDictionary<BuffType, int> buffs)
         {
             int total = 0;
@@ -370,10 +437,12 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             {
                 total += strengthValue;
             }
+
             if (TryGetBuffValue(buffs, BuffType.Ritual, out int ritualValue))
             {
                 total += ritualValue;
             }
+
             if (TryGetBuffValue(buffs, BuffType.Enrage, out int enrageValue))
             {
                 total += enrageValue;
@@ -382,37 +451,19 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return total;
         }
 
-        /// <summary>
-        /// ステータス値取得
-        /// </summary>
-        private static bool TryGetStatusValue(IReadOnlyDictionary<StatusType, int> statuses, StatusType statusType, out int value)
+        private static bool TryGetStatusValue(
+            IReadOnlyDictionary<StatusType, int> statuses,
+            StatusType statusType,
+            out int value)
         {
             value = 0;
             return statuses != null && statuses.TryGetValue(statusType, out value);
         }
 
-        /// <summary>
-        /// バフ値取得
-        /// </summary>
         private static bool TryGetBuffValue(IReadOnlyDictionary<BuffType, int> buffs, BuffType buffType, out int value)
         {
             value = 0;
             return buffs != null && buffs.TryGetValue(buffType, out value);
-        }
-
-        /// <summary>
-        /// 単体敵表示互換用stateを同期する
-        /// </summary>
-        private void SyncPrimaryEnemyState(BattleSceneState state)
-        {
-            BattleEnemyState selectedEnemy = _enemyActionSelector.GetSelectedEnemy(state);
-            if (selectedEnemy == null)
-            {
-                state.ClearSelectedEnemyDisplay();
-                return;
-            }
-
-            state.SyncSelectedEnemyDisplay(selectedEnemy, state.SelectedEnemyIndex);
         }
     }
 }
