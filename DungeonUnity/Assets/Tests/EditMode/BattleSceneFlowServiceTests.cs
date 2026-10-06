@@ -171,6 +171,264 @@ namespace Dungeon.Tests.EditMode
         }
 
         [Test]
+        public void SelectMapNode_RandomEnemyIntent_IsShownAndExecutedFromOnePlan()
+        {
+            RuntimeEnemy enemy = CreateEnemy(
+                3001,
+                "Slime",
+                18,
+                18,
+                14,
+                CreateAction(1, 5, RepeatRule.Random),
+                CreateAction(2, 8, RepeatRule.Random));
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: Array.Empty<RuntimeCard>(),
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(enemy, 10) });
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(new[] { 0, 1, 0 });
+            BattleSceneFlowService service = CreateServiceWithRandomProvider(runDefinition, randomProvider);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot firstSnapshot = service.CreateSnapshot();
+            BattleSceneSnapshot repeatedSnapshot = service.CreateSnapshot();
+            service.EndTurn();
+            BattleSceneSnapshot afterEnemyTurn = service.CreateSnapshot();
+
+            Assert.That(Combat(firstSnapshot).EnemyIntent.Damage, Is.EqualTo(8));
+            Assert.That(Combat(repeatedSnapshot).EnemyIntent.Damage, Is.EqualTo(8));
+            Assert.That(Combat(afterEnemyTurn).PlayerHp, Is.EqualTo(42));
+            Assert.That(Combat(afterEnemyTurn).EnemyIntent.Damage, Is.EqualTo(5));
+            Assert.That(randomProvider.Counter, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void SnapshotTargetAndPileInspection_DoNotChangePlannedActionsOrRandomCounter()
+        {
+            RuntimeEnemy firstEnemy = CreateEnemy(
+                3001,
+                "First",
+                18,
+                18,
+                10,
+                CreateAction(1, 5, RepeatRule.Random),
+                CreateAction(2, 8, RepeatRule.Random));
+            RuntimeEnemy secondEnemy = CreateEnemy(
+                3002,
+                "Second",
+                18,
+                18,
+                10,
+                CreateAction(3, 6, RepeatRule.Random),
+                CreateAction(4, 9, RepeatRule.Random));
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(CreateFormation(
+                        CreateEnemyEntry(firstEnemy, 0),
+                        CreateEnemyEntry(secondEnemy, 1)), 10)
+                });
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(new[] { 1, 0, 1, 0 });
+            BattleSceneFlowService service = CreateServiceWithRandomProvider(runDefinition, randomProvider);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot openingSnapshot = service.CreateSnapshot();
+            int randomCounterAfterPreparation = randomProvider.Counter;
+            int[] plannedActionOrders = Combat(openingSnapshot).Enemies
+                .Select(enemy => enemy.Intent.ActionOrder)
+                .ToArray();
+
+            BattleSceneSnapshot repeatedSnapshot = service.CreateSnapshot();
+            service.SelectEnemyTarget(1);
+            BattleSceneSnapshot secondEnemySelectedSnapshot = service.CreateSnapshot();
+            service.OpenPileInspect(BattlePileType.Draw);
+            BattleSceneSnapshot pileInspectionSnapshot = service.CreateSnapshot();
+            service.ClosePileInspect();
+            BattleSceneSnapshot afterInspectionSnapshot = service.CreateSnapshot();
+
+            Assert.That(Combat(repeatedSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder), Is.EqualTo(plannedActionOrders));
+            Assert.That(Combat(secondEnemySelectedSnapshot).EnemyIntent.ActionOrder, Is.EqualTo(plannedActionOrders[1]));
+            Assert.That(Combat(secondEnemySelectedSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder), Is.EqualTo(plannedActionOrders));
+            Assert.That(pileInspectionSnapshot.PileInspect.IsOpen, Is.True);
+            Assert.That(Combat(pileInspectionSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder), Is.EqualTo(plannedActionOrders));
+            Assert.That(Combat(afterInspectionSnapshot).EnemyIntent.ActionOrder, Is.EqualTo(plannedActionOrders[1]));
+            Assert.That(randomProvider.Counter, Is.EqualTo(randomCounterAfterPreparation));
+        }
+
+        [Test]
+        public void CardAndTargetedPotions_UpdateIntentDamageAndResolveTheDisplayedPerHitValues()
+        {
+            RuntimeCard weakenCard = CreateCard(1001, "Weaken", 0, 0, new[]
+            {
+                new RuntimeCardEffect(1, EffectType.ApplyStatus, 0, 1, StatusType.Weak, 1, TargetSide.Enemy)
+            });
+            RuntimePotion singleTargetPotion = CreatePotion(
+                3101,
+                "Single Weak",
+                PotionUseContext.BattleOnly,
+                PotionTargetMode.AnyEnemy,
+                new[]
+                {
+                    new RuntimePotionEffect(1, EffectType.ApplyStatus, 0, 1, StatusType.Weak, 1, TargetSide.Enemy)
+                });
+            RuntimePotion allEnemiesPotion = CreatePotion(
+                3102,
+                "All Weak",
+                PotionUseContext.BattleOnly,
+                PotionTargetMode.AllEnemies,
+                new[]
+                {
+                    new RuntimePotionEffect(1, EffectType.ApplyStatus, 0, 1, StatusType.Weak, 1, TargetSide.AllEnemies)
+                });
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { weakenCard },
+                potionCatalog: new Dictionary<int, RuntimePotion>
+                {
+                    [singleTargetPotion.Id] = singleTargetPotion,
+                    [allEnemiesPotion.Id] = allEnemiesPotion
+                },
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[]
+                {
+                    CreateEncounter(CreateFormation(
+                        CreateEnemyEntry(CreateEnemy(3001, "First", 18, 18, 10, CreateAction(1, 8, RepeatRule.RepeatAfterOpening)), 0),
+                        CreateEnemyEntry(CreateEnemy(3002, "Second", 18, 18, 10, CreateAction(1, 8, RepeatRule.RepeatAfterOpening)), 1),
+                        CreateEnemyEntry(CreateEnemy(3003, "Third", 18, 18, 10, CreateAction(1, 8, RepeatRule.RepeatAfterOpening)), 2)), 10)
+                });
+            FakeRunSaveService runSaveService = new FakeRunSaveService();
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(Enumerable.Repeat(0, 128));
+            BattleSceneFlowService service = CreateServiceWithRandomProvider(
+                runDefinition,
+                randomProvider,
+                runSaveService: runSaveService);
+
+            service.Initialize(5501);
+            RunSaveData potionCheckpoint = CloneSaveData(runSaveService.LastSavedData);
+            potionCheckpoint.OwnedPotionIds.Add(singleTargetPotion.Id);
+            potionCheckpoint.OwnedPotionIds.Add(allEnemiesPotion.Id);
+            service.InitializeFromSave(potionCheckpoint);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot openingSnapshot = service.CreateSnapshot();
+            int[] plannedActionOrders = Combat(openingSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder).ToArray();
+
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot afterCardSnapshot = service.CreateSnapshot();
+            service.UsePotion(0);
+            service.SelectEnemyTarget(1);
+            service.SelectEnemyTarget(1);
+            BattleSceneSnapshot afterSinglePotionSnapshot = service.CreateSnapshot();
+            service.SelectEnemyTarget(2);
+            BattleSceneSnapshot thirdEnemySelectedSnapshot = service.CreateSnapshot();
+
+            Assert.That(Combat(afterCardSnapshot).Enemies.Select(enemy => enemy.Intent.Damage), Is.EqualTo(new[] { 6, 8, 8 }));
+            Assert.That(Combat(afterSinglePotionSnapshot).Enemies.Select(enemy => enemy.Intent.Damage), Is.EqualTo(new[] { 6, 6, 8 }));
+            Assert.That(Combat(afterSinglePotionSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder), Is.EqualTo(plannedActionOrders));
+            Assert.That(Combat(afterSinglePotionSnapshot).EnemyIntent.Damage, Is.EqualTo(6));
+            Assert.That(Combat(thirdEnemySelectedSnapshot).EnemyIntent.Damage, Is.EqualTo(8));
+            Assert.That(Combat(thirdEnemySelectedSnapshot).Enemies.Select(enemy => enemy.Intent.Damage), Is.EqualTo(new[] { 6, 6, 8 }));
+
+            service.EndTurn();
+            BattleSceneSnapshot afterSinglePotionResolution = service.CreateSnapshot();
+            Assert.That(Combat(afterSinglePotionResolution).PlayerHp, Is.EqualTo(30));
+
+            service.UsePotion(0);
+            BattleSceneSnapshot afterAllEnemiesPotionSnapshot = service.CreateSnapshot();
+            Assert.That(Combat(afterAllEnemiesPotionSnapshot).Enemies.Select(enemy => enemy.Intent.Damage), Is.EqualTo(new[] { 6, 6, 6 }));
+            Assert.That(Combat(afterAllEnemiesPotionSnapshot).EnemyIntent.Damage, Is.EqualTo(6));
+            Assert.That(Combat(afterAllEnemiesPotionSnapshot).Enemies.Select(enemy => enemy.Intent.ActionOrder), Is.EqualTo(plannedActionOrders));
+
+            service.EndTurn();
+            BattleSceneSnapshot afterAllEnemiesPotionResolution = service.CreateSnapshot();
+
+            Assert.That(Combat(afterAllEnemiesPotionResolution).PlayerHp, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void EndTurn_ZeroDamageIntent_DoesNotNotifyPlayerDamaged()
+        {
+            RuntimeEnemyAction action = CreateAction(
+                1,
+                0,
+                RepeatRule.OpeningOnly,
+                IntentType.Buff,
+                block: 2,
+                buffType: BuffType.Strength,
+                buffValue: 3);
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                nodes: new[] { CreateNode(5301, 1, InGameNodeType.Battle, "B1", new[] { 1 }) },
+                battleEncounters: new[] { CreateEncounter(CreateEnemy(3001, "Slime", 18, 18, 14, action), 10) });
+            FakeBattleCombatEventService combatEventService = new FakeBattleCombatEventService();
+            BattleSceneFlowService service = CreateServiceWithCombatEvents(runDefinition, combatEventService, 0, 0);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            service.EndTurn();
+            BattleSceneSnapshot snapshot = service.CreateSnapshot();
+
+            Assert.That(Combat(snapshot).PlayerHp, Is.EqualTo(50));
+            Assert.That(Combat(snapshot).Enemies[0].Block, Is.EqualTo(2));
+            Assert.That(combatEventService.Events, Does.Not.Contain("PlayerDamaged:0"));
+            Assert.That(combatEventService.Events.Any(entry => entry.StartsWith("PlayerDamaged:", StringComparison.Ordinal)), Is.False);
+        }
+
+        [Test]
+        public void BattleVictoryContinue_PreparesTheNextBattlePlanWithoutReusingTheOldPlan()
+        {
+            RuntimeCard finisher = CreateCard(1001, "Finisher", 0, 1);
+            RuntimeEnemy elite = CreateEnemy(
+                3001,
+                "Elite",
+                1,
+                1,
+                10,
+                CreateAction(11, 4, RepeatRule.OpeningOnly));
+            RuntimeEnemy nextEnemy = CreateEnemy(
+                3002,
+                "Next enemy",
+                12,
+                12,
+                10,
+                CreateAction(21, 8, RepeatRule.OpeningOnly));
+            RuntimeRunDefinition runDefinition = CreateRunDefinition(
+                starterDeck: new[] { finisher },
+                nodes: new[]
+                {
+                    CreateNode(5301, 1, InGameNodeType.EliteBattle, "Elite", new[] { 1 }),
+                    CreateNode(5302, 2, InGameNodeType.Battle, "Next", Array.Empty<int>())
+                },
+                eliteEncounters: new[] { CreateEncounter(elite, 10) },
+                battleEncounters: new[] { CreateEncounter(nextEnemy, 10) });
+            SequenceRandomProvider randomProvider = new SequenceRandomProvider(Enumerable.Repeat(0, 128));
+            BattleSceneFlowService service = CreateServiceWithRandomProvider(runDefinition, randomProvider);
+
+            service.Initialize(5501);
+            service.SelectMapNode(0);
+            BattleSceneSnapshot firstBattleSnapshot = service.CreateSnapshot();
+            int oldPlanOrder = Combat(firstBattleSnapshot).EnemyIntent.ActionOrder;
+            service.SelectHandCard(0);
+            service.TryPlaySelectedCard();
+            BattleSceneSnapshot victorySnapshot = service.CreateSnapshot();
+            service.EndTurn();
+            service.ContinueFromReward();
+            service.SelectMapNode(1);
+            BattleSceneSnapshot nextBattleSnapshot = service.CreateSnapshot();
+            int randomCounterAfterNextPreparation = randomProvider.Counter;
+            BattleSceneSnapshot repeatedNextBattleSnapshot = service.CreateSnapshot();
+
+            Assert.That(oldPlanOrder, Is.EqualTo(11));
+            Assert.That(victorySnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Reward));
+            Assert.That(victorySnapshot.Combat.Enemies.All(enemy => enemy.Intent == null), Is.True);
+            Assert.That(nextBattleSnapshot.CurrentPage, Is.EqualTo(BattleScenePage.Battle));
+            Assert.That(Combat(nextBattleSnapshot).CurrentEnemy.Id, Is.EqualTo(3002));
+            Assert.That(Combat(nextBattleSnapshot).EnemyIntent.ActionOrder, Is.EqualTo(21));
+            Assert.That(Combat(repeatedNextBattleSnapshot).EnemyIntent.ActionOrder, Is.EqualTo(21));
+            Assert.That(randomProvider.Counter, Is.EqualTo(randomCounterAfterNextPreparation));
+        }
+
+        [Test]
         public void SelectMapNode_BattleNode_DrawsUniqueCardsFromCombatDrawPile()
         {
             RuntimeCard first = CreateCard(1001, "First", 1, 6);
@@ -1885,7 +2143,14 @@ namespace Dungeon.Tests.EditMode
                 },
                 battleEncounters: new[]
                 {
-                    CreateEncounter(CreateEnemy(3001, "Slime", 15, 19, 12, CreateAction(1, 4, RepeatRule.RepeatAfterOpening)), 10),
+                    CreateEncounter(CreateEnemy(
+                        3001,
+                        "Slime",
+                        15,
+                        19,
+                        12,
+                        CreateAction(1, 4, RepeatRule.Random),
+                        CreateAction(2, 9, RepeatRule.Random)), 10),
                     CreateEncounter(
                         CreateFormation(
                             CreateEnemyEntry(CreateEnemy(3002, "Fungi", 11, 13, 7, CreateAction(1, 3, RepeatRule.RepeatAfterOpening)), 0),
@@ -1893,26 +2158,35 @@ namespace Dungeon.Tests.EditMode
                         10)
                 });
 
+            BattleRandomProvider originalRandomProvider = new BattleRandomProvider();
             BattleSceneFlowService originalService = CreateServiceWithRandomProvider(
                 runDefinition,
-                new BattleRandomProvider(),
+                originalRandomProvider,
                 runSaveService: runSaveService);
             originalService.Initialize(5501);
             RunSaveData saveData = CloneSaveData(runSaveService.LastSavedData);
             BattleSceneSnapshot originalMapSnapshot = originalService.CreateSnapshot();
             originalService.SelectMapNode(0);
-            BattleSceneSnapshot originalBattleSnapshot = originalService.CreateSnapshot();
+            IReadOnlyList<string> originalBattleReplay = BuildBattleReplaySequence(
+                originalService,
+                originalRandomProvider,
+                new[] { 0, 3, 1 });
 
+            BattleRandomProvider restoredRandomProvider = new BattleRandomProvider();
             BattleSceneFlowService restoredService = CreateServiceWithRandomProvider(
                 runDefinition,
-                new BattleRandomProvider());
+                restoredRandomProvider);
             restoredService.InitializeFromSave(saveData);
             BattleSceneSnapshot restoredMapSnapshot = restoredService.CreateSnapshot();
             restoredService.SelectMapNode(0);
-            BattleSceneSnapshot restoredBattleSnapshot = restoredService.CreateSnapshot();
+            IReadOnlyList<string> restoredBattleReplay = BuildBattleReplaySequence(
+                restoredService,
+                restoredRandomProvider,
+                new[] { 5, 1, 4 });
 
             Assert.That(Map(restoredMapSnapshot).AvailableNodeIndices, Is.EqualTo(Map(originalMapSnapshot).AvailableNodeIndices));
-            Assert.That(BuildBattleEncounterSignature(restoredBattleSnapshot), Is.EqualTo(BuildBattleEncounterSignature(originalBattleSnapshot)));
+            Assert.That(restoredBattleReplay, Is.EqualTo(originalBattleReplay));
+            Assert.That(restoredRandomProvider.Counter, Is.EqualTo(originalRandomProvider.Counter));
         }
 
         [Test]
@@ -2330,8 +2604,35 @@ namespace Dungeon.Tests.EditMode
             string hand = string.Join(",", Combat(snapshot).HandCards.Select(card => card.Card.Id));
             string enemies = string.Join(
                 "|",
-                Combat(snapshot).Enemies.Select(enemy => $"{enemy.SlotIndex}:{enemy.DisplayName}:{enemy.Hp}:{enemy.Block}:{enemy.Intent?.IntentName}"));
+                Combat(snapshot).Enemies.Select(enemy =>
+                    $"{enemy.SlotIndex}:{enemy.DisplayName}:{enemy.Hp}:{enemy.Block}:{enemy.IsDefeated}:" +
+                    $"{enemy.Intent?.ActionOrder}:{enemy.Intent?.IntentType}:{enemy.Intent?.Damage}:" +
+                    $"{enemy.Intent?.HitCount}:{enemy.Intent?.Block}:{enemy.Intent?.StatusType}:{enemy.Intent?.StatusValue}:" +
+                    $"{enemy.Intent?.BuffType}:{enemy.Intent?.BuffValue}"));
             return $"{snapshot.CurrentPage}|{Combat(snapshot).PlayerEnergy}|{hand}|{enemies}";
+        }
+
+        private static IReadOnlyList<string> BuildBattleReplaySequence(
+            BattleSceneFlowService service,
+            BattleRandomProvider randomProvider,
+            IReadOnlyList<int> extraSnapshotCallsPerTurn)
+        {
+            List<string> signatures = new List<string>();
+            for (int turnIndex = 0; turnIndex < extraSnapshotCallsPerTurn.Count; turnIndex++)
+            {
+                BattleSceneSnapshot snapshot = service.CreateSnapshot();
+                signatures.Add(BuildBattleEncounterSignature(snapshot));
+                int counterBeforeReadOnlySnapshots = randomProvider.Counter;
+                for (int snapshotIndex = 0; snapshotIndex < extraSnapshotCallsPerTurn[turnIndex]; snapshotIndex++)
+                {
+                    service.CreateSnapshot();
+                }
+
+                Assert.That(randomProvider.Counter, Is.EqualTo(counterBeforeReadOnlySnapshots));
+                service.EndTurn();
+            }
+
+            return signatures;
         }
 
         private static string BuildShopLineupSignature(BattleShopSnapshot snapshot)
