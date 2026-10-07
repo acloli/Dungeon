@@ -500,6 +500,10 @@ PrefabInstance:
       propertyPath: m_IsOn
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+      propertyPath: m_Group
+      value: 
+      objectReference: {fileID: 871194606}
     - target: {fileID: 7485628796141947606, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -514,6 +518,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5293663134308042370, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
   m_PrefabInstance: {fileID: 262093998}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &262094000 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8043077276231896155, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 262093998}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 361a3c2f78b7242e4800286b42ed7aa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Common::Dungeon.Runtime.OutGame.Common.Badge
 --- !u!1 &274119737
 GameObject:
   m_ObjectHideFlags: 0
@@ -1148,8 +1163,10 @@ GameObject:
   - component: {fileID: 871194603}
   - component: {fileID: 871194602}
   - component: {fileID: 871194604}
+  - component: {fileID: 871194605}
+  - component: {fileID: 871194606}
   m_Layer: 0
-  m_Name: Footer
+  m_Name: FooterToggleGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1241,6 +1258,37 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &871194605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871194600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e459dbb425fa4bfcb3723d94ad7e119, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.LobbyFooterToggleGroup
+  _home: {fileID: 2120720968}
+  _shop: {fileID: 1793129662}
+  _history: {fileID: 1229981054}
+  _homeBadge: {fileID: 1170012737406067723}
+  _shopBadge: {fileID: 1226687457}
+  _historyBadge: {fileID: 262094000}
+--- !u!114 &871194606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871194600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ToggleGroup
+  m_AllowSwitchOff: 0
 --- !u!1 &890234344
 GameObject:
   m_ObjectHideFlags: 0
@@ -1888,6 +1936,10 @@ PrefabInstance:
       propertyPath: m_IsOn
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+      propertyPath: m_Group
+      value: 
+      objectReference: {fileID: 871194606}
     - target: {fileID: 7485628796141947606, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1902,6 +1954,28 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5293663134308042370, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
   m_PrefabInstance: {fileID: 1226687455}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1226687457 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8043077276231896155, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 1226687455}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 361a3c2f78b7242e4800286b42ed7aa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Common::Dungeon.Runtime.OutGame.Common.Badge
+--- !u!114 &1229981054 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 262093998}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Toggle
 --- !u!1 &1257570548
 GameObject:
   m_ObjectHideFlags: 0
@@ -2825,6 +2899,17 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1720426196}
   m_Enabled: 1
+--- !u!114 &1793129662 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 1226687455}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Toggle
 --- !u!1001 &1813934399
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3542,6 +3627,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5293663134308042370, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
   m_PrefabInstance: {fileID: 1170012737406067722}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2120720968 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 1170012737406067722}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Toggle
 --- !u!224 &2140373026 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3567792916092583933, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
@@ -3690,6 +3786,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7394834205350136357, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+      propertyPath: m_Group
+      value: 
+      objectReference: {fileID: 871194606}
     - target: {fileID: 7485628796141947606, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -3699,6 +3799,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+--- !u!114 &1170012737406067723 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8043077276231896155, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
+  m_PrefabInstance: {fileID: 1170012737406067722}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 361a3c2f78b7242e4800286b42ed7aa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Common::Dungeon.Runtime.OutGame.Common.Badge
 --- !u!1001 &3044319000724630102
 PrefabInstance:
   m_ObjectHideFlags: 0
