@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.EnemyMasterContainer
   _data:
   - Id: 3001
-    Key: enemy_ash_cultist
-    Name: Ash Cultist
-    LocalizationKey: enemy.name.ash_cultist
+    Key: enemy_ruins_watcher
+    Name: Ruins Watcher
+    LocalizationKey: enemy.name.ruins_watcher
     EnemyTier: 2
     HpMin: 48
     HpMax: 54
@@ -59,18 +59,18 @@ MonoBehaviour:
     GoldReward: 15
     ActionPatternId: 4005
   - Id: 3006
-    Key: enemy_nob_reaver
-    Name: Nob Reaver
-    LocalizationKey: enemy.name.nob_reaver
+    Key: enemy_strongarm_watcher
+    Name: Strongarm Watcher
+    LocalizationKey: enemy.name.strongarm_watcher
     EnemyTier: 1
     HpMin: 82
     HpMax: 86
     GoldReward: 30
     ActionPatternId: 4006
   - Id: 3007
-    Key: enemy_sludge_monarch
-    Name: Sludge Monarch
-    LocalizationKey: enemy.name.sludge_monarch
+    Key: enemy_mire_master
+    Name: Master of the Mire
+    LocalizationKey: enemy.name.mire_master
     EnemyTier: 0
     HpMin: 140
     HpMax: 140

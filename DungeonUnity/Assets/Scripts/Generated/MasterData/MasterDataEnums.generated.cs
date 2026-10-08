@@ -44,7 +44,17 @@ namespace Game.MasterData.Generated
     /// </summary>
     public enum CharacterArchetype
     {
-        CrimsonExile,
+        MeleeExplorer,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: CharacterSpeechTriggerType
+    /// </summary>
+    public enum CharacterSpeechTriggerType
+    {
+        HomeClick,
+        HomeEnter,
+        RunStart,
     }
 
     /// <summary>
@@ -60,11 +70,7 @@ namespace Game.MasterData.Generated
         GainFreeCardUpgrade,
         GainGold,
         GainMaxHp,
-        GainPotion,
-        GainRelic,
-        GainStrength,
         HealHp,
-        LoseGold,
         LoseHp,
         UpgradeRandomCommonCard,
     }
@@ -103,7 +109,6 @@ namespace Game.MasterData.Generated
         EliteBattle,
         Event,
         RestShop,
-        Treasure,
     }
 
     /// <summary>
@@ -131,16 +136,11 @@ namespace Game.MasterData.Generated
     /// </summary>
     public enum RelicTriggerType
     {
-        CardExhausted,
         CardPlayed,
         CombatStart,
         CombatVictory,
-        LoseHp,
-        PlayerDamaged,
-        PlayerTurnEnd,
         PlayerTurnStart,
         RestShopEntered,
-        Shuffle,
     }
 
     /// <summary>

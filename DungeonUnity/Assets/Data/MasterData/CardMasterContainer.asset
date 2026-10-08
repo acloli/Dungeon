@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.CardMasterContainer
   _data:
   - Id: 1001
-    Key: card_cinder_slash
-    Name: Cinder Slash
-    LocalizationKey: card.name.cinder_slash
-    DescriptionKey: card.desc.cinder_slash
+    Key: card_scratch
+    Name: Scratch
+    LocalizationKey: card.name.scratch
+    DescriptionKey: card.desc.scratch
     ImageId: card_art_cinder_slash
     CardType: 0
     Rarity: 0
@@ -28,10 +28,10 @@ MonoBehaviour:
     UpgradeCardId: 1101
     ExhaustsOnPlay: 0
   - Id: 1002
-    Key: card_ash_guard
-    Name: Ash Guard
-    LocalizationKey: card.name.ash_guard
-    DescriptionKey: card.desc.ash_guard
+    Key: card_brace
+    Name: Brace
+    LocalizationKey: card.name.brace
+    DescriptionKey: card.desc.brace
     ImageId: card_art_ash_guard
     CardType: 3
     Rarity: 0
@@ -42,10 +42,10 @@ MonoBehaviour:
     UpgradeCardId: 1102
     ExhaustsOnPlay: 0
   - Id: 1003
-    Key: card_crystal_bash
-    Name: Crystal Bash
-    LocalizationKey: card.name.crystal_bash
-    DescriptionKey: card.desc.crystal_bash
+    Key: card_unbalancing_strike
+    Name: Unbalancing Strike
+    LocalizationKey: card.name.unbalancing_strike
+    DescriptionKey: card.desc.unbalancing_strike
     ImageId: card_art_crystal_bash
     CardType: 0
     Rarity: 0
@@ -84,10 +84,10 @@ MonoBehaviour:
     UpgradeCardId: 1105
     ExhaustsOnPlay: 0
   - Id: 1006
-    Key: card_dual_fang
-    Name: Dual Fang
-    LocalizationKey: card.name.dual_fang
-    DescriptionKey: card.desc.dual_fang
+    Key: card_double_scratch
+    Name: Double Scratch
+    LocalizationKey: card.name.double_scratch
+    DescriptionKey: card.desc.double_scratch
     ImageId: card_art_dual_fang
     CardType: 0
     Rarity: 1
@@ -126,10 +126,10 @@ MonoBehaviour:
     UpgradeCardId: 1108
     ExhaustsOnPlay: 0
   - Id: 1009
-    Key: card_char_sweep
-    Name: Char Sweep
-    LocalizationKey: card.name.char_sweep
-    DescriptionKey: card.desc.char_sweep
+    Key: card_sweep
+    Name: Sweep
+    LocalizationKey: card.name.sweep
+    DescriptionKey: card.desc.sweep
     ImageId: card_art_char_sweep
     CardType: 0
     Rarity: 1
@@ -154,10 +154,10 @@ MonoBehaviour:
     UpgradeCardId: 1110
     ExhaustsOnPlay: 0
   - Id: 1011
-    Key: card_spark_focus
-    Name: Spark Focus
-    LocalizationKey: card.name.spark_focus
-    DescriptionKey: card.desc.spark_focus
+    Key: card_focus
+    Name: Focus
+    LocalizationKey: card.name.focus
+    DescriptionKey: card.desc.focus
     ImageId: card_art_spark_focus
     CardType: 3
     Rarity: 4
@@ -168,10 +168,10 @@ MonoBehaviour:
     UpgradeCardId: 1111
     ExhaustsOnPlay: 1
   - Id: 1101
-    Key: card_cinder_slash_plus
-    Name: Cinder Slash+
-    LocalizationKey: card.name.cinder_slash_plus
-    DescriptionKey: card.desc.cinder_slash_plus
+    Key: card_scratch_plus
+    Name: Scratch+
+    LocalizationKey: card.name.scratch_plus
+    DescriptionKey: card.desc.scratch_plus
     ImageId: card_art_cinder_slash
     CardType: 0
     Rarity: 0
@@ -182,10 +182,10 @@ MonoBehaviour:
     UpgradeCardId: 0
     ExhaustsOnPlay: 0
   - Id: 1102
-    Key: card_ash_guard_plus
-    Name: Ash Guard+
-    LocalizationKey: card.name.ash_guard_plus
-    DescriptionKey: card.desc.ash_guard_plus
+    Key: card_brace_plus
+    Name: Brace+
+    LocalizationKey: card.name.brace_plus
+    DescriptionKey: card.desc.brace_plus
     ImageId: card_art_ash_guard
     CardType: 3
     Rarity: 0
@@ -196,10 +196,10 @@ MonoBehaviour:
     UpgradeCardId: 0
     ExhaustsOnPlay: 0
   - Id: 1103
-    Key: card_crystal_bash_plus
-    Name: Crystal Bash+
-    LocalizationKey: card.name.crystal_bash_plus
-    DescriptionKey: card.desc.crystal_bash_plus
+    Key: card_unbalancing_strike_plus
+    Name: Unbalancing Strike+
+    LocalizationKey: card.name.unbalancing_strike_plus
+    DescriptionKey: card.desc.unbalancing_strike_plus
     ImageId: card_art_crystal_bash
     CardType: 0
     Rarity: 0
@@ -238,10 +238,10 @@ MonoBehaviour:
     UpgradeCardId: 0
     ExhaustsOnPlay: 0
   - Id: 1106
-    Key: card_dual_fang_plus
-    Name: Dual Fang+
-    LocalizationKey: card.name.dual_fang_plus
-    DescriptionKey: card.desc.dual_fang_plus
+    Key: card_double_scratch_plus
+    Name: Double Scratch+
+    LocalizationKey: card.name.double_scratch_plus
+    DescriptionKey: card.desc.double_scratch_plus
     ImageId: card_art_dual_fang
     CardType: 0
     Rarity: 1
@@ -280,10 +280,10 @@ MonoBehaviour:
     UpgradeCardId: 0
     ExhaustsOnPlay: 0
   - Id: 1109
-    Key: card_char_sweep_plus
-    Name: Char Sweep+
-    LocalizationKey: card.name.char_sweep_plus
-    DescriptionKey: card.desc.char_sweep_plus
+    Key: card_sweep_plus
+    Name: Sweep+
+    LocalizationKey: card.name.sweep_plus
+    DescriptionKey: card.desc.sweep_plus
     ImageId: card_art_char_sweep
     CardType: 0
     Rarity: 1
@@ -308,10 +308,10 @@ MonoBehaviour:
     UpgradeCardId: 0
     ExhaustsOnPlay: 0
   - Id: 1111
-    Key: card_spark_focus_plus
-    Name: Spark Focus+
-    LocalizationKey: card.name.spark_focus_plus
-    DescriptionKey: card.desc.spark_focus_plus
+    Key: card_focus_plus
+    Name: Focus+
+    LocalizationKey: card.name.focus_plus
+    DescriptionKey: card.desc.focus_plus
     ImageId: card_art_spark_focus
     CardType: 3
     Rarity: 4

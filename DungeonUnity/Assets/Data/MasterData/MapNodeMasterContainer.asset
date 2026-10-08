@@ -32,8 +32,8 @@ MonoBehaviour:
     NodeKey: node_03
     Floor: 2
     NodeType: 4
-    Name: Cinder Rest
-    LocalizationKey: map.node.cinder_rest
+    Name: Explorer's Rest
+    LocalizationKey: map.node.explorers_rest
   - Id: 5304
     MapTemplateId: 6301
     NodeKey: node_04
@@ -46,8 +46,8 @@ MonoBehaviour:
     NodeKey: node_05
     Floor: 4
     NodeType: 2
-    Name: Abyss Gate
-    LocalizationKey: map.node.abyss_gate
+    Name: Guarded Gate
+    LocalizationKey: map.node.guarded_gate
   - Id: 5306
     MapTemplateId: 6301
     NodeKey: node_06
@@ -60,8 +60,8 @@ MonoBehaviour:
     NodeKey: node_07
     Floor: 6
     NodeType: 1
-    Name: Throne Gate
-    LocalizationKey: map.node.throne_gate
+    Name: Labyrinth Depths
+    LocalizationKey: map.node.labyrinth_depths
   - Id: 5308
     MapTemplateId: 6301
     NodeKey: node_08

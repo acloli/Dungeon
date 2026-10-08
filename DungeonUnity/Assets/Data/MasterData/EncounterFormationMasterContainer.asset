@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.EncounterFormationMasterContainer
   _data:
   - Id: 7001
-    Key: formation_ash_cultist
-    Name: Ash Cultist
+    Key: formation_ruins_watcher
+    Name: Ruins Watcher
     NodeType: 0
   - Id: 7002
     Key: formation_gnaw_beast
@@ -34,10 +34,10 @@ MonoBehaviour:
     Name: Mire Slime
     NodeType: 0
   - Id: 7006
-    Key: formation_nob_reaver
-    Name: Nob Reaver
+    Key: formation_strongarm_watcher
+    Name: Strongarm Watcher
     NodeType: 2
   - Id: 7007
-    Key: formation_sludge_monarch
-    Name: Sludge Monarch
+    Key: formation_mire_master
+    Name: Master of the Mire
     NodeType: 1
