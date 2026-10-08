@@ -30,7 +30,7 @@ namespace Dungeon.Tests.EditMode
                 {
                     Id = 5501,
                     Key = "run_test",
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99,
                     StarterDeckGroupId = 6001,
@@ -46,8 +46,8 @@ namespace Dungeon.Tests.EditMode
             });
             masterDataService.SetAll(new[]
             {
-                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", DescriptionKey = "card.a.desc", ImageId = "card_a", Cost = 1, CardType = CardType.Attack, Rarity = CardRarity.Basic, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = false, UpgradeCardId = 1002 },
-                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", DescriptionKey = "card.b.desc", ImageId = "card_b", Cost = 2, CardType = CardType.Skill, Rarity = CardRarity.Common, CharacterArchetype = CharacterArchetype.CrimsonExile, CanAppearInReward = true }
+                new CardMaster { Id = 1001, Key = "card_a", Name = "CardA", LocalizationKey = "card.a", DescriptionKey = "card.a.desc", ImageId = "card_a", Cost = 1, CardType = CardType.Attack, Rarity = CardRarity.Basic, CharacterArchetype = CharacterArchetype.MeleeExplorer, CanAppearInReward = false, UpgradeCardId = 1002 },
+                new CardMaster { Id = 1002, Key = "card_b", Name = "CardB", LocalizationKey = "card.b", DescriptionKey = "card.b.desc", ImageId = "card_b", Cost = 2, CardType = CardType.Skill, Rarity = CardRarity.Common, CharacterArchetype = CharacterArchetype.MeleeExplorer, CanAppearInReward = true }
             });
             masterDataService.SetAll(new[]
             {
@@ -222,7 +222,7 @@ namespace Dungeon.Tests.EditMode
                 {
                     Id = 5501,
                     Key = "run_chapter_one",
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99,
                     StarterDeckGroupId = 6001,
@@ -391,7 +391,7 @@ namespace Dungeon.Tests.EditMode
                 {
                     Id = 5501,
                     Key = "run_test",
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99,
                     StarterDeckGroupId = 6001,

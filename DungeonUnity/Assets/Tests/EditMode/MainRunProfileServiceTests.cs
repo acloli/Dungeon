@@ -29,7 +29,7 @@ namespace Dungeon.Tests.EditMode
                     Key = "run_a",
                     Name = "Run A",
                     LocalizationKey = "run.profile.a",
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99
                 }
@@ -45,7 +45,7 @@ namespace Dungeon.Tests.EditMode
             Assert.That(runProfile.Key, Is.EqualTo("run_a"));
             Assert.That(runProfile.DisplayName, Is.EqualTo("ローカライズラン"));
             Assert.That(runProfile.LocalizationKey, Is.EqualTo("run.profile.a"));
-            Assert.That(runProfile.CharacterArchetype, Is.EqualTo("CrimsonExile"));
+            Assert.That(runProfile.CharacterArchetype, Is.EqualTo("MeleeExplorer"));
             Assert.That(runProfile.PlayerMaxHp, Is.EqualTo(80));
             Assert.That(runProfile.StartingGold, Is.EqualTo(99));
         }
@@ -62,7 +62,7 @@ namespace Dungeon.Tests.EditMode
                     Key = "run_a",
                     Name = "Run A",
                     LocalizationKey = "run.profile.missing",
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99
                 }
@@ -86,7 +86,7 @@ namespace Dungeon.Tests.EditMode
                     Key = "run_a",
                     Name = string.Empty,
                     LocalizationKey = string.Empty,
-                    CharacterArchetype = CharacterArchetype.CrimsonExile,
+                    CharacterArchetype = CharacterArchetype.MeleeExplorer,
                     PlayerMaxHp = 80,
                     StartingGold = 99
                 }

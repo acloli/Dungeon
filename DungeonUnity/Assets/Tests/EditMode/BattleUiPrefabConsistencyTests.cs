@@ -269,7 +269,7 @@ namespace Dungeon.Tests.EditMode
                     1,
                     CardType.Attack,
                     CardRarity.Common,
-                    CharacterArchetype.CrimsonExile,
+                    CharacterArchetype.MeleeExplorer,
                     System.Array.Empty<RuntimeCardEffect>());
 
                 Assert.That(footerText, Is.Not.Null);

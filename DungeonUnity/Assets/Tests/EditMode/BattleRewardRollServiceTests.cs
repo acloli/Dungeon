@@ -99,7 +99,7 @@ namespace Dungeon.Tests.EditMode
                 5501,
                 "reward_roll",
                 6301,
-                CharacterArchetype.CrimsonExile,
+                CharacterArchetype.MeleeExplorer,
                 50,
                 120,
                 3,
