@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a9380e3676b420ca290987a011d67a, type: 3}
+  m_Name: CharacterMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.CharacterMasterContainer
+  _data:
+  - Id: 1
+    Key: character_momo
+    Name: Momo
+    LocalizationKey: character.name.momo
+    DescriptionKey: character.desc.momo
+    BiographyKey: character.biography.momo
+    PortraitImageId: None
+    StandImageId: None
+    RunProfileId: 5501

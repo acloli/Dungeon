@@ -70,7 +70,11 @@ namespace Game.MasterData.Generated
         GainFreeCardUpgrade,
         GainGold,
         GainMaxHp,
+        GainPotion,
+        GainRelic,
+        GainStrength,
         HealHp,
+        LoseGold,
         LoseHp,
         UpgradeRandomCommonCard,
     }
@@ -109,6 +113,7 @@ namespace Game.MasterData.Generated
         EliteBattle,
         Event,
         RestShop,
+        Treasure,
     }
 
     /// <summary>
@@ -136,11 +141,16 @@ namespace Game.MasterData.Generated
     /// </summary>
     public enum RelicTriggerType
     {
+        CardExhausted,
         CardPlayed,
         CombatStart,
         CombatVictory,
+        LoseHp,
+        PlayerDamaged,
+        PlayerTurnEnd,
         PlayerTurnStart,
         RestShopEntered,
+        Shuffle,
     }
 
     /// <summary>
