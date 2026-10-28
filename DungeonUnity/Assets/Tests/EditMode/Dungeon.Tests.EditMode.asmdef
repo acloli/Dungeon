@@ -17,7 +17,8 @@
         "TFramework.UI",
         "UniTask",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

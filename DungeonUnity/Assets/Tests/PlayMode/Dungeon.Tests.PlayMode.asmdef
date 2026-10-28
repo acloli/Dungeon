@@ -5,6 +5,8 @@
     "Dungeon.Runtime.InGame.Battle",
     "Dungeon.Runtime.InGame.Domain",
     "Dungeon.Runtime.InGame.Save",
+    "Dungeon.Runtime.OutGame.Main",
+    "TFramework.UI",
     "Game.MasterData.Generated",
     "UniTask",
     "VContainer",
