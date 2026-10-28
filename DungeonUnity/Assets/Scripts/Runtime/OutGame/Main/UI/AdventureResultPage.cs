@@ -26,4 +26,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         public UIButton HomeButton => _homeButton;
     }
 }
-

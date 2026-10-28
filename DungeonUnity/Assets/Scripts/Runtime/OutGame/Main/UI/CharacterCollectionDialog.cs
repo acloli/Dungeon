@@ -39,4 +39,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         }
     }
 }
-

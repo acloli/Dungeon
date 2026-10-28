@@ -30,4 +30,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         public ToggleGroup CharacterToggleGroup => _characterToggleGroup;
     }
 }
-

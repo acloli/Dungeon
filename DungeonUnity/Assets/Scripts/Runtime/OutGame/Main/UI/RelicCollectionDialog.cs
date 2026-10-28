@@ -18,4 +18,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         public RelicCollectionItem ItemTemplate => _itemTemplate;
     }
 }
-

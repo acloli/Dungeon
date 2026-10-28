@@ -23,4 +23,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         public UIButton CloseButton => _closeButton;
     }
 }
-

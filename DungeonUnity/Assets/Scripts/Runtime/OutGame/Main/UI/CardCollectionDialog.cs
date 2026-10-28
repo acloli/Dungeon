@@ -19,4 +19,3 @@ namespace Dungeon.Runtime.OutGame.Main.UI
         public BattleCardIconView ItemTemplate => _itemTemplate;
     }
 }
-
