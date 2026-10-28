@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 546116d7c938c4b14875aa3b999e5b38
+    m_Address: SettingsDialog
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75bca614a3314400483d3922ca51250c
     m_Address: CardSelectDialog
     m_ReadOnly: 0
