@@ -8,7 +8,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 初期デッキ一覧の表示と入力参照
     /// </summary>
-    public sealed class InitialDeckDialog : UIDialogBase
+    public sealed class InitialDeckDialog : MainMenuDialogBase
     {
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private BattleCardIconView _cardTemplate;

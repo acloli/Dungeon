@@ -6,7 +6,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 図鑑共通の本型ダイアログと入力参照
     /// </summary>
-    public class CommonBookDialog : UIDialogBase
+    public class CommonBookDialog : MainMenuDialogBase
     {
         [SerializeField] private TFTextUGUI _titleText;
         [SerializeField] private UIButton _closeButton;

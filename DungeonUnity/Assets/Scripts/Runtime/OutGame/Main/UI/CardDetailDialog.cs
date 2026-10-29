@@ -8,7 +8,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// カード詳細の表示と入力参照
     /// </summary>
-    public sealed class CardDetailDialog : UIDialogBase
+    public sealed class CardDetailDialog : MainMenuDialogBase
     {
         [SerializeField] private BattleCardIconView _cardIcon;
         [SerializeField] private Toggle _normalToggle;

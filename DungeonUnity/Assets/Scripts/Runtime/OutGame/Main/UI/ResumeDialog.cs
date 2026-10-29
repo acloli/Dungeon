@@ -6,7 +6,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 冒険再開ダイアログの表示と入力参照
     /// </summary>
-    public sealed class ResumeDialog : UIDialogBase
+    public sealed class ResumeDialog : MainMenuDialogBase
     {
         [SerializeField] private UIButton _continueButton;
         [SerializeField] private UIButton _newAdventureButton;

@@ -7,7 +7,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 出発キャラクター選択ページの表示と入力参照
     /// </summary>
-    public sealed class CharacterSelectPage : UIPageBase
+    public sealed class CharacterSelectPage : MainMenuPageBase
     {
         [SerializeField] private Image _characterImage;
         [SerializeField] private TFTextUGUI _nameText;

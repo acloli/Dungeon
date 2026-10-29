@@ -7,7 +7,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 冒険結果ページの表示と入力参照
     /// </summary>
-    public sealed class AdventureResultPage : UIPageBase
+    public sealed class AdventureResultPage : MainMenuPageBase
     {
         [SerializeField] private TFTextUGUI _headlineText;
         [SerializeField] private TFTextUGUI _floorText;

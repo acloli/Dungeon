@@ -6,7 +6,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 設定シートの表示と入力参照
     /// </summary>
-    public sealed class SettingsDialog : UIDialogBase
+    public sealed class SettingsDialog : MainMenuDialogBase
     {
         [SerializeField] private SettingsAudioToggle _bgmToggle;
         [SerializeField] private SettingsAudioToggle _soundEffectToggle;
