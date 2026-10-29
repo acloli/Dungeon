@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4786f227ce6d94fcc8df3599911f4285, type: 3}
+  m_Name: MainMenuPreviewContent
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.MainMenuPreviewContent
+  _data:
+    HasResumableAdventure: 1
+    BgmEnabled: 1
+    SoundEffectEnabled: 0
+    Version: 1.0
+    GameId: 123456789
+    Cards:
+    - Id: preview.scratch
+      Name: "\u3072\u3063\u304B\u304D"
+      Description: "\u65751\u4F53\u306B\n6\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002"
+      UpgradedDescription: "\u65751\u4F53\u306B\n6\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002"
+      Cost: 1
+      UpgradedCost: 1
+      Category: "\u30A2\u30BF\u30C3\u30AF"
+      Rarity: 0
+      Artwork: {fileID: 21300000, guid: ade9b96ae543b4db691411f6a2b5fd87, type: 3}
+      StartingQuantity: 5
+    - Id: preview.guard
+      Name: "\u8EAB\u69CB\u3048"
+      Description: "<color=#16727A>5\u30D6\u30ED\u30C3\u30AF</color>\u3092\u5F97\u308B\u3002"
+      UpgradedDescription: "<color=#16727A>5\u30D6\u30ED\u30C3\u30AF</color>\u3092\u5F97\u308B\u3002"
+      Cost: 1
+      UpgradedCost: 1
+      Category: "\u30B9\u30AD\u30EB"
+      Rarity: 0
+      Artwork: {fileID: 21300000, guid: b8440f0d0e5664cd89a8590228038075, type: 3}
+      StartingQuantity: 4
+    - Id: preview.strike
+      Name: "\u5D29\u3057\u6253\u3061"
+      Description: "\u65751\u4F53\u306B\n8\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002\n<color=#C53B92>\u8106\u5F312</color>\u3092\u4ED8\u4E0E\u3059\u308B\u3002"
+      UpgradedDescription: "\u65751\u4F53\u306B\n8\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002\n<color=#C53B92>\u8106\u5F312</color>\u3092\u4ED8\u4E0E\u3059\u308B\u3002"
+      Cost: 2
+      UpgradedCost: 2
+      Category: "\u30A2\u30BF\u30C3\u30AF"
+      Rarity: 0
+      Artwork: {fileID: 21300000, guid: 61bcb3a52e17941058a17d9cd7076808, type: 3}
+      StartingQuantity: 1
+    - Id: preview.combination
+      Name: "\u9023\u643A\u5D29\u3057"
+      Description: "\u65751\u4F53\u306B\n8\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002\n<color=#C53B92>\u8106\u5F312\u30FB\u8131\u529B2</color>\u3092\u4ED8\u4E0E\u3059\u308B\u3002\n<color=#8066B4>\u5EC3\u68C4</color>"
+      UpgradedDescription: "\u65751\u4F53\u306B\n8\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002\n<color=#C53B92>\u8106\u5F312\u30FB\u8131\u529B2</color>\u3092\u4ED8\u4E0E\u3059\u308B\u3002\n<color=#8066B4>\u5EC3\u68C4</color>"
+      Cost: 2
+      UpgradedCost: 2
+      Category: "\u30A2\u30BF\u30C3\u30AF"
+      Rarity: 4
+      Artwork: {fileID: 21300000, guid: 61bcb3a52e17941058a17d9cd7076808, type: 3}
+      StartingQuantity: 0
+    CollectionCardCount: 11
+    Relics:
+    - Name: "\u6B20\u3051\u305F\u7D50\u6676"
+      Description: "\u52B9\u679C\u306E\u8A73\u7D30\u306F\u4ECA\u5F8C\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002"
+      Artwork: {fileID: 21300000, guid: ff3de2719e5b14f9790d7ad896900dcf, type: 3}
+      EffectText: 
+      FrameColor: {r: 0.88, g: 0.86, b: 0.94, a: 1}
+      IsDiscovered: 1
+    - Name: "\u5B9D\u63A2\u3057\u306E\u5C0F\u888B"
+      Description: "\u52B9\u679C\u306E\u8A73\u7D30\u306F\u4ECA\u5F8C\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002"
+      Artwork: {fileID: 21300000, guid: 985fae17fee2e4798bc736eea6b7dbc5, type: 3}
+      EffectText: 
+      FrameColor: {r: 0.88, g: 0.86, b: 0.94, a: 1}
+      IsDiscovered: 1
+    - Name: "\u3053\u3060\u307E\u306E\u9234"
+      Description: "\u5404\u30BF\u30FC\u30F3\u3001\u6700\u521D\u306B\n<color=#5C5680>\u30B3\u30B9\u30C80</color>\u306E\u30AB\u30FC\u30C9\u3092\u4F7F\u3046\u3068\u3001"
+      Artwork: {fileID: 21300000, guid: 4fb3d19fa3f1a43a993802c2bdd62b00, type: 3}
+      EffectText: "<color=#16727A>2\u30D6\u30ED\u30C3\u30AF</color>\u3092\u5F97\u308B\u3002"
+      FrameColor: {r: 0.3, g: 0.63, b: 0.91, a: 1}
+      IsDiscovered: 1
+    - Name: "\uFF1F\uFF1F\uFF1F"
+      Description: "\u52B9\u679C\u306E\u8A73\u7D30\u306F\u4ECA\u5F8C\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002"
+      Artwork: {fileID: 21300000, guid: ff3de2719e5b14f9790d7ad896900dcf, type: 3}
+      EffectText: 
+      FrameColor: {r: 0.36, g: 0.31, b: 0.49, a: 1}
+      IsDiscovered: 0
+    - Name: "\uFF1F\uFF1F\uFF1F"
+      Description: "\u52B9\u679C\u306E\u8A73\u7D30\u306F\u4ECA\u5F8C\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002"
+      Artwork: {fileID: 21300000, guid: 985fae17fee2e4798bc736eea6b7dbc5, type: 3}
+      EffectText: 
+      FrameColor: {r: 0.36, g: 0.31, b: 0.49, a: 1}
+      IsDiscovered: 0
+    - Name: "\u4F7F\u3044\u8FBC\u3093\u3060\u624B\u5E33"
+      Description: "\u52B9\u679C\u306E\u8A73\u7D30\u306F\u4ECA\u5F8C\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002"
+      Artwork: {fileID: 21300000, guid: 4f03fbbc7b53b42af91a1fdef380c9c1, type: 3}
+      EffectText: 
+      FrameColor: {r: 0.94, g: 0.78, b: 0.25, a: 1}
+      IsDiscovered: 1
+    Characters:
+    - Name: "\u30E2\u30E2"
+      Description: "\u907A\u7269\u3092\u63A2\u3057\u3066\u8FF7\u5BAE\u3092\u6B69\u304F\u63A2\u691C\u5BB6\u3002\n\u8FD1\u8DDD\u96E2\u3067\u306E\u653B\u6483\u3068\u9632\u5FA1\u3092\u5F97\u610F\u3068\u3059\u308B\u3002"
+      CombatDescription: "\u8FD1\u8DDD\u96E2\u3067\u306E\u653B\u6483\u3068\u9632\u5FA1\u304C\u5F97\u610F\u3002"
+      Artwork: {fileID: 21300000, guid: bb0c2b9830744469ead1ba27c2eab560, type: 3}
+      IsUnlocked: 1
+      Health: 80
+      Gold: 99
+    - Name: "\uFF1F\uFF1F\uFF1F"
+      Description: 
+      CombatDescription: 
+      Artwork: {fileID: 21300000, guid: 097f93068efe5454982192332634b16d, type: 3}
+      IsUnlocked: 0
+      Health: 80
+      Gold: 99
+    - Name: "\uFF1F\uFF1F\uFF1F"
+      Description: 
+      CombatDescription: 
+      Artwork: {fileID: 21300000, guid: e2121ac65a113490f89f7fd9dec2fece, type: 3}
+      IsUnlocked: 0
+      Health: 80
+      Gold: 99
+    ResultHeadline: "\u52DD\u5229\u2026\u2026\uFF1F"
+    ReachedFloor: 8
+    EnemyCount: 7
+    EliteCount: 1
+    BossCount: 1
