@@ -354,9 +354,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 257805054}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2dcae2cb31927458da1ccd8db9748d09, type: 3}
+  m_Script: {fileID: 11500000, guid: 81678ca11af1649778bfe6202edde0ee, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.LobbyCharacterMotion
+  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Runtime.Common.Character.CharacterMotion
   _visualRoot: {fileID: 257805055}
   _idleHeight: 4
   _idlePeriod: 3.5
@@ -1546,6 +1546,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &1023400344 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090639735519687406, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
+  m_PrefabInstance: {fileID: 1023400340}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a2af44c6e3304392b441eba84e13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TFramework.UI::TFramework.UI.UIButton
 --- !u!1 &1097646078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2352,6 +2363,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &1333627318 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090639735519687406, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
+  m_PrefabInstance: {fileID: 1333627314}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a2af44c6e3304392b441eba84e13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TFramework.UI::TFramework.UI.UIButton
+--- !u!1 &1398971462 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 237276551963992906, guid: c6b6b7fd0c4344c6aa1f1f45002621c7, type: 3}
+  m_PrefabInstance: {fileID: 8372722526557854131}
+  m_PrefabAsset: {fileID: 0}
 --- !u!21 &1456719076
 Material:
   serializedVersion: 8
@@ -3102,6 +3129,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &1813934403 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090639735519687406, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
+  m_PrefabInstance: {fileID: 1813934399}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a2af44c6e3304392b441eba84e13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TFramework.UI::TFramework.UI.UIButton
 --- !u!1 &1823499124
 GameObject:
   m_ObjectHideFlags: 0
@@ -3113,6 +3151,7 @@ GameObject:
   - component: {fileID: 1823499126}
   - component: {fileID: 1823499125}
   - component: {fileID: 1823499127}
+  - component: {fileID: 1823499128}
   m_Layer: 0
   m_Name: MainSceneController
   m_TagString: Untagged
@@ -3132,11 +3171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8a91fd4d2fac439f89444b5971f5660, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.MainSceneController
-  _newRunButton: {fileID: 1629607664}
-  _continueRunButton: {fileID: 1921446603}
-  _battleSceneName: BattleScene
-  _defaultRunProfileId: 5501
-  _selectedRunProfileText: {fileID: 342796364}
+  _view: {fileID: 1823499128}
 --- !u!4 &1823499126
 Transform:
   m_ObjectHideFlags: 0
@@ -3168,6 +3203,29 @@ MonoBehaviour:
     TypeName: TFramework.Installer.TFrameworkProjectLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
+  _previewContent: {fileID: 11400000, guid: 230038b3ace35485b9b519f92a0146c7, type: 2}
+--- !u!114 &1823499128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823499124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d05f142ceb5e4d179934136a451d325, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.MainSceneView
+  _lobbyGroup: {fileID: 8372722526557854139}
+  _adventureButton: {fileID: 1629607664}
+  _settingsButton: {fileID: 2140373029}
+  _cardCollectionButton: {fileID: 1932292085}
+  _relicCollectionButton: {fileID: 1813934403}
+  _characterCollectionButton: {fileID: 1023400344}
+  _profileButton: {fileID: 1333627318}
+  _homeToggle: {fileID: 2120720968}
+  _shopToggle: {fileID: 1793129662}
+  _historyToggle: {fileID: 1229981054}
 --- !u!1 &1910900024
 GameObject:
   m_ObjectHideFlags: 0
@@ -3622,6 +3680,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &1932292085 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090639735519687406, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
+  m_PrefabInstance: {fileID: 1932292081}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a2af44c6e3304392b441eba84e13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TFramework.UI::TFramework.UI.UIButton
 --- !u!224 &1956666701 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5293663134308042370, guid: 15b00a429b84d4480885d12c42fe4b41, type: 3}
@@ -3654,6 +3723,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &2140373029 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090639735519687406, guid: 4f982c351df504c26902f4ba0c7da9ac, type: 3}
+  m_PrefabInstance: {fileID: 3044319000724630102}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a2af44c6e3304392b441eba84e13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TFramework.UI::TFramework.UI.UIButton
 --- !u!1001 &1170012737406067722
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4161,6 +4241,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 871194601}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 237276551963992906, guid: c6b6b7fd0c4344c6aa1f1f45002621c7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8372722526557854139}
     - targetCorrespondingSourceObject: {fileID: 6504396787093562532, guid: c6b6b7fd0c4344c6aa1f1f45002621c7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8372722526557854135}
@@ -4271,6 +4354,18 @@ MonoBehaviour:
   _localizationKey: 
   _localizationParameters: []
   _typewriterSpeed: 30
+--- !u!225 &8372722526557854139
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1398971462}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
