@@ -1,8 +1,11 @@
-using Dungeon.Runtime.OutGame.Main.UI;
+using System.Collections.Generic;
+using System.IO;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.InGame.Domain;
+using Dungeon.Runtime.OutGame.Main.Dialog;
+using Dungeon.Runtime.OutGame.Main.View;
 using Dungeon.Tests.EditMode.Support;
 using Game.MasterData.Generated;
 using NUnit.Framework;
@@ -11,8 +14,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Dungeon.Tests.EditMode
 {
@@ -774,7 +775,7 @@ namespace Dungeon.Tests.EditMode
                 EditorSceneManager.ClosePreviewScene(mainScene);
             }
 
-            GameObject resumePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/OutGame/UI/ResumeDialog.prefab");
+            GameObject resumePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/OutGame/Main/Dialog/ResumeDialog.prefab");
             Assert.That(resumePrefab, Is.Not.Null);
             ResumeDialog resume = resumePrefab.GetComponent<ResumeDialog>();
             Assert.That(resume, Is.Not.Null);
