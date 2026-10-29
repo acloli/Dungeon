@@ -15,7 +15,8 @@
         "VContainer",
         "Dungeon.Runtime.InGame.Save",
         "Dungeon.Runtime.InGame.Battle",
-        "Dungeon.Runtime.OutGame.Common"
+        "Dungeon.Runtime.OutGame.Common",
+        "Dungeon.Runtime.Common.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

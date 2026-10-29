@@ -1,12 +1,12 @@
 using TFramework.UI;
 using UnityEngine;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.Common.UI.Dialog
 {
     /// <summary>
     /// 共通確認ダイアログの表示と入力参照
     /// </summary>
-    public sealed class CommonConfirmDialog : MainMenuDialogBase
+    public sealed class CommonConfirmDialog : BoundDialogBase
     {
         [SerializeField] private TFTextUGUI _bodyText;
         [SerializeField] private UIButton _cancelButton;

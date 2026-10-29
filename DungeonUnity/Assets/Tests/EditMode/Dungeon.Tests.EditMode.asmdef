@@ -19,7 +19,8 @@
         "VContainer",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.Addressables.Editor"
+        "Unity.Addressables.Editor",
+        "Dungeon.Runtime.Common.UI"
     ],
     "includePlatforms": [
         "Editor"

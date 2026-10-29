@@ -12,7 +12,8 @@
     "Game.MasterData.Generated",
     "UniTask",
     "VContainer",
-    "UnityEngine.TestRunner"
+    "UnityEngine.TestRunner",
+    "Dungeon.Runtime.Common.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

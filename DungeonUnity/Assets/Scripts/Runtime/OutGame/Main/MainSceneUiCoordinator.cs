@@ -1,3 +1,6 @@
+using Dungeon.Runtime.Common.UI.Binding;
+using Dungeon.Runtime.Common.UI.Page;
+using Dungeon.Runtime.Common.UI.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +26,7 @@ namespace Dungeon.Runtime.OutGame.Main
         private readonly HashSet<Type> _openDialogs = new HashSet<Type>();
         private readonly List<CanvasGroup> _dialogLayers = new List<CanvasGroup>();
         private CancellationTokenSource _lifetime;
-        private MainMenuBindings _lobbyBindings;
+        private ScreenInputBindings _lobbyBindings;
         private MainSceneView _view;
         private MainMenuData _data;
         private bool _pageTransition;
@@ -50,7 +53,7 @@ namespace Dungeon.Runtime.OutGame.Main
             await _ui.ClearStackAsync(_lifetime.Token);
             _view.SetVisible(true);
             _view.SelectHome();
-            _lobbyBindings = new MainMenuBindings();
+            _lobbyBindings = new ScreenInputBindings();
             _lobbyBindings.Add(view.AdventureButton, () => Navigate(ShowAdventureEntryAsync));
             _lobbyBindings.Add(view.SettingsButton, () => Navigate(ShowSettingsAsync));
             _lobbyBindings.Add(view.CardCollectionButton, () => Navigate(ShowCardsAsync));
@@ -83,18 +86,18 @@ namespace Dungeon.Runtime.OutGame.Main
             });
         }
 
-        private async UniTask ShowDialogAsync<T>(Func<T, MainMenuBindings> configure, CancellationToken ct)
-            where T : MainMenuDialogBase
+        private async UniTask ShowDialogAsync<T>(Func<T, ScreenInputBindings> configure, CancellationToken ct)
+            where T : BoundDialogBase
         {
             if (!_openDialogs.Add(typeof(T))) return;
             CanvasGroup previous = _dialogLayers.LastOrDefault() ?? _ui.CurrentPage?.CanvasGroup ?? _view.LobbyGroup;
             SetInteractable(previous, false);
             bool opened = false;
-            var binding = new MainMenuScreenBinding<T>(dialog =>
+            var binding = new ScreenBinding<T>(dialog =>
             {
                 opened = true;
                 _dialogLayers.Add(dialog.CanvasGroup);
-                MainMenuBindings controls = configure(dialog);
+                ScreenInputBindings controls = configure(dialog);
                 controls.OnDispose(() => _dialogLayers.Remove(dialog.CanvasGroup));
                 return controls;
             });
@@ -111,15 +114,15 @@ namespace Dungeon.Runtime.OutGame.Main
             }
         }
 
-        private async UniTask ShowPageAsync<T>(Func<T, MainMenuBindings> configure, CancellationToken ct)
-            where T : MainMenuPageBase
+        private async UniTask ShowPageAsync<T>(Func<T, ScreenInputBindings> configure, CancellationToken ct)
+            where T : BoundPageBase
         {
             if (_pageTransition) return;
             _pageTransition = true;
             _view.SetVisible(false);
             try
             {
-                await _ui.ShowPageAsync<T>(new MainMenuScreenBinding<T>(configure), ct);
+                await _ui.ShowPageAsync<T>(new ScreenBinding<T>(configure), ct);
                 if (!(_ui.CurrentPage is T)) throw new InvalidOperationException("Could not open " + typeof(T).Name);
             }
             finally
@@ -178,7 +181,7 @@ namespace Dungeon.Runtime.OutGame.Main
         {
             return ShowPageAsync<CharacterSelectPage>(page =>
             {
-                var controls = new MainMenuBindings();
+                var controls = new ScreenInputBindings();
                 controls.Add(page.BackButton, () => Navigate(ShowHomeAsync));
                 controls.Add(page.InitialDeckButton, () => Navigate(ShowDeckAsync));
                 controls.Add(page.DepartButton,
@@ -364,7 +367,7 @@ namespace Dungeon.Runtime.OutGame.Main
                 page.NormalEnemyCountText.text = _data.EnemyCount.ToString();
                 page.EliteEnemyCountText.text = _data.EliteCount.ToString();
                 page.BossCountText.text = _data.BossCount.ToString();
-                var controls = new MainMenuBindings();
+                var controls = new ScreenInputBindings();
                 controls.Add(page.HomeButton, () => Navigate(ShowHomeAsync));
                 controls.Add(page.InventoryButton, () => Navigate(ShowInventoryAsync));
                 return controls;
@@ -429,7 +432,7 @@ namespace Dungeon.Runtime.OutGame.Main
             await ShowDialogAsync<CommonConfirmDialog>(dialog =>
             {
                 dialog.ApplyText(body, cancel, confirm);
-                var controls = new MainMenuBindings();
+                var controls = new ScreenInputBindings();
                 controls.Add(dialog.CancelButton, dialog.Close);
                 controls.Add(dialog.ConfirmButton, () =>
                 {
@@ -441,9 +444,9 @@ namespace Dungeon.Runtime.OutGame.Main
             return accepted;
         }
 
-        private static MainMenuBindings CloseControls(Button close, Action onClose)
+        private static ScreenInputBindings CloseControls(Button close, Action onClose)
         {
-            var controls = new MainMenuBindings();
+            var controls = new ScreenInputBindings();
             controls.Add(close, onClose);
             return controls;
         }

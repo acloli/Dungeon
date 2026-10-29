@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.Page;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 冒険結果ページの表示と入力参照
     /// </summary>
-    public sealed class AdventureResultPage : MainMenuPageBase
+    public sealed class AdventureResultPage : BoundPageBase
     {
         [SerializeField] private TFTextUGUI _headlineText;
         [SerializeField] private TFTextUGUI _floorText;

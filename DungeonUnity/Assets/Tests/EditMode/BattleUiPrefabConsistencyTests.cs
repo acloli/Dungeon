@@ -1,3 +1,4 @@
+using Dungeon.Runtime.OutGame.Main.UI;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
@@ -21,6 +22,15 @@ namespace Dungeon.Tests.EditMode
     [TestFixture]
     public sealed class BattleUiPrefabConsistencyTests
     {
+        private static string PrefabPath(string name)
+        {
+            if (name == "CommonDialog") return $"{CommonUiFolder}/Dialog/{name}.prefab";
+            if (name == "CommonPage") return $"{CommonUiFolder}/Page/{name}.prefab";
+            if (name == "MultiIcon" || name == "CardIcon" || name == "RelicIcon" || name == "PotionIcon" || name == "ResourceIcon")
+                return $"{CommonUiFolder}/MultiIcon/{name}.prefab";
+            return $"{UiFolder}/{name}.prefab";
+        }
+
         private const string UiFolder = "Assets/Prefabs/InGame/UI";
         private const string CommonUiFolder = "Assets/Prefabs/Common/UI";
         private const string AddressGroupPath = "Assets/AddressableAssetsData/AssetGroups/Default Local Group.asset";
@@ -45,7 +55,7 @@ namespace Dungeon.Tests.EditMode
         [TestCase("ResourceIcon", true, "MultiIcon")]
         public void Prefabs_FollowNamingAndVariantRules(string prefabName, bool shouldBeVariant, string parentPrefabName)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(prefabName));
 
             Assert.That(prefab, Is.Not.Null, $"{prefabName}.prefab is missing.");
             Assert.That(prefab.name, Is.EqualTo(prefabName));
@@ -60,7 +70,7 @@ namespace Dungeon.Tests.EditMode
 
             Object parentPrefab = PrefabUtility.GetCorrespondingObjectFromSource(prefab);
             Assert.That(parentPrefab, Is.Not.Null, $"{prefabName} should inherit from {parentPrefabName}.");
-            Assert.That(AssetDatabase.GetAssetPath(parentPrefab), Is.EqualTo($"{UiFolder}/{parentPrefabName}.prefab"));
+            Assert.That(AssetDatabase.GetAssetPath(parentPrefab), Is.EqualTo(PrefabPath(parentPrefabName)));
         }
 
         [Test]
@@ -250,7 +260,7 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void CardIcon_PriceFooter_RespondsToVisibilityFlag()
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/CardIcon.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath("CardIcon"));
             GameObject instance = Object.Instantiate(prefab);
 
             try
@@ -750,13 +760,28 @@ namespace Dungeon.Tests.EditMode
         public void RunSaveScenes_HaveEntryAndQuitReferences()
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
-            string mainSceneYaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/MainScene.unity"));
-            string battleSceneYaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
+            var mainScene = EditorSceneManager.OpenPreviewScene("Assets/Scenes/MainScene.unity");
+            try
+            {
+                MainSceneView view = FindSceneGameObject(mainScene, "MainSceneController").GetComponent<MainSceneView>();
+                Assert.That(view, Is.Not.Null);
+                Assert.That(view.AdventureButton, Is.Not.Null);
+                Assert.That(view.AdventureButton.gameObject.activeInHierarchy, Is.True);
+                Assert.That(view.AdventureButton.name, Is.EqualTo("NewRunButton"));
+            }
+            finally
+            {
+                EditorSceneManager.ClosePreviewScene(mainScene);
+            }
 
-            StringAssert.Contains("_newRunButton: {fileID:", mainSceneYaml);
-            StringAssert.Contains("_continueRunButton: {fileID:", mainSceneYaml);
-            StringAssert.Contains("value: NewRunButton", mainSceneYaml);
-            StringAssert.Contains("m_Name: ContinueRunButton", mainSceneYaml);
+            GameObject resumePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/OutGame/UI/ResumeDialog.prefab");
+            Assert.That(resumePrefab, Is.Not.Null);
+            ResumeDialog resume = resumePrefab.GetComponent<ResumeDialog>();
+            Assert.That(resume, Is.Not.Null);
+            Assert.That(resume.ContinueButton, Is.Not.Null);
+            Assert.That(resume.NewAdventureButton, Is.Not.Null);
+            Assert.That(resume.ContinueButton, Is.Not.SameAs(resume.NewAdventureButton));
+            string battleSceneYaml = File.ReadAllText(Path.Combine(projectRoot, "Assets/Scenes/BattleScene.unity"));
             StringAssert.Contains("_saveQuitButton: {fileID:", battleSceneYaml);
             StringAssert.Contains("m_Name: SaveQuitButton", battleSceneYaml);
         }
@@ -783,7 +808,7 @@ namespace Dungeon.Tests.EditMode
 
         private static void AssertPrefabContainsComponent<T>(string prefabName) where T : Component
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{UiFolder}/{prefabName}.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(prefabName));
             Assert.That(prefab.GetComponent<T>(), Is.Not.Null, $"{prefabName}.prefab is missing {typeof(T).Name}.");
         }
 

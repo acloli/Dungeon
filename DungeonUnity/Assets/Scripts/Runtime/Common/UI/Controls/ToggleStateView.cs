@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.Common.UI.Controls
 {
     /// <summary>
     /// トグル入力に対応する二つの表示状態を切り替える

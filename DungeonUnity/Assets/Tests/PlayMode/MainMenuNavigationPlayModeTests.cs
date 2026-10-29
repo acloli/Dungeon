@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using Dungeon.Runtime.Common.UI.Dialog;
 using System.Collections;
 using System.Linq;
 using Dungeon.Runtime.InGame.Battle.View;
@@ -41,7 +42,7 @@ namespace Dungeon.Tests.PlayMode
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            foreach (MainMenuDialogBase dialog in Object.FindObjectsByType<MainMenuDialogBase>(FindObjectsSortMode.None)) dialog.Close();
+            foreach (BoundDialogBase dialog in Object.FindObjectsByType<BoundDialogBase>(FindObjectsSortMode.None)) dialog.Close();
             for (int i = 0; i < 25; i++) yield return null;
             if (_lobby != null)
             {

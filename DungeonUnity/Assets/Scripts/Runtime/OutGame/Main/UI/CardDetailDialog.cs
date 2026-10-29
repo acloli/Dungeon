@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.Dialog;
 using Dungeon.Runtime.InGame.Battle.View;
 using TFramework.UI;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// カード詳細の表示と入力参照
     /// </summary>
-    public sealed class CardDetailDialog : MainMenuDialogBase
+    public sealed class CardDetailDialog : BoundDialogBase
     {
         [SerializeField] private BattleCardIconView _cardIcon;
         [SerializeField] private Toggle _normalToggle;

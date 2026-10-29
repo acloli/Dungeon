@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.Controls;
 namespace Dungeon.Runtime.OutGame.Main.UI
 {
     /// <summary>

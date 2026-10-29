@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.Page;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 出発キャラクター選択ページの表示と入力参照
     /// </summary>
-    public sealed class CharacterSelectPage : MainMenuPageBase
+    public sealed class CharacterSelectPage : BoundPageBase
     {
         [SerializeField] private Image _characterImage;
         [SerializeField] private TFTextUGUI _nameText;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -10,7 +11,28 @@ namespace Dungeon.Tests.EditMode
 {
     public sealed class OutGameUiPrefabTests
     {
-        private const string Folder = "Assets/Prefabs/OutGame/UI";
+        private static readonly Dictionary<string, string> PrefabPaths = new Dictionary<string, string>
+        {
+            { "CommonConfirmDialog", "Assets/Prefabs/Common/UI/Dialog/CommonConfirmDialog.prefab" },
+            { "ResumeDialog", "Assets/Prefabs/OutGame/UI/ResumeDialog.prefab" },
+            { "SettingsDialog", "Assets/Prefabs/OutGame/UI/SettingsDialog.prefab" },
+            { "CommonBookDialog", "Assets/Prefabs/OutGame/UI/CommonBookDialog.prefab" },
+            { "CardCollectionDialog", "Assets/Prefabs/OutGame/UI/CardCollectionDialog.prefab" },
+            { "RelicCollectionDialog", "Assets/Prefabs/OutGame/UI/RelicCollectionDialog.prefab" },
+            { "CharacterCollectionDialog", "Assets/Prefabs/OutGame/UI/CharacterCollectionDialog.prefab" },
+            { "InitialDeckDialog", "Assets/Prefabs/OutGame/UI/InitialDeckDialog.prefab" },
+            { "CardDetailDialog", "Assets/Prefabs/OutGame/UI/CardDetailDialog.prefab" },
+            { "RelicDetailDialog", "Assets/Prefabs/OutGame/UI/RelicDetailDialog.prefab" },
+            { "CharacterSelectPage", "Assets/Prefabs/OutGame/UI/CharacterSelectPage.prefab" },
+            { "AdventureResultPage", "Assets/Prefabs/OutGame/UI/AdventureResultPage.prefab" },
+            { "CollectionItemIcon", "Assets/Prefabs/OutGame/UI/CollectionItemIcon.prefab" },
+            { "RelicCollectionItem", "Assets/Prefabs/OutGame/UI/RelicCollectionItem.prefab" },
+            { "SettingsAudioToggle", "Assets/Prefabs/OutGame/UI/SettingsAudioToggle.prefab" },
+            { "CardVersionToggle", "Assets/Prefabs/OutGame/UI/CardVersionToggle.prefab" },
+            { "CharacterPortraitToggle", "Assets/Prefabs/OutGame/UI/CharacterPortraitToggle.prefab" },
+            { "SettingsMenuButton", "Assets/Prefabs/OutGame/UI/SettingsMenuButton.prefab" },
+            { "KeywordTooltip", "Assets/Prefabs/OutGame/UI/KeywordTooltip.prefab" },
+        };
 
         [TestCase("CommonConfirmDialog", "CommonDialog")]
         [TestCase("ResumeDialog", "CommonDialog")]
@@ -54,7 +76,7 @@ namespace Dungeon.Tests.EditMode
             GameObject prefab = Load(name);
             Assert.That(prefab.name, Is.EqualTo(name));
             Assert.That(prefab.GetComponents<Component>().Any(c => c != null && c.GetType().Name == name), Is.True);
-            string guid = AssetDatabase.AssetPathToGUID($"{Folder}/{name}.prefab");
+            string guid = AssetDatabase.AssetPathToGUID(PrefabPaths[name]);
             var entry = AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(guid);
             Assert.That(entry, Is.Not.Null);
             Assert.That(entry.address, Is.EqualTo(name));
@@ -63,8 +85,7 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void Prefabs_HaveCompleteReferencesAndPortableDependencies()
         {
-            string[] paths = AssetDatabase.FindAssets("t:Prefab", new[] { Folder })
-                .Select(AssetDatabase.GUIDToAssetPath).ToArray();
+            string[] paths = PrefabPaths.Values.ToArray();
             Assert.That(paths, Is.Not.Empty);
 
             foreach (string path in paths)
@@ -81,7 +102,7 @@ namespace Dungeon.Tests.EditMode
                     Type type = component.GetType();
                     Assert.That(type.Name, Is.Not.EqualTo("TextMeshProUGUI"), path);
                     Assert.That(type.FullName, Is.Not.EqualTo("UnityEngine.UI.Text"), path);
-                    while (type != null && type.Namespace == "Dungeon.Runtime.OutGame.Main.UI")
+                    while (type != null && type.Namespace != null && type.Namespace.StartsWith("Dungeon.Runtime.", StringComparison.Ordinal))
                     {
                         foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                         {
@@ -115,7 +136,7 @@ namespace Dungeon.Tests.EditMode
             foreach (var card in cards)
             {
                 string source = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(card.gameObject);
-                Assert.That(source, Is.EqualTo("Assets/Prefabs/InGame/UI/CardIcon.prefab"));
+                Assert.That(source, Is.EqualTo("Assets/Prefabs/Common/UI/MultiIcon/CardIcon.prefab"));
                 SerializedObject serialized = new SerializedObject(card);
                 foreach (string key in new[] { "_button", "_frameImage", "_artImage", "_nameText", "_descriptionText", "_costText", "_quantityText" })
                 {
@@ -127,7 +148,7 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void CardIcon_HidingCostKeepsTheCardFaceVisible()
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/InGame/UI/CardIcon.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Common/UI/MultiIcon/CardIcon.prefab");
             GameObject instance = UnityEngine.Object.Instantiate(prefab);
             try
             {
@@ -162,7 +183,7 @@ namespace Dungeon.Tests.EditMode
 
         private static GameObject Load(string name)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{Folder}/{name}.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPaths[name]);
             Assert.That(prefab, Is.Not.Null, name);
             return prefab;
         }

@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.Dialog;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ namespace Dungeon.Runtime.OutGame.Main.UI
     /// <summary>
     /// 遺物詳細の表示と入力参照
     /// </summary>
-    public sealed class RelicDetailDialog : MainMenuDialogBase
+    public sealed class RelicDetailDialog : BoundDialogBase
     {
         [SerializeField] private TFTextUGUI _titleText;
         [SerializeField] private RectTransform _effectRoot;
