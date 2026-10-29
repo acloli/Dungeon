@@ -367,7 +367,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0b09f3dcd1ca64e3d9123b1ce81a1099, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CardDetailDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.CardDetail::Dungeon.Runtime.OutGame.CardDetail.CardDetailDialog
   _canvasGroup: {fileID: 5506060321592106328}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0
@@ -1342,7 +1342,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80a8dc8f098da49ed96e9dfb24644a26, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.BattleCardIconView
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.MultiIcon.CardIconView
 --- !u!224 &5167175207691421097 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4175843736026985454, guid: 89c095e8e81444732889303370afa4a4, type: 3}

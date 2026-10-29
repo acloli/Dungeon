@@ -1,5 +1,5 @@
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.OutGame.Collection.Common;
-using Dungeon.Runtime.InGame.Battle.View;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,10 +13,10 @@ namespace Dungeon.Runtime.OutGame.Collection.Card
     {
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private TFTextUGUI _discoveryCountText;
-        [SerializeField] private BattleCardIconView _itemTemplate;
+        [SerializeField] private CardIconView _itemTemplate;
 
         public ScrollRect ScrollRect => _scrollRect;
         public TFTextUGUI DiscoveryCountText => _discoveryCountText;
-        public BattleCardIconView ItemTemplate => _itemTemplate;
+        public CardIconView ItemTemplate => _itemTemplate;
     }
 }

@@ -110,7 +110,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!114 &1961719006670588194 stripped
 MonoBehaviour:
@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!114 &2505580062992793093 stripped
 MonoBehaviour:
@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!114 &4208261835972186595 stripped
 MonoBehaviour:
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbdadf6957f12b44f9b15593c81b12fb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: TFramework.UI::TFramework.UI.TFTextUGUI
 --- !u!114 &4956251507458261701 stripped
 MonoBehaviour:
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbdadf6957f12b44f9b15593c81b12fb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: TFramework.UI::TFramework.UI.TFTextUGUI
 --- !u!114 &5566516420349986537 stripped
 MonoBehaviour:
@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbdadf6957f12b44f9b15593c81b12fb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: TFramework.UI::TFramework.UI.TFTextUGUI
 --- !u!1 &6626929323126783317 stripped
 GameObject:
@@ -187,8 +187,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 022e11d9a2e1f43c0ae0ce9923cde098, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.BattleMultiIconView
+  m_Name: 
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.MultiIcon.MultiIconView
   _button: {fileID: 0}
   _frameImage: {fileID: 1961719006670588194}
   _artImage: {fileID: 2505580062992793093}
@@ -207,5 +207,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbdadf6957f12b44f9b15593c81b12fb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: TFramework.UI::TFramework.UI.TFTextUGUI

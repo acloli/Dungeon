@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using Dungeon.Runtime.Common.UI.Dialog;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.OutGame.CardDetail;
 using Dungeon.Runtime.OutGame.CardDetail.UI;
@@ -74,7 +75,7 @@ namespace Dungeon.Tests.PlayMode
             CardCollectionDialog cards = FindReady<CardCollectionDialog>();
             Assert.That(Object.FindObjectsByType<CardCollectionDialog>(FindObjectsSortMode.None).Length, Is.EqualTo(1));
             Assert.That(_lobby.LobbyGroup.interactable, Is.False);
-            cards.ScrollRect.content.GetChild(0).GetComponentInChildren<BattleCardIconView>().GetComponent<Button>().onClick.Invoke();
+            cards.ScrollRect.content.GetChild(0).GetComponentInChildren<CardIconView>().GetComponent<Button>().onClick.Invoke();
             yield return WaitFor<CardDetailDialog>();
             CardDetailDialog detail = FindReady<CardDetailDialog>();
             Assert.That(cards.CanvasGroup.interactable, Is.False);
@@ -83,7 +84,7 @@ namespace Dungeon.Tests.PlayMode
             Assert.That(CardName(detail), Is.EqualTo(_content.Data.Cards[0].Name + "+"));
             detail.CloseButton.onClick.Invoke();
             yield return WaitFor<CardCollectionDialog>();
-            cards.ScrollRect.content.GetChild(3).GetComponentInChildren<BattleCardIconView>().GetComponent<Button>().onClick.Invoke();
+            cards.ScrollRect.content.GetChild(3).GetComponentInChildren<CardIconView>().GetComponent<Button>().onClick.Invoke();
             yield return WaitFor<CardDetailDialog>();
             detail = FindReady<CardDetailDialog>();
             Assert.That(detail.NormalToggle.isOn, Is.True);
@@ -118,7 +119,7 @@ namespace Dungeon.Tests.PlayMode
             characters.InitialDeckButton.onClick.Invoke();
             yield return WaitFor<InitialDeckDialog>();
             InitialDeckDialog deck = FindReady<InitialDeckDialog>();
-            deck.ScrollRect.content.GetChild(1).GetComponentInChildren<BattleCardIconView>().GetComponent<Button>().onClick.Invoke();
+            deck.ScrollRect.content.GetChild(1).GetComponentInChildren<CardIconView>().GetComponent<Button>().onClick.Invoke();
             yield return WaitFor<CardDetailDialog>();
             Assert.That(CardName(FindReady<CardDetailDialog>()), Is.EqualTo(_content.Data.Cards[1].Name));
             FindReady<CardDetailDialog>().CloseButton.onClick.Invoke();

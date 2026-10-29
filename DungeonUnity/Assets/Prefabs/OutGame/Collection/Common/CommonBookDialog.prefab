@@ -2201,7 +2201,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2834cf529e38439cb134c6fe2fd6ac0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CommonBookDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Collection::Dungeon.Runtime.OutGame.Collection.Common.CommonBookDialog
   _canvasGroup: {fileID: 4259764351602243970}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

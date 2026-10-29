@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,13 +17,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Image _battlePanelBackgroundImage;
         [SerializeField] private BattlePageView _battlePageView;
         [SerializeField] private Transform _ownedRelicRoot;
-        [SerializeField] private BattleMultiIconView _ownedRelicTemplate;
+        [SerializeField] private MultiIconView _ownedRelicTemplate;
         [SerializeField] private GameObject _ownedRelicHintRoot;
         [SerializeField] private TFTextUGUI _ownedRelicHintText;
         [SerializeField] private CanvasGroup _ownedRelicCanvasGroup;
         [SerializeField] private CanvasGroup _ownedRelicHintCanvasGroup;
         [SerializeField] private Transform _ownedPotionRoot;
-        [SerializeField] private BattleMultiIconView _ownedPotionTemplate;
+        [SerializeField] private MultiIconView _ownedPotionTemplate;
         [SerializeField] private GameObject _ownedPotionHintRoot;
         [SerializeField] private TFTextUGUI _ownedPotionHintText;
         [SerializeField] private Button _ownedPotionUseButton;
@@ -32,15 +33,15 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Button _hostBackgroundButton;
         [SerializeField] private Button _saveQuitButton;
 
-        private readonly List<BattleMultiIconView> _ownedRelicViews = new List<BattleMultiIconView>();
-        private readonly List<BattleMultiIconView> _ownedPotionViews = new List<BattleMultiIconView>();
+        private readonly List<MultiIconView> _ownedRelicViews = new List<MultiIconView>();
+        private readonly List<MultiIconView> _ownedPotionViews = new List<MultiIconView>();
 
         /// <summary>
         /// 戦闘画面View取得
         /// </summary>
         public IBattlePageView BattlePageView => _battlePageView;
 
-        public void BuildOwnedRelics(IReadOnlyList<Model.BattleMultiIconViewModel> relics, Action<int> onClicked)
+        public void BuildOwnedRelics(IReadOnlyList<MultiIconViewModel> relics, Action<int> onClicked)
         {
             ClearOwnedRelics();
 
@@ -56,13 +57,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < relics.Count; i++)
             {
                 int relicIndex = i;
-                Model.BattleMultiIconViewModel relic = relics[relicIndex];
+                MultiIconViewModel relic = relics[relicIndex];
                 if (relic == null)
                 {
                     continue;
                 }
 
-                BattleMultiIconView relicView = Instantiate(_ownedRelicTemplate, _ownedRelicRoot);
+                MultiIconView relicView = Instantiate(_ownedRelicTemplate, _ownedRelicRoot);
                 relicView.gameObject.SetActive(true);
                 relicView.Bind(relic, () => onClicked?.Invoke(relicIndex));
                 relicView.SetCompactLayout(true);
@@ -70,7 +71,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
-        public void BuildOwnedPotions(IReadOnlyList<Model.BattleMultiIconViewModel> potions, Action<int> onClicked)
+        public void BuildOwnedPotions(IReadOnlyList<MultiIconViewModel> potions, Action<int> onClicked)
         {
             ClearOwnedPotions();
 
@@ -87,13 +88,13 @@ namespace Dungeon.Runtime.InGame.Battle.View
             for (int i = 0; i < potions.Count; i++)
             {
                 int potionIndex = i;
-                Model.BattleMultiIconViewModel potion = potions[potionIndex];
+                MultiIconViewModel potion = potions[potionIndex];
                 if (potion == null)
                 {
                     continue;
                 }
 
-                BattleMultiIconView potionView = Instantiate(_ownedPotionTemplate, _ownedPotionRoot);
+                MultiIconView potionView = Instantiate(_ownedPotionTemplate, _ownedPotionRoot);
                 potionView.gameObject.SetActive(true);
                 potionView.Bind(potion, () => onClicked?.Invoke(potionIndex));
                 potionView.SetCompactLayout(true);
@@ -149,7 +150,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _ownedRelicViews.Count; i++)
             {
-                BattleMultiIconView relicView = _ownedRelicViews[i];
+                MultiIconView relicView = _ownedRelicViews[i];
                 if (relicView == null)
                 {
                     continue;
@@ -171,7 +172,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _ownedPotionViews.Count; i++)
             {
-                BattleMultiIconView potionView = _ownedPotionViews[i];
+                MultiIconView potionView = _ownedPotionViews[i];
                 if (potionView == null)
                 {
                     continue;

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Battle.Services;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,11 +16,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class PotionReplaceDialog : UIDialogBase<PotionReplaceDialogResult>
     {
         [SerializeField] private Transform _ownedPotionRoot;
-        [SerializeField] private BattleMultiIconView _ownedPotionTemplate;
-        [SerializeField] private BattleMultiIconView _offeredPotionView;
+        [SerializeField] private MultiIconView _ownedPotionTemplate;
+        [SerializeField] private MultiIconView _offeredPotionView;
         [SerializeField] private Button _cancelButton;
 
-        private readonly List<BattleMultiIconView> _ownedPotionViews = new List<BattleMultiIconView>();
+        private readonly List<MultiIconView> _ownedPotionViews = new List<MultiIconView>();
         private BattlePotionReplaceDialogParam _param;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
@@ -48,7 +50,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             ClearOwnedPotions();
 
-            IReadOnlyList<BattleMultiIconViewModel> potions = _param?.Snapshot?.OwnedPotions;
+            IReadOnlyList<MultiIconViewModel> potions = _param?.Snapshot?.OwnedPotions;
             if (_ownedPotionRoot == null || _ownedPotionTemplate == null || potions == null)
             {
                 return;
@@ -57,14 +59,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
             _ownedPotionTemplate.gameObject.SetActive(false);
             for (int i = 0; i < potions.Count; i++)
             {
-                BattleMultiIconViewModel potion = potions[i];
+                MultiIconViewModel potion = potions[i];
                 if (potion == null)
                 {
                     continue;
                 }
 
                 int potionIndex = i;
-                BattleMultiIconView potionView = Instantiate(_ownedPotionTemplate, _ownedPotionRoot);
+                MultiIconView potionView = Instantiate(_ownedPotionTemplate, _ownedPotionRoot);
                 potionView.gameObject.SetActive(true);
                 potionView.Bind(potion, () => OnPotionClicked(potionIndex));
                 _ownedPotionViews.Add(potionView);
@@ -73,9 +75,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void BindOfferedPotion()
         {
-            BattleMultiIconViewModel offeredPotion = _param?.Snapshot?.PendingPotionOffer?.Potion == null
+            MultiIconViewModel offeredPotion = _param?.Snapshot?.PendingPotionOffer?.Potion == null
                 ? null
-                : BattleMultiIconViewModel.CreatePotion(_param.Snapshot.PendingPotionOffer.Potion);
+                : BattleIconViewModelFactory.CreatePotion(_param.Snapshot.PendingPotionOffer.Potion);
             _offeredPotionView?.Bind(offeredPotion, null);
         }
 
@@ -83,7 +85,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _ownedPotionViews.Count; i++)
             {
-                BattleMultiIconView potionView = _ownedPotionViews[i];
+                MultiIconView potionView = _ownedPotionViews[i];
                 if (potionView == null)
                 {
                     continue;

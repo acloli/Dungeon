@@ -2441,7 +2441,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0c94ea33c4924ff0a091f1b3917925d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CharacterCollectionDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Collection::Dungeon.Runtime.OutGame.Collection.Character.CharacterCollectionDialog
   _canvasGroup: {fileID: 3548552128382133229}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

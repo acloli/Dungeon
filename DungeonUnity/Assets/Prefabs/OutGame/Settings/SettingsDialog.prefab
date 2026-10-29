@@ -2590,7 +2590,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9fbe8a2950a6b4c948200d6c095aa8a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.SettingsDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Settings::Dungeon.Runtime.OutGame.Settings.SettingsDialog
   _canvasGroup: {fileID: 2085315838504559615}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

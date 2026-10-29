@@ -5,7 +5,8 @@
         "TFramework.Core",
         "TFramework.UI",
         "Unity.TextMeshPro",
-        "UniTask"
+        "UniTask",
+        "Game.MasterData.Generated"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,5 +1,5 @@
 using Dungeon.Runtime.Common.UI.Dialog;
-using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,13 +11,13 @@ namespace Dungeon.Runtime.OutGame.CardDetail
     /// </summary>
     public sealed class CardDetailDialog : BoundDialogBase
     {
-        [SerializeField] private BattleCardIconView _cardIcon;
+        [SerializeField] private CardIconView _cardIcon;
         [SerializeField] private Toggle _normalToggle;
         [SerializeField] private Toggle _upgradedToggle;
         [SerializeField] private RectTransform _keywordRoot;
         [SerializeField] private UIButton _closeButton;
 
-        public BattleCardIconView CardIcon => _cardIcon;
+        public CardIconView CardIcon => _cardIcon;
         public Toggle NormalToggle => _normalToggle;
         public Toggle UpgradedToggle => _upgradedToggle;
         public RectTransform KeywordRoot => _keywordRoot;

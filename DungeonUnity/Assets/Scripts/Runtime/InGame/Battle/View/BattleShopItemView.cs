@@ -1,4 +1,5 @@
 using System;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class BattleShopItemView : MonoBehaviour
     {
         [SerializeField] private Button _button;
-        [SerializeField] private BattleMultiIconView _iconView;
+        [SerializeField] private MultiIconView _iconView;
         [SerializeField] private TFTextUGUI _priceText;
 
         public void Bind(BattleShopItemViewModel itemViewModel, Action<int> onClick)

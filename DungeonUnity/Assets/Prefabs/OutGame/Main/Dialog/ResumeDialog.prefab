@@ -826,7 +826,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5eff73400c97541a1a6349d296e56a30, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.ResumeDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.Dialog.ResumeDialog
   _canvasGroup: {fileID: 4907117389755318667}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

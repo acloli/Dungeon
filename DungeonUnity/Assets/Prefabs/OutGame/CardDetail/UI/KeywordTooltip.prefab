@@ -89,7 +89,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa86c61a406cd4cdc8ed705293d3cda6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.KeywordTooltip
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.CardDetail::Dungeon.Runtime.OutGame.CardDetail.UI.KeywordTooltip
   _titleText: {fileID: 1477109646600693933}
   _descriptionText: {fileID: 7259494386856556454}
 --- !u!1 &1915086593440200076

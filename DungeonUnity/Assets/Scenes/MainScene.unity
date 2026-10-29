@@ -1269,7 +1269,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e459dbb425fa4bfcb3723d94ad7e119, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.LobbyFooterToggleGroup
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.View.LobbyFooterToggleGroup
   _home: {fileID: 2120720968}
   _shop: {fileID: 1793129662}
   _history: {fileID: 1229981054}
@@ -3215,7 +3215,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0d05f142ceb5e4d179934136a451d325, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.MainSceneView
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.View.MainSceneView
   _lobbyGroup: {fileID: 8372722526557854139}
   _adventureButton: {fileID: 1629607664}
   _settingsButton: {fileID: 2140373029}

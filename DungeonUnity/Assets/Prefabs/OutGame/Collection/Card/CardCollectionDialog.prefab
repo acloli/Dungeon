@@ -1812,7 +1812,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 978ab4c753aaf411ba97b26453ec5f83, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CardCollectionDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Collection::Dungeon.Runtime.OutGame.Collection.Card.CardCollectionDialog
   _canvasGroup: {fileID: 1433766196515354921}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

@@ -500,7 +500,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47f73341135b44b44a7092d10906755d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CollectionItemIcon
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.MultiIcon.CollectionItemIcon
   _button: {fileID: 4557996502582394563}
   _artImage: {fileID: 8099353807968669449}
   _rarityFrame: {fileID: 1674846172035093309}

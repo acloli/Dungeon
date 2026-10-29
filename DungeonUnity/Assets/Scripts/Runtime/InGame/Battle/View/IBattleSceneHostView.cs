@@ -1,3 +1,5 @@
+using Dungeon.Runtime.Common.UI.MultiIcon;
+
 namespace Dungeon.Runtime.InGame.Battle.View
 {
     using System;
@@ -8,10 +10,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public interface IBattleSceneHostView
     {
         IBattlePageView BattlePageView { get; }
-        void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> relics, Action<int> onClicked);
+        void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<MultiIconViewModel> relics, Action<int> onClicked);
         void SetOwnedRelicHint(string message, int selectedIndex);
         void ClearOwnedRelics();
-        void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<Model.BattleMultiIconViewModel> potions, Action<int> onClicked);
+        void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<MultiIconViewModel> potions, Action<int> onClicked);
         void SetOwnedPotionHint(string message, int selectedIndex);
         void SetOwnedPotionUseVisible(bool visible, Action onClicked);
         void ClearOwnedPotions();

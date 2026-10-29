@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Dungeon.Runtime.InGame.Battle.Model;
-using Dungeon.Runtime.InGame.Battle.View;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Game.MasterData.Generated;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,11 +12,11 @@ namespace Dungeon.Runtime.OutGame.Main.Presentation
     /// </summary>
     internal static class MainMenuUiPresentation
     {
-        public static void Card(BattleCardIconView view, MainMenuCardData card, bool upgraded = false, int quantity = 0)
+        public static void Card(CardIconView view, MainMenuCardData card, bool upgraded = false, int quantity = 0)
         {
             bool discovered = card != null;
-            view.Bind(new BattleMultiIconViewModel(
-                BattleIconKind.Card,
+            view.Bind(new MultiIconViewModel(
+                MultiIconKind.Card,
                 discovered ? card.Name + (upgraded ? "+" : string.Empty) : string.Empty,
                 discovered ? (upgraded ? card.UpgradedDescription : card.Description) : string.Empty,
                 string.Empty, discovered ? card.Rarity : CardRarity.Basic,

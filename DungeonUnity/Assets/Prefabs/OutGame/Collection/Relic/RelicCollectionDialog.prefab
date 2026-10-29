@@ -1465,7 +1465,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7c0ab17f491545818985851c77fc8b6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.RelicCollectionDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Collection::Dungeon.Runtime.OutGame.Collection.Relic.RelicCollectionDialog
   _canvasGroup: {fileID: 4162447454285755864}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

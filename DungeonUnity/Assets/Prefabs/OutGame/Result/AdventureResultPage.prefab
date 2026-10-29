@@ -2745,7 +2745,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65ca1e1cc06834b159794a38c25d3377, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.AdventureResultPage
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Result::Dungeon.Runtime.OutGame.Result.AdventureResultPage
   _canvasGroup: {fileID: 3991677455778264506}
   _pageAddress: AdventureResultPage
   _cacheOnClose: 1

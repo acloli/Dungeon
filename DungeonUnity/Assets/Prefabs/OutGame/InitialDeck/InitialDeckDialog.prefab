@@ -1574,7 +1574,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 359ab81ef94c04df99aaf1ebb4d623e0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.InitialDeckDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.InitialDeck::Dungeon.Runtime.OutGame.InitialDeck.InitialDeckDialog
   _canvasGroup: {fileID: 7329957785958015688}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

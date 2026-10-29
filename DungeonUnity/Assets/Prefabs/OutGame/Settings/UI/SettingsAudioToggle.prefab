@@ -940,7 +940,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 851fdfe408b844b979b71fef995661ef, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.SettingsAudioToggle
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Settings::Dungeon.Runtime.OutGame.Settings.UI.SettingsAudioToggle
   _toggle: {fileID: 5106033566984486375}
   _onState: {fileID: 7041987059688199317}
   _offState: {fileID: 1028842392436683532}

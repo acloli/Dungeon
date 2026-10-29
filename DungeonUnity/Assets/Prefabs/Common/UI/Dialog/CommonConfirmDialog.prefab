@@ -854,7 +854,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46f44905e5b0f420d91c80a8ff6cbdeb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CommonConfirmDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.Dialog.CommonConfirmDialog
   _canvasGroup: {fileID: 3671583241661905070}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

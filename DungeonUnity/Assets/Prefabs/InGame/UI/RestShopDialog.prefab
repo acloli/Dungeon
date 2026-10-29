@@ -1384,7 +1384,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 211e251bd42f94bcf8a74295d692191a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RestShopDialogView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RestShopDialog
   _canvasGroup: {fileID: 8433673066215788827}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1

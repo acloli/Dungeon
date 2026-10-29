@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Battle.Services;
 using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.OutGame.Main.Dialog;
@@ -251,11 +253,11 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void CardIconPrefabs_HaveExpectedComponents()
         {
-            AssertPrefabContainsComponent<BattleMultiIconView>("MultiIcon");
-            AssertPrefabContainsComponent<BattleCardIconView>("CardIcon");
-            AssertPrefabContainsComponent<BattleMultiIconView>("RelicIcon");
-            AssertPrefabContainsComponent<BattleMultiIconView>("PotionIcon");
-            AssertPrefabContainsComponent<BattleMultiIconView>("ResourceIcon");
+            AssertPrefabContainsComponent<MultiIconView>("MultiIcon");
+            AssertPrefabContainsComponent<CardIconView>("CardIcon");
+            AssertPrefabContainsComponent<MultiIconView>("RelicIcon");
+            AssertPrefabContainsComponent<MultiIconView>("PotionIcon");
+            AssertPrefabContainsComponent<MultiIconView>("ResourceIcon");
         }
 
         [Test]
@@ -266,7 +268,7 @@ namespace Dungeon.Tests.EditMode
 
             try
             {
-                BattleCardIconView cardIcon = instance.GetComponent<BattleCardIconView>();
+                CardIconView cardIcon = instance.GetComponent<CardIconView>();
                 SerializedObject serialized = new SerializedObject(cardIcon);
                 Component footerText = serialized.FindProperty("_quantityText").objectReferenceValue as Component;
                 RuntimeCard card = new RuntimeCard(
@@ -286,7 +288,7 @@ namespace Dungeon.Tests.EditMode
                 Assert.That(footerText, Is.Not.Null);
 
                 cardIcon.Bind(
-                    BattleMultiIconViewModel.CreateCard(card, true, true, false, 25, true),
+                    BattleIconViewModelFactory.CreateCard(card, true, true, false, 25, true),
                     null);
                 SerializedObject footerSerialized = new SerializedObject(footerText);
                 footerSerialized.Update();
@@ -294,7 +296,7 @@ namespace Dungeon.Tests.EditMode
                 Assert.That(footerSerialized.FindProperty("m_text").stringValue, Is.EqualTo("25"));
 
                 cardIcon.Bind(
-                    BattleMultiIconViewModel.CreateCard(card, true, true, false, 0, false),
+                    BattleIconViewModelFactory.CreateCard(card, true, true, false, 0, false),
                     null);
                 footerSerialized.Update();
                 Assert.That(footerText.gameObject.activeSelf, Is.False);
@@ -567,8 +569,8 @@ namespace Dungeon.Tests.EditMode
                     "Exhaust",
                     new[]
                     {
-                        BattleMultiIconViewModel.CreateCard(strike, isInteractable: false),
-                        BattleMultiIconViewModel.CreateCard(guard, isInteractable: false)
+                        BattleIconViewModelFactory.CreateCard(strike, isInteractable: false),
+                        BattleIconViewModelFactory.CreateCard(guard, isInteractable: false)
                     },
                     isOpen: true);
 

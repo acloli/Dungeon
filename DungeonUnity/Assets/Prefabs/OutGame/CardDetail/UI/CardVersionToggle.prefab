@@ -624,7 +624,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 12d179b586bfb47cdbbba6364edadc10, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CardVersionToggle
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.CardDetail::Dungeon.Runtime.OutGame.CardDetail.UI.CardVersionToggle
   _toggle: {fileID: 4864849624499591015}
   _onState: {fileID: 2784450543750139080}
   _offState: {fileID: 6196711838764883433}

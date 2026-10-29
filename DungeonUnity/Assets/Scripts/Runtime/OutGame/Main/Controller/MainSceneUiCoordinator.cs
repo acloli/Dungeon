@@ -5,8 +5,8 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.Common.UI.Binding;
 using Dungeon.Runtime.Common.UI.Dialog;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.Common.UI.Page;
-using Dungeon.Runtime.InGame.Battle.View;
 using Dungeon.Runtime.OutGame.CardDetail;
 using Dungeon.Runtime.OutGame.CardDetail.UI;
 using Dungeon.Runtime.OutGame.CharacterSelect;
@@ -237,7 +237,7 @@ namespace Dungeon.Runtime.OutGame.Main
                 for (int i = 0; i < slots.Count; i++)
                 {
                     MainMenuCardData card = i < _data.Cards.Length ? _data.Cards[i] : null;
-                    BattleCardIconView icon = slots[i].GetComponentInChildren<BattleCardIconView>(true);
+                    CardIconView icon = slots[i].GetComponentInChildren<CardIconView>(true);
                     MainMenuUiPresentation.Card(icon, card);
                     if (card != null)
                         controls.Add(icon.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(card, token)));
@@ -259,7 +259,7 @@ namespace Dungeon.Runtime.OutGame.Main
                 for (int i = 0; i < cards.Length; i++)
                 {
                     MainMenuCardData card = cards[i];
-                    BattleCardIconView icon = slots[i].GetComponentInChildren<BattleCardIconView>(true);
+                    CardIconView icon = slots[i].GetComponentInChildren<CardIconView>(true);
                     MainMenuUiPresentation.Card(icon, card);
                     slots[i].Find("QuantityText").GetComponent<TFTextUGUI>().text = "×" + card.StartingQuantity;
                     controls.Add(icon.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(card, token)));

@@ -13,7 +13,8 @@
     "Dungeon.Runtime.SceneFlow",
     "Game.MasterData.Generated",
     "UniTask",
-    "VContainer"
+    "VContainer",
+    "Dungeon.Runtime.Common.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,22 +1,22 @@
 using System;
-using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.InGame.Battle.View
+namespace Dungeon.Runtime.Common.UI.MultiIcon
 {
     /// <summary>
     /// カード表示用の汎用アイコンViewクラス
     /// </summary>
-    public sealed class BattleCardIconView : BattleMultiIconView
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "Dungeon.Runtime.InGame.Battle.View", "Dungeon.Runtime.InGame.Battle", "BattleCardIconView")]
+    public sealed class CardIconView : MultiIconView
     {
         [SerializeField] private GameObject _cardFace;
         [SerializeField] private GameObject _undiscoveredState;
         [SerializeField] private TFTextUGUI _typeText;
         [SerializeField] private Image _nameplateImage;
 
-        public override void Bind(BattleMultiIconViewModel icon, Action onClick)
+        public override void Bind(MultiIconViewModel icon, Action onClick)
         {
             base.Bind(icon, onClick);
             SetFooterLabel(icon?.FooterLabel ?? string.Empty, icon?.ShowFooterLabel == true);

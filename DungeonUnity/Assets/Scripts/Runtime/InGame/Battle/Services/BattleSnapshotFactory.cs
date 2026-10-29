@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
 using Game.MasterData.Generated;
@@ -312,9 +313,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return indices;
         }
 
-        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedRelicViews(BattleSceneState state)
+        private static IReadOnlyList<MultiIconViewModel> BuildOwnedRelicViews(BattleSceneState state)
         {
-            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            List<MultiIconViewModel> views = new List<MultiIconViewModel>();
             for (int i = 0; i < state.OwnedRelics.Count; i++)
             {
                 RuntimeRelic relic = state.OwnedRelics[i];
@@ -323,7 +324,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(BattleMultiIconViewModel.CreateRelic(
+                views.Add(BattleIconViewModelFactory.CreateRelic(
                     relic,
                     isSelected: i == state.SelectedOwnedRelicIndex));
             }
@@ -331,9 +332,9 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return views;
         }
 
-        private static IReadOnlyList<BattleMultiIconViewModel> BuildOwnedPotionViews(BattleSceneState state)
+        private static IReadOnlyList<MultiIconViewModel> BuildOwnedPotionViews(BattleSceneState state)
         {
-            List<BattleMultiIconViewModel> views = new List<BattleMultiIconViewModel>();
+            List<MultiIconViewModel> views = new List<MultiIconViewModel>();
             for (int i = 0; i < state.OwnedPotions.Count; i++)
             {
                 RuntimePotion potion = state.OwnedPotions[i];
@@ -342,7 +343,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                views.Add(BattleMultiIconViewModel.CreatePotion(
+                views.Add(BattleIconViewModelFactory.CreatePotion(
                     potion,
                     isSelected: i == state.SelectedOwnedPotionIndex));
             }
@@ -508,7 +509,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             return item.RewardType.ToString();
         }
 
-        private BattleMultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item, int currentGold)
+        private MultiIconViewModel BuildShopItemIconViewModel(BattleShopItemState item, int currentGold)
         {
             bool isAffordable = !item.IsSoldOut && currentGold >= item.Price;
             bool isInteractable = !item.IsSoldOut && isAffordable;
@@ -520,7 +521,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             if (item.RewardType == RewardType.Relic && item.Relic != null)
             {
-                return BattleMultiIconViewModel.CreateRelic(
+                return BattleIconViewModelFactory.CreateRelic(
                     item.Relic,
                     isInteractable: isInteractable,
                     isAffordable: isAffordable);
@@ -528,23 +529,23 @@ namespace Dungeon.Runtime.InGame.Battle.Services
 
             if (item.RewardType == RewardType.Potion && item.Potion != null)
             {
-                return BattleMultiIconViewModel.CreatePotion(
+                return BattleIconViewModelFactory.CreatePotion(
                     item.Potion,
                     isInteractable: isInteractable,
                     isAffordable: isAffordable);
             }
 
-            return BattleMultiIconViewModel.CreatePlaceholder(
-                BattleIconKind.None,
+            return BattleIconViewModelFactory.CreatePlaceholder(
+                MultiIconKind.None,
                 BuildShopItemDisplayName(item),
                 CardRarity.Common,
                 isInteractable,
                 isAffordable);
         }
 
-        private static BattleMultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
+        private static MultiIconViewModel BuildCardIconViewModel(RuntimeCard card, bool isAffordable, bool isSelected, bool isInteractable)
         {
-            return BattleMultiIconViewModel.CreateCard(card, isAffordable, isInteractable, isSelected);
+            return BattleIconViewModelFactory.CreateCard(card, isAffordable, isInteractable, isSelected);
         }
 
         /// <summary>
@@ -561,7 +562,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IReadOnlyList<RuntimeCard> sourceCards = GetPileCards(state, openedPileType.Value);
             IReadOnlyList<RuntimeCard> orderedCards = _pileOrderService.Order(openedPileType.Value, sourceCards, state);
 
-            List<BattleMultiIconViewModel> cardViews = new List<BattleMultiIconViewModel>(orderedCards.Count);
+            List<MultiIconViewModel> cardViews = new List<MultiIconViewModel>(orderedCards.Count);
             for (int i = 0; i < orderedCards.Count; i++)
             {
                 RuntimeCard card = orderedCards[i];
@@ -570,7 +571,7 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                     continue;
                 }
 
-                cardViews.Add(BattleMultiIconViewModel.CreateCard(card, isInteractable: false));
+                cardViews.Add(BattleIconViewModelFactory.CreateCard(card, isInteractable: false));
             }
 
             string title = GetPileTitle(openedPileType.Value);

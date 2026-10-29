@@ -410,7 +410,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1feaaf0fe8738486c9bcf2365c589e9a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.RelicCollectionItem
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Collection::Dungeon.Runtime.OutGame.Collection.Relic.UI.RelicCollectionItem
   _button: {fileID: 4016451508109587186}
   _artImage: {fileID: 8690438299560395576}
   _rarityFrame: {fileID: 2288447974516350732}

@@ -6,8 +6,7 @@
         "TFramework.Core",
         "TFramework.UI",
         "Unity.TextMeshPro",
-        "UniTask",
-        "Dungeon.Runtime.InGame.Battle"
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

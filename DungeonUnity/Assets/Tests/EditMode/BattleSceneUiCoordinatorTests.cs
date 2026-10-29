@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.View;
@@ -244,7 +245,7 @@ namespace Dungeon.Tests.EditMode
             public bool LastHostChromeInteractable { get; private set; } = true;
             public int SetHostChromeInteractableCallCount { get; private set; }
 
-            public void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            public void BuildOwnedRelics(System.Collections.Generic.IReadOnlyList<MultiIconViewModel> relics, Action<int> onClicked)
             {
             }
 
@@ -256,7 +257,7 @@ namespace Dungeon.Tests.EditMode
             {
             }
 
-            public void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<BattleMultiIconViewModel> potions, Action<int> onClicked)
+            public void BuildOwnedPotions(System.Collections.Generic.IReadOnlyList<MultiIconViewModel> potions, Action<int> onClicked)
             {
             }
 

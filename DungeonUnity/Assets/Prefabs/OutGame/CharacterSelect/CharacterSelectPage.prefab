@@ -2503,7 +2503,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c166b341b5b1742f8a2ede5630fa0832, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CharacterSelectPage
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.CharacterSelect::Dungeon.Runtime.OutGame.CharacterSelect.CharacterSelectPage
   _canvasGroup: {fileID: 4796262217419658280}
   _pageAddress: CharacterSelectPage
   _cacheOnClose: 1

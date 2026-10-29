@@ -1318,7 +1318,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47f73341135b44b44a7092d10906755d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.CollectionItemIcon
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.MultiIcon.CollectionItemIcon
 --- !u!1001 &6668374053581468202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1459,7 +1459,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7253d6bf5ce374150a61ee90034f9021, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.UI.RelicDetailDialog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.RelicDetail::Dungeon.Runtime.OutGame.RelicDetail.RelicDetailDialog
   _canvasGroup: {fileID: 1752763803759718380}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 0

@@ -2143,7 +2143,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b80556906cd0b4c68bbce3eb2287dcb6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.MapPageView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.MapPage
   _canvasGroup: {fileID: 30041525540033052}
   _pageAddress: MapPage
   _cacheOnClose: 1

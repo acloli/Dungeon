@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
@@ -131,7 +132,7 @@ namespace Dungeon.Tests.EditMode
         public void CardScreens_UseTheSharedCardIcon(string name, int expectedCount)
         {
             GameObject prefab = Load(name);
-            var cards = prefab.GetComponentsInChildren<Dungeon.Runtime.InGame.Battle.View.BattleCardIconView>(true);
+            var cards = prefab.GetComponentsInChildren<Dungeon.Runtime.Common.UI.MultiIcon.CardIconView>(true);
             Assert.That(cards.Length, Is.EqualTo(expectedCount));
             foreach (var card in cards)
             {
@@ -152,9 +153,9 @@ namespace Dungeon.Tests.EditMode
             GameObject instance = UnityEngine.Object.Instantiate(prefab);
             try
             {
-                var view = instance.GetComponent<Dungeon.Runtime.InGame.Battle.View.BattleCardIconView>();
-                var model = new Dungeon.Runtime.InGame.Battle.Model.BattleMultiIconViewModel(
-                    Dungeon.Runtime.InGame.Battle.Model.BattleIconKind.Card,
+                var view = instance.GetComponent<Dungeon.Runtime.Common.UI.MultiIcon.CardIconView>();
+                var model = new Dungeon.Runtime.Common.UI.MultiIcon.MultiIconViewModel(
+                    Dungeon.Runtime.Common.UI.MultiIcon.MultiIconKind.Card,
                     "検証用カード", "検証用の説明", string.Empty,
                     Game.MasterData.Generated.CardRarity.Common,
                     showCost: false, isSelected: true);

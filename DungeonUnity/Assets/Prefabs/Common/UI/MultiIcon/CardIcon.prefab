@@ -2174,7 +2174,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80a8dc8f098da49ed96e9dfb24644a26, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.BattleCardIconView
+  m_EditorClassIdentifier: Dungeon.Runtime.Common.UI::Dungeon.Runtime.Common.UI.MultiIcon.CardIconView
   _button: {fileID: 1854342516311384768}
   _frameImage: {fileID: 2184152025555765039}
   _artImage: {fileID: 8658246562425506949}

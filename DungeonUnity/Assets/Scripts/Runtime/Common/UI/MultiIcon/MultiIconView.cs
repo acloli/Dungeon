@@ -1,16 +1,16 @@
 using System;
-using Dungeon.Runtime.InGame.Battle.Model;
 using Game.MasterData.Generated;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.InGame.Battle.View
+namespace Dungeon.Runtime.Common.UI.MultiIcon
 {
     /// <summary>
     /// 汎用アイコン表示Viewクラス
     /// </summary>
-    public class BattleMultiIconView : MonoBehaviour
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "Dungeon.Runtime.InGame.Battle.View", "Dungeon.Runtime.InGame.Battle", "BattleMultiIconView")]
+    public class MultiIconView : MonoBehaviour
     {
         [SerializeField] private Button _button;
         [SerializeField] private Image _frameImage;
@@ -22,7 +22,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _costText;
         [SerializeField] private TFTextUGUI _quantityText;
 
-        public virtual void Bind(BattleMultiIconViewModel icon, Action onClick)
+        public virtual void Bind(MultiIconViewModel icon, Action onClick)
         {
             if (icon == null)
             {
