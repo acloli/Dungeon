@@ -1,0 +1,20 @@
+{
+    "name": "Dungeon.Runtime.OutGame.RelicDetail",
+    "rootNamespace": "Dungeon.Runtime.OutGame.RelicDetail",
+    "references": [
+        "Dungeon.Runtime.Common.UI",
+        "TFramework.Core",
+        "TFramework.UI",
+        "Unity.TextMeshPro",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

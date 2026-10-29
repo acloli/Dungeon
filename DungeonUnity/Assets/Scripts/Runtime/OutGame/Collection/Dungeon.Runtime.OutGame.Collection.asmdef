@@ -1,0 +1,21 @@
+{
+    "name": "Dungeon.Runtime.OutGame.Collection",
+    "rootNamespace": "Dungeon.Runtime.OutGame.Collection",
+    "references": [
+        "Dungeon.Runtime.Common.UI",
+        "TFramework.Core",
+        "TFramework.UI",
+        "Unity.TextMeshPro",
+        "UniTask",
+        "Dungeon.Runtime.InGame.Battle"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,7 +1,7 @@
 using TFramework.UI;
 using UnityEngine;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.CardDetail.UI
 {
     /// <summary>
     /// カード用語の短い説明表示

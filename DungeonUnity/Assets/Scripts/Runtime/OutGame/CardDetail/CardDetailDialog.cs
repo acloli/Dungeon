@@ -4,7 +4,7 @@ using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.CardDetail
 {
     /// <summary>
     /// カード詳細の表示と入力参照

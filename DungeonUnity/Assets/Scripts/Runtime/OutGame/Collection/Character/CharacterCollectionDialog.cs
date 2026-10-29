@@ -1,8 +1,9 @@
+using Dungeon.Runtime.OutGame.Collection.Common;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.Collection.Character
 {
     /// <summary>
     /// キャラクター図鑑の表示と入力参照

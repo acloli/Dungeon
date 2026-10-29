@@ -4,7 +4,7 @@ using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.InitialDeck
 {
     /// <summary>
     /// 初期デッキ一覧の表示と入力参照

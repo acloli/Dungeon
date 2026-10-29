@@ -2,7 +2,7 @@ using Dungeon.Runtime.Common.UI.Dialog;
 using TFramework.UI;
 using UnityEngine;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.Collection.Common
 {
     /// <summary>
     /// 図鑑共通の本型ダイアログと入力参照

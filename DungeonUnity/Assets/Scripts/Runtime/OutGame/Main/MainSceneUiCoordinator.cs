@@ -1,3 +1,11 @@
+using Dungeon.Runtime.OutGame.CardDetail;
+using Dungeon.Runtime.OutGame.CardDetail.UI;
+using Dungeon.Runtime.OutGame.Collection.Card;
+using Dungeon.Runtime.OutGame.Collection.Character;
+using Dungeon.Runtime.OutGame.Collection.Relic;
+using Dungeon.Runtime.OutGame.Collection.Relic.UI;
+using Dungeon.Runtime.OutGame.InitialDeck;
+using Dungeon.Runtime.OutGame.RelicDetail;
 using Dungeon.Runtime.Common.UI.Binding;
 using Dungeon.Runtime.Common.UI.Page;
 using Dungeon.Runtime.Common.UI.Dialog;

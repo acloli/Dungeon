@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
+using Dungeon.Runtime.OutGame.Collection.Character;
 using System.Collections;
+using System.Linq;
 using Dungeon.Runtime.OutGame.Main.UI;
 using NUnit.Framework;
 using UnityEditor;
@@ -118,7 +120,11 @@ namespace Dungeon.Tests.PlayMode
 
         private GameObject Instantiate(string name)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Prefabs/OutGame/UI/{name}.prefab");
+            string[] paths = AssetDatabase.FindAssets(name + " t:Prefab", new[] { "Assets/Prefabs/OutGame", "Assets/Prefabs/Common" })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => System.IO.Path.GetFileNameWithoutExtension(path) == name).ToArray();
+            Assert.That(paths.Length, Is.EqualTo(1), name);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
             Assert.That(prefab, Is.Not.Null);
             GameObject instance = Object.Instantiate(prefab, _canvasObject.transform, false);
             RectTransform rect = instance.GetComponent<RectTransform>();

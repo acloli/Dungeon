@@ -1,9 +1,10 @@
+using Dungeon.Runtime.OutGame.Collection.Common;
 using Dungeon.Runtime.InGame.Battle.View;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.Collection.Card
 {
     /// <summary>
     /// カード図鑑の表示と入力参照

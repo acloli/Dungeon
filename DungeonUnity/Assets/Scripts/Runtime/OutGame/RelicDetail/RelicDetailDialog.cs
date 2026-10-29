@@ -1,9 +1,10 @@
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.Common.UI.Dialog;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.RelicDetail
 {
     /// <summary>
     /// 遺物詳細の表示と入力参照

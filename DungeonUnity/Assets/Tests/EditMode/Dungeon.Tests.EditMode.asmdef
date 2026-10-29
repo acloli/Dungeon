@@ -20,7 +20,11 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.Addressables.Editor",
-        "Dungeon.Runtime.Common.UI"
+        "Dungeon.Runtime.Common.UI",
+        "Dungeon.Runtime.OutGame.CardDetail",
+        "Dungeon.Runtime.OutGame.Collection",
+        "Dungeon.Runtime.OutGame.InitialDeck",
+        "Dungeon.Runtime.OutGame.RelicDetail"
     ],
     "includePlatforms": [
         "Editor"

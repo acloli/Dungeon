@@ -1,7 +1,8 @@
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using TFramework.UI;
 using UnityEngine;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.OutGame.Collection.Relic.UI
 {
     /// <summary>
     /// 名称をアイコンの外に表示する遺物図鑑項目

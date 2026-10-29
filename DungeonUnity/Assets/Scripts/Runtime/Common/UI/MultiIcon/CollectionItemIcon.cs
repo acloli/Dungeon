@@ -2,7 +2,7 @@ using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Dungeon.Runtime.OutGame.Main.UI
+namespace Dungeon.Runtime.Common.UI.MultiIcon
 {
     /// <summary>
     /// 図鑑用アイコンの共通表示参照
