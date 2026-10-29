@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Dungeon.Runtime.OutGame.Main
+namespace Dungeon.Runtime.Common.Character
 {
     /// <summary>
-    /// ロビーキャラクターの演出
+    /// キャラクターの演出
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public sealed class LobbyCharacterMotion : MonoBehaviour, IPointerClickHandler
+    public sealed class CharacterMotion : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField, Tooltip("アニメーション対象")] private RectTransform _visualRoot;
 
@@ -36,6 +36,7 @@ namespace Dungeon.Runtime.OutGame.Main
         private float _idleElapsed;
         private float _hopElapsed;
         private bool _isHopping;
+        private bool _isClickable;
 
         private void OnEnable()
         {
@@ -45,6 +46,7 @@ namespace Dungeon.Runtime.OutGame.Main
             _idleElapsed = 0f;
             _hopElapsed = 0f;
             _isHopping = false;
+            _isClickable = false;
         }
 
         private void Update()
@@ -67,10 +69,12 @@ namespace Dungeon.Runtime.OutGame.Main
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (eventData != null && eventData.button == PointerEventData.InputButton.Left)
+            if (!_isClickable || eventData is not { button: PointerEventData.InputButton.Left })
             {
-                PlayHop();
+                return;
             }
+
+            PlayHop();
         }
 
         /// <summary>
@@ -85,6 +89,14 @@ namespace Dungeon.Runtime.OutGame.Main
 
             _hopElapsed = 0f;
             _isHopping = true;
+        }
+
+        /// <summary>
+        /// クリック可能/不可を設定する
+        /// </summary>
+        public void SetClickable(bool isClickable)
+        {
+            _isClickable = isClickable;
         }
 
         /// <summary>
