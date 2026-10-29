@@ -7,6 +7,8 @@
     "Dungeon.Runtime.InGame.Save",
     "Dungeon.Runtime.OutGame.Main",
     "TFramework.UI",
+    "TFramework.Scene",
+    "Unity.TextMeshPro",
     "Game.MasterData.Generated",
     "UniTask",
     "VContainer",
