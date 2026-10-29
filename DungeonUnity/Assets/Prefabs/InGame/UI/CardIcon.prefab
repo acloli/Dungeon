@@ -2184,6 +2184,10 @@ MonoBehaviour:
   _descriptionText: {fileID: 7776337515026665002}
   _costText: {fileID: 7715917924706714272}
   _quantityText: {fileID: 6389721012824022166}
+  _cardFace: {fileID: 1717869407801611427}
+  _undiscoveredState: {fileID: 4145213333510110251}
+  _typeText: {fileID: 1141361752017667783}
+  _nameplateImage: {fileID: 3979827625502282940}
 --- !u!114 &1854342516311384768
 MonoBehaviour:
   m_ObjectHideFlags: 0

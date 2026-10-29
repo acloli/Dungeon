@@ -71,7 +71,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             SetActive(_quantityText, !isCompact && _quantityText != null && !string.IsNullOrEmpty(_quantityText.text));
         }
 
-        protected void SetArtSprite(Sprite sprite)
+        public void SetArtSprite(Sprite sprite)
         {
             if (_artImage == null)
             {
@@ -79,6 +79,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
 
             _artImage.sprite = sprite;
+        }
+
+        /// <summary>
+        /// 利用先の表示色を枠へ反映
+        /// </summary>
+        public void SetFrameColor(Color color)
+        {
+            if (_frameImage != null) _frameImage.color = color;
         }
 
         private void ApplyRarityColor(CardRarity rarity)
