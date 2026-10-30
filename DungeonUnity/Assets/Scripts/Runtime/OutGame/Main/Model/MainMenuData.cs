@@ -19,7 +19,7 @@ namespace Dungeon.Runtime.OutGame.Main
     /// </summary>
     public interface IMainMenuActionHandler
     {
-        UniTask<bool> ExecuteAsync(MainMenuAction action, CancellationToken ct);
+        UniTask<bool> ExecuteAsync(MainMenuAction action, CancellationToken ct, MainMenuCharacterData character = null);
     }
 
     public enum MainMenuAction

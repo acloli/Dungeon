@@ -38,6 +38,23 @@ namespace Dungeon.Tests.PlayMode
         private MainSceneView _lobby;
         private bool _loadedScene;
         private MainMenuData _data;
+        private NavigationActions _actions;
+
+        private sealed class NavigationActions : IMainMenuActionHandler
+        {
+            public MainMenuAction? LastAction;
+            public int Calls;
+            public UniTaskCompletionSource<bool> Pending;
+            public MainMenuCharacterData Character;
+            public UniTask<bool> ExecuteAsync(MainMenuAction action, CancellationToken ct, MainMenuCharacterData character = null)
+            {
+                ct.ThrowIfCancellationRequested();
+                Calls++;
+                LastAction = action;
+                Character = character;
+                return Pending != null ? Pending.Task : UniTask.FromResult(false);
+            }
+        }
 
         private sealed class NavigationSource : IMainMenuDataSource
         {
@@ -68,7 +85,8 @@ namespace Dungeon.Tests.PlayMode
             if (main.isLoaded) yield return SceneManager.UnloadSceneAsync(main);
             _loadedScene = true;
             _data = NavigationData();
-            using (LifetimeScope.Enqueue(builder => builder.RegisterInstance(new NavigationSource(_data)).As<IMainMenuDataSource>()))
+            _actions = new NavigationActions();
+            using (LifetimeScope.Enqueue(builder => { builder.RegisterInstance(new NavigationSource(_data)).As<IMainMenuDataSource>(); builder.RegisterInstance(_actions).As<IMainMenuActionHandler>(); }))
                 yield return SceneManager.LoadSceneAsync("Assets/Scenes/MainScene.unity", LoadSceneMode.Additive);
             for (int i = 0; i < 900; i++)
             {
@@ -182,9 +200,12 @@ namespace Dungeon.Tests.PlayMode
             yield return WaitFor<InitialDeckDialog>();
             FindReady<InitialDeckDialog>().CloseButton.onClick.Invoke();
             yield return WaitFor<CharacterSelectPage>();
+            Assert.That(_actions.LastAction, Is.Null, "新規確認の取消と選択画面の表示だけでは冒険を開始しない");
             selection.DepartButton.onClick.Invoke();
             yield return WaitFor<CommonConfirmDialog>();
             Assert.That(SceneManager.GetSceneByName("BattleScene").isLoaded, Is.False);
+            Assert.That(_actions.LastAction, Is.EqualTo(MainMenuAction.StartAdventure));
+            Assert.That(_actions.Character, Is.SameAs(_data.Characters[0]));
             FindReady<CommonConfirmDialog>().ConfirmButton.onClick.Invoke();
             yield return WaitFor<CharacterSelectPage>();
             selection.BackButton.onClick.Invoke();
@@ -204,6 +225,41 @@ namespace Dungeon.Tests.PlayMode
             _lobby.HistoryToggle.isOn = true;
             yield return WaitFor<AdventureResultPage>();
             FindReady<AdventureResultPage>().HomeButton.onClick.Invoke();
+            yield return WaitForLobby();
+        }
+
+        [UnityTest]
+        public IEnumerator ContinueAdventure_InvokesResumeAction()
+        {
+            _lobby.AdventureButton.onClick.Invoke();
+            yield return WaitFor<ResumeDialog>();
+            FindReady<ResumeDialog>().ContinueButton.onClick.Invoke();
+            yield return WaitFor<CommonConfirmDialog>();
+            Assert.That(_actions.LastAction, Is.EqualTo(MainMenuAction.ResumeAdventure));
+            Assert.That(_actions.Calls, Is.EqualTo(1));
+            FindReady<CommonConfirmDialog>().ConfirmButton.onClick.Invoke();
+            yield return WaitForLobby();
+        }
+
+        [UnityTest]
+        public IEnumerator Depart_BlocksDuplicateRequests_AndRestoresInput()
+        {
+            _data.HasResumableAdventure = false;
+            _lobby.AdventureButton.onClick.Invoke();
+            yield return WaitFor<CharacterSelectPage>();
+            var selection = FindReady<CharacterSelectPage>();
+            _actions.Pending = new UniTaskCompletionSource<bool>();
+            selection.DepartButton.onClick.Invoke();
+            selection.DepartButton.onClick.Invoke();
+            yield return null;
+            Assert.That(_actions.Calls, Is.EqualTo(1));
+            Assert.That(selection.CanvasGroup.interactable, Is.False);
+            _actions.Pending.TrySetResult(false);
+            yield return WaitFor<CommonConfirmDialog>();
+            FindReady<CommonConfirmDialog>().ConfirmButton.onClick.Invoke();
+            yield return WaitFor<CharacterSelectPage>();
+            Assert.That(selection.CanvasGroup.interactable, Is.True);
+            selection.BackButton.onClick.Invoke();
             yield return WaitForLobby();
         }
 

@@ -44,6 +44,7 @@ namespace Dungeon.Runtime.OutGame.Main
         private MainMenuData _data;
         private MainMenuCharacterData _selectedCharacter;
         private bool _pageTransition;
+        private bool _actionInProgress;
         private bool _bgmEnabled;
         private bool _soundEffectEnabled;
 
@@ -462,8 +463,31 @@ namespace Dungeon.Runtime.OutGame.Main
                 if (!await ConfirmAsync(message, "やめる", "確認", ct)) return;
             }
 
-            if (!await _actions.ExecuteAsync(action, ct))
-                await ConfirmAsync("ただいま準備中です。", null, "OK", ct);
+            if (_actionInProgress) return;
+            _actionInProgress = true;
+            CanvasGroup parent = _dialogLayers.LastOrDefault() ?? _ui.CurrentPage?.CanvasGroup ?? _view.LobbyGroup;
+            SetInteractable(parent, false);
+            try
+            {
+                bool adventure = action == MainMenuAction.StartAdventure || action == MainMenuAction.ResumeAdventure;
+                // SingleロードによるMainScene破棄で遷移自体をキャンセルしない
+                ct.ThrowIfCancellationRequested();
+                CancellationToken actionToken = adventure ? Application.exitCancellationToken : ct;
+                if (!await _actions.ExecuteAsync(action, actionToken, _selectedCharacter))
+                    await ConfirmAsync("ただいま準備中です。", null, "OK", ct);
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex)
+            {
+                TLogger.Error(ex.ToString(), "Main");
+                if (!ct.IsCancellationRequested)
+                    await ConfirmAsync("冒険を開始できませんでした。\nホームに戻って、もう一度お試しください。", null, "OK", ct);
+            }
+            finally
+            {
+                _actionInProgress = false;
+                if (parent != null && !ct.IsCancellationRequested) SetInteractable(parent, true);
+            }
         }
 
         private async UniTask<bool> ConfirmAsync(string body, string cancel, string confirm, CancellationToken ct)
