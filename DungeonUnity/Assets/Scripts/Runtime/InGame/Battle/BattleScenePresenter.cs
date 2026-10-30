@@ -1,3 +1,4 @@
+using Dungeon.Runtime.SceneFlow;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -47,7 +48,8 @@ namespace Dungeon.Runtime.InGame.Battle
         /// <summary>
         /// View接続初期化
         /// </summary>
-        public async UniTask InitializeAsync(IBattleSceneHostView view, int runProfileId, Action onResultBackClicked, CancellationToken ct, Action onSaveQuitClicked = null)
+        public async UniTask InitializeAsync(IBattleSceneHostView view, int runProfileId, Action onResultBackClicked, CancellationToken ct, Action onSaveQuitClicked = null,
+            BattleRunStartMode startMode = BattleRunStartMode.Automatic)
         {
             _view = view;
             _onResultBackClicked = onResultBackClicked;
@@ -58,21 +60,31 @@ namespace Dungeon.Runtime.InGame.Battle
             _view.WireHostBackgroundClick(OnHostBackgroundClicked);
             await _uiCoordinator.InitializeAsync(view, ct);
 
-            if (_runSaveService != null && _runSaveService.HasSavedRun())
+            if (startMode == BattleRunStartMode.NewAdventure)
+            {
+                // 新規初期化のチェックポイント保存で旧冒険を置き換える
+                _flowService.Initialize(runProfileId);
+            }
+            else if (_runSaveService != null && (startMode == BattleRunStartMode.ContinueAdventure || _runSaveService.HasSavedRun()))
             {
                 RunSaveData saveData = await _runSaveService.LoadCurrentRunAsync(ct);
-                if (saveData != null && saveData.IsValid)
+                if (saveData != null && saveData.IsValid &&
+                    (startMode != BattleRunStartMode.ContinueAdventure || saveData.RunProfileId == runProfileId))
                 {
                     _flowService.InitializeFromSave(saveData);
                 }
                 else
                 {
+                    if (startMode == BattleRunStartMode.ContinueAdventure)
+                        throw new InvalidOperationException("再開できる冒険が見つかりません");
                     _runSaveService.DeleteSavedRun();
                     _flowService.Initialize(runProfileId);
                 }
             }
             else
             {
+                if (startMode == BattleRunStartMode.ContinueAdventure)
+                    throw new InvalidOperationException("再開できる冒険が見つかりません");
                 _flowService.Initialize(runProfileId);
             }
 

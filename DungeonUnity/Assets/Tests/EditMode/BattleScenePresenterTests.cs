@@ -1,3 +1,4 @@
+using Dungeon.Runtime.SceneFlow;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -396,6 +397,45 @@ namespace Dungeon.Tests.EditMode
             Assert.That(flowService.InitializeFromSaveCallCount, Is.EqualTo(1));
             Assert.That(flowService.InitializeCallCount, Is.EqualTo(0));
             Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ExplicitNewAdventure_IgnoresExistingCheckpointWithoutDeletingItFirst()
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { HasSavedRunResult = true, LoadResult = CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            presenter.InitializeAsync(new FakeBattleSceneHostView(), 6601, () => { }, CancellationToken.None,
+                startMode: BattleRunStartMode.NewAdventure).GetAwaiter().GetResult();
+            Assert.That(flow.InitializeCallCount, Is.EqualTo(1));
+            Assert.That(flow.InitializeFromSaveCallCount, Is.Zero);
+            Assert.That(save.DeleteCallCount, Is.Zero);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ExplicitContinue_RejectsMissingOrMismatchedCheckpoint(bool missing)
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { LoadResult = missing ? null : CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            Assert.Throws<InvalidOperationException>(() => presenter.InitializeAsync(new FakeBattleSceneHostView(), 6601,
+                () => { }, CancellationToken.None, startMode: BattleRunStartMode.ContinueAdventure).GetAwaiter().GetResult());
+            Assert.That(flow.InitializeCallCount, Is.Zero);
+            Assert.That(flow.InitializeFromSaveCallCount, Is.Zero);
+            Assert.That(save.DeleteCallCount, Is.Zero);
+        }
+
+        [Test]
+        public void ExplicitContinue_RestoresCheckpointEvenWithoutExistsHint()
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { LoadResult = CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            presenter.InitializeAsync(new FakeBattleSceneHostView(), save.LoadResult.RunProfileId, () => { }, CancellationToken.None,
+                startMode: BattleRunStartMode.ContinueAdventure).GetAwaiter().GetResult();
+            Assert.That(flow.InitializeFromSaveCallCount, Is.EqualTo(1));
+            Assert.That(flow.InitializeCallCount, Is.Zero);
         }
 
         [Test]
