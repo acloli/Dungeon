@@ -32,6 +32,12 @@ namespace Dungeon.Runtime.OutGame.Main
     public sealed class MainMenuCardData
     {
         public string Id;
+        public int MasterId;
+        public bool IsDiscovered = true;
+        public bool HasUpgrade;
+        public string UpgradedName;
+        public MainMenuKeywordData[] Keywords = Array.Empty<MainMenuKeywordData>();
+        public MainMenuKeywordData[] UpgradedKeywords = Array.Empty<MainMenuKeywordData>();
         public string Name;
         [TextArea] public string Description;
         [TextArea] public string UpgradedDescription;
@@ -44,8 +50,23 @@ namespace Dungeon.Runtime.OutGame.Main
     }
 
     [Serializable]
+    public sealed class MainMenuKeywordData
+    {
+        public string Title;
+        public string Description;
+    }
+
+    [Serializable]
+    public sealed class MainMenuDeckEntry
+    {
+        public MainMenuCardData Card;
+        public int Quantity;
+    }
+
+    [Serializable]
     public sealed class MainMenuRelicData
     {
+        public int Id;
         public string Name;
         [TextArea] public string Description;
         public Sprite Artwork;
@@ -57,13 +78,16 @@ namespace Dungeon.Runtime.OutGame.Main
     [Serializable]
     public sealed class MainMenuCharacterData
     {
+        public int Id;
+        public int RunProfileId;
+        public MainMenuDeckEntry[] Deck = Array.Empty<MainMenuDeckEntry>();
         public string Name;
         [TextArea] public string Description;
         [TextArea] public string CombatDescription;
         public Sprite Artwork;
         public bool IsUnlocked;
-        public int Health = 80;
-        public int Gold = 99;
+        public int Health;
+        public int Gold;
     }
 
     /// <summary>
@@ -72,19 +96,19 @@ namespace Dungeon.Runtime.OutGame.Main
     [Serializable]
     public sealed class MainMenuData
     {
-        public bool HasResumableAdventure = true;
+        public bool HasResumableAdventure;
         public bool BgmEnabled = true;
         public bool SoundEffectEnabled;
-        public string Version = "1.0";
-        public string GameId = "123456789";
+        public string Version = string.Empty;
+        public string GameId = string.Empty;
         public MainMenuCardData[] Cards = Array.Empty<MainMenuCardData>();
-        public int CollectionCardCount = 11;
         public MainMenuRelicData[] Relics = Array.Empty<MainMenuRelicData>();
         public MainMenuCharacterData[] Characters = Array.Empty<MainMenuCharacterData>();
-        public string ResultHeadline = "勝利……？";
-        public int ReachedFloor = 8;
-        public int EnemyCount = 7;
-        public int EliteCount = 1;
-        public int BossCount = 1;
+        public int CollectionCardCount;
+        public string ResultHeadline = "冒険の記録はありません";
+        public int ReachedFloor;
+        public int EnemyCount;
+        public int EliteCount;
+        public int BossCount;
     }
 }
