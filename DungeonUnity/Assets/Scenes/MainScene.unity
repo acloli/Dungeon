@@ -3203,7 +3203,7 @@ MonoBehaviour:
     TypeName: TFramework.Installer.TFrameworkProjectLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
-  _previewContent: {fileID: 11400000, guid: 230038b3ace35485b9b519f92a0146c7, type: 2}
+  _presentationCatalog: {fileID: 11400000, guid: f5b8cac495cbe4f8794cec0579e3bd30, type: 2}
 --- !u!114 &1823499128
 MonoBehaviour:
   m_ObjectHideFlags: 0

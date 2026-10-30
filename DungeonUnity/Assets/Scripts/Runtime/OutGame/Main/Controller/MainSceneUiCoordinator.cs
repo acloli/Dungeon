@@ -42,6 +42,7 @@ namespace Dungeon.Runtime.OutGame.Main
         private ScreenInputBindings _lobbyBindings;
         private MainSceneView _view;
         private MainMenuData _data;
+        private MainMenuCharacterData _selectedCharacter;
         private bool _pageTransition;
         private bool _bgmEnabled;
         private bool _soundEffectEnabled;
@@ -90,13 +91,21 @@ namespace Dungeon.Runtime.OutGame.Main
         private void Navigate(Func<CancellationToken, UniTask> navigation)
         {
             if (_lifetime == null || _lifetime.IsCancellationRequested) return;
-            navigation(_lifetime.Token).Forget(ex =>
+            NavigateAsync(navigation, _lifetime.Token).Forget(ex =>
             {
                 if (ex is OperationCanceledException)
                     TLogger.Debug("Menu navigation cancelled", "Main");
                 else
                     TLogger.Error(ex.ToString(), "Main");
             });
+        }
+
+        private async UniTask NavigateAsync(Func<CancellationToken, UniTask> navigation, CancellationToken ct)
+        {
+            int selectedId = _selectedCharacter?.Id ?? 0;
+            _data = await _dataSource.LoadAsync(ct);
+            _selectedCharacter = _data.Characters.FirstOrDefault(character => character.Id == selectedId);
+            await navigation(ct);
         }
 
         private async UniTask ShowDialogAsync<T>(Func<T, ScreenInputBindings> configure, CancellationToken ct)
@@ -199,20 +208,35 @@ namespace Dungeon.Runtime.OutGame.Main
                 controls.Add(page.InitialDeckButton, () => Navigate(ShowDeckAsync));
                 controls.Add(page.DepartButton,
                     () => Navigate(token => RequestActionAsync(MainMenuAction.StartAdventure, token)));
-                Toggle[] toggles = page.CharacterToggleGroup.GetComponentsInChildren<Toggle>(true);
-                for (int i = 0; i < toggles.Length; i++)
+                MainMenuCharacterData first = _data.Characters.FirstOrDefault(c => c.IsUnlocked);
+                _selectedCharacter = first;
+                page.Roster.Bind(_data.Characters, (cell, character, index) =>
                 {
-                    int index = i;
-                    toggles[i].interactable = index < _data.Characters.Length && _data.Characters[index].IsUnlocked;
-                    if (toggles[i].interactable)
-                        controls.Add(toggles[i], selected =>
-                        {
-                            if (selected) ApplyCharacter(page, _data.Characters[index]);
-                        });
+                    Toggle toggle = cell.GetComponent<Toggle>();
+                    toggle.group = null;
+                    toggle.isOn = false;
+                    toggle.group = page.CharacterToggleGroup;
+                    toggle.interactable = character.IsUnlocked;
+                    Image portrait = cell.Find("Image").GetComponent<Image>();
+                    portrait.sprite = character.Artwork;
+                    cell.Find("Label").GetComponent<TFTextUGUI>().text = character.Name;
+                    toggle.isOn = character == first;
+                    controls.Add(toggle, selected =>
+                    {
+                        if (selected) { _selectedCharacter = character; ApplyCharacter(page, character); }
+                    });
+                });
+                controls.OnDispose(page.Roster.Clear);
+                page.DepartButton.interactable = first != null;
+                page.InitialDeckButton.interactable = first != null;
+                if (first != null) ApplyCharacter(page, first);
+                else
+                {
+                    page.NameText.text = "選択できるキャラクターがありません";
+                    page.CharacterImage.sprite = null;
+                    page.DescriptionText.text = string.Empty;
+                    page.HealthText.text = page.GoldText.text = page.DeckCountText.text = string.Empty;
                 }
-
-                MainMenuCharacterData character = _data.Characters.FirstOrDefault(c => c.IsUnlocked);
-                if (character != null) ApplyCharacter(page, character);
                 return controls;
             }, ct);
         }
@@ -224,6 +248,7 @@ namespace Dungeon.Runtime.OutGame.Main
             page.DescriptionText.text = character.Description;
             page.HealthText.text = character.Health.ToString();
             page.GoldText.text = character.Gold.ToString();
+            page.DeckCountText.text = character.Deck.Sum(entry => entry.Quantity) + "枚";
         }
 
         private UniTask ShowCardsAsync(CancellationToken ct)
@@ -231,18 +256,16 @@ namespace Dungeon.Runtime.OutGame.Main
             return ShowDialogAsync<CardCollectionDialog>(dialog =>
             {
                 var controls = CloseControls(dialog.CloseButton, dialog.Close);
-                int count = Math.Max(_data.CollectionCardCount, _data.Cards.Length);
-                List<Transform> slots = MainMenuUiPresentation.Slots(dialog.ScrollRect, count);
-                dialog.DiscoveryCountText.text = _data.Cards.Length + " / " + count;
-                for (int i = 0; i < slots.Count; i++)
+                dialog.DiscoveryCountText.text = _data.Cards.Count(card => card.IsDiscovered) + " / " + _data.Cards.Length;
+                controls.OnDispose(dialog.Grid.Bind(_data.Cards, (cell, card, index) =>
                 {
-                    MainMenuCardData card = i < _data.Cards.Length ? _data.Cards[i] : null;
-                    CardIconView icon = slots[i].GetComponentInChildren<CardIconView>(true);
-                    MainMenuUiPresentation.Card(icon, card);
-                    if (card != null)
-                        controls.Add(icon.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(card, token)));
-                }
-
+                    var item = cell.GetComponent<CardListItem>();
+                    item.SetQuantity(0);
+                    MainMenuUiPresentation.Card(item.Card, card);
+                    var input = new ScreenInputBindings();
+                    if (card.IsDiscovered) input.Add(item.Card.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(card, token)));
+                    return input;
+                }).Dispose);
                 return controls;
             }, ct);
         }
@@ -252,19 +275,18 @@ namespace Dungeon.Runtime.OutGame.Main
             return ShowDialogAsync<InitialDeckDialog>(dialog =>
             {
                 var controls = CloseControls(dialog.CloseButton, dialog.Close);
-                MainMenuCardData[] cards = _data.Cards.Where(c => c.StartingQuantity > 0).ToArray();
-                List<Transform> slots = MainMenuUiPresentation.Slots(dialog.ScrollRect, cards.Length);
-                dialog.SummaryText.text = _data.Characters.FirstOrDefault(c => c.IsUnlocked)?.Name + "　合計" +
-                                          cards.Sum(c => c.StartingQuantity) + "枚";
-                for (int i = 0; i < cards.Length; i++)
+                MainMenuCharacterData character = _selectedCharacter ?? _data.Characters.FirstOrDefault(c => c.IsUnlocked);
+                MainMenuDeckEntry[] cards = character?.Deck ?? Array.Empty<MainMenuDeckEntry>();
+                dialog.SummaryText.text = (character?.Name ?? string.Empty) + "　合計" + cards.Sum(entry => entry.Quantity) + "枚";
+                controls.OnDispose(dialog.Grid.Bind(cards, (cell, entry, index) =>
                 {
-                    MainMenuCardData card = cards[i];
-                    CardIconView icon = slots[i].GetComponentInChildren<CardIconView>(true);
-                    MainMenuUiPresentation.Card(icon, card);
-                    slots[i].Find("QuantityText").GetComponent<TFTextUGUI>().text = "×" + card.StartingQuantity;
-                    controls.Add(icon.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(card, token)));
-                }
-
+                    var item = cell.GetComponent<CardListItem>();
+                    MainMenuUiPresentation.Card(item.Card, entry.Card);
+                    item.SetQuantity(entry.Quantity);
+                    var input = new ScreenInputBindings();
+                    input.Add(item.Card.GetComponent<Button>(), () => Navigate(token => ShowCardAsync(entry.Card, token)));
+                    return input;
+                }).Dispose);
                 return controls;
             }, ct);
         }
@@ -278,12 +300,17 @@ namespace Dungeon.Runtime.OutGame.Main
                 void Apply(bool upgraded)
                 {
                     MainMenuUiPresentation.Card(dialog.CardIcon, card, upgraded);
-                    string description = upgraded ? card.UpgradedDescription : card.Description;
-                    foreach (KeywordTooltip tooltip in dialog.KeywordRoot.GetComponentsInChildren<KeywordTooltip>(true))
-                        tooltip.gameObject.SetActive(
-                            description != null && description.Contains(tooltip.TitleText.text));
+                    MainMenuKeywordData[] keywords = upgraded ? card.UpgradedKeywords : card.Keywords;
+                    dialog.Keywords.Bind(keywords, (cell, keyword, index) =>
+                    {
+                        var tooltip = cell.GetComponent<KeywordTooltip>();
+                        tooltip.TitleText.text = keyword.Title;
+                        tooltip.DescriptionText.text = keyword.Description;
+                    });
                 }
 
+                dialog.UpgradedToggle.interactable = card.HasUpgrade;
+                controls.OnDispose(dialog.Keywords.Clear);
                 dialog.NormalToggle.isOn = true;
                 dialog.UpgradedToggle.isOn = false;
                 controls.Add(dialog.NormalToggle, selected =>
@@ -304,21 +331,19 @@ namespace Dungeon.Runtime.OutGame.Main
             return ShowDialogAsync<RelicCollectionDialog>(dialog =>
             {
                 var controls = CloseControls(dialog.CloseButton, dialog.Close);
-                List<Transform> slots = MainMenuUiPresentation.Slots(dialog.ScrollRect, _data.Relics.Length);
                 dialog.DiscoveryCountText.text = _data.Relics.Count(r => r.IsDiscovered) + " / " + _data.Relics.Length;
-                for (int i = 0; i < slots.Count; i++)
+                controls.OnDispose(dialog.Grid.Bind(_data.Relics, (cell, relic, index) =>
                 {
-                    MainMenuRelicData relic = _data.Relics[i];
-                    RelicCollectionItem item = slots[i].GetComponent<RelicCollectionItem>();
+                    var item = cell.GetComponent<RelicCollectionItem>();
                     item.NameText.text = relic.IsDiscovered ? relic.Name : "？？？";
                     item.ArtImage.sprite = relic.Artwork;
                     item.ArtImage.color = relic.IsDiscovered ? Color.white : new Color(0.14f, 0.11f, 0.28f);
                     item.RarityFrame.color = relic.FrameColor;
                     item.Button.interactable = relic.IsDiscovered;
-                    if (relic.IsDiscovered)
-                        controls.Add(item.Button, () => Navigate(token => ShowRelicAsync(relic, token)));
-                }
-
+                    var input = new ScreenInputBindings();
+                    if (relic.IsDiscovered) input.Add(item.Button, () => Navigate(token => ShowRelicAsync(relic, token)));
+                    return input;
+                }).Dispose);
                 return controls;
             }, ct);
         }
@@ -348,9 +373,10 @@ namespace Dungeon.Runtime.OutGame.Main
                     MainMenuCharacterData character = _data.Characters[index];
                     dialog.SetLocked(!character.IsUnlocked);
                     dialog.NameText.text = character.Name;
-                    dialog.DescriptionText.text = character.Description;
+                    dialog.DescriptionText.text = string.IsNullOrEmpty(character.Biography) ? character.Description : character.Biography;
                     dialog.CombatText.text = character.CombatDescription;
                     dialog.PortraitImage.sprite = character.Artwork;
+                    dialog.InitialDeckButton.interactable = character.IsUnlocked;
                     dialog.PreviousButton.interactable = index > 0;
                     dialog.NextButton.interactable = index + 1 < _data.Characters.Length;
                 }
@@ -365,8 +391,9 @@ namespace Dungeon.Runtime.OutGame.Main
                     index = Math.Min(_data.Characters.Length - 1, index + 1);
                     Apply();
                 });
-                controls.Add(dialog.InitialDeckButton, () => Navigate(ShowDeckAsync));
+                controls.Add(dialog.InitialDeckButton, () => { _selectedCharacter = _data.Characters[index]; Navigate(ShowDeckAsync); });
                 if (_data.Characters.Length > 0) Apply();
+                else { dialog.PreviousButton.interactable = false; dialog.NextButton.interactable = false; dialog.InitialDeckButton.interactable = false; dialog.SetLocked(true); dialog.NameText.text = "キャラクターがありません"; }
                 return controls;
             }, ct);
         }

@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.List;
 using Dungeon.Runtime.Common.UI.Dialog;
 using Dungeon.Runtime.Common.UI.MultiIcon;
 using TFramework.UI;
@@ -11,12 +12,14 @@ namespace Dungeon.Runtime.OutGame.CardDetail
     /// </summary>
     public sealed class CardDetailDialog : BoundDialogBase
     {
+        [SerializeField] private PrefabListView _keywords;
         [SerializeField] private CardIconView _cardIcon;
         [SerializeField] private Toggle _normalToggle;
         [SerializeField] private Toggle _upgradedToggle;
         [SerializeField] private RectTransform _keywordRoot;
         [SerializeField] private UIButton _closeButton;
 
+        public PrefabListView Keywords => _keywords;
         public CardIconView CardIcon => _cardIcon;
         public Toggle NormalToggle => _normalToggle;
         public Toggle UpgradedToggle => _upgradedToggle;

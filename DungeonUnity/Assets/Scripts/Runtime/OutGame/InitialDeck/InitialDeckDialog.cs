@@ -1,3 +1,4 @@
+using Dungeon.Runtime.Common.UI.List;
 using Dungeon.Runtime.Common.UI.Dialog;
 using Dungeon.Runtime.Common.UI.MultiIcon;
 using TFramework.UI;
@@ -11,11 +12,13 @@ namespace Dungeon.Runtime.OutGame.InitialDeck
     /// </summary>
     public sealed class InitialDeckDialog : BoundDialogBase
     {
+        [SerializeField] private RecyclingGridView _grid;
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private CardIconView _cardTemplate;
         [SerializeField] private TFTextUGUI _summaryText;
         [SerializeField] private UIButton _closeButton;
 
+        public RecyclingGridView Grid => _grid;
         public ScrollRect ScrollRect => _scrollRect;
         public CardIconView CardTemplate => _cardTemplate;
         public TFTextUGUI SummaryText => _summaryText;

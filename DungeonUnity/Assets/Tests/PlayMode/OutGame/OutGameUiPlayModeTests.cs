@@ -88,33 +88,70 @@ namespace Dungeon.Tests.PlayMode
         {
             GameObject instance = Instantiate("CharacterSelectPage");
             yield return null;
-            Toggle[] toggles = instance.transform.Find("CharacterRoster").GetComponentsInChildren<Toggle>();
-            Assert.That(toggles.Length, Is.EqualTo(3));
+            var page = instance.GetComponent<Dungeon.Runtime.OutGame.CharacterSelect.CharacterSelectPage>();
+            Assert.That(page.Roster.Root.childCount, Is.Zero);
+            var data = new[] { "Available", "Locked", "Another" };
+            page.Roster.Bind(data, (cell, name, index) =>
+            {
+                var toggle = cell.GetComponent<Toggle>();
+                toggle.group = null;
+                toggle.isOn = false;
+                toggle.group = page.CharacterToggleGroup;
+                toggle.interactable = index == 0;
+                toggle.isOn = index == 0;
+            });
+            yield return null;
+            Toggle[] toggles = page.CharacterToggleGroup.GetComponentsInChildren<Toggle>();
+            Assert.That(toggles.Length, Is.EqualTo(data.Length));
             Assert.That(toggles[0].isOn, Is.True);
             Assert.That(toggles[0].interactable, Is.True);
-            for (int i = 1; i < toggles.Length; i++)
-            {
-                Assert.That(toggles[i].isOn, Is.False);
-                Assert.That(toggles[i].interactable, Is.False);
-                Assert.That(toggles[i].graphic.canvasRenderer.GetAlpha(), Is.Zero.Within(0.01f));
-            }
+            Assert.That(toggles[1].interactable, Is.False);
+            page.Roster.Bind(new[] { "Only" }, (cell, name, index) => { });
+            Assert.That(page.CharacterToggleGroup.GetComponentsInChildren<Toggle>().Length, Is.EqualTo(1));
         }
 
         [UnityTest]
-        public IEnumerator CardCollection_ScrollsItsClippedContent()
+        public IEnumerator CardCollection_RecyclesClippedCells_AndClearsStaleInput()
         {
             GameObject instance = Instantiate("CardCollectionDialog");
             yield return null;
             Canvas.ForceUpdateCanvases();
-            ScrollRect scroll = instance.GetComponentInChildren<ScrollRect>();
+            var grid = instance.GetComponentInChildren<Dungeon.Runtime.Common.UI.List.RecyclingGridView>();
+            ScrollRect scroll = grid.ScrollRect;
+            Assert.That(scroll.content.childCount, Is.Zero);
             Assert.That(scroll.viewport.GetComponent<RectMask2D>(), Is.Not.Null);
-            Assert.That(scroll.content.childCount, Is.EqualTo(11));
-            Assert.That(scroll.content.rect.height, Is.GreaterThan(scroll.viewport.rect.height * 2));
-
+            int clicked = -1;
+            using var binding = grid.Bind(Enumerable.Range(0, 1000).ToArray(), (cell, value, index) =>
+            {
+                var input = new Dungeon.Runtime.Common.UI.Binding.ScreenInputBindings();
+                input.Add(cell.GetComponentInChildren<Button>(), () => clicked = value);
+                return input;
+            });
+            yield return null;
+            Assert.That(grid.ActiveCellCount, Is.GreaterThan(0));
+            Assert.That(scroll.content.childCount, Is.LessThan(30));
+            int capacity = scroll.content.childCount;
+            scroll.content.GetChild(0).GetComponentInChildren<Button>().onClick.Invoke();
+            Assert.That(clicked, Is.Zero);
             scroll.verticalNormalizedPosition = 0;
             yield return null;
             Assert.That(scroll.content.anchoredPosition.y, Is.GreaterThan(1000));
-            Assert.That(scroll.verticalNormalizedPosition, Is.Zero.Within(0.01f));
+            scroll.content.GetChild(0).GetComponentInChildren<Button>().onClick.Invoke();
+            Assert.That(clicked, Is.GreaterThan(900));
+            Assert.That(scroll.content.childCount, Is.EqualTo(capacity));
+            using var smaller = grid.Bind(new[] { 23 }, (cell, value, index) =>
+            {
+                var input = new Dungeon.Runtime.Common.UI.Binding.ScreenInputBindings();
+                input.Add(cell.GetComponentInChildren<Button>(), () => clicked = value);
+                return input;
+            });
+            binding.Dispose();
+            Assert.That(grid.ActiveCellCount, Is.EqualTo(1));
+            scroll.content.GetChild(0).GetComponentInChildren<Button>().onClick.Invoke();
+            Assert.That(clicked, Is.EqualTo(23));
+            smaller.Dispose();
+            Assert.That(grid.ActiveCellCount, Is.Zero);
+            Assert.That(scroll.content.GetComponentsInChildren<Button>().Length, Is.Zero);
         }
 
         private GameObject Instantiate(string name)

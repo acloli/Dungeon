@@ -46,7 +46,6 @@ namespace Dungeon.Runtime.OutGame.Main
         public string Category;
         public CardRarity Rarity;
         public Sprite Artwork;
-        public int StartingQuantity;
     }
 
     [Serializable]
@@ -81,6 +80,7 @@ namespace Dungeon.Runtime.OutGame.Main
         public int Id;
         public int RunProfileId;
         public MainMenuDeckEntry[] Deck = Array.Empty<MainMenuDeckEntry>();
+        [TextArea] public string Biography;
         public string Name;
         [TextArea] public string Description;
         [TextArea] public string CombatDescription;
@@ -104,7 +104,6 @@ namespace Dungeon.Runtime.OutGame.Main
         public MainMenuCardData[] Cards = Array.Empty<MainMenuCardData>();
         public MainMenuRelicData[] Relics = Array.Empty<MainMenuRelicData>();
         public MainMenuCharacterData[] Characters = Array.Empty<MainMenuCharacterData>();
-        public int CollectionCardCount;
         public string ResultHeadline = "冒険の記録はありません";
         public int ReachedFloor;
         public int EnemyCount;

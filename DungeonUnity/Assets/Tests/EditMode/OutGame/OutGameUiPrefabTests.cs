@@ -126,8 +126,8 @@ namespace Dungeon.Tests.EditMode
             }
         }
 
-        [TestCase("CardCollectionDialog", 11)]
-        [TestCase("InitialDeckDialog", 3)]
+        [TestCase("CardCollectionDialog", 0)]
+        [TestCase("InitialDeckDialog", 0)]
         [TestCase("CardDetailDialog", 1)]
         public void CardScreens_UseTheSharedCardIcon(string name, int expectedCount)
         {
@@ -179,6 +179,24 @@ namespace Dungeon.Tests.EditMode
             finally
             {
                 UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
+        [TestCase("CardCollectionDialog")]
+        [TestCase("RelicCollectionDialog")]
+        [TestCase("InitialDeckDialog")]
+        public void DataLists_ContainNoAuthoredEntries_AndReferenceAnExternalTemplate(string name)
+        {
+            var prefab = Load(name);
+            var grid = prefab.GetComponentInChildren<Dungeon.Runtime.Common.UI.List.RecyclingGridView>(true);
+            Assert.That(grid, Is.Not.Null);
+            Assert.That(grid.ScrollRect.content.childCount, Is.Zero);
+            Assert.That(AssetDatabase.Contains(grid.Template), Is.True);
+            Assert.That(AssetDatabase.GetAssetPath(grid.Template), Is.Not.EqualTo(PrefabPaths[name]));
+            if (name != "RelicCollectionDialog")
+            {
+                var card = grid.Template.GetComponentInChildren<CardIconView>(true);
+                Assert.That(PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(card.gameObject), Is.EqualTo("Assets/Prefabs/Common/UI/MultiIcon/CardIcon.prefab"));
             }
         }
 

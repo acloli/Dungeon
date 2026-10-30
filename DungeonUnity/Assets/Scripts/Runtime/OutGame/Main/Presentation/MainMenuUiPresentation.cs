@@ -14,10 +14,10 @@ namespace Dungeon.Runtime.OutGame.Main.Presentation
     {
         public static void Card(CardIconView view, MainMenuCardData card, bool upgraded = false, int quantity = 0)
         {
-            bool discovered = card != null;
+            bool discovered = card != null && card.IsDiscovered;
             view.Bind(new MultiIconViewModel(
                 MultiIconKind.Card,
-                discovered ? card.Name + (upgraded ? "+" : string.Empty) : string.Empty,
+                discovered ? (upgraded ? card.UpgradedName ?? card.Name + "+" : card.Name) : string.Empty,
                 discovered ? (upgraded ? card.UpgradedDescription : card.Description) : string.Empty,
                 string.Empty, discovered ? card.Rarity : CardRarity.Basic,
                 discovered ? (upgraded ? card.UpgradedCost : card.Cost) : 0,
@@ -30,31 +30,5 @@ namespace Dungeon.Runtime.OutGame.Main.Presentation
             view.GetComponent<Button>().interactable = discovered;
         }
 
-        public static List<Transform> Slots(ScrollRect scroll, int count)
-        {
-            Transform root = scroll.content;
-            if (root.childCount == 0) throw new InvalidOperationException("Menu list template is missing");
-            while (root.childCount < count)
-                UnityEngine.Object.Instantiate(root.GetChild(0).gameObject, root);
-
-            var slots = new List<Transform>();
-            for (int i = 0; i < root.childCount; i++)
-            {
-                Transform slot = root.GetChild(i);
-                slot.gameObject.SetActive(i < count);
-                if (i < count) slots.Add(slot);
-            }
-
-            GridLayoutGroup grid = root.GetComponent<GridLayoutGroup>();
-            if (grid != null)
-            {
-                int rows = Mathf.CeilToInt((float)count / Mathf.Max(1, grid.constraintCount));
-                float height = grid.padding.top + grid.padding.bottom + rows * grid.cellSize.y + Mathf.Max(0, rows - 1) * grid.spacing.y;
-                scroll.content.sizeDelta = new Vector2(scroll.content.sizeDelta.x, Mathf.Max(height, scroll.viewport.rect.height));
-            }
-
-            scroll.verticalNormalizedPosition = 1;
-            return slots;
-        }
     }
 }

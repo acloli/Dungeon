@@ -1,5 +1,11 @@
 #if UNITY_EDITOR
 using System.Collections;
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using VContainer;
+using VContainer.Unity;
+using Object = UnityEngine.Object;
 using System.Linq;
 using Dungeon.Runtime.Common.UI.Dialog;
 using Dungeon.Runtime.Common.UI.MultiIcon;
@@ -31,14 +37,39 @@ namespace Dungeon.Tests.PlayMode
     {
         private MainSceneView _lobby;
         private bool _loadedScene;
-        private MainMenuPreviewContent _content;
+        private MainMenuData _data;
+
+        private sealed class NavigationSource : IMainMenuDataSource
+        {
+            private readonly MainMenuData _data;
+            public NavigationSource(MainMenuData data) => _data = data;
+            public UniTask<MainMenuData> LoadAsync(CancellationToken ct) { ct.ThrowIfCancellationRequested(); return UniTask.FromResult(_data); }
+        }
+
+        private static MainMenuData NavigationData()
+        {
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Card/Art/CardScratch.png");
+            var keywords = new[] { new MainMenuKeywordData { Title = "脆弱", Description = "検証用の説明" },
+                new MainMenuKeywordData { Title = "脱力", Description = "検証用の説明" }, new MainMenuKeywordData { Title = "廃棄", Description = "検証用の説明" } };
+            var cards = Enumerable.Range(0, 11).Select(i => new MainMenuCardData { Id = (1001 + i).ToString(), MasterId = 1001 + i,
+                Name = "検証カード" + i, UpgradedName = "検証カード" + i + "+", Description = "検証用の効果", UpgradedDescription = "強化後の効果",
+                Artwork = art, IsDiscovered = i < 4, HasUpgrade = true, Keywords = i == 3 ? keywords : Array.Empty<MainMenuKeywordData>(), UpgradedKeywords = keywords }).ToArray();
+            return new MainMenuData { HasResumableAdventure = true, Cards = cards,
+                Characters = new[] { new MainMenuCharacterData { Id = 1, Name = "検証キャラクター", IsUnlocked = true, Artwork = art,
+                    Deck = cards.Take(3).Select((card, i) => new MainMenuDeckEntry { Card = card, Quantity = i + 1 }).ToArray() },
+                    new MainMenuCharacterData { Id = 2, Name = "未解放1" }, new MainMenuCharacterData { Id = 3, Name = "未解放2" } },
+                Relics = Enumerable.Range(0, 6).Select(i => new MainMenuRelicData { Id = i + 1, Name = "検証レリック" + i, EffectText = "効果" + i, Artwork = art, IsDiscovered = i < 4 }).ToArray() };
+        }
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             Scene main = SceneManager.GetSceneByPath("Assets/Scenes/MainScene.unity");
-            _loadedScene = !main.isLoaded;
-            if (_loadedScene) yield return SceneManager.LoadSceneAsync("Assets/Scenes/MainScene.unity", LoadSceneMode.Additive);
+            if (main.isLoaded) yield return SceneManager.UnloadSceneAsync(main);
+            _loadedScene = true;
+            _data = NavigationData();
+            using (LifetimeScope.Enqueue(builder => builder.RegisterInstance(new NavigationSource(_data)).As<IMainMenuDataSource>()))
+                yield return SceneManager.LoadSceneAsync("Assets/Scenes/MainScene.unity", LoadSceneMode.Additive);
             for (int i = 0; i < 900; i++)
             {
                 MainSceneController controller = Object.FindFirstObjectByType<MainSceneController>();
@@ -47,7 +78,6 @@ namespace Dungeon.Tests.PlayMode
                 yield return null;
             }
             _lobby = Object.FindFirstObjectByType<MainSceneView>();
-            _content = AssetDatabase.LoadAssetAtPath<MainMenuPreviewContent>("Assets/Settings/OutGame/Main/MainMenuPreviewContent.asset");
             Assert.That(_lobby.LobbyGroup, Is.Not.Null);
             Assert.That(_lobby.LobbyGroup.interactable, Is.True);
         }
@@ -79,9 +109,9 @@ namespace Dungeon.Tests.PlayMode
             yield return WaitFor<CardDetailDialog>();
             CardDetailDialog detail = FindReady<CardDetailDialog>();
             Assert.That(cards.CanvasGroup.interactable, Is.False);
-            Assert.That(CardName(detail), Is.EqualTo(_content.Data.Cards[0].Name));
+            Assert.That(CardName(detail), Is.EqualTo(_data.Cards[0].Name));
             detail.UpgradedToggle.isOn = true;
-            Assert.That(CardName(detail), Is.EqualTo(_content.Data.Cards[0].Name + "+"));
+            Assert.That(CardName(detail), Is.EqualTo(_data.Cards[0].Name + "+"));
             detail.CloseButton.onClick.Invoke();
             yield return WaitFor<CardCollectionDialog>();
             cards.ScrollRect.content.GetChild(3).GetComponentInChildren<CardIconView>().GetComponent<Button>().onClick.Invoke();
@@ -101,8 +131,8 @@ namespace Dungeon.Tests.PlayMode
             relics.ScrollRect.content.GetChild(2).GetComponent<RelicCollectionItem>().Button.onClick.Invoke();
             yield return WaitFor<RelicDetailDialog>();
             RelicDetailDialog relic = FindReady<RelicDetailDialog>();
-            Assert.That(relic.TitleText.text, Is.EqualTo(_content.Data.Relics[2].Name));
-            Assert.That(relic.EffectText.text, Is.EqualTo(_content.Data.Relics[2].EffectText));
+            Assert.That(relic.TitleText.text, Is.EqualTo(_data.Relics[2].Name));
+            Assert.That(relic.EffectText.text, Is.EqualTo(_data.Relics[2].EffectText));
             relic.CloseButton.onClick.Invoke();
             yield return WaitFor<RelicCollectionDialog>();
             relics.CloseButton.onClick.Invoke();
@@ -121,7 +151,7 @@ namespace Dungeon.Tests.PlayMode
             InitialDeckDialog deck = FindReady<InitialDeckDialog>();
             deck.ScrollRect.content.GetChild(1).GetComponentInChildren<CardIconView>().GetComponent<Button>().onClick.Invoke();
             yield return WaitFor<CardDetailDialog>();
-            Assert.That(CardName(FindReady<CardDetailDialog>()), Is.EqualTo(_content.Data.Cards[1].Name));
+            Assert.That(CardName(FindReady<CardDetailDialog>()), Is.EqualTo(_data.Cards[1].Name));
             FindReady<CardDetailDialog>().CloseButton.onClick.Invoke();
             yield return WaitFor<InitialDeckDialog>();
             deck.CloseButton.onClick.Invoke();
@@ -146,6 +176,7 @@ namespace Dungeon.Tests.PlayMode
             FindReady<CommonConfirmDialog>().ConfirmButton.onClick.Invoke();
             yield return WaitFor<CharacterSelectPage>();
             CharacterSelectPage selection = FindReady<CharacterSelectPage>();
+            Assert.That(selection.DeckCountText.text, Is.EqualTo("6枚"));
             Assert.That(_lobby.LobbyGroup.alpha, Is.Zero);
             selection.InitialDeckButton.onClick.Invoke();
             yield return WaitFor<InitialDeckDialog>();

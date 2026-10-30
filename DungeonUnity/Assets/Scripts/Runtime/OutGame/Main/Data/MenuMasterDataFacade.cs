@@ -61,7 +61,8 @@ namespace Dungeon.Runtime.OutGame.Main
                     Id = character.Id, RunProfileId = profile?.Id ?? 0,
                     Name = Text(character.LocalizationKey, character.Name),
                     Description = Text(character.DescriptionKey, string.Empty),
-                    CombatDescription = Text(character.BiographyKey, string.Empty),
+                    Biography = Text(character.BiographyKey, string.Empty),
+                    CombatDescription = Text(character.DescriptionKey, string.Empty),
                     Artwork = _presentation.FindArtwork(character.PortraitImageId, true),
                     IsUnlocked = available, Health = profile?.PlayerMaxHp ?? 0, Gold = profile?.StartingGold ?? 0,
                     Deck = deck
