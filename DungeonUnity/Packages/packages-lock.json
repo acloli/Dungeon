@@ -364,7 +364,7 @@
       "hash": "177dbda557fd652ce7f5d1647a3621653e094373"
     },
     "work.fmhr.tframework": {
-      "version": "https://github.com/fmhr-work/TFramework.git?path=/TFrameworkUnity/Assets/TFramework",
+      "version": "https://github.com/fmhr-work/TFramework.git?path=/TFrameworkUnity/Assets/TFramework#03844b5a447c17da717bb8cbb0bb6e457620280f",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -375,7 +375,7 @@
         "com.unity.ugui": "2.0.0",
         "com.unity.nuget.newtonsoft-json": "3.2.2"
       },
-      "hash": "65022b0985fb33d3d6923c694ff7da02985ea7a4"
+      "hash": "03844b5a447c17da717bb8cbb0bb6e457620280f"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
