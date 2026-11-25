@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _exhaustPileCountText;
         [SerializeField] private TFTextUGUI _handCountText;
         [SerializeField] private Transform _handCardRoot;
-        [SerializeField] private BattleCardIconView _handCardTemplate;
+        [SerializeField] private CardIconView _handCardTemplate;
         [SerializeField] private Transform _enemyTargetRoot;
         [SerializeField] private Button _enemyTargetButton;
         [SerializeField] private Button _endTurnButton;
@@ -35,7 +36,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private Button _discardPileButton;
         [SerializeField] private Button _exhaustPileButton;
 
-        private readonly List<BattleCardIconView> _handCards = new List<BattleCardIconView>();
+        private readonly List<CardIconView> _handCards = new List<CardIconView>();
         private readonly List<Button> _enemyButtons = new List<Button>();
         private static readonly Color SelectedEnemyColor = new Color(0.88f, 0.42f, 0.22f, 1f);
         private static readonly Color ActiveEnemyColor = new Color(0.2f, 0.35f, 0.55f, 1f);
@@ -218,7 +219,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     continue;
                 }
 
-                BattleCardIconView cardView = Instantiate(_handCardTemplate, _handCardRoot);
+                CardIconView cardView = Instantiate(_handCardTemplate, _handCardRoot);
                 cardView.gameObject.SetActive(true);
                 cardView.Bind(handCard.Icon, () => onClicked?.Invoke(handIndex));
                 _handCards.Add(cardView);
@@ -313,11 +314,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 動的ボタン一覧消去
         /// </summary>
-        private static void ClearCards(List<BattleCardIconView> cards)
+        private static void ClearCards(List<CardIconView> cards)
         {
             for (int i = 0; i < cards.Count; i++)
             {
-                BattleCardIconView card = cards[i];
+                CardIconView card = cards[i];
                 if (card == null)
                 {
                     continue;

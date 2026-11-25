@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.MasterData.Generated.RunProfileMasterContainer
   _data:
   - Id: 5501
-    Key: run_crimson_exile_act1
-    Name: Crimson Exile Standard
-    LocalizationKey: run.profile.crimson_exile_standard
+    Key: run_momo_act1
+    Name: Momo's Adventure
+    LocalizationKey: run.profile.momo_standard
     CharacterArchetype: 0
     PlayerMaxHp: 80
     StartingGold: 99

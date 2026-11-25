@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Battle.Services;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,10 +16,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
     public sealed class CardPickDialog : UIDialogBase<RuntimeRewardEntry>
     {
         [SerializeField] private Transform _cardContainer;
-        [SerializeField] private BattleCardIconView _cardTemplate;
+        [SerializeField] private CardIconView _cardTemplate;
         [SerializeField] private Button _backButton;
 
-        private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
+        private readonly List<CardIconView> _cardViews = new List<CardIconView>();
         private BattleCardPickDialogParam _param;
 
         protected override UniTask OnPreOpenAsync(object param, CancellationToken ct)
@@ -75,10 +77,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     continue;
                 }
 
-                BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
+                CardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
                 RuntimeRewardEntry captured = entry;
-                cardView.Bind(BattleMultiIconViewModel.CreateCard(entry.Card), () => CloseWithResult(captured));
+                cardView.Bind(BattleIconViewModelFactory.CreateCard(entry.Card), () => CloseWithResult(captured));
                 _cardViews.Add(cardView);
             }
         }
@@ -87,7 +89,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _cardViews.Count; i++)
             {
-                BattleCardIconView cardView = _cardViews[i];
+                CardIconView cardView = _cardViews[i];
                 if (cardView == null) continue;
                 cardView.Clear();
                 Destroy(cardView.gameObject);

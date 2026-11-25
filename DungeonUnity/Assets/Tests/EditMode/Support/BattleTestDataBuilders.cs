@@ -95,7 +95,7 @@ namespace Dungeon.Tests.EditMode.Support
         public int Cost { get; set; } = 1;
         public CardType CardType { get; set; } = CardType.Attack;
         public CardRarity Rarity { get; set; } = CardRarity.Common;
-        public CharacterArchetype CharacterArchetype { get; set; } = CharacterArchetype.CrimsonExile;
+        public CharacterArchetype CharacterArchetype { get; set; } = CharacterArchetype.MeleeExplorer;
         public IReadOnlyList<RuntimeCardEffect> Effects { get; set; } = Array.Empty<RuntimeCardEffect>();
         public int UpgradeCardId { get; set; }
         public bool IsUpgraded { get; set; }
@@ -336,7 +336,7 @@ namespace Dungeon.Tests.EditMode.Support
         public int RunProfileId { get; set; } = 5501;
         public string Key { get; set; } = "run_test";
         public int MapTemplateId { get; set; } = 6301;
-        public CharacterArchetype CharacterArchetype { get; set; } = CharacterArchetype.CrimsonExile;
+        public CharacterArchetype CharacterArchetype { get; set; } = CharacterArchetype.MeleeExplorer;
         public int PlayerMaxHp { get; set; } = 50;
         public int StartingGold { get; set; } = 120;
         public int CardRewardChoiceCount { get; set; } = 3;

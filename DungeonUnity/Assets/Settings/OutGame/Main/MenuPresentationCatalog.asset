@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd9010f67578c41f9a9656c1c2163aae, type: 3}
+  m_Name: MenuPresentationCatalog
+  m_EditorClassIdentifier: Dungeon.Runtime.OutGame.Main::Dungeon.Runtime.OutGame.Main.MenuPresentationCatalog
+  Artwork:
+  - ImageId: card_art_cinder_slash
+    Sprite: {fileID: 21300000, guid: ade9b96ae543b4db691411f6a2b5fd87, type: 3}
+  - ImageId: card_art_ash_guard
+    Sprite: {fileID: 21300000, guid: b8440f0d0e5664cd89a8590228038075, type: 3}
+  - ImageId: card_art_crystal_bash
+    Sprite: {fileID: 21300000, guid: 61bcb3a52e17941058a17d9cd7076808, type: 3}
+  MissingArtwork: {fileID: 21300000, guid: b92f9e3aba3af47c5bc8b6fd59b0480d, type: 3}
+  MissingPortrait: {fileID: 21300000, guid: 097f93068efe5454982192332634b16d, type: 3}
+  KeywordDefinitions:
+  - Title: "\u8106\u5F31"
+    Description: "\u53D7\u3051\u308B\u30C0\u30E1\u30FC\u30B8\u304C50%\u5897\u3048\u308B\u3002"
+  - Title: "\u8131\u529B"
+    Description: "\u4E0E\u3048\u308B\u30C0\u30E1\u30FC\u30B8\u304C25%\u6E1B\u308B\u3002"
+  - Title: "\u5EC3\u68C4"
+    Description: "\u4F7F\u7528\u5F8C\u3001\u3053\u306E\u6226\u95D8\u4E2D\u306F\u4F7F\u3048\u306A\u3044\u3002"

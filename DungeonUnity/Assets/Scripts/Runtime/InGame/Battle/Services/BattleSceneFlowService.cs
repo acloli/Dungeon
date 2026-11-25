@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Domain;
 using Dungeon.Runtime.InGame.Save.Model;
@@ -35,6 +36,8 @@ namespace Dungeon.Runtime.InGame.Battle.Services
         private readonly IBattleCheckpointService _checkpointService;
         private readonly IBattleEnemyActionSelector _enemyActionSelector;
 
+        private readonly ICollectionProgressService _progress;
+
         private RuntimeRunDefinition _runDefinition;
         private int _masterSeed;
         private int _mapSeed;
@@ -54,8 +57,10 @@ namespace Dungeon.Runtime.InGame.Battle.Services
             IBattleRestShopFlowService restShopFlowService,
             IRunSaveService runSaveService,
             IBattleCheckpointService checkpointService,
-            IBattleEnemyActionSelector enemyActionSelector)
+            IBattleEnemyActionSelector enemyActionSelector,
+            ICollectionProgressService progress = null)
         {
+            _progress = progress;
             _rules = rules;
             _randomProvider = randomProvider;
             _masterDataFacade = masterDataFacade;
@@ -864,6 +869,27 @@ namespace Dungeon.Runtime.InGame.Battle.Services
                 ? string.Format(BattleSceneConstants.ResultVictoryFormat, _state.PlayerHp, _state.PlayerMaxHp, _state.Gold)
                 : BattleSceneConstants.RunFailedMessage;
                 
+            if (_progress != null)
+            {
+                var completed = _state.MapRouteNodeIndices.Distinct()
+                    .Where(index => index >= 0 && index < _state.Nodes.Count && (victory || index != _state.CurrentNodeIndex))
+                    .Select(index => _state.Nodes[index]).ToArray();
+                var result = new RunHistoryData
+                {
+                    Victory = victory,
+                    ReachedFloor = _state.Nodes.Count == 0 ? 0 : _state.Nodes[Math.Max(0, Math.Min(_state.CurrentNodeIndex, _state.Nodes.Count - 1))].Floor,
+                    EnemyCount = completed.Count(node => node.NodeType == InGameNodeType.Battle),
+                    EliteCount = completed.Count(node => node.NodeType == InGameNodeType.EliteBattle),
+                    BossCount = completed.Count(node => node.NodeType == InGameNodeType.Boss),
+                    CardIds = _state.Deck.Select(card => card.Id).ToList(),
+                    RelicIds = _state.OwnedRelics.Select(relic => relic.Id).ToList()
+                };
+                // 結果保存はシーンを離れた後も継続し、アプリ終了でキャンセルする
+                _progress.RecordResultAsync(result, UnityEngine.Application.exitCancellationToken).Forget(ex =>
+                {
+                    if (!(ex is OperationCanceledException)) TLogger.Error(ex.ToString(), "CollectionProgress");
+                });
+            }
             _runSaveService?.DeleteSavedRun();
         }
 

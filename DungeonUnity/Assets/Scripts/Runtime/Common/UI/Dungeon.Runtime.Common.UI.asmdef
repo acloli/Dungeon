@@ -1,0 +1,20 @@
+{
+    "name": "Dungeon.Runtime.Common.UI",
+    "rootNamespace": "Dungeon.Runtime.Common.UI",
+    "references": [
+        "TFramework.Core",
+        "TFramework.UI",
+        "Unity.TextMeshPro",
+        "UniTask",
+        "Game.MasterData.Generated"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

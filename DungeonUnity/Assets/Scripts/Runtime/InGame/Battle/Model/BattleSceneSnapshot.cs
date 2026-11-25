@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Domain;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
@@ -51,16 +52,16 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public sealed class BattleHostChromeSnapshot
     {
         public BattleHostChromeSnapshot(
-            IReadOnlyList<BattleMultiIconViewModel> ownedRelics = null,
-            IReadOnlyList<BattleMultiIconViewModel> ownedPotions = null,
+            IReadOnlyList<MultiIconViewModel> ownedRelics = null,
+            IReadOnlyList<MultiIconViewModel> ownedPotions = null,
             int selectedOwnedRelicIndex = BattleSceneConstants.UnselectedCardIndex,
             int selectedOwnedPotionIndex = BattleSceneConstants.UnselectedCardIndex,
             string ownedRelicHintMessage = null,
             string ownedPotionHintMessage = null,
             bool canUseSelectedPotion = false)
         {
-            OwnedRelics = ownedRelics ?? Array.Empty<BattleMultiIconViewModel>();
-            OwnedPotions = ownedPotions ?? Array.Empty<BattleMultiIconViewModel>();
+            OwnedRelics = ownedRelics ?? Array.Empty<MultiIconViewModel>();
+            OwnedPotions = ownedPotions ?? Array.Empty<MultiIconViewModel>();
             SelectedOwnedRelicIndex = selectedOwnedRelicIndex;
             SelectedOwnedPotionIndex = selectedOwnedPotionIndex;
             OwnedRelicHintMessage = ownedRelicHintMessage ?? string.Empty;
@@ -68,8 +69,8 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             CanUseSelectedPotion = canUseSelectedPotion;
         }
 
-        public IReadOnlyList<BattleMultiIconViewModel> OwnedRelics { get; }
-        public IReadOnlyList<BattleMultiIconViewModel> OwnedPotions { get; }
+        public IReadOnlyList<MultiIconViewModel> OwnedRelics { get; }
+        public IReadOnlyList<MultiIconViewModel> OwnedPotions { get; }
         public int SelectedOwnedRelicIndex { get; }
         public int SelectedOwnedPotionIndex { get; }
         public string OwnedRelicHintMessage { get; }
@@ -297,14 +298,14 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     public sealed class BattlePotionReplaceSnapshot
     {
         public BattlePotionReplaceSnapshot(
-            IReadOnlyList<BattleMultiIconViewModel> ownedPotions = null,
+            IReadOnlyList<MultiIconViewModel> ownedPotions = null,
             PendingPotionOffer pendingPotionOffer = null)
         {
-            OwnedPotions = ownedPotions ?? Array.Empty<BattleMultiIconViewModel>();
+            OwnedPotions = ownedPotions ?? Array.Empty<MultiIconViewModel>();
             PendingPotionOffer = pendingPotionOffer;
         }
 
-        public IReadOnlyList<BattleMultiIconViewModel> OwnedPotions { get; }
+        public IReadOnlyList<MultiIconViewModel> OwnedPotions { get; }
         public PendingPotionOffer PendingPotionOffer { get; }
     }
 
@@ -316,18 +317,18 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public BattlePileInspectSnapshot(
             BattlePileType pileType = BattlePileType.Draw,
             string title = null,
-            IReadOnlyList<BattleMultiIconViewModel> cards = null,
+            IReadOnlyList<MultiIconViewModel> cards = null,
             bool isOpen = false)
         {
             PileType = pileType;
             Title = title ?? string.Empty;
-            Cards = cards ?? Array.Empty<BattleMultiIconViewModel>();
+            Cards = cards ?? Array.Empty<MultiIconViewModel>();
             IsOpen = isOpen;
         }
 
         public BattlePileType PileType { get; }
         public string Title { get; }
-        public IReadOnlyList<BattleMultiIconViewModel> Cards { get; }
+        public IReadOnlyList<MultiIconViewModel> Cards { get; }
         public bool IsOpen { get; }
     }
 }

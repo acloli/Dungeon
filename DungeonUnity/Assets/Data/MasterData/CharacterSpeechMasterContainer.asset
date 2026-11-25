@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01868356e956441d891216b32399428d, type: 3}
+  m_Name: CharacterSpeechMasterContainer
+  m_EditorClassIdentifier: Game.MasterData.Generated::Game.MasterData.Generated.CharacterSpeechMasterContainer
+  _data:
+  - Id: 1
+    CharacterId: 1
+    TriggerType: 1
+    LocalizationKey: character.speech.momo.home_enter_01
+  - Id: 2
+    CharacterId: 1
+    TriggerType: 1
+    LocalizationKey: character.speech.momo.home_enter_02
+  - Id: 3
+    CharacterId: 1
+    TriggerType: 0
+    LocalizationKey: character.speech.momo.home_click_01
+  - Id: 4
+    CharacterId: 1
+    TriggerType: 0
+    LocalizationKey: character.speech.momo.home_click_02
+  - Id: 5
+    CharacterId: 1
+    TriggerType: 2
+    LocalizationKey: character.speech.momo.run_start_01
+  - Id: 6
+    CharacterId: 1
+    TriggerType: 2
+    LocalizationKey: character.speech.momo.run_start_02

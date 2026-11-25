@@ -44,7 +44,17 @@ namespace Game.MasterData.Generated
     /// </summary>
     public enum CharacterArchetype
     {
-        CrimsonExile,
+        MeleeExplorer,
+    }
+
+    /// <summary>
+    /// MasterData共有Enum: CharacterSpeechTriggerType
+    /// </summary>
+    public enum CharacterSpeechTriggerType
+    {
+        HomeClick,
+        HomeEnter,
+        RunStart,
     }
 
     /// <summary>

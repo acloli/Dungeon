@@ -1,7 +1,9 @@
+using Dungeon.Runtime.SceneFlow;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle;
 using Dungeon.Runtime.InGame.Battle.Model;
 using Dungeon.Runtime.InGame.Battle.Services;
@@ -150,10 +152,10 @@ namespace Dungeon.Tests.EditMode
                 {
                     new BattleHandCardViewModel(
                         CreateCard(1001, "Strike", 1),
-                        BattleMultiIconViewModel.CreateCard(CreateCard(1001, "Strike", 1))),
+                        BattleIconViewModelFactory.CreateCard(CreateCard(1001, "Strike", 1))),
                     new BattleHandCardViewModel(
                         CreateCard(1002, "Guard", 2),
-                        BattleMultiIconViewModel.CreateCard(CreateCard(1002, "Guard", 2), isAffordable: false, isSelected: true))
+                        BattleIconViewModelFactory.CreateCard(CreateCard(1002, "Guard", 2), isAffordable: false, isSelected: true))
                 },
                 enemies: Array.Empty<BattleEnemyViewModel>(),
                 selectedEnemyIndex: 0,
@@ -188,7 +190,7 @@ namespace Dungeon.Tests.EditMode
             snapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
                 ownedRelics: new[]
                 {
-                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                    new MultiIconViewModel(MultiIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
                 },
                 selectedOwnedRelicIndex: 0,
                 ownedRelicHintMessage: "Burning Core\nGain 6 Block at combat start.");
@@ -266,7 +268,7 @@ namespace Dungeon.Tests.EditMode
             snapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
                 ownedRelics: new[]
                 {
-                    new BattleMultiIconViewModel(BattleIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
+                    new MultiIconViewModel(MultiIconKind.Relic, "Burning Core", "Gain 6 Block at combat start.", "relic_1", CardRarity.Uncommon)
                 });
             BattleSceneSnapshot snapshot = snapshotBuilder.Build();
             FakeBattleSceneFlowService flowService = new FakeBattleSceneFlowService(snapshot);
@@ -287,7 +289,7 @@ namespace Dungeon.Tests.EditMode
             snapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
                 ownedPotions: new[]
                 {
-                    new BattleMultiIconViewModel(BattleIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
+                    new MultiIconViewModel(MultiIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
                 },
                 selectedOwnedPotionIndex: 0,
                 ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
@@ -314,7 +316,7 @@ namespace Dungeon.Tests.EditMode
             readySnapshotBuilder.HostChrome = new BattleHostChromeSnapshot(
                 ownedPotions: new[]
                 {
-                    new BattleMultiIconViewModel(BattleIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
+                    new MultiIconViewModel(MultiIconKind.Potion, "Fruit Juice", "Gain 5 Max HP.", "potion_fruit_juice", CardRarity.Uncommon)
                 },
                 selectedOwnedPotionIndex: 0,
                 ownedPotionHintMessage: "Fruit Juice\nGain 5 Max HP.",
@@ -339,8 +341,8 @@ namespace Dungeon.Tests.EditMode
         [Test]
         public void OnUsePotionClicked_TargetPotion_DelegatesOnceAndRerenders()
         {
-            BattleMultiIconViewModel firePotion = new BattleMultiIconViewModel(
-                BattleIconKind.Potion,
+            MultiIconViewModel firePotion = new MultiIconViewModel(
+                MultiIconKind.Potion,
                 "Fire Potion",
                 "Deal 20 damage.",
                 "potion_fire",
@@ -395,6 +397,45 @@ namespace Dungeon.Tests.EditMode
             Assert.That(flowService.InitializeFromSaveCallCount, Is.EqualTo(1));
             Assert.That(flowService.InitializeCallCount, Is.EqualTo(0));
             Assert.That(runSaveService.DeleteCallCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ExplicitNewAdventure_IgnoresExistingCheckpointWithoutDeletingItFirst()
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { HasSavedRunResult = true, LoadResult = CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            presenter.InitializeAsync(new FakeBattleSceneHostView(), 6601, () => { }, CancellationToken.None,
+                startMode: BattleRunStartMode.NewAdventure).GetAwaiter().GetResult();
+            Assert.That(flow.InitializeCallCount, Is.EqualTo(1));
+            Assert.That(flow.InitializeFromSaveCallCount, Is.Zero);
+            Assert.That(save.DeleteCallCount, Is.Zero);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ExplicitContinue_RejectsMissingOrMismatchedCheckpoint(bool missing)
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { LoadResult = missing ? null : CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            Assert.Throws<InvalidOperationException>(() => presenter.InitializeAsync(new FakeBattleSceneHostView(), 6601,
+                () => { }, CancellationToken.None, startMode: BattleRunStartMode.ContinueAdventure).GetAwaiter().GetResult());
+            Assert.That(flow.InitializeCallCount, Is.Zero);
+            Assert.That(flow.InitializeFromSaveCallCount, Is.Zero);
+            Assert.That(save.DeleteCallCount, Is.Zero);
+        }
+
+        [Test]
+        public void ExplicitContinue_RestoresCheckpointEvenWithoutExistsHint()
+        {
+            var flow = new FakeBattleSceneFlowService(CreateSnapshot(BattleScenePage.Map));
+            var save = new FakeRunSaveService { LoadResult = CreateValidSaveData() };
+            var presenter = new BattleScenePresenter(flow, flow, new BattlePagePresenter(), new FakeBattleSceneUiCoordinator(), save);
+            presenter.InitializeAsync(new FakeBattleSceneHostView(), save.LoadResult.RunProfileId, () => { }, CancellationToken.None,
+                startMode: BattleRunStartMode.ContinueAdventure).GetAwaiter().GetResult();
+            Assert.That(flow.InitializeFromSaveCallCount, Is.EqualTo(1));
+            Assert.That(flow.InitializeCallCount, Is.Zero);
         }
 
         [Test]
@@ -845,10 +886,10 @@ namespace Dungeon.Tests.EditMode
 
             public bool IsBattleVisible { get; private set; }
             public bool IsSaveQuitVisible { get; private set; }
-            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
+            public IReadOnlyList<MultiIconViewModel> LastOwnedRelics { get; private set; } = Array.Empty<MultiIconViewModel>();
             public string LastOwnedRelicHint { get; private set; } = string.Empty;
             public int LastSelectedOwnedRelicIndex { get; private set; } = -1;
-            public IReadOnlyList<BattleMultiIconViewModel> LastOwnedPotions { get; private set; } = Array.Empty<BattleMultiIconViewModel>();
+            public IReadOnlyList<MultiIconViewModel> LastOwnedPotions { get; private set; } = Array.Empty<MultiIconViewModel>();
             public string LastOwnedPotionHint { get; private set; } = string.Empty;
             public int LastSelectedOwnedPotionIndex { get; private set; } = -1;
             public bool IsOwnedPotionUseVisible { get; private set; }
@@ -858,9 +899,9 @@ namespace Dungeon.Tests.EditMode
             private Action _onUsePotionClicked;
             private Action _onHostBackgroundClicked;
 
-            public void BuildOwnedRelics(IReadOnlyList<BattleMultiIconViewModel> relics, Action<int> onClicked)
+            public void BuildOwnedRelics(IReadOnlyList<MultiIconViewModel> relics, Action<int> onClicked)
             {
-                LastOwnedRelics = relics ?? Array.Empty<BattleMultiIconViewModel>();
+                LastOwnedRelics = relics ?? Array.Empty<MultiIconViewModel>();
             }
 
             public void SetOwnedRelicHint(string message, int selectedIndex)
@@ -871,12 +912,12 @@ namespace Dungeon.Tests.EditMode
 
             public void ClearOwnedRelics()
             {
-                LastOwnedRelics = Array.Empty<BattleMultiIconViewModel>();
+                LastOwnedRelics = Array.Empty<MultiIconViewModel>();
             }
 
-            public void BuildOwnedPotions(IReadOnlyList<BattleMultiIconViewModel> potions, Action<int> onClicked)
+            public void BuildOwnedPotions(IReadOnlyList<MultiIconViewModel> potions, Action<int> onClicked)
             {
-                LastOwnedPotions = potions ?? Array.Empty<BattleMultiIconViewModel>();
+                LastOwnedPotions = potions ?? Array.Empty<MultiIconViewModel>();
             }
 
             public void SetOwnedPotionHint(string message, int selectedIndex)
@@ -893,7 +934,7 @@ namespace Dungeon.Tests.EditMode
 
             public void ClearOwnedPotions()
             {
-                LastOwnedPotions = Array.Empty<BattleMultiIconViewModel>();
+                LastOwnedPotions = Array.Empty<MultiIconViewModel>();
                 IsOwnedPotionUseVisible = false;
                 _onUsePotionClicked = null;
             }

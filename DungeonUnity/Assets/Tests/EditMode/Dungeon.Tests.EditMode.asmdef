@@ -16,8 +16,18 @@
         "TFramework.Scene",
         "TFramework.UI",
         "UniTask",
+        "VContainer",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.Addressables.Editor",
+        "Dungeon.Runtime.Common.UI",
+        "Dungeon.Runtime.OutGame.CardDetail",
+        "Dungeon.Runtime.OutGame.Collection",
+        "Dungeon.Runtime.OutGame.InitialDeck",
+        "Dungeon.Runtime.OutGame.RelicDetail",
+        "Dungeon.Runtime.OutGame.CharacterSelect",
+        "Dungeon.Runtime.OutGame.Result",
+        "Dungeon.Runtime.OutGame.Settings"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.InGame.Battle.Services;
 using TFramework.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,10 +18,10 @@ namespace Dungeon.Runtime.InGame.Battle.View
         [SerializeField] private TFTextUGUI _messageText;
         [SerializeField] private Transform _cardContainer;
         [SerializeField] private Transform _previewContainer;
-        [SerializeField] private BattleCardIconView _cardTemplate;
+        [SerializeField] private CardIconView _cardTemplate;
 
-        private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
-        private readonly List<BattleCardIconView> _previewCardViews = new List<BattleCardIconView>();
+        private readonly List<CardIconView> _cardViews = new List<CardIconView>();
+        private readonly List<CardIconView> _previewCardViews = new List<CardIconView>();
         private BattleCardSelectDialogParam _param;
         private IReadOnlyList<RuntimeCard> _deckCards;
         private IReadOnlyDictionary<int, int> _cardPrices;
@@ -112,12 +114,12 @@ namespace Dungeon.Runtime.InGame.Battle.View
                     continue;
                 }
 
-                BattleCardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
+                CardIconView cardView = Instantiate(_cardTemplate, _cardContainer);
                 cardView.gameObject.SetActive(true);
                 int cardIndex = i;
                 int cardPrice = ResolveCardPrice(card);
                 cardView.Bind(
-                    BattleMultiIconViewModel.CreateCard(
+                    BattleIconViewModelFactory.CreateCard(
                         card,
                         isInteractable: !_isPreviewOpen,
                         isSelected: IsSelectedCard(cardIndex),
@@ -280,7 +282,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
         private void CreatePreviewCard(RuntimeCard card, Vector2 anchoredPosition)
         {
-            BattleCardIconView cardView = Instantiate(_cardTemplate, _previewContainer);
+            CardIconView cardView = Instantiate(_cardTemplate, _previewContainer);
             cardView.gameObject.SetActive(true);
             if (cardView.transform is RectTransform rectTransform)
             {
@@ -291,7 +293,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
                 rectTransform.sizeDelta = new Vector2(220f, 320f);
             }
 
-            cardView.Bind(BattleMultiIconViewModel.CreateCard(card), null);
+            cardView.Bind(BattleIconViewModelFactory.CreateCard(card), null);
             _previewCardViews.Add(cardView);
         }
 
@@ -350,7 +352,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
             }
         }
 
-        private static void DestroyCardView(BattleCardIconView cardView)
+        private static void DestroyCardView(CardIconView cardView)
         {
             if (cardView == null)
             {

@@ -1,45 +1,45 @@
 key,ja,en,zh-CN,zh-TW,ko
-ui.title.main,メイン,Main,Main,Main,Main
+ui.title.main,メイン,Main,主界面,主畫面,메인
 ui.message.welcome,ようこそ、{0}!,"Welcome, {0}!",欢迎，{0}!,歡迎，{0}!,"환영합니다, {0}!"
 ui.title.settings,設定,Settings,设置,設定,설정
 ui.message.complete,完了,Complete,完成,完成,완료
 ui.button.confirm,確認,Confirm,确认,確認,확인
 ui.button.cancel,キャンセル,Cancel,取消,取消,취소
-card.name.cinder_slash,シンダースラッシュ,Cinder Slash,余烬斩,餘燼斬,신더 슬래시
-card.name.ash_guard,アッシュガード,Ash Guard,灰烬壁垒,灰燼壁壘,애시 가드
-card.name.crystal_bash,クリスタルバッシュ,Crystal Bash,晶簇猛击,晶簇猛擊,크리스탈 배시
+card.name.scratch,ひっかき,Scratch,抓挠,抓撓,할퀴기
+card.name.brace,身構え,Brace,防备,防備,방어 자세
+card.name.unbalancing_strike,崩し打ち,Unbalancing Strike,破势击,破勢擊,균형 깨기
 card.name.ember_knuckle,エンバーナックル,Ember Knuckle,余火重拳,餘火重拳,엠버 너클
 card.name.shell_up,シェルアップ,Shell Up,甲壳架势,甲殼架勢,셸 업
-card.name.dual_fang,デュアルファング,Dual Fang,双牙连击,雙牙連擊,듀얼 팽
+card.name.double_scratch,連続ひっかき,Double Scratch,连续抓挠,連續抓撓,연속 할퀴기
 card.name.iron_tide,アイアンタイド,Iron Tide,铁潮拍击,鐵潮拍擊,아이언 타이드
 card.name.storm_clap,ストームクラップ,Storm Clap,风暴震击,風暴震擊,스톰 클랩
-card.name.char_sweep,チャースイープ,Char Sweep,焦炭横扫,焦炭橫掃,숯먼지 휩쓸기
+card.name.sweep,なぎ払い,Sweep,横扫,橫掃,휩쓸기
 card.name.grim_line,グリムライン,Grim Line,沉重打击,沉重打擊,그림 라인
-card.name.cinder_slash_plus,シンダースラッシュ+,Cinder Slash+,余烬斩+,餘燼斬+,신더 슬래시+
-card.name.ash_guard_plus,アッシュガード+,Ash Guard+,灰烬壁垒+,灰燼壁壘+,애시 가드+
-card.name.crystal_bash_plus,クリスタルバッシュ+,Crystal Bash+,晶簇猛击+,晶簇猛擊+,크리스탈 배시+
+card.name.scratch_plus,ひっかき+,Scratch+,抓挠+,抓撓+,할퀴기+
+card.name.brace_plus,身構え+,Brace+,防备+,防備+,방어 자세+
+card.name.unbalancing_strike_plus,崩し打ち+,Unbalancing Strike+,破势击+,破勢擊+,균형 깨기+
 card.name.ember_knuckle_plus,エンバーナックル+,Ember Knuckle+,余火重拳+,餘火重拳+,엠버 너클+
 card.name.shell_up_plus,シェルアップ+,Shell Up+,甲壳架势+,甲殼架勢+,셸 업+
-card.name.dual_fang_plus,デュアルファング+,Dual Fang+,双牙连击+,雙牙連擊+,듀얼 팽+
+card.name.double_scratch_plus,連続ひっかき+,Double Scratch+,连续抓挠+,連續抓撓+,연속 할퀴기+
 card.name.iron_tide_plus,アイアンタイド+,Iron Tide+,铁潮拍击+,鐵潮拍擊+,아이언 타이드+
 card.name.storm_clap_plus,ストームクラップ+,Storm Clap+,风暴震击+,風暴震擊+,스톰 클랩+
-card.name.char_sweep_plus,チャースイープ+,Char Sweep+,焦炭横扫+,焦炭橫掃+,숯먼지 휩쓸기+
+card.name.sweep_plus,なぎ払い+,Sweep+,横扫+,橫掃+,휩쓸기+
 card.name.grim_line_plus,グリムライン+,Grim Line+,沉重打击+,沉重打擊+,그림 라인+
-card.name.spark_focus_plus,スパークフォーカス+,Spark Focus+,火花专注+,火花專注+,스파크 포커스+
-enemy.name.ash_cultist,アッシュカルティスト,Ash Cultist,灰烬邪教徒,灰燼邪教徒,애시 컬티스트
+card.name.focus_plus,集中+,Focus+,集中+,集中+,집중+
+enemy.name.ruins_watcher,遺跡の番人,Ruins Watcher,遗迹守卫,遺跡守衛,유적 파수꾼
 enemy.name.gnaw_beast,噛みつき獣,Gnaw Beast,噬咬兽,噬咬獸,물어뜯는 야수
 enemy.name.red_mite,赤ダニ,Red Mite,赤螨,赤蟎,붉은 진드기
 enemy.name.green_mite,緑ダニ,Green Mite,绿螨,綠蟎,초록 진드기
 enemy.name.mire_slime,マイアスライム,Mire Slime,泥沼史莱姆,泥沼史萊姆,수렁 슬라임
-enemy.name.nob_reaver,ノブリーバー,Nob Reaver,豪腕掠夺者,豪腕掠奪者,노브 리버
-enemy.name.sludge_monarch,スラッジモナーク,Sludge Monarch,淤泥君王,淤泥君王,슬러지 모나크
+enemy.name.strongarm_watcher,豪腕の番人,Strongarm Watcher,巨力守卫,巨力守衛,괴력의 파수꾼
+enemy.name.mire_master,ぬまの主,Master of the Mire,沼泽之主,沼澤之主,늪의 주인
 map.node.ruins_path_1,廃墟通路I,Ruins Path I,废墟通路I,廢墟通路I,폐허 통로 I
 map.node.broken_bridge,崩れた橋,Broken Bridge,断裂桥,斷裂橋,무너진 다리
-map.node.cinder_rest,残り火の休息所,Cinder Rest,余烬营地,餘燼營地,잿불 휴식처
+map.node.explorers_rest,探検家の休憩所,Explorer's Rest,探险家休息处,探險家休息處,탐험가의 쉼터
 map.node.ruins_path_2,廃墟通路II,Ruins Path II,废墟通路II,廢墟通路II,폐허 통로 II
-map.node.abyss_gate,深淵の門,Abyss Gate,深渊之门,深淵之門,심연의 문
+map.node.guarded_gate,守りの門,Guarded Gate,守护之门,守護之門,수호의 문
 map.node.supply_post,前線補給所,Supply Post,前线补给站,前線補給站,전선 보급소
-map.node.throne_gate,玉座の門,Throne Gate,王座之门,王座之門,왕좌의 문
+map.node.labyrinth_depths,迷宮の奥,Labyrinth Depths,迷宫深处,迷宮深處,미궁 깊은 곳
 battle.intent.attack,攻撃,Attack,攻击,攻擊,공격
 battle.intent.attack_debuff,攻撃弱体,Attack Debuff,攻击弱化,攻擊弱化,공격 약화
 battle.intent.attack_defend,攻防,Attack Defend,攻防,攻防,공방
@@ -53,10 +53,10 @@ battle.status.slimed,粘液,Slimed,黏液,黏液,점액
 battle.buff.strength,筋力,Strength,力量,力量,힘
 battle.buff.ritual,儀式,Ritual,仪式,儀式,의식
 battle.buff.enrage,激昂,Enrage,激怒,激怒,격노
-run.profile.crimson_exile_standard,紅蓮追放者 標準ラン,Crimson Exile Standard,红莲追放者 标准运行,紅蓮追放者 標準ラン,크림슨 엑자일 표준 런
+run.profile.momo_standard,モモの冒険,Momo's Adventure,桃桃的冒险,桃桃的冒險,모모의 모험
 event_fountain_title,不思議な泉,Mysterious Fountain,神秘泉水,神秘泉水,신비한 샘
 event_fountain_desc,あなたは奇妙なスライムの泉を見つけた。どうする？,You found a strange slime fountain. What will you do?,你发现了一个奇怪的史莱姆泉水。你打算怎么做？,你發現了一個奇怪的史萊姆泉水。你打算怎麼做？,당신은 기묘한 슬라임 샘을 발견했다. 어떻게 할까?
-event_fountain_choice1_text,泉の水を飲む（最大HP+5）,Drink the water (Max HP +5),喝泉水（最大生命+5）,喝泉水（最大生命+5）,샘물을 마신다 (최대 체력 +5)
+event_fountain_choice1_text,泉の水を飲む（最大HP+5、HPを5回復）,"Drink the water (Max HP +5, heal 5 HP)",喝泉水（最大生命+5，恢复5点生命）,喝泉水（最大生命+5，恢復5點生命）,"샘물을 마신다 (최대 체력 +5, 체력 5 회복)"
 event_fountain_choice2_text,泉の底を探る（10ダメージ）,Search the bottom (10 Damage),探索泉底（受到10点伤害）,探索泉底（受到10點傷害）,샘 바닥을 살핀다 (10 피해)
 event_fountain_choice3_text,泉の底を探る（100Gold獲得）,Search the bottom (Gain 100 Gold),探索泉底（获得100金币）,探索泉底（獲得100金幣）,샘 바닥을 살핀다 (100 골드 획득)
 event_fountain_choice4_text,無視して立ち去る,Ignore and leave,无视并离开,無視並離開,무시하고 떠난다
@@ -66,49 +66,41 @@ restshop.rest_button,休憩,Rest,休息,休息,휴식
 restshop.upgrade_button,強化,Upgrade,强化,強化,강화
 restshop.shop_button,ショップ,Shop,商店,商店,상점
 restshop.continue_button,先へ進む,Continue,前进,前進,계속
-card.name.spark_focus,スパークフォーカス,Spark Focus,火花专注,火花專注,스파크 포커스
-card.desc.cinder_slash,敵1体に6ダメージを与える。,Deal 6 damage to an enemy.,对1名敌人造成6点伤害。,對1名敵人造成6點傷害。,적 하나에게 피해 6을 준다.
-card.desc.ash_guard,5ブロックを得る。,Gain 5 Block.,获得5点格挡。,獲得5點格擋。,방어도 5를 얻는다.
-card.desc.crystal_bash,敵1体に10ダメージを与える。,Deal 10 damage to an enemy.,对1名敌人造成10点伤害。,對1名敵人造成10點傷害。,적 하나에게 피해 10을 준다.
-card.desc.ember_knuckle,敵1体に8ダメージを与える。,Deal 8 damage to an enemy.,对1名敌人造成8点伤害。,對1名敵人造成8點傷害。,적 하나에게 피해 8을 준다.
-card.desc.shell_up,8ブロックを得る。,Gain 8 Block.,获得8点格挡。,獲得8點格擋。,방어도 8을 얻는다.
-card.desc.dual_fang,敵1体に4ダメージを2回与える。,Deal 4 damage twice to an enemy.,对1名敌人造成2次4点伤害。,對1名敵人造成2次4點傷害。,적 하나에게 피해 4를 2회 준다.
-card.desc.iron_tide,敵1体に7ダメージを与え5ブロックを得る。,Deal 7 damage and gain 5 Block.,对1名敌人造成7点伤害并获得5点格挡。,對1名敵人造成7點傷害並獲得5點格擋。,적 하나에게 피해 7을 주고 방어도 5를 얻는다.
-card.desc.storm_clap,すべての敵に5ダメージを与える。,Deal 5 damage to all enemies.,对所有敌人造成5点伤害。,對所有敵人造成5點傷害。,모든 적에게 피해 5를 준다.
-card.desc.char_sweep,すべての敵に4ダメージを与え脱力1を付与する。,Deal 4 damage and apply 1 Weak to all enemies.,对所有敌人造成4点伤害并施加1层虚弱。,對所有敵人造成4點傷害並施加1層虛弱。,모든 적에게 피해 4를 주고 약화 1을 건다.
-card.desc.grim_line,敵1体に14ダメージを与える。,Deal 14 damage to an enemy.,对1名敌人造成14点伤害。,對1名敵人造成14點傷害。,적 하나에게 피해 14를 준다.
-card.desc.spark_focus,エナジー1を得てカードを1枚引く。,Gain 1 Energy and draw 1 card.,获得1点能量并抽1张牌。,獲得1點能量並抽1張牌。,에너지 1을 얻고 카드 1장을 뽑는다.
-card.desc.cinder_slash_plus,敵1体に9ダメージを与える。,Deal 9 damage to an enemy.,对1名敌人造成9点伤害。,對1名敵人造成9點傷害。,적 하나에게 피해 9를 준다.
-card.desc.ash_guard_plus,8ブロックを得る。,Gain 8 Block.,获得8点格挡。,獲得8點格擋。,방어도 8을 얻는다.
-card.desc.crystal_bash_plus,敵1体に10ダメージを与え脆弱2を付与する。,Deal 10 damage and apply 2 Vulnerable to an enemy.,对1名敌人造成10点伤害并施加2层易伤。,對1名敵人造成10點傷害並施加2層易傷。,적 하나에게 피해 10을 주고 취약 2를 건다.
+card.name.focus,集中,Focus,集中,集中,집중
+card.desc.scratch,敵1体に6ダメージを与える。,Deal 6 damage to an enemy.,对1名敌人造成6点伤害。,對1名敵人造成6點傷害。,적 하나에게 피해 6을 준다.
+card.desc.brace,5ブロックを得る。,Gain 5 Block.,获得5点格挡。,獲得5點格擋。,방어도 5를 얻는다.
+card.desc.unbalancing_strike,敵1体に8ダメージを与え、脆弱2を付与する。,Deal 8 damage and apply 2 Vulnerable to an enemy.,对1名敌人造成8点伤害并施加2层易伤。,對1名敵人造成8點傷害並施加2層易傷。,적 하나에게 피해 8을 주고 취약 2를 건다.
+card.desc.ember_knuckle,敵1体に9ダメージを与え、カードを1枚引く。,Deal 9 damage and draw 1 card.,对1名敌人造成9点伤害并抽1张牌。,對1名敵人造成9點傷害並抽1張牌。,적 하나에게 피해 9를 주고 카드 1장을 뽑는다.
+card.desc.shell_up,8ブロックを得て、カードを1枚引く。,Gain 8 Block and draw 1 card.,获得8点格挡并抽1张牌。,獲得8點格擋並抽1張牌。,방어도 8을 얻고 카드 1장을 뽑는다.
+card.desc.double_scratch,敵1体に5ダメージを2回与える。,Deal 5 damage twice to an enemy.,对1名敌人造成2次5点伤害。,對1名敵人造成2次5點傷害。,적 하나에게 피해 5를 2회 준다.
+card.desc.iron_tide,敵1体に5ダメージを与え、5ブロックを得る。,Deal 5 damage and gain 5 Block.,对1名敌人造成5点伤害并获得5点格挡。,對1名敵人造成5點傷害並獲得5點格擋。,적 하나에게 피해 5를 주고 방어도 5를 얻는다.
+card.desc.storm_clap,すべての敵に4ダメージを与え、脆弱1を付与する。,Deal 4 damage and apply 1 Vulnerable to all enemies.,对所有敌人造成4点伤害并施加1层易伤。,對所有敵人造成4點傷害並施加1層易傷。,모든 적에게 피해 4를 주고 취약 1을 건다.
+card.desc.sweep,すべての敵に8ダメージを与える。,Deal 8 damage to all enemies.,对所有敌人造成8点伤害。,對所有敵人造成8點傷害。,모든 적에게 피해 8을 준다.
+card.desc.grim_line,敵1体に12ダメージを与え、脱力2を付与する。,Deal 12 damage and apply 2 Weak to an enemy.,对1名敌人造成12点伤害并施加2层虚弱。,對1名敵人造成12點傷害並施加2層虛弱。,적 하나에게 피해 12를 주고 약화 2를 건다.
+card.desc.focus,エナジー1を得て、カードを1枚引く。廃棄。,Gain 1 Energy and draw 1 card. Exhaust.,获得1点能量并抽1张牌。消耗。,獲得1點能量並抽1張牌。消耗。,에너지 1을 얻고 카드 1장을 뽑는다. 소멸.
+card.desc.scratch_plus,敵1体に9ダメージを与える。,Deal 9 damage to an enemy.,对1名敌人造成9点伤害。,對1名敵人造成9點傷害。,적 하나에게 피해 9를 준다.
+card.desc.brace_plus,8ブロックを得る。,Gain 8 Block.,获得8点格挡。,獲得8點格擋。,방어도 8을 얻는다.
+card.desc.unbalancing_strike_plus,敵1体に10ダメージを与え脆弱2を付与する。,Deal 10 damage and apply 2 Vulnerable to an enemy.,对1名敌人造成10点伤害并施加2层易伤。,對1名敵人造成10點傷害並施加2層易傷。,적 하나에게 피해 10을 주고 취약 2를 건다.
 card.desc.ember_knuckle_plus,敵1体に12ダメージを与えカードを1枚引く。,Deal 12 damage and draw 1 card.,对1名敌人造成12点伤害并抽1张牌。,對1名敵人造成12點傷害並抽1張牌。,적 하나에게 피해 12를 주고 카드 1장을 뽑는다.
 card.desc.shell_up_plus,11ブロックを得てカードを1枚引く。,Gain 11 Block and draw 1 card.,获得11点格挡并抽1张牌。,獲得11點格擋並抽1張牌。,방어도 11을 얻고 카드 1장을 뽑는다.
-card.desc.dual_fang_plus,敵1体に6ダメージを2回与える。,Deal 6 damage twice to an enemy.,对1名敌人造成2次6点伤害。,對1名敵人造成2次6點傷害。,적 하나에게 피해 6을 2회 준다.
+card.desc.double_scratch_plus,敵1体に6ダメージを2回与える。,Deal 6 damage twice to an enemy.,对1名敌人造成2次6点伤害。,對1名敵人造成2次6點傷害。,적 하나에게 피해 6을 2회 준다.
 card.desc.iron_tide_plus,敵1体に7ダメージを与え7ブロックを得る。,Deal 7 damage and gain 7 Block.,对1名敌人造成7点伤害并获得7点格挡。,對1名敵人造成7點傷害並獲得7點格擋。,적 하나에게 피해 7을 주고 방어도 7을 얻는다.
-card.desc.storm_clap_plus,すべての敵に6ダメージを与え脆弱1を付与する。,Deal 6 damage and apply 1 Vulnerable to all enemies.,对所有敌人造成6点伤害并施加1层易伤。,對所有敵人造成6點傷害並施加1層易傷。,모든 적에게 피해 6을 주고 취약 1을 건다.
-card.desc.char_sweep_plus,すべての敵に10ダメージを与える。,Deal 10 damage to all enemies.,对所有敌人造成10点伤害。,對所有敵人造成10點傷害。,모든 적에게 피해 10을 준다.
+card.desc.storm_clap_plus,すべての敵に6ダメージを与え、脆弱1を付与する。,Deal 6 damage and apply 1 Vulnerable to all enemies.,对所有敌人造成6点伤害并施加1层易伤。,對所有敵人造成6點傷害並施加1層易傷。,모든 적에게 피해 6을 주고 취약 1을 건다.
+card.desc.sweep_plus,すべての敵に10ダメージを与える。,Deal 10 damage to all enemies.,对所有敌人造成10点伤害。,對所有敵人造成10點傷害。,모든 적에게 피해 10을 준다.
 card.desc.grim_line_plus,敵1体に16ダメージを与え脱力2を付与する。,Deal 16 damage and apply 2 Weak to an enemy.,对1名敌人造成16点伤害并施加2层虚弱。,對1名敵人造成16點傷害並施加2層虛弱。,적 하나에게 피해 16을 주고 약화 2를 건다.
-card.desc.spark_focus_plus,エナジー1を得てカードを2枚引く。,Gain 1 Energy and draw 2 cards.,获得1点能量并抽2张牌。,獲得1點能量並抽2張牌。,에너지 1을 얻고 카드 2장을 뽑는다.
-relic.name.burning_core,バーニングコア,Burning Core,燃烧核心,燃燒核心,버닝 코어
-relic.desc.burning_core,戦闘開始時に6ブロックを得る。,Gain 6 Block at the start of combat.,战斗开始时获得6点格挡。,戰鬥開始時獲得6點格擋。,전투 시작 시 방어도 6을 얻는다.
-relic.name.ember_crown,エンバークラウン,Ember Crown,余烬王冠,餘燼王冠,엠버 크라운
-relic.desc.ember_crown,プレイヤーターン開始時にエナジー1を得る。,Gain 1 Energy at the start of each player turn.,每个玩家回合开始时获得1点能量。,每個玩家回合開始時獲得1點能量。,플레이어 턴 시작 시 에너지 1을 얻는다.
-relic.name.cracked_crystal_core,破損晶核,Cracked Crystal Core,破损晶核,破損晶核,파손된 수정핵
-relic.desc.cracked_crystal_core,戦闘開始時にエナジー1を得る。,Gain 1 Energy at the start of combat.,战斗开始时获得1点能量。,戰鬥開始時獲得1點能量。,전투 시작 시 에너지 1을 얻는다.
-relic.name.hunters_talisman,猟師の護符,Hunter's Talisman,猎人护符,獵人護符,사냥꾼의 부적
-relic.desc.hunters_talisman,戦闘勝利時に10ゴールドを得る。,Gain 10 Gold after winning a battle.,战斗胜利时获得10金币。,戰鬥勝利時獲得10金幣。,전투 승리 시 골드 10을 얻는다.
-relic.name.echo_vessel,反響容器,Echo Vessel,回响容器,迴響容器,메아리 그릇
-relic.desc.echo_vessel,各ターンで最初にコスト0のカードを使用した時、2ブロックを得る。,Gain 2 Block after playing the first 0-cost card each turn.,每回合首次打出0费卡牌时获得2点格挡。,每回合首次打出0費卡牌時獲得2點格擋。,매 턴 처음으로 비용 0 카드를 사용하면 방어도 2를 얻는다.
-relic.name.cracked_idol,亀裂の聖像,Cracked Idol,裂纹圣像,裂紋聖像,금이 간 성상
-relic.desc.cracked_idol,プレイヤーターン開始時、HPが50%以下なら3ブロックを得る。,Gain 3 Block at the start of your turn if HP is 50% or lower.,玩家回合开始时若生命值不高于50%则获得3点格挡。,玩家回合開始時若生命值不高於50%則獲得3點格擋。,플레이어 턴 시작 시 체력이 50% 이하면 방어도 3을 얻는다.
-relic.name.refining_prism,精製プリズム,Refining Prism,精炼棱镜,精煉稜鏡,정제 프리즘
-relic.desc.refining_prism,ラン中に1回、休憩所へ入った時にHPを5回復し、その休憩所でのカード強化を1回無料にする。,Once per run heal 5 HP when entering a Rest Shop and make one card upgrade there free.,每次冒险限一次：进入休息商店时恢复5点生命并可免费强化1张卡牌。,每次冒險限一次：進入休息商店時恢復5點生命並可免費強化1張卡牌。,런당 1회 휴식 상점에 들어가면 체력 5를 회복하고 그곳에서 카드 강화 1회를 무료로 한다.
-relic.name.bone_white_dice_box,骨白のダイス箱,Bone-White Dice Box,骨白骰盒,骨白骰盒,백골 주사위 상자
-relic.desc.bone_white_dice_box,エリート戦の勝利時、Commonカード1枚を規定の順序で強化する。,After winning an Elite Battle upgrade one Common card in a fixed order.,精英战胜利时按固定顺序强化1张普通卡牌。,精英戰勝利時按固定順序強化1張普通卡牌。,엘리트 전투 승리 시 정해진 순서에 따라 Common 카드 1장을 강화한다.
-potion.name.cinder_tonic,シンダートニック,Cinder Tonic,余烬药剂,餘燼藥劑,신더 토닉
-potion.desc.cinder_tonic,火花が沈む薬瓶。基本ポーション表示用。,A bottled cinder. Baseline potion for shared icon display.,封存火星的药剂。用于基础药水显示。,封存火星的藥劑。用於基礎藥水顯示。,불씨가 가라앉은 약병. 기본 포션 표시용.
-potion.name.smoke_phial,スモークファイアル,Smoke Phial,烟幕小瓶,煙幕小瓶,스모크 피알
-potion.desc.smoke_phial,薄煙を閉じ込めた小瓶。上位ポーション表示用。,A phial of smoke. Sample potion for upgraded display.,封存烟雾的小瓶。用于进阶药水显示。,封存煙霧的小瓶。用於進階藥水顯示。,옅은 연기를 담은 작은 병. 상위 포션 표시용.
+card.desc.focus_plus,エナジー1を得て、カードを2枚引く。廃棄。,Gain 1 Energy and draw 2 cards. Exhaust.,获得1点能量并抽2张牌。消耗。,獲得1點能量並抽2張牌。消耗。,에너지 1을 얻고 카드 2장을 뽑는다. 소멸.
+relic.name.chipped_crystal,欠けた結晶,Chipped Crystal,缺角结晶,缺角結晶,이가 빠진 결정
+relic.desc.chipped_crystal,戦闘開始時にエナジー1を得る。,Gain 1 Energy at the start of combat.,战斗开始时获得1点能量。,戰鬥開始時獲得1點能量。,전투 시작 시 에너지 1을 얻는다.
+relic.name.treasure_pouch,宝探しの小袋,Treasure Pouch,寻宝小袋,尋寶小袋,보물찾기 주머니
+relic.desc.treasure_pouch,戦闘勝利時に10ゴールドを得る。,Gain 10 Gold after winning a battle.,战斗胜利时获得10金币。,戰鬥勝利時獲得10金幣。,전투 승리 시 골드 10을 얻는다.
+relic.name.echo_bell,こだまの鈴,Echo Bell,回声铃,回聲鈴,메아리 방울
+relic.desc.echo_bell,各ターンで最初にコスト0のカードを使用した時、2ブロックを得る。,Gain 2 Block after playing the first 0-cost card each turn.,每回合首次打出0费卡牌时获得2点格挡。,每回合首次打出0費卡牌時獲得2點格擋。,매 턴 처음으로 비용 0 카드를 사용하면 방어도 2를 얻는다.
+relic.name.protective_box,守りの小箱,Protective Box,守护小盒,守護小盒,수호의 작은 상자
+relic.desc.protective_box,プレイヤーターン開始時、HPが50%以下なら3ブロックを得る。,Gain 3 Block at the start of your turn if HP is 50% or lower.,玩家回合开始时若生命值不高于50%则获得3点格挡。,玩家回合開始時若生命值不高於50%則獲得3點格擋。,플레이어 턴 시작 시 체력이 50% 이하면 방어도 3을 얻는다.
+relic.name.travel_bag,旅支度のかばん,Travel Bag,旅行背包,旅行背包,여행 가방
+relic.desc.travel_bag,ラン中に1回、休憩所へ入った時にHPを5回復し、その休憩所でのカード強化を1回無料にする。,Once per run heal 5 HP when entering a Rest Shop and make one card upgrade there free.,每次冒险限一次：进入休息商店时恢复5点生命并可免费强化1张卡牌。,每次冒險限一次：進入休息商店時恢復5點生命並可免費強化1張卡牌。,런당 1회 휴식 상점에 들어가면 체력 5를 회복하고 그곳에서 카드 강화 1회를 무료로 한다.
+relic.name.worn_notebook,使い込んだ手帳,Worn Notebook,旧手册,舊手冊,손때 묻은 수첩
+relic.desc.worn_notebook,エリート戦の勝利時、未強化のコモンカード1枚をランダムに強化する。,"After winning an Elite Battle, randomly upgrade one unupgraded Common card.",精英战胜利时随机强化1张未强化的普通卡牌。,精英戰勝利時隨機強化1張未強化的普通卡牌。,엘리트 전투 승리 시 강화하지 않은 일반 카드 1장을 무작위로 강화한다.
 battle.pile.draw,山札,Draw,抽牌堆,抽牌堆,드로우
 battle.pile.discard,捨て札,Discard,弃牌堆,棄牌堆,버림
 battle.pile.exhaust,廃棄札,Exhaust,废弃堆,廢棄堆,소멸
@@ -120,7 +112,7 @@ potion.desc.block_potion,12ブロックを得る。,Gain 12 Block.,获得12点�
 potion.name.swift_potion,スイフトポーション,Swift Potion,迅捷药水,迅捷藥水,신속 포션
 potion.desc.swift_potion,カードを3枚引く。,Draw 3 cards.,抽3张牌。,抽3張牌。,카드 3장을 뽑는다.
 potion.name.fruit_juice,フルーツジュース,Fruit Juice,果汁药剂,果汁藥劑,과일 주스
-potion.desc.fruit_juice,最大HPを5増やす。,Gain 5 Max HP.,增加5点最大生命。,增加5點最大生命。,최대 체력 5를 얻는다.
+potion.desc.fruit_juice,最大HPを5増やし、HPを5回復する。,Increase Max HP by 5 and heal 5 HP.,最大生命值增加5点，并恢复5点生命。,最大生命值增加5點，並恢復5點生命。,최대 체력이 5 증가하고 체력을 5 회복한다.
 potion.name.shard_bomb,晶片爆弾,Shard Bomb,晶片炸弹,晶片炸彈,수정 조각 폭탄
 potion.desc.shard_bomb,敵1体に15ダメージを与える。,Deal 15 damage to an enemy.,对1名敌人造成15点伤害。,對1名敵人造成15點傷害。,적 하나에게 피해 15를 준다.
 potion.name.fracture_ampoule,亀裂アンプル,Fracture Ampoule,裂隙安瓿,裂隙安瓿,균열 앰풀
@@ -132,3 +124,12 @@ battle.potion.use_confirm_title,ポーション使用,Use Potion,使用药水,�
 battle.potion.use_confirm_message,{0}を使用しますか？,Use {0}?,要使用{0}吗？,要使用{0}嗎？,{0}을(를) 사용하시겠습니까?
 battle.potion.replace_title,ポーション入れ替え,Potion Replace,药水替换,藥水替換,포션 교체
 battle.potion.replace_message,所持上限です。入れ替えるポーションを選んでください。,Potion slots are full. Choose a potion to replace.,药水槽已满。请选择要替换的药水。,藥水槽已滿。請選擇要替換的藥水。,포션 슬롯이 가득 찼습니다. 교체할 포션을 선택하세요.
+character.name.momo,モモ,Momo,桃桃,桃桃,모모
+character.desc.momo,遺物を探して迷宮を歩く探検家。近距離での攻撃と防御を得意とする。,An explorer searching the labyrinth for relics. Skilled in close-range attacks and defense.,在迷宫中寻找遗物的探险家，擅长近距离攻击与防御。,在迷宮中尋找遺物的探險家，擅長近距離攻擊與防禦。,유물을 찾아 미궁을 탐험하는 탐험가. 근거리 공격과 방어가 특기다.
+character.biography.momo,猫たちが暮らす街を拠点に、珍しい品や未知の場所を求めて迷宮へ向かう探検家。近距離で攻撃し、身を守りながら探索を進める。,"An explorer based in a town of cats, venturing into the labyrinth in search of unusual treasures and unfamiliar places. Fights at close range and stays on guard while exploring.",以猫咪们生活的城镇为据点，为寻找珍奇物品与未知之地而踏入迷宫的探险家。以近距离攻击应战，一边保护自己一边继续探索。,以貓咪們生活的城鎮為據點，為尋找珍奇物品與未知之地而踏入迷宮的探險家。以近距離攻擊應戰，一邊保護自己一邊繼續探索。,고양이들이 사는 마을을 거점으로 삼아 신기한 물건과 낯선 장소를 찾아 미궁으로 향하는 탐험가. 근거리 공격으로 싸우며 스스로를 지키면서 탐험을 이어 간다.
+character.speech.momo.home_enter_01,準備ができたら、迷宮へ行こう。,"Once we are ready, let us head into the labyrinth.",准备好就去迷宫吧。,準備好就去迷宮吧。,준비되면 미궁으로 가자.
+character.speech.momo.home_enter_02,次はどんな遺物が見つかるかな。,I wonder what relic we will find next.,下次会找到什么遗物呢？,下次會找到什麼遺物呢？,다음에는 어떤 유물을 찾을까?
+character.speech.momo.home_click_01,道具の確認は済んだ？,Have you checked our supplies?,道具检查好了吗？,道具檢查好了嗎？,도구는 다 확인했어?
+character.speech.momo.home_click_02,気になる道があったら教えてね。,Tell me if a path catches your eye.,有想探索的路线就告诉我。,有想探索的路線就告訴我。,궁금한 길이 있으면 알려 줘.
+character.speech.momo.run_start_01,よし、迷宮を探検しよう。,"All right, let us explore the labyrinth.",好，去探索迷宫吧。,好，去探索迷宮吧。,"좋아, 미궁을 탐험하자."
+character.speech.momo.run_start_02,無理せず、進めるところまで行こう。,Let us go as far as we safely can.,量力而行，看看我们能走到哪里。,量力而行，看看我們能走到哪裡。,무리하지 말고 갈 수 있는 데까지 가자.

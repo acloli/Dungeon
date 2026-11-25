@@ -19,6 +19,16 @@ namespace Game.MasterData.Generated
             return self.GetContainer<CardMasterContainer>();
         }
 
+        public static CharacterMasterContainer CharacterMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<CharacterMasterContainer>();
+        }
+
+        public static CharacterSpeechMasterContainer CharacterSpeechMaster(this IMasterDataService self)
+        {
+            return self.GetContainer<CharacterSpeechMasterContainer>();
+        }
+
         public static DeckGroupMasterContainer DeckGroupMaster(this IMasterDataService self)
         {
             return self.GetContainer<DeckGroupMasterContainer>();

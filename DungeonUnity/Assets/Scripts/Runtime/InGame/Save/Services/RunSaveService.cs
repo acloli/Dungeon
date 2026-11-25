@@ -13,10 +13,12 @@ namespace Dungeon.Runtime.InGame.Save.Services
     {
         private const string RunSaveKey = "run_save";
         private readonly ISaveDataService _saveDataService;
+        private readonly ICollectionProgressService _progress;
 
-        public RunSaveService(ISaveDataService saveDataService)
+        public RunSaveService(ISaveDataService saveDataService, ICollectionProgressService progress = null)
         {
             _saveDataService = saveDataService;
+            _progress = progress;
         }
 
         /// <summary>
@@ -29,6 +31,9 @@ namespace Dungeon.Runtime.InGame.Save.Services
                 TLogger.Warning("RunSaveData is invalid", "RunSave");
                 return;
             }
+
+            if (_progress != null)
+                await _progress.RecordAsync(data.DeckCardIds, data.OwnedRelicIds, null, token);
 
             try
             {

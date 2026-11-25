@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Game.MasterData.Generated;
 
 namespace Dungeon.Runtime.InGame.Battle.Model
@@ -139,164 +140,18 @@ namespace Dungeon.Runtime.InGame.Battle.Model
     }
 
     /// <summary>
-    /// 汎用アイコン種別
-    /// </summary>
-    public enum BattleIconKind
-    {
-        None = 0,
-        Card = 1,
-        Relic = 2,
-        Potion = 3,
-        Resource = 4
-    }
-
-    /// <summary>
-    /// 汎用アイコン表示用モデル
-    /// </summary>
-    public sealed class BattleMultiIconViewModel
-    {
-        public BattleMultiIconViewModel(
-            BattleIconKind iconKind,
-            string displayName,
-            string description,
-            string imageId,
-            CardRarity rarity,
-            int cost = 0,
-            bool showCost = false,
-            bool isInteractable = true,
-            bool isSelected = false,
-            bool isAffordable = true,
-            int quantity = 0,
-            bool showQuantity = false,
-            string footerLabel = "",
-            bool showFooterLabel = false)
-        {
-            IconKind = iconKind;
-            DisplayName = displayName ?? string.Empty;
-            Description = description ?? string.Empty;
-            ImageId = imageId ?? string.Empty;
-            Rarity = rarity;
-            Cost = cost;
-            ShowCost = showCost;
-            IsInteractable = isInteractable;
-            IsSelected = isSelected;
-            IsAffordable = isAffordable;
-            Quantity = quantity;
-            ShowQuantity = showQuantity;
-            FooterLabel = footerLabel ?? string.Empty;
-            ShowFooterLabel = showFooterLabel;
-        }
-
-        public static BattleMultiIconViewModel CreateCard(
-            RuntimeCard card,
-            bool isAffordable = true,
-            bool isInteractable = true,
-            bool isSelected = false,
-            int price = 0,
-            bool showPrice = false)
-        {
-            if (card == null)
-            {
-                return null;
-            }
-
-            return new BattleMultiIconViewModel(
-                BattleIconKind.Card,
-                card.DisplayName,
-                card.Description,
-                card.ImageId,
-                card.Rarity,
-                cost: card.Cost,
-                showCost: true,
-                isInteractable: isInteractable,
-                isSelected: isSelected,
-                isAffordable: isAffordable,
-                footerLabel: showPrice ? price.ToString() : string.Empty,
-                showFooterLabel: showPrice);
-        }
-
-        public static BattleMultiIconViewModel CreateRelic(RuntimeRelic relic, bool isInteractable = true, bool isSelected = false, bool isAffordable = true)
-        {
-            if (relic == null)
-            {
-                return null;
-            }
-
-            return new BattleMultiIconViewModel(
-                BattleIconKind.Relic,
-                relic.DisplayName,
-                relic.Description,
-                relic.ImageId,
-                relic.Rarity,
-                isInteractable: isInteractable,
-                isSelected: isSelected,
-                isAffordable: isAffordable);
-        }
-
-        public static BattleMultiIconViewModel CreatePotion(RuntimePotion potion, bool isInteractable = true, bool isSelected = false, bool isAffordable = true)
-        {
-            if (potion == null)
-            {
-                return null;
-            }
-
-            return new BattleMultiIconViewModel(
-                BattleIconKind.Potion,
-                potion.DisplayName,
-                potion.Description,
-                potion.ImageId,
-                potion.Rarity,
-                isInteractable: isInteractable,
-                isSelected: isSelected,
-                isAffordable: isAffordable);
-        }
-
-        public static BattleMultiIconViewModel CreatePlaceholder(
-            BattleIconKind iconKind,
-            string displayName,
-            CardRarity rarity,
-            bool isInteractable = true,
-            bool isAffordable = true)
-        {
-            return new BattleMultiIconViewModel(
-                iconKind,
-                displayName,
-                string.Empty,
-                string.Empty,
-                rarity,
-                isInteractable: isInteractable,
-                isAffordable: isAffordable);
-        }
-
-        public BattleIconKind IconKind { get; }
-        public string DisplayName { get; }
-        public string Description { get; }
-        public string ImageId { get; }
-        public CardRarity Rarity { get; }
-        public int Cost { get; }
-        public bool ShowCost { get; }
-        public bool IsInteractable { get; }
-        public bool IsSelected { get; }
-        public bool IsAffordable { get; }
-        public int Quantity { get; }
-        public bool ShowQuantity { get; }
-        public string FooterLabel { get; }
-        public bool ShowFooterLabel { get; }
-    }
-
-    /// <summary>
     /// 戦闘手札表示用モデル
     /// </summary>
     public sealed class BattleHandCardViewModel
     {
-        public BattleHandCardViewModel(RuntimeCard card, BattleMultiIconViewModel icon)
+        public BattleHandCardViewModel(RuntimeCard card, MultiIconViewModel icon)
         {
             Card = card;
             Icon = icon;
         }
 
         public RuntimeCard Card { get; }
-        public BattleMultiIconViewModel Icon { get; }
+        public MultiIconViewModel Icon { get; }
     }
 
     /// <summary>
@@ -314,7 +169,7 @@ namespace Dungeon.Runtime.InGame.Battle.Model
             RuntimeRelic relic,
             RuntimePotion potion,
             int itemId,
-            BattleMultiIconViewModel icon)
+            MultiIconViewModel icon)
         {
             SlotIndex = slotIndex;
             RewardType = rewardType;
@@ -337,6 +192,6 @@ namespace Dungeon.Runtime.InGame.Battle.Model
         public RuntimeRelic Relic { get; }
         public RuntimePotion Potion { get; }
         public int ItemId { get; }
-        public BattleMultiIconViewModel Icon { get; }
+        public MultiIconViewModel Icon { get; }
     }
 }

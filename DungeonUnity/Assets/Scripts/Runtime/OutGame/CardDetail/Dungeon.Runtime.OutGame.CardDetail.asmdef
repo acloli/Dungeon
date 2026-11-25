@@ -1,0 +1,20 @@
+{
+    "name": "Dungeon.Runtime.OutGame.CardDetail",
+    "rootNamespace": "Dungeon.Runtime.OutGame.CardDetail",
+    "references": [
+        "Dungeon.Runtime.Common.UI",
+        "TFramework.Core",
+        "TFramework.UI",
+        "Unity.TextMeshPro",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

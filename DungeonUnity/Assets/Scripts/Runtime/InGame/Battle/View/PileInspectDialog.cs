@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Dungeon.Runtime.Common.UI.MultiIcon;
 using Dungeon.Runtime.InGame.Battle.Model;
 using TFramework.UI;
 using UnityEngine;
@@ -15,11 +16,11 @@ namespace Dungeon.Runtime.InGame.Battle.View
     {
         [SerializeField] private TFTextUGUI _titleText;
         [SerializeField] private Transform _cardRoot;
-        [SerializeField] private BattleCardIconView _cardTemplate;
+        [SerializeField] private CardIconView _cardTemplate;
         [SerializeField] private Button _closeButton;
         [SerializeField] [UnityEngine.Serialization.FormerlySerializedAs("_backgroundButton")] private Button _backgroundAreaButton;
 
-        private readonly List<BattleCardIconView> _cardViews = new List<BattleCardIconView>();
+        private readonly List<CardIconView> _cardViews = new List<CardIconView>();
         private int _selectedCardIndex = -1;
         private BattlePileInspectDialogParam _param;
 
@@ -67,7 +68,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// カード一覧構築
         /// </summary>
-        private void BuildCards(IReadOnlyList<BattleMultiIconViewModel> cards)
+        private void BuildCards(IReadOnlyList<MultiIconViewModel> cards)
         {
             ClearCards();
             if (_cardRoot == null || _cardTemplate == null || cards == null)
@@ -79,14 +80,14 @@ namespace Dungeon.Runtime.InGame.Battle.View
 
             for (int i = 0; i < cards.Count; i++)
             {
-                BattleMultiIconViewModel model = cards[i];
+                MultiIconViewModel model = cards[i];
                 if (model == null)
                 {
                     continue;
                 }
 
                 int cardIndex = i;
-                BattleCardIconView cardView = Instantiate(_cardTemplate, _cardRoot);
+                CardIconView cardView = Instantiate(_cardTemplate, _cardRoot);
                 cardView.gameObject.SetActive(true);
                 cardView.Bind(CreateSelectableModel(model, cardIndex), () => OnCardClicked(cardIndex));
                 _cardViews.Add(cardView);
@@ -96,9 +97,9 @@ namespace Dungeon.Runtime.InGame.Battle.View
         /// <summary>
         /// 選択状態付き表示モデルを生成する
         /// </summary>
-        private BattleMultiIconViewModel CreateSelectableModel(BattleMultiIconViewModel source, int cardIndex)
+        private MultiIconViewModel CreateSelectableModel(MultiIconViewModel source, int cardIndex)
         {
-            return new BattleMultiIconViewModel(
+            return new MultiIconViewModel(
                 source.IconKind,
                 source.DisplayName,
                 source.Description,
@@ -122,7 +123,7 @@ namespace Dungeon.Runtime.InGame.Battle.View
         {
             for (int i = 0; i < _cardViews.Count; i++)
             {
-                BattleCardIconView cardView = _cardViews[i];
+                CardIconView cardView = _cardViews[i];
                 if (cardView == null)
                 {
                     continue;

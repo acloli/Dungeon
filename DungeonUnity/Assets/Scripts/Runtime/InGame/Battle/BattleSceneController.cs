@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Dungeon.Runtime.InGame.Battle.Model;
+using Dungeon.Runtime.SceneFlow;
 using Dungeon.Runtime.InGame.Battle.View;
 using TFramework.Debug;
 using TFramework.Scene;
@@ -47,7 +48,8 @@ namespace Dungeon.Runtime.InGame.Battle
                 return;
             }
 
-            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct, OnSaveQuitClicked);
+            await _presenter.InitializeAsync(_view, runProfileId, OnResultBackClicked, ct, OnSaveQuitClicked,
+                (bridgeData as BattleRunBridgeData)?.StartMode ?? BattleRunStartMode.Automatic);
         }
 
         /// <summary>

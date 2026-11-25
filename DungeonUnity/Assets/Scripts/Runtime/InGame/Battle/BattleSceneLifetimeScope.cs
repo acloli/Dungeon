@@ -13,6 +13,7 @@ namespace Dungeon.Runtime.InGame.Battle
         /// </summary>
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.Register<Save.Services.CollectionProgressService>(Lifetime.Scoped).As<Save.Services.ICollectionProgressService>();
             builder.Register<Save.Services.RunSaveService>(Lifetime.Scoped).As<Save.Services.IRunSaveService>();
             builder.Register<Services.BattleRandomProvider>(Lifetime.Singleton).As<Services.IBattleRandomProvider>();
             builder.Register<Services.BattleMapGenerator>(Lifetime.Singleton).As<Services.IBattleMapGenerator>();

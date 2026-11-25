@@ -816,7 +816,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f50de63c6fd4a2b969a9eb0fca0ed2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RewardDialogView
+  m_EditorClassIdentifier: Dungeon.Runtime.InGame.Battle::Dungeon.Runtime.InGame.Battle.View.RewardDialog
   _canvasGroup: {fileID: 8256202407261689461}
   _backgroundButton: {fileID: 0}
   _closeOnBackgroundClick: 1
